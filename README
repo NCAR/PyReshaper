@@ -1,0 +1,52 @@
+==========
+PyReshaper
+==========
+
+A package for converting NetCDF files from time-slice (history) format 
+to time-series (single-variable) format.
+
+AUTHORS:   John Dennis (dennis@ucar.edu)
+           Sheri Mickelson (mickelso@ucar.edu)
+           Kevin Paul (kpaul@ucar.edu)
+           Haiying Xu (haiyingx@ucar.edu)
+
+Send questions and comments to Kevin Paul (kpaul@ucar.edu).
+
+--------
+OVERVIEW
+--------
+
+The PyReshaper package is a Python-based package for performing time-slice
+to time-series convertion of NetCDF files, compliant with the CF 1.6 
+Conventions.  The PyReshaper package is designed to run in parallel to
+maximize performance, with the parallelism implemented over variables
+(i.e., task parallelism).  This means that the maximum parallelism
+achieveable for a given operation is one core/processor per variables in
+the time-slice NetCDF files.
+
+------------
+DEPENDENCIES
+------------
+
+The PyReshaper directly depends upon the PyNIO and mpi4py packages.  Access
+and manipulation of the NetCDF files is done through PyNIO, and the parallelism
+is implimented directly with mpi4py.  Implicit dependencies exists, as PyNIO
+has its own dependencies (netCDF4 and numpy) as does mpi4py (numpy and MPI).
+
+Currently these dependencies are known to be:
+
+PyNIO (>=1.4.1)
+mpi4py (>=1.3)
+
+The version requirements have not been rigidly tested, so earlier versions
+may actually work.  No version requirement is made during installation, though,
+so problems might occur if an earlier versions of these packages have been
+installed.
+
+-----------------------
+BUILDING & INSTALLATION
+-----------------------
+
+See the file called INSTALL for more instructions on building and installing
+the PyReshaper package.
+

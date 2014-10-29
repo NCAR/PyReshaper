@@ -1,0 +1,44 @@
+# File Format:
+#
+#   - Pound symbols (#) indicate comments, and are ignored always
+#   - Assumes 1 record per line (since records can be long paths)
+#   - Assumes 1+ blank line(s) (i.e., all whitespace) between tests
+#   - If 3 records are not found for each test (TEST_NAME, HIST_DIR,
+#     SERIES_DIR) then the test is ignored
+#
+
+POP1deg10years
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/hist
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/mon/tseries
+         
+POP0p1deg10years       
+/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/hist
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/mon/tseries
+
+CICE1deg10years
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ice/hist
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ice/mon/tseries 
+
+CICE0p1deg10years
+/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/cice-hist
+/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/cice-hist/mon/tseries
+
+CAM-SE1deg10years
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/atm/hist
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/atm/mon/tseries
+
+CAM-SE0p25deg10years
+/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/atm-hist
+/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/atm-hist/mon/tseries
+
+CAM-FV1deg10years
+/glade/u/tdd/asap/data/b40.20th.track1.1deg.006/atm/hist
+/glade/u/tdd/asap/data/b40.20th.track1.1deg.006/atm/mon/tseries
+
+CLM-SE1deg10years
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/lnd/hist
+/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/lnd/mon/tseries
+
+CLM-SE0p1deg10years
+/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/lnd-hist
+/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/lnd-hist/mon/tseries
