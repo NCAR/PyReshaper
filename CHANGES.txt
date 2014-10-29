@@ -1,0 +1,46 @@
+VERSION 0.9.0
+
+9 Jun 2014
+- Initial release.  (Previously in prototype repo.)
+
+1 Jul 2014
+- Improvements to the Yellowstone testing scripts
+
+2 Jul 2014
+- Added new UCAR license agreement
+
+
+VERSION 0.9.1
+  
+4 Aug 2014
+ - Added many new helper tools in the Yellowstone testing directory.
+ 
+18 Aug 2014
+ - Perform a sort of the time-series variables by size before partitioning
+   them across processors.  Since the partition strides through the list of
+   variables names, by sorting the variables by size first, we do a reasonable
+   job of selecting as many small variables as large on every processor
+
+28 Aug 2014
+ - A few minor typo bugfixes.
+ 
+1 Sep 2014
+- Added the ability to output all metadata to a "once" file.  This metadata
+  includes ALL variables that are NOT the time-series variables being written
+  to file.  Hence, this can produce time-series files that are not entirely
+  self-describing.
+
+3 Sep 2014
+- Fixed a bug in which a job hangs when using more ranks than variables
+
+10 Sep 2014
+- Switched to using the identified 'unlimited' dimension name instead of
+  explicitly using the string 'time'.
+
+11 Sep 2014
+- Added the ability to process time-slice files with multiple time steps
+  in each slice file. 
+- Added new plotting utility and module.  Some changes to the getsizes
+  utility in the Yellowstone testing area.  Some more tweaks here, too.
+  
+  
