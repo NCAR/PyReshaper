@@ -1,0 +1,2108 @@
+{
+    "CAMFV-1.0": {
+        "baseline": "/glade/u/tdd/asap/data/b40.20th.track1.1deg.006/atm/mon/tseries",
+        "endYear": "1859",
+        "input": "/glade/u/tdd/asap/data/b40.20th.track1.1deg.006/atm/hist",
+        "isize": 28453.1,
+        "n2dVars": 82,
+        "n3dVars": 40,
+        "nVars": 122,
+        "osize": 28525.4,
+        "results": {
+            "cdo": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1940.0,
+                    "sys": "caldera"
+                }
+            },
+            "ncl": {
+                "140226-105745": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 120.93,
+                    "metadata": false,
+                    "real": 1767.76,
+                    "sys": "geyser",
+                    "user": 153.4
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1768.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140226-173803": {
+                    "cores": 4,
+                    "correct": "fail",
+                    "metadata": true,
+                    "real": 3353.0,
+                    "sys": "caldera"
+                },
+                "140303-175041": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 3251.0,
+                    "sys": "caldera"
+                },
+                "140312-182909": {
+                    "TS": 732.7,
+                    "cores": 16,
+                    "correct": "pass",
+                    "metaTI": 1.27,
+                    "metaTV": 164.81,
+                    "metadata": true,
+                    "real": 936.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1236.0,
+                    "sys": "caldera"
+                }
+            },
+            "pynio": {
+                "140305-193740": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 32.6,
+                    "metadata": false,
+                    "real": 1523.02,
+                    "sys": "geyser",
+                    "user": 112.72
+                },
+                "140307-113151": {
+                    "TS": 1463.81,
+                    "actual": 84000.0,
+                    "cores": 1,
+                    "correct": false,
+                    "kernel": 31.82,
+                    "metaTI": 6.29,
+                    "metaTV": 50.86,
+                    "metadata": false,
+                    "openi": 6.65,
+                    "openo": 0.78,
+                    "real": 1542.99,
+                    "request": 28447.83,
+                    "sys": "geyser",
+                    "user": 114.6
+                },
+                "140307-120707": {
+                    "TS": 1824.31,
+                    "actual": 77760.0,
+                    "cores": 1,
+                    "correct": false,
+                    "kernel": 46.61,
+                    "metaTI": 7.74,
+                    "metaTV": 82.0,
+                    "metadata": true,
+                    "openi": 6.19,
+                    "openo": 0.44,
+                    "real": 1933.83,
+                    "request": 28447.83,
+                    "sys": "geyser",
+                    "user": 141.55
+                }
+            },
+            "pynio4_0": {
+                "140317-232104": {
+                    "TS": 1900.95,
+                    "actual": 956160.0,
+                    "cores": 1,
+                    "correct": false,
+                    "kernel": 64.18,
+                    "metaTI": 2.7,
+                    "metaTV": 161.9,
+                    "metadata": true,
+                    "openi": 6.46,
+                    "openo": 0.26,
+                    "real": 2077.05,
+                    "request": 28447.83,
+                    "sys": "geyser",
+                    "user": 498.48
+                }
+            },
+            "pynio4_1": {
+                "140318-114642": {
+                    "TS": 2706.45,
+                    "actual": 956160.0,
+                    "cores": 1,
+                    "correct": false,
+                    "kernel": 62.85,
+                    "metaTI": 3.59,
+                    "metaTV": 291.47,
+                    "metadata": true,
+                    "openi": 7.08,
+                    "openo": 0.91,
+                    "real": 3020.34,
+                    "request": 28447.83,
+                    "sys": "geyser",
+                    "user": 1174.47
+                }
+            },
+            "pyniompi": {
+                "140305-204127": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.26,
+                    "metadata": false,
+                    "real": 243.41,
+                    "sys": "yellowstone",
+                    "user": 0.22
+                },
+                "140310-164122": {
+                    "TS": 197.8,
+                    "actual": 77760.0,
+                    "cores": 16,
+                    "correct": false,
+                    "kernel": 0.09,
+                    "metaTI": 0.49,
+                    "metaTV": 5.04,
+                    "metadata": true,
+                    "openi": 5.71,
+                    "openo": 0.14,
+                    "real": 211.66,
+                    "request": 28447.83,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                },
+                "140313-154918": {
+                    "TS": 248.07,
+                    "actual": 77760.0,
+                    "cores": 16,
+                    "correct": false,
+                    "kernel": 0.09,
+                    "metaTI": 0.23,
+                    "metaTV": 8.91,
+                    "metadata": true,
+                    "openi": 5.66,
+                    "openo": 0.14,
+                    "real": 268.67,
+                    "request": 28447.83,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                }
+            },
+            "pyniompi4_0": {
+                "140317-234936": {
+                    "TS": 182.06,
+                    "actual": 956160.0,
+                    "cores": 16,
+                    "correct": false,
+                    "kernel": 0.09,
+                    "metaTI": 0.19,
+                    "metaTV": 10.64,
+                    "metadata": true,
+                    "openi": 5.84,
+                    "openo": 0.27,
+                    "real": 207.49,
+                    "request": 28447.83,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                }
+            },
+            "pyniompi4_1": {
+                "140318-092050": {
+                    "TS": 337.4,
+                    "actual": 956160.0,
+                    "cores": 16,
+                    "correct": false,
+                    "kernel": 0.14,
+                    "metaTI": 0.22,
+                    "metaTV": 12.79,
+                    "metadata": true,
+                    "openi": 5.77,
+                    "openo": 0.22,
+                    "real": 362.0,
+                    "request": 28447.83,
+                    "sys": "yellowstone",
+                    "user": 0.16
+                }
+            },
+            "pyreshaper": {
+                "140624-113717": {
+                    "TS": 469.639892101,
+                    "actual": 956160.0,
+                    "cores": 16,
+                    "metaTI": 0.462065219879,
+                    "metaTV": 34.4386823177,
+                    "metadata": true,
+                    "openi": 7.20728111267,
+                    "openo": 0.362703323364,
+                    "real": 499.0,
+                    "request": 28449.3301392,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140624-113934": {
+                    "TS": 481.015773535,
+                    "actual": 956160.0,
+                    "cores": 16,
+                    "metaTI": 0.442744970322,
+                    "metaTV": 34.7662909031,
+                    "metadata": true,
+                    "openi": 10.6994099617,
+                    "openo": 0.54573059082,
+                    "real": 557.0,
+                    "request": 28449.3301392,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-113836": {
+                    "TS": 502.167779446,
+                    "actual": 956160.0,
+                    "cores": 16,
+                    "metaTI": 0.599811792374,
+                    "metaTV": 34.622944355,
+                    "metadata": true,
+                    "openi": 6.6991379261,
+                    "openo": 0.377572059631,
+                    "real": 567.0,
+                    "request": 28449.3301392,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "1850"
+    },
+    "CAMSE-0.25": {
+        "baseline": "/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/atm-hist/mon/tseries",
+        "endYear": "0010",
+        "input": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/atm-hist",
+        "isize": 1077150.0,
+        "n2dVars": 101,
+        "n3dVars": 97,
+        "nVars": 198,
+        "osize": 1078586.3,
+        "results": {
+            "cdo": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 35221.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncl": {
+                "140228-145958": {
+                    "cores": 1,
+                    "kernel": 1679.35,
+                    "metadata": false,
+                    "real": 25973.02,
+                    "sys": "geyser",
+                    "user": 4582.95
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 17136.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140303-130853": {
+                    "cores": 16,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 11597.0,
+                    "sys": "caldera"
+                },
+                "140312-193053": {
+                    "TS": 3243.49,
+                    "cores": 16,
+                    "correct": "pass",
+                    "metaTI": 21.05,
+                    "metaTV": 468.2,
+                    "metadata": true,
+                    "real": 3693.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 16,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 20403.0,
+                    "sys": "caldera"
+                }
+            },
+            "pynio": {
+                "140306-094908": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 1203.54,
+                    "metadata": false,
+                    "real": 8277.37,
+                    "sys": "geyser",
+                    "user": 3875.32
+                },
+                "140313-160743": {
+                    "TS": 11855.1,
+                    "actual": 2544960.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 2012.42,
+                    "metaTI": 48.72,
+                    "metaTV": 474.69,
+                    "metadata": true,
+                    "openi": 9.67,
+                    "openo": 0.87,
+                    "real": 12393.05,
+                    "request": 1074992.99,
+                    "sys": "geyser",
+                    "user": 5717.35
+                }
+            },
+            "pyniompi": {
+                "140305-204455": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.13,
+                    "metadata": false,
+                    "real": 830.18,
+                    "sys": "yellowstone",
+                    "user": 0.23
+                },
+                "140313-160528": {
+                    "TS": 1161.84,
+                    "actual": 1119360.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.14,
+                    "metaTI": 2.97,
+                    "metaTV": 21.81,
+                    "metadata": true,
+                    "openi": 11.31,
+                    "openo": 0.09,
+                    "real": 1204.44,
+                    "request": 1074992.99,
+                    "sys": "yellowstone",
+                    "user": 0.24
+                }
+            },
+            "pyniompi4_0": {
+                "140318-070023": {
+                    "TS": 1637.77,
+                    "actual": 2544960.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.14,
+                    "metaTI": 3.62,
+                    "metaTV": 26.27,
+                    "metadata": true,
+                    "openi": 10.9,
+                    "openo": 0.3,
+                    "real": 1688.02,
+                    "request": 1074992.99,
+                    "sys": "yellowstone",
+                    "user": 0.24
+                }
+            },
+            "pyreshaper": {
+                "140624-115354": {
+                    "TS": 1400.56879449,
+                    "actual": 2544960.0,
+                    "cores": 16,
+                    "metaTI": 2.51281142235,
+                    "metaTV": 28.7670600414,
+                    "metadata": true,
+                    "openi": 11.0115630627,
+                    "openo": 0.804432153702,
+                    "real": 1485.0,
+                    "request": 1074995.44647,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140624-120120": {
+                    "TS": 1781.45158434,
+                    "actual": 2544960.0,
+                    "cores": 16,
+                    "metaTI": 3.85545730591,
+                    "metaTV": 25.5409047604,
+                    "metadata": true,
+                    "openi": 8.35853886604,
+                    "openo": 0.244127988815,
+                    "real": 1863.0,
+                    "request": 1074995.44647,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-154149": {
+                    "TS": 3583.59778595,
+                    "actual": 2544960.0,
+                    "cores": 16,
+                    "metaTI": 8.08878302574,
+                    "metaTV": 30.8035469055,
+                    "metadata": true,
+                    "openi": 10.7068860531,
+                    "openo": 0.415813922882,
+                    "real": 3675.0,
+                    "request": 1074995.44647,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "0001"
+    },
+    "CAMSE-1.0": {
+        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/atm/mon/tseries",
+        "endYear": "0010",
+        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/atm/hist",
+        "isize": 30819.4,
+        "n2dVars": 89,
+        "n3dVars": 43,
+        "nVars": 132,
+        "osize": 30848.5,
+        "results": {
+            "cdo": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 2045.0,
+                    "sys": "caldera"
+                }
+            },
+            "ncl": {
+                "140226-105740": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 106.11,
+                    "metadata": false,
+                    "real": 1744.31,
+                    "sys": "geyser",
+                    "user": 156.66
+                },
+                "140310-150352": {
+                    "cores": 1,
+                    "correct": false,
+                    "kernel": 64.39,
+                    "metadata": true,
+                    "real": 1415.25,
+                    "sys": "geyser",
+                    "user": 139.09
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1675.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140226-174338": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 3508.0,
+                    "sys": "caldera"
+                },
+                "140312-174430": {
+                    "TS": 584.01,
+                    "cores": 16,
+                    "correct": "pass",
+                    "metaTI": 1.65,
+                    "metaTV": 144.09,
+                    "metadata": true,
+                    "real": 776.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1221.0,
+                    "sys": "caldera"
+                }
+            },
+            "pynio": {
+                "140306-122536": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 47.7,
+                    "metadata": false,
+                    "real": 1186.08,
+                    "sys": "geyser",
+                    "user": 142.21
+                },
+                "140313-140230": {
+                    "TS": 2018.78,
+                    "actual": 1034400.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 64.35,
+                    "metaTI": 15.56,
+                    "metaTV": 205.56,
+                    "metadata": true,
+                    "openi": 10.53,
+                    "openo": 0.8,
+                    "real": 2252.34,
+                    "request": 30680.31,
+                    "sys": "geyser",
+                    "user": 207.35
+                },
+                "140314-095342": {
+                    "TS": 1823.92,
+                    "actual": 1034400.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 64.35,
+                    "metaTI": 15.81,
+                    "metaTV": 187.139,
+                    "metadata": true,
+                    "openi": 9.58,
+                    "openo": 1.64,
+                    "real": 2046.33,
+                    "request": 30680.31,
+                    "sys": "geyser",
+                    "user": 209.87
+                }
+            },
+            "pynio4_0": {
+                "140317-211646": {
+                    "TS": 2030.66,
+                    "actual": 1034400.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 71.43,
+                    "metaTI": 5.59,
+                    "metaTV": 154.64,
+                    "metadata": true,
+                    "openi": 7.5,
+                    "openo": 0.72,
+                    "real": 2207.53,
+                    "request": 30680.31,
+                    "sys": "geyser",
+                    "user": 554.99
+                }
+            },
+            "pynio4_1": {
+                "140317-220052": {
+                    "TS": 2487.96,
+                    "actual": 1034400.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 65.25,
+                    "metaTI": 5.93,
+                    "metaTV": 143.5,
+                    "metadata": true,
+                    "openi": 8.76,
+                    "openo": 0.31,
+                    "real": 2655.9,
+                    "request": 30680.31,
+                    "sys": "geyser",
+                    "user": 1237.65
+                }
+            },
+            "pyniompi": {
+                "140305-202628": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.26,
+                    "metadata": false,
+                    "real": 241.44,
+                    "sys": "yellowstone",
+                    "user": 0.22
+                },
+                "140307-12401": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.1,
+                    "metadata": true,
+                    "real": 394.67,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                },
+                "140313-131051": {
+                    "TS": 326.62,
+                    "actual": 84000.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 0.07,
+                    "metaTV": 7.41,
+                    "metadata": true,
+                    "openi": 7.87,
+                    "openo": 0.08,
+                    "real": 351.16,
+                    "request": 30680.31,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                },
+                "140313-152431": {
+                    "TS": 274.12,
+                    "actual": 84000.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 0.85,
+                    "metaTV": 7.67,
+                    "metadata": true,
+                    "openi": 7.87,
+                    "openo": 0.12,
+                    "real": 298.27,
+                    "request": 30680.31,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                },
+                "140314-095707": {
+                    "TS": 274.95,
+                    "actual": 84000.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 0.66,
+                    "metaTV": 3.82,
+                    "metadata": true,
+                    "openi": 6.57,
+                    "openo": 0.09,
+                    "real": 295.59,
+                    "request": 30680.31,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                }
+            },
+            "pyniompi4_0": {
+                "140317-220307": {
+                    "TS": 296.53,
+                    "actual": 1034400.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.09,
+                    "metaTI": 0.33,
+                    "metaTV": 8.92,
+                    "metadata": true,
+                    "openi": 6.24,
+                    "openo": 0.14,
+                    "real": 320.67,
+                    "request": 30680.31,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                }
+            },
+            "pyniompi4_1": {
+                "140317-225919": {
+                    "TS": 360.21,
+                    "actual": 1034400.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.09,
+                    "metaTI": 0.39,
+                    "metaTV": 15.98,
+                    "metadata": true,
+                    "openi": 6.24,
+                    "openo": 0.14,
+                    "real": 385.35,
+                    "request": 30680.31,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                }
+            },
+            "pyreshaper": {
+                "140624-113737": {
+                    "TS": 461.879812002,
+                    "actual": 1034400.0,
+                    "cores": 16,
+                    "metaTI": 2.49611783028,
+                    "metaTV": 31.9543848038,
+                    "metadata": true,
+                    "openi": 7.89434218407,
+                    "openo": 0.142995357513,
+                    "real": 546.0,
+                    "request": 30681.9406128,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140624-113928": {
+                    "TS": 543.640252829,
+                    "actual": 1034400.0,
+                    "cores": 16,
+                    "metaTI": 2.19070911407,
+                    "metaTV": 35.477850914,
+                    "metadata": true,
+                    "openi": 11.187032938,
+                    "openo": 0.304791927338,
+                    "real": 599.0,
+                    "request": 30681.9406128,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-114030": {
+                    "TS": 529.075484514,
+                    "actual": 1034400.0,
+                    "cores": 16,
+                    "metaTI": 2.13327646255,
+                    "metaTV": 26.9639163017,
+                    "metadata": true,
+                    "openi": 15.6393549442,
+                    "openo": 0.988724708557,
+                    "real": 613.0,
+                    "request": 30681.9406128,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "0001"
+    },
+    "CICE-0.1": {
+        "baseline": "/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/cice-hist/mon/tseries",
+        "endYear": "0010",
+        "input": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/cice-hist",
+        "isize": 569550.0,
+        "n2dVars": 114,
+        "nVars": 114,
+        "osize": 42112.4,
+        "results": {
+            "cdo": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 52644.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncl": {
+                "140303-153053": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 2041.37,
+                    "metadata": true,
+                    "real": 42931.93,
+                    "sys": "geyser",
+                    "user": 2850.04
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 8909.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140226-172014": {
+                    "cores": 4,
+                    "correct": "fail",
+                    "metadata": true,
+                    "real": 1894.0,
+                    "sys": "caldera"
+                },
+                "140312-191124": {
+                    "TS": 1496.09,
+                    "cores": 16,
+                    "correct": "fail",
+                    "metaTI": 340.73,
+                    "metaTV": 382.07,
+                    "metadata": true,
+                    "real": 2275.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 16,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 7643.0,
+                    "sys": "caldera"
+                }
+            },
+            "pynio": {
+                "140306-095228": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 615.82,
+                    "metadata": false,
+                    "real": 5123.69,
+                    "sys": "geyser",
+                    "user": 2224.77
+                },
+                "140313-191710": {
+                    "TS": 8314.32,
+                    "actual": 591360.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 1142.96,
+                    "metaTI": 863.84,
+                    "metaTV": 250.88,
+                    "metadata": true,
+                    "openi": 10.87,
+                    "openo": 0.43,
+                    "real": 9441.99,
+                    "request": 442968.9,
+                    "sys": "yellowstone",
+                    "user": 3773.87
+                }
+            },
+            "pynio4_0": {
+                "140317-232134": {
+                    "TS": 10980.29,
+                    "actual": 591360.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 1239.65,
+                    "metaTI": 2122.46,
+                    "metaTV": 252.9,
+                    "metadata": true,
+                    "openi": 11.49,
+                    "openo": 0.15,
+                    "real": 13369.16,
+                    "request": 442968.9,
+                    "sys": "yellowstone",
+                    "user": 8880.6
+                }
+            },
+            "pyniompi": {
+                "140305-214140": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metadata": false,
+                    "real": 499.0,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                },
+                "140313-160555": {
+                    "TS": 506.93,
+                    "actual": 483840.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.33,
+                    "metaTI": 49.12,
+                    "metaTV": 7.06,
+                    "metadata": true,
+                    "openi": 11.02,
+                    "openo": 0.33,
+                    "real": 506.94,
+                    "request": 442968.75,
+                    "sys": "yellowstone",
+                    "user": 0.22
+                }
+            },
+            "pyniompi4_0": {
+                "140318-070023": {
+                    "TS": 625.78,
+                    "actual": 591360.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 82.63,
+                    "metaTV": 4.44,
+                    "metadata": true,
+                    "openi": 10.87,
+                    "openo": 0.21,
+                    "real": 723.09,
+                    "request": 442968.75,
+                    "sys": "yellowstone",
+                    "user": 0.22
+                }
+            },
+            "pyniompi4_1": {
+                "140318-092050": {
+                    "TS": 810.31,
+                    "actual": 591360.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 109.63,
+                    "metaTV": 12.48,
+                    "metadata": true,
+                    "openi": 11.27,
+                    "openo": 0.21,
+                    "real": 945.86,
+                    "request": 442968.75,
+                    "sys": "yellowstone",
+                    "user": 0.22
+                }
+            },
+            "pyreshaper": {
+                "140624-114000": {
+                    "TS": 526.702405453,
+                    "actual": 591360.0,
+                    "cores": 16,
+                    "metaTI": 68.0012328625,
+                    "metaTV": 12.8914823532,
+                    "metadata": true,
+                    "openi": 9.54658794403,
+                    "openo": 0.496648788452,
+                    "real": 631.0,
+                    "request": 442968.903809,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140624-114226": {
+                    "TS": 627.303998947,
+                    "actual": 591360.0,
+                    "cores": 16,
+                    "metaTI": 92.6080269814,
+                    "metaTV": 8.79434752464,
+                    "metadata": true,
+                    "openi": 9.54019212723,
+                    "openo": 0.270900964737,
+                    "real": 777.0,
+                    "request": 442968.903809,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-114838": {
+                    "TS": 764.767405272,
+                    "actual": 591360.0,
+                    "cores": 16,
+                    "metaTI": 111.515741587,
+                    "metaTV": 10.9106748104,
+                    "metadata": true,
+                    "openi": 8.38807797432,
+                    "openo": 0.644446849823,
+                    "real": 946.0,
+                    "request": 442968.903809,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "0001"
+    },
+    "CICE-1.0": {
+        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ice/mon/tseries",
+        "endYear": "0010",
+        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ice/hist",
+        "isize": 8386.9,
+        "n2dVars": 117,
+        "nVars": 117,
+        "osize": 3923.2,
+        "results": {
+            "cdo": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1266.0,
+                    "sys": "caldera"
+                }
+            },
+            "ncl": {
+                "140226-090346": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 30.49,
+                    "metadata": false,
+                    "real": 122.42,
+                    "sys": "geyser",
+                    "user": 41.92
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1717.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140226-165327": {
+                    "cores": 4,
+                    "correct": "fail",
+                    "metadata": true,
+                    "real": 351.0,
+                    "sys": "caldera"
+                },
+                "140312-192224": {
+                    "TS": 590.53,
+                    "cores": 16,
+                    "correct": "fail",
+                    "metaTI": 3.88,
+                    "metaTV": 24.01,
+                    "metadata": true,
+                    "real": 646.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1472.0,
+                    "sys": "caldera"
+                }
+            },
+            "pynio": {
+                "140306-085654": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 10.99,
+                    "metadata": false,
+                    "real": 583.14,
+                    "sys": "geyser",
+                    "user": 37.36
+                },
+                "140313-140222": {
+                    "TS": 749.0,
+                    "actual": 56160.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 21.67,
+                    "metaTI": 24.15,
+                    "metaTV": 43.49,
+                    "metadata": true,
+                    "openi": 11.29,
+                    "openo": 0.06,
+                    "real": 829.98,
+                    "request": 6581.25,
+                    "sys": "geyser",
+                    "user": 73.95
+                }
+            },
+            "pynio4_0": {
+                "140317-232127": {
+                    "TS": 738.4,
+                    "actual": 168480.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 19.79,
+                    "metaTI": 36.44,
+                    "metaTV": 29.97,
+                    "metadata": true,
+                    "openi": 8.05,
+                    "openo": 0.14,
+                    "real": 814.78,
+                    "request": 6581.25,
+                    "sys": "geyser",
+                    "user": 150.37
+                }
+            },
+            "pynio4_1": {
+                "140317-114654": {
+                    "TS": 955.55,
+                    "actual": 168480.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 16.99,
+                    "metaTI": 61.52,
+                    "metaTV": 96.4,
+                    "metadata": true,
+                    "openi": 10.16,
+                    "openo": 0.65,
+                    "real": 1125.94,
+                    "request": 6581.25,
+                    "sys": "geyser",
+                    "user": 206.09
+                }
+            },
+            "pyniompi": {
+                "140306-085823": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.1,
+                    "metadata": false,
+                    "real": 60.68,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                },
+                "140313-154954": {
+                    "TS": 77.32,
+                    "actual": 56160.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.07,
+                    "metaTI": 1.95,
+                    "metaTV": 3.78,
+                    "metadata": true,
+                    "openi": 10.54,
+                    "openo": 0.1,
+                    "real": 98.22,
+                    "request": 6581.25,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                }
+            },
+            "pyniompi4_0": {
+                "140318-070023": {
+                    "TS": 78.05,
+                    "actual": 168480.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.07,
+                    "metaTI": 2.96,
+                    "metaTV": 2.97,
+                    "metadata": true,
+                    "openi": 9.39,
+                    "openo": 0.18,
+                    "real": 99.4,
+                    "request": 6581.25,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                }
+            },
+            "pyniompi4_1": {
+                "140318-092051": {
+                    "TS": 73.51,
+                    "actual": 168480.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.07,
+                    "metaTI": 2.28,
+                    "metaTV": 2.36,
+                    "metadata": true,
+                    "openi": 9.43,
+                    "openo": 0.32,
+                    "real": 94.29,
+                    "request": 6581.25,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                }
+            },
+            "pyreshaper": {
+                "140624-113558": {
+                    "TS": 265.71512866,
+                    "actual": 168480.0,
+                    "cores": 16,
+                    "metaTI": 5.01533293724,
+                    "metaTV": 11.8876111507,
+                    "metadata": true,
+                    "openi": 19.778968811,
+                    "openo": 0.388194084167,
+                    "real": 341.0,
+                    "request": 6581.41067505,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140624-113559": {
+                    "TS": 266.083644629,
+                    "actual": 168480.0,
+                    "cores": 16,
+                    "metaTI": 4.95094203949,
+                    "metaTV": 10.9867026806,
+                    "metadata": true,
+                    "openi": 19.8844599724,
+                    "openo": 0.547864675522,
+                    "real": 347.0,
+                    "request": 6581.41067505,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-113440": {
+                    "TS": 240.76835227,
+                    "actual": 168480.0,
+                    "cores": 16,
+                    "metaTI": 3.82919192314,
+                    "metaTV": 5.04663062096,
+                    "metadata": true,
+                    "openi": 18.8568351269,
+                    "openo": 0.306517124176,
+                    "real": 311.0,
+                    "request": 6581.41067505,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "0001"
+    },
+    "CLM-0.25": {
+        "baseline": " /glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/lnd-hist/mon/tseries",
+        "endYear": "0010",
+        "input": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/lnd-hist",
+        "isize": 84015.0,
+        "n2dVars": 150,
+        "nVars": 150,
+        "osize": 124702.8,
+        "results": {
+            "ncl": {
+                "140228-145409": {
+                    "cores": 1,
+                    "kernel": 194.42,
+                    "metadata": false,
+                    "real": 3358.85,
+                    "sys": "geyser",
+                    "user": 377.15
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 4141.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140303-105425": {
+                    "cores": 12,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 4301.0,
+                    "sys": "caldera"
+                },
+                "140312-193441": {
+                    "TS": 385.05,
+                    "cores": 16,
+                    "correct": "pass",
+                    "metaTI": 181.87,
+                    "metaTV": 104.3,
+                    "metadata": true,
+                    "real": 723.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 16,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 5493.0,
+                    "sys": "caldera"
+                }
+            },
+            "pynio": {
+                "140306-091858": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 86.93,
+                    "metadata": false,
+                    "real": 1694.12,
+                    "sys": "geyser",
+                    "user": 415.54
+                },
+                "140313-191915": {
+                    "TS": 2534.72,
+                    "cores": 1,
+                    "kernel": 203.25,
+                    "metaTI": 418.15,
+                    "metaTV": 323.28,
+                    "metadata": true,
+                    "openi": 11.03,
+                    "openo": 0.8,
+                    "real": 3289.98,
+                    "sys": "geyser",
+                    "user": 838.8
+                }
+            },
+            "pyniompi": {
+                "140306-091653": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.1,
+                    "metadata": false,
+                    "real": 174.86,
+                    "sys": "yellowstone",
+                    "user": 0.17
+                },
+                "140313-160541": {
+                    "TS": 222.28,
+                    "cores": 16,
+                    "kernel": 0.24,
+                    "metaTI": 26.88,
+                    "metaTV": 9.63,
+                    "metadata": true,
+                    "openi": 10.39,
+                    "openo": 0.09,
+                    "real": 266.2,
+                    "sys": "yellowstone",
+                    "user": 0.29
+                }
+            },
+            "pyniompi4_0": {
+                "140318-070023": {
+                    "TS": 255.0,
+                    "actual": 613440.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.1,
+                    "metaTI": 37.85,
+                    "metaTV": 10.41,
+                    "metadata": true,
+                    "openi": 10.81,
+                    "openo": 0.16,
+                    "real": 309.31,
+                    "request": 81515.14,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                }
+            },
+            "pyniompi4_1": {
+                "140318-091904": {
+                    "TS": 296.05,
+                    "actual": 613440.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.1,
+                    "metaTI": 46.37,
+                    "metaTV": 12.85,
+                    "metadata": true,
+                    "openi": 10.67,
+                    "openo": 0.23,
+                    "real": 354.78,
+                    "request": 81515.14,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                }
+            },
+            "pyreshaper": {
+                "140624-113329": {
+                    "TS": 217.386395931,
+                    "actual": 749760.0,
+                    "cores": 16,
+                    "metaTI": 27.5108315945,
+                    "metaTV": 11.7934093475,
+                    "metadata": true,
+                    "openi": 8.86293721199,
+                    "openo": 0.513876199722,
+                    "real": 271.0,
+                    "request": 81515.3311157,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140624-113608": {
+                    "TS": 253.195567369,
+                    "actual": 749760.0,
+                    "cores": 16,
+                    "metaTI": 36.1291060448,
+                    "metaTV": 14.0747671127,
+                    "metadata": true,
+                    "openi": 7.50084495544,
+                    "openo": 0.289590358734,
+                    "real": 351.0,
+                    "request": 81515.3311157,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-113607": {
+                    "TS": 293.581233501,
+                    "actual": 749760.0,
+                    "cores": 16,
+                    "metaTI": 44.2273983955,
+                    "metaTV": 11.2281382084,
+                    "metadata": true,
+                    "openi": 7.57388806343,
+                    "openo": 0.776012897491,
+                    "real": 398.0,
+                    "request": 81515.3311157,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "0001"
+    },
+    "CLM-1.0": {
+        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/lnd/mon/tseries",
+        "endYear": "0010",
+        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/lnd/hist",
+        "isize": 9009.4,
+        "n2dVars": 297,
+        "nVars": 297,
+        "osize": 14051.0,
+        "results": {
+            "cdo": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 2788.0,
+                    "sys": "caldera"
+                }
+            },
+            "ncl": {
+                "140228-142411": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 45.35,
+                    "metadata": false,
+                    "real": 205.48,
+                    "sys": "geyser",
+                    "user": 47.44
+                },
+                "140228-143030": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 44.6,
+                    "metadata": false,
+                    "real": 220.15,
+                    "sys": "geyser",
+                    "user": 48.45
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 4321.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140226-173600": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 2713.0,
+                    "sys": "caldera"
+                },
+                "140312-200047": {
+                    "TS": 1153.94,
+                    "cores": 16,
+                    "correct": "pass",
+                    "metaTI": 23.35,
+                    "metaTV": 542.14,
+                    "metadata": true,
+                    "real": 1782.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1789.0,
+                    "sys": "caldera"
+                }
+            },
+            "pynio": {
+                "140306-090318": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 28.22,
+                    "metadata": false,
+                    "real": 1359.24,
+                    "sys": "geyser",
+                    "user": 68.68
+                },
+                "140313-140215": {
+                    "TS": 1235.35,
+                    "actual": 147840.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 55.29,
+                    "metaTI": 60.26,
+                    "metaTV": 135.67,
+                    "metadata": true,
+                    "openi": 13.75,
+                    "openo": 1.95,
+                    "real": 1452.57,
+                    "request": 8832.56,
+                    "sys": "geyser",
+                    "user": 162.48
+                }
+            },
+            "pynio4_0": {
+                "140317-232111": {
+                    "TS": 1174.86,
+                    "actual": 1148160.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 47.37,
+                    "metaTI": 106.8,
+                    "metaTV": 124.61,
+                    "metadata": true,
+                    "openi": 11.67,
+                    "openo": 0.5,
+                    "real": 1421.16,
+                    "request": 8678.32,
+                    "sys": "geyser",
+                    "user": 304.33
+                }
+            },
+            "pynio4_1": {
+                "140318-114712": {
+                    "TS": 1451.53,
+                    "actual": 1148160.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 43.67,
+                    "metaTI": 146.12,
+                    "metaTV": 206.4,
+                    "metadata": true,
+                    "openi": 11.81,
+                    "openo": 1.66,
+                    "real": 1820.33,
+                    "request": 8678.32,
+                    "sys": "geyser",
+                    "user": 426.28
+                }
+            },
+            "pyniompi": {
+                "140306-091538": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metadata": false,
+                    "real": 129.54,
+                    "sys": "yellowstone",
+                    "user": 0.2
+                },
+                "140313-131051": {
+                    "TS": 146.97,
+                    "actual": 143520.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 1.8,
+                    "metaTV": 3.95,
+                    "metadata": true,
+                    "openi": 10.49,
+                    "openo": 0.12,
+                    "real": 172.44,
+                    "request": 8676.81,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                },
+                "140313-155000": {
+                    "TS": 158.54,
+                    "actual": 143520.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 1.8,
+                    "metaTV": 5.83,
+                    "metadata": true,
+                    "openi": 10.49,
+                    "openo": 0.12,
+                    "real": 183.07,
+                    "request": 8676.81,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                },
+                "140314-101030": {
+                    "TS": 112.91,
+                    "actual": 1148160.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 2.66,
+                    "metaTV": 5.16,
+                    "metadata": true,
+                    "openi": 9.67,
+                    "openo": 0.13,
+                    "real": 139.56,
+                    "request": 8676.81,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                }
+            },
+            "pyniompi4_0": {
+                "140318-070023": {
+                    "TS": 156.21,
+                    "actual": 1148160.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 6.95,
+                    "metaTV": 6.95,
+                    "metadata": true,
+                    "openi": 10.6,
+                    "openo": 0.33,
+                    "real": 189.24,
+                    "request": 8676.81,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                }
+            },
+            "pyniompi4_1": {
+                "140318-091904": {
+                    "TS": 129.37,
+                    "actual": 1148160.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.11,
+                    "metaTI": 5.47,
+                    "metaTV": 4.62,
+                    "metadata": true,
+                    "openi": 9.89,
+                    "openo": 0.2,
+                    "real": 151.48,
+                    "request": 8676.81,
+                    "sys": "yellowstone",
+                    "user": 0.18
+                }
+            },
+            "pyreshaper": {
+                "140624-113616": {
+                    "TS": 362.838088274,
+                    "actual": 1425600.0,
+                    "cores": 16,
+                    "metaTI": 3.64182257652,
+                    "metaTV": 7.80311584473,
+                    "metadata": true,
+                    "openi": 13.7385029793,
+                    "openo": 0.708451747894,
+                    "real": 427.0,
+                    "request": 8678.71307373,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140624-113802": {
+                    "TS": 384.561959028,
+                    "actual": 1425600.0,
+                    "cores": 16,
+                    "metaTI": 6.64893960953,
+                    "metaTV": 15.0808794498,
+                    "metadata": true,
+                    "openi": 19.5430710316,
+                    "openo": 0.769854307175,
+                    "real": 465.0,
+                    "request": 8678.71307373,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-113733": {
+                    "TS": 385.772614479,
+                    "actual": 1425600.0,
+                    "cores": 16,
+                    "metaTI": 7.3999941349,
+                    "metaTV": 12.4398062229,
+                    "metadata": true,
+                    "openi": 19.5401780605,
+                    "openo": 0.989186286926,
+                    "real": 436.0,
+                    "request": 8678.71307373,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "0001"
+    },
+    "POP-0.1": {
+        "baseline": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/mon",
+        "endYear": "0010",
+        "input": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/hist",
+        "isize": 3183855.25,
+        "n2dVars": 23,
+        "n3dVars": 11,
+        "nVars": 34,
+        "osize": 3124562.75,
+        "results": {
+            "ncl": {
+                "140306-200340": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 4956.16,
+                    "metadata": false,
+                    "real": 30509.62,
+                    "sys": "geyser",
+                    "user": 12327.82
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 52558.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140312-220039": {
+                    "TS": 8365.7,
+                    "cores": 16,
+                    "correct": "pass",
+                    "metaTI": 255.62,
+                    "metaTV": 78.48,
+                    "metadata": true,
+                    "real": 8745.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 16,
+                    "correct": "pass",
+                    "real": 53051.0,
+                    "sys": "geyser"
+                }
+            },
+            "pynio": {
+                "140306-092824": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 4047.26,
+                    "metadata": false,
+                    "real": 20526.06,
+                    "sys": "geyser",
+                    "user": 14145.3
+                },
+                "140313-192244": {
+                    "TS": 33980.16,
+                    "actual": 3071040.0,
+                    "cores": 1,
+                    "correct": false,
+                    "kernel": 6749.21,
+                    "metaTI": 343.98,
+                    "metaTV": 129.17,
+                    "metadata": true,
+                    "openi": 10.93,
+                    "openo": 0.1,
+                    "real": 34465.08,
+                    "request": 3029589.9,
+                    "sys": "geyser",
+                    "user": 22193.31
+                }
+            },
+            "pyniompi": {
+                "140314-130728": {
+                    "TS": 4157.04,
+                    "actual": 3071040.0,
+                    "cores": 16,
+                    "correct": false,
+                    "kernel": 0.11,
+                    "metaTI": 24.89,
+                    "metaTV": 9.75,
+                    "metadata": true,
+                    "openi": 12.99,
+                    "openo": 0.16,
+                    "real": 4205.33,
+                    "request": 3029589.94,
+                    "sys": "yellowstone",
+                    "user": 0.23
+                }
+            },
+            "pyniompi4_0": {
+                "140318-070102": {
+                    "TS": 6096.63,
+                    "actual": 3071040.0,
+                    "cores": 16,
+                    "correct": false,
+                    "kernel": 0.24,
+                    "metaTI": 40.16,
+                    "metaTV": 8.26,
+                    "metadata": true,
+                    "openi": 9.97,
+                    "openo": 0.16,
+                    "real": 6148.8,
+                    "request": 3029589.94,
+                    "sys": "yellowstone",
+                    "user": 0.43
+                }
+            },
+            "pyniompi4_1": {
+                "140318-092050": {
+                    "TS": 12840.39,
+                    "actual": 3071040.0,
+                    "cores": 16,
+                    "correct": false,
+                    "kernel": 0.24,
+                    "metaTI": 62.78,
+                    "metaTV": 7.74,
+                    "metadata": true,
+                    "openi": 11.32,
+                    "openo": 0.26,
+                    "real": 12906.67,
+                    "request": 3029589.94,
+                    "sys": "yellowstone",
+                    "user": 0.43
+                }
+            },
+            "pyreshaper": {
+                "140625-133224": {
+                    "TS": 4188.19754171,
+                    "actual": 3071040.0,
+                    "cores": 16,
+                    "metaTI": 23.1918101311,
+                    "metaTV": 10.8097374439,
+                    "metadata": true,
+                    "openi": 9.9564101696,
+                    "openo": 0.165270090103,
+                    "real": 4269.0,
+                    "request": 3029589.93713,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140625-111405": {
+                    "TS": 6304.54537344,
+                    "actual": 3071040.0,
+                    "cores": 16,
+                    "metaTI": 42.2605381012,
+                    "metaTV": 12.7368450165,
+                    "metadata": true,
+                    "openi": 9.24561190605,
+                    "openo": 0.189666986465,
+                    "real": 6366.0,
+                    "request": 3029589.93713,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-201355": {
+                    "TS": 12475.4380803,
+                    "actual": 3071040.0,
+                    "cores": 16,
+                    "metaTI": 60.3435850143,
+                    "metaTV": 7.27081155777,
+                    "metadata": true,
+                    "openi": 12.5250890255,
+                    "openo": 0.35288977623,
+                    "real": 12575.0,
+                    "request": 3029589.93713,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "0001"
+    },
+    "POP-1.0": {
+        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/mon/tseries",
+        "endYear": "0010",
+        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/hist",
+        "isize": 194366.25,
+        "n2dVars": 78,
+        "n3dVars": 36,
+        "nVars": 114,
+        "osize": 194261.85,
+        "results": {
+            "cdo": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 10739.0,
+                    "sys": "caldera"
+                }
+            },
+            "ncl": {
+                "140303-095502": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 771.41,
+                    "metadata": false,
+                    "real": 31790.53,
+                    "sys": "geyser",
+                    "user": 1118.61
+                }
+            },
+            "nco": {
+                "??????-??????": {
+                    "cores": 1,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 5679.0,
+                    "sys": "geyser"
+                }
+            },
+            "ncr": {
+                "140226-171901": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 1623.0,
+                    "sys": "caldera"
+                },
+                "140312-202524": {
+                    "TS": 1288.62,
+                    "cores": 16,
+                    "correct": "pass",
+                    "metaTI": 14.2,
+                    "metaTV": 116.77,
+                    "metadata": true,
+                    "real": 1465.0,
+                    "sys": "caldera"
+                }
+            },
+            "pagoda": {
+                "??????-??????": {
+                    "cores": 4,
+                    "correct": "pass",
+                    "metadata": true,
+                    "real": 5513.0,
+                    "sys": "caldera"
+                }
+            },
+            "pynio": {
+                "140306-104238": {
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 183.7,
+                    "metadata": false,
+                    "real": 6890.64,
+                    "sys": "geyser",
+                    "user": 1043.99
+                },
+                "140307-094628": {
+                    "TS": 4436.59,
+                    "actual": 242880.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 311.76,
+                    "metaTI": 422.84,
+                    "metaTV": 260.98,
+                    "metadata": true,
+                    "openi": 9.83,
+                    "openo": 1.07,
+                    "real": 5159.22,
+                    "request": 192163.54,
+                    "sys": "geyser",
+                    "user": 1409.84
+                }
+            },
+            "pynio4_0": {
+                "140317-232141": {
+                    "TS": 7754.38,
+                    "actual": 352320.0,
+                    "cores": 1,
+                    "correct": "fail",
+                    "kernel": 298.58,
+                    "metaTI": 88.15,
+                    "metaTV": 177.24,
+                    "metadata": true,
+                    "openi": 9.75,
+                    "openo": 0.17,
+                    "real": 8032.64,
+                    "request": 192163.54,
+                    "sys": "geyser",
+                    "user": 3312.31
+                }
+            },
+            "pyniompi": {
+                "140305-211128": {
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.1,
+                    "metadata": false,
+                    "real": 729.3,
+                    "sys": "yellowstone",
+                    "user": 0.23
+                },
+                "140313-155030": {
+                    "TS": 1103.49,
+                    "actual": 242880.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.13,
+                    "metaTI": 7.21,
+                    "metaTV": 9.13,
+                    "metadata": true,
+                    "openi": 12.52,
+                    "openo": 0.09,
+                    "real": 1141.67,
+                    "request": 192163.54,
+                    "sys": "yellowstone",
+                    "user": 0.19
+                }
+            },
+            "pyniompi4_0": {
+                "140318-070023": {
+                    "TS": 1087.52,
+                    "actual": 352320.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.23,
+                    "metaTI": 5.21,
+                    "metaTV": 11.24,
+                    "metadata": true,
+                    "openi": 9.47,
+                    "openo": 0.09,
+                    "real": 1122.78,
+                    "request": 192163.54,
+                    "sys": "yellowstone",
+                    "user": 0.17
+                }
+            },
+            "pyniompi4_1": {
+                "140318-092050": {
+                    "TS": 1487.0,
+                    "actual": 352320.0,
+                    "cores": 16,
+                    "correct": "fail",
+                    "kernel": 0.23,
+                    "metaTI": 8.59,
+                    "metaTV": 13.03,
+                    "metadata": true,
+                    "openi": 9.47,
+                    "openo": 0.26,
+                    "real": 1525.21,
+                    "request": 192163.54,
+                    "sys": "yellowstone",
+                    "user": 0.17
+                }
+            },
+            "pyreshaper": {
+                "140624-115036": {
+                    "TS": 1115.6568172,
+                    "actual": 352320.0,
+                    "cores": 16,
+                    "metaTI": 22.2814490795,
+                    "metaTV": 52.5229613781,
+                    "metadata": true,
+                    "openi": 23.7155740261,
+                    "openo": 0.268895864487,
+                    "real": 1213.0,
+                    "request": 192163.858337,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4": {
+                "140624-115036": {
+                    "TS": 1145.50996685,
+                    "actual": 352320.0,
+                    "cores": 16,
+                    "metaTI": 20.7704982758,
+                    "metaTV": 45.629805088,
+                    "metadata": true,
+                    "openi": 17.5859360695,
+                    "openo": 0.32540512085,
+                    "real": 1219.0,
+                    "request": 192163.858337,
+                    "sys": "yellowstone"
+                }
+            },
+            "pyreshaper4c": {
+                "140624-115037": {
+                    "TS": 1236.12181854,
+                    "actual": 352320.0,
+                    "cores": 16,
+                    "metaTI": 11.7521572113,
+                    "metaTV": 29.1930208206,
+                    "metadata": true,
+                    "openi": 9.35915207863,
+                    "openo": 0.2045814991,
+                    "real": 1299.0,
+                    "request": 192163.858337,
+                    "sys": "yellowstone"
+                }
+            }
+        },
+        "startYear": "0001"
+    }
+}
