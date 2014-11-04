@@ -322,6 +322,21 @@
                     "real": 243.0,
                     "request": 28449.3301392,
                     "sys": "yellowstone"
+                },
+                "140915-153852": {
+                    "TS": 139.93287158,
+                    "actual": 956160.0,
+                    "cores": 16,
+                    "metaTI": 0.356719017029,
+                    "metaTV": 7.22233319283,
+                    "metadata": true,
+                    "nodes": 4,
+                    "once": false,
+                    "openi": 3.86684203148,
+                    "openo": 0.50390124321,
+                    "real": 192.0,
+                    "request": 28449.3301392,
+                    "sys": "yellowstone"
                 }
             },
             "pyreshaper4": {
@@ -3861,7 +3876,6 @@
         "n3dVars": 4,
         "nVars": 4,
         "osize": 6963.2,
-        "startYear": "0001",
         "results": {
             "pyreshaper": {
                 "140911-111816": {
@@ -3959,6 +3973,7 @@
                     "sys": "yellowstone"
                 }
             }
-        }
+        },
+        "startYear": "0001"
     }
 }
