@@ -144,7 +144,7 @@ class SpecifierTests(unittest.TestCase):
         self.assertRaises(ValueError, spec.validate_values)
 
     def test_validate_values_mod(self):
-        in_list = ['timekeeperTests.py', 'messengerTests.py']
+        in_list = ['specificationTests.py']
         fmt = 'netcdf4'
         prefix = 'pre.'
         suffix = '.suf'
