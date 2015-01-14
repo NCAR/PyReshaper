@@ -536,7 +536,7 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Start the total convert process timer
         self._messenger.sync()
-        self._timer.start('TOTAL TIME')
+        self._timer.start('Complete Conversion Process')
 
         # Debugging output
         self._messenger.print_once('Converting time-slices to time-series',
