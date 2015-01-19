@@ -123,7 +123,10 @@ for test_name in jsondata:
     metadata_names.update(set(jsondata[test_name]['metadata']))
 
     # Determine sizes of variables
-    timeseries_vars = {}
+    timeseries_vars_1D = {}
+    timeseries_vars_2D = {}
+    timeseries_vars_3D = {}
+    timeseries_vars_oD = {}
     ti_metadata_vars = {}
     tv_metadata_vars = {}
     for var_name in infile0.variables.keys():
@@ -134,24 +137,36 @@ for test_name in jsondata:
         if (udim in var_obj.dimensions):
             if var_name in metadata_names:
                 tv_metadata_vars[var_name] = var_bytesize
+            elif len(var_shape) == 1:
+                timeseries_vars_1D[var_name] = var_bytesize
+            elif len(var_shape) == 2:
+                timeseries_vars_2D[var_name] = var_bytesize
+            elif len(var_shape) == 3:
+                timeseries_vars_3D[var_name] = var_bytesize
             else:
-                timeseries_vars[var_name] = var_bytesize
+                timeseries_vars_oD[var_name] = var_bytesize
         else:
             ti_metadata_vars[var_name] = var_bytesize
 
-    tser_num = len(timeseries_vars)
+    ts1d_num = len(timeseries_vars_1D)
+    ts2d_num = len(timeseries_vars_2D)
+    ts3d_num = len(timeseries_vars_3D)
+    tsod_num = len(timeseries_vars_oD)
     timd_num = len(ti_metadata_vars)
     tvmd_num = len(tv_metadata_vars)
-    tot_num = tser_num + timd_num + tvmd_num
+    tot_num = ts1d_num + ts2d_num + ts3d_num + tsod_num + timd_num + tvmd_num
 
     # Close the file
     infile0.close()
 
     # Some output (numbers)
-    print '  No. of TI Metadata Variables: ', timd_num
-    print '  No. of TV Metadata Variables: ', tvmd_num
-    print '  No. of Time-Series Variables: ', tser_num
-    print '  No. of Variables (TOTAL):     ', tot_num
+    print '  No. of TI Metadata Variables:      ', timd_num
+    print '  No. of TV Metadata Variables:      ', tvmd_num
+    print '  No. of Time-Series Variables (1D): ', ts1d_num
+    print '  No. of Time-Series Variables (2D): ', ts2d_num
+    print '  No. of Time-Series Variables (3D): ', ts3d_num
+    print '  No. of Time-Series Variables (?D): ', tsod_num
+    print '  No. of Variables (TOTAL):          ', tot_num
 
     # Loop over all input files and compute time-variant variable sizes
     for file_name in input_files[1:]:
@@ -167,20 +182,32 @@ for test_name in jsondata:
                 var_bytesize = var_size * get_itemsize(var_obj.typecode())
                 if var_name in metadata_names:
                     tv_metadata_vars[var_name] += var_bytesize
+                elif len(var_shape) == 1:
+                    timeseries_vars_1D[var_name] += var_bytesize
+                elif len(var_shape) == 2:
+                    timeseries_vars_2D[var_name] += var_bytesize
+                elif len(var_shape) == 3:
+                    timeseries_vars_3D[var_name] += var_bytesize
                 else:
-                    timeseries_vars[var_name] += var_bytesize
+                    timeseries_vars_oD[var_name] += var_bytesize
 
         # Close the file
         infile.close()
 
     # Compute totals
-    tser_size = np.sum(timeseries_vars.values())
+    ts1d_size = np.sum(timeseries_vars_1D.values())
+    ts2d_size = np.sum(timeseries_vars_2D.values())
+    ts3d_size = np.sum(timeseries_vars_3D.values())
+    tsod_size = np.sum(timeseries_vars_oD.values())
     timd_size = np.sum(ti_metadata_vars.values())
     tvmd_size = np.sum(tv_metadata_vars.values())
-    tot_isize = tser_size + timd_size + tvmd_size
+    tot_isize = ts1d_size + ts2d_size + ts3d_size + tsod_size + timd_size + tvmd_size
 
     print '  Size of TI Metadata Variables:', nbyte_str(timd_size)
     print '  Size of TV Metadata Variables:', nbyte_str(tvmd_size)
-    print '  Size of Time-Series Variables:', nbyte_str(tser_size)
+    print '  Size of Time-Series Variables (1D):', nbyte_str(ts1d_size)
+    print '  Size of Time-Series Variables (2D):', nbyte_str(ts2d_size)
+    print '  Size of Time-Series Variables (3D):', nbyte_str(ts3d_size)
+    print '  Size of Time-Series Variables (?D):', nbyte_str(tsod_size)
     print '  TOTAL Size of Variables:      ', nbyte_str(tot_isize)
     print
