@@ -10,8 +10,10 @@ Created on Apr 30, 2014
 '''
 
 from specification import Specifier, Slice2SeriesSpecifier
-from pyreshaper.messenger import create_messenger
+from pyreshaper.simplcomm import create_comm
 from timekeeper import TimeKeeper
+from partition import WeightBalanced
+from vprinter import VPrinter
 
 import os
 import Nio
@@ -197,16 +199,21 @@ class Reshaper(object):
         self.assumed_block_size = float(4 * 1024 * 1024)
         self._byte_counts = {}
 
-        self._timer.start('Initializing Messenger')
-        ## Pointer to the messenger
-        self._messenger = create_messenger(serial=serial)
-        self._timer.stop('Initializing Messenger')
+        self._timer.start('Initializing Simple Communicator')
+        ## Reference to the simple communicator
+        self._simplecomm = create_comm(serial=serial)
+        self._timer.stop('Initializing Simple Communicator')
 
-        # Set the verbosity in the messenger
-        self._messenger.verbosity = verbosity
+        # Contruct the print header
+        header = ''.join(['[', str(self._simplecomm.get_rank()),
+                          '/', str(self._simplecomm.get_size()), '] '])
+
+        ## Reference to the verbose printer tool
+        self._vprint = VPrinter(header=header, verbosity=verbosity)
 
         # Debug output starting
-        self._messenger.print_once('Initializing Reshaper', vlevel=1)
+        if self._simplecomm.is_manager():
+            self._vprint('Initializing Reshaper', verbosity=1)
 
         ## Input specification
         self._specifier = specifier
@@ -215,7 +222,8 @@ class Reshaper(object):
         self._timer.start('Specifier Validation')
         self._specifier.validate()
         self._timer.stop('Specifier Validation')
-        self._messenger.print_once('Specifier validated', vlevel=1)
+        if self._simplecomm.is_manager():
+            self._vprint('Specifier validated', verbosity=1)
 
     def convert(self, output_limit=0):
         '''
@@ -237,21 +245,22 @@ class Reshaper(object):
 
         # Get all totals and maxima
         my_times = self._timer.get_all_times()
-        #print str(self._messenger.get_rank()) + ': all_times =', my_times
-        max_times = self._messenger.max(my_times)
-        #print str(self._messenger.get_rank()) + ': max_times =', max_times
+        #print str(self._simplecomm.get_rank()) + ': all_times =', my_times
+        max_times = self._simplecomm.allreduce(my_times, op='max')
+        #print str(self._simplecomm.get_rank()) + ': max_times =', max_times
         my_bytes = self._byte_counts
-        #print str(self._messenger.get_rank()) + ': byte_counts =', my_bytes
-        total_bytes = self._messenger.sum(my_bytes)
-        #print str(self._messenger.get_rank()) + ': total_bytes =', total_bytes
+        #print str(self._simplecomm.get_rank()) + ': byte_counts =', my_bytes
+        total_bytes = self._simplecomm.allreduce(my_bytes, op='sum')
+        #print str(self._simplecomm.get_rank()) + ': total_bytes =', total_bytes
 
         # Synchronize
-        self._messenger.sync()
+        self._simplecomm.sync()
 
         # Print timing maxima
         o = self._timer.get_order()
         time_table_str = _pprint_dictionary('TIMING DATA', max_times, order=o)
-        self._messenger.print_once(time_table_str, vlevel=0)
+        if self._simplecomm.is_manager():
+            self._vprint(time_table_str, verbosity=0)
 
         # Convert byte count to MB
         for name in total_bytes:
@@ -259,7 +268,8 @@ class Reshaper(object):
 
         # Print byte count totals
         byte_count_str = _pprint_dictionary('BYTE COUNTS (MB)', total_bytes)
-        self._messenger.print_once(byte_count_str, vlevel=0)
+        if self._simplecomm.is_manager():
+            self._vprint(byte_count_str, verbosity=0)
 
 
 #==============================================================================
@@ -318,7 +328,8 @@ class Slice2SeriesReshaper(Reshaper):
             opt.Format = 'NetCDF4Classic'
             opt.CompressionLevel = 1
         self._nio_options = opt
-        self._messenger.print_once('PyNIO options set', vlevel=2)
+        if self._simplecomm.is_manager():
+            self._vprint('PyNIO options set', verbosity=2)
 
         # Open all of the input files
         self._timer.start('Open Input Files')
@@ -326,19 +337,22 @@ class Slice2SeriesReshaper(Reshaper):
         for filename in self._specifier.input_file_list:
             self._input_files.append(Nio.open_file(filename, "r"))
         self._timer.stop('Open Input Files')
-        self._messenger.print_once('Input files opened', vlevel=2)
+        if self._simplecomm.is_manager():
+            self._vprint('Input files opened', verbosity=2)
 
         # Validate the input files themselves
         self._timer.start('Input File Validation')
         self._validate_input_files()
         self._timer.stop('Input File Validation')
-        self._messenger.print_once('Input files validated', vlevel=2)
+        if self._simplecomm.is_manager():
+            self._vprint('Input files validated', verbosity=2)
 
         # Sort the input files by time
         self._timer.start('Sort Input Files')
         self._sort_input_files_by_time()
         self._timer.stop('Sort Input Files')
-        self._messenger.print_once('Input files sorted', vlevel=2)
+        if self._simplecomm.is_manager():
+            self._vprint('Input files sorted', verbosity=2)
 
         # Retrieve and sort the variables in each time-slice file
         # (To determine if it is time-invariant metadata, time-variant
@@ -346,13 +360,15 @@ class Slice2SeriesReshaper(Reshaper):
         self._timer.start('Sort Variables')
         self._sort_variables()
         self._timer.stop('Sort Variables')
-        self._messenger.print_once('Variables sorted', vlevel=2)
+        if self._simplecomm.is_manager():
+            self._vprint('Variables sorted', verbosity=2)
 
         # Helpful debugging message
-        self._messenger.print_once('Reshaper initialized.', vlevel=1)
+        if self._simplecomm.is_manager():
+            self._vprint('Reshaper initialized.', verbosity=1)
 
         # Sync before continuing..
-        self._messenger.sync()
+        self._simplecomm.sync()
 
     def _validate_input_files(self):
         '''
@@ -361,7 +377,8 @@ class Slice2SeriesReshaper(Reshaper):
         '''
 
         # Helpful debugging message
-        self._messenger.print_once('Validating input files', vlevel=1)
+        if self._simplecomm.is_manager():
+            self._vprint('Validating input files', verbosity=1)
 
         # In the first file, look for the 'unlimited' dimension
         ifile = self._input_files[0]
@@ -401,12 +418,11 @@ class Slice2SeriesReshaper(Reshaper):
             var_names_next = set(ifile.variables.keys())
             missing_vars.update(var_names - var_names_next)
         if (len(missing_vars) != 0):
-            print "WARNING: The first input file has variables that are " \
-                + "not in all input files:"
-            warning = ' '
+            warning = "WARNING: The first input file has variables that are " \
+                    + "not in all input files:" + os.linesep + '   '
             for var in missing_vars:
                 warning += ' ' + str(var)
-            print warning
+            self._vprint(warning, header=True, verbosity=1)
 
     def _sort_input_files_by_time(self):
         '''
@@ -426,7 +442,8 @@ class Slice2SeriesReshaper(Reshaper):
         '''
 
         # Helpful debugging message
-        self._messenger.print_once('Sorting input files', vlevel=1)
+        if self._simplecomm.is_manager():
+            self._vprint('Sorting input files', verbosity=1)
 
         # Get the time attributes (for convenience) and, for each file,
         # add the times to a list.  (Each file will have an array of times
@@ -482,7 +499,8 @@ class Slice2SeriesReshaper(Reshaper):
         '''
 
         # Helpful debugging message
-        self._messenger.print_once('Sorting variables', vlevel=1)
+        if self._simplecomm.is_manager():
+            self._vprint('Sorting variables', verbosity=1)
 
         # Initialize the dictionary of variable names for each category
         # (Keys are variable names, Values are variable sizes)
@@ -504,18 +522,19 @@ class Slice2SeriesReshaper(Reshaper):
                 self._time_series_variables[var_name] = size
 
         # Debug output
-        self._messenger.print_once('Time-Invariant Metadata: ' + \
-                                  str(self._time_invariant_metadata.keys()), vlevel=2)
-        self._messenger.print_once('Time-Variant Metadata: ' + \
-                                  str(self._time_variant_metadata.keys()), vlevel=2)
-        self._messenger.print_once('Time-Series Variables: ' + \
-                                  str(self._time_series_variables.keys()), vlevel=2)
+        if self._simplecomm.is_manager():
+            self._vprint('Time-Invariant Metadata: ' + \
+                         str(self._time_invariant_metadata.keys()), verbosity=2)
+            self._vprint('Time-Variant Metadata: ' + \
+                         str(self._time_variant_metadata.keys()), verbosity=2)
+            self._vprint('Time-Series Variables: ' + \
+                         str(self._time_series_variables.keys()), verbosity=2)
 
         # Add 'once' variable if writing to a once file
         # NOTE: This is a "cheat"!  There is no 'once' variable.  It's just
         #       a catch for all metadata IFF the 'once-file' is enabled.
         if (self._use_once_file):
-            self._time_series_variables.append('once')
+            self._time_series_variables['once'] = 1
 
 
     def convert(self, output_limit=0):
@@ -535,12 +554,12 @@ class Slice2SeriesReshaper(Reshaper):
             raise TypeError(err_msg)
 
         # Start the total convert process timer
-        self._messenger.sync()
+        self._simplecomm.sync()
         self._timer.start('Complete Conversion Process')
 
         # Debugging output
-        self._messenger.print_once('Converting time-slices to time-series',
-                                   vlevel=1)
+        if self._simplecomm.is_manager():
+            self._vprint('Converting time-slices to time-series', verbosity=1)
 
         # For data common to all input files, we reference only the first
         ref_infile = self._input_files[0]
@@ -551,14 +570,15 @@ class Slice2SeriesReshaper(Reshaper):
         common_atts = ref_infile.attributes
 
         # Partition the time-series variables across all processors
-        tsv_names_loc = self._messenger.partition(self._time_series_variables)
+        tsv_names_loc = self._simplecomm.partition(self._time_series_variables.items(),
+                                                   func=WeightBalanced(),
+                                                   involved=True)
         if (output_limit > 0):
             tsv_names_loc = tsv_names_loc[0:output_limit]
 
         # Print partitions for all ranks
-        dbg_msg = 'Local time-series variables are ' \
-                + str(tsv_names_loc)
-        self._messenger.print_all(dbg_msg, vlevel=2)
+        dbg_msg = 'Local time-series variables are ' + str(tsv_names_loc)
+        self._vprint(dbg_msg, header=True, verbosity=2)
 
         # Reset all of the timer values (as it is possible that there are no
         # time-series variables in the local list procuded above)
@@ -607,7 +627,7 @@ class Slice2SeriesReshaper(Reshaper):
             dbg_msg = 'Creating output file for variable: ' + out_name
             if (is_once_file):
                 dbg_msg = 'Creating "once" file.'
-            self._messenger.print_all(dbg_msg, vlevel=1)
+            self._vprint(dbg_msg, header=True, verbosity=1)
 
             # Open each output file and create the dimensions and attributes
             # NOTE: If the output file already exists, abort!
@@ -667,7 +687,7 @@ class Slice2SeriesReshaper(Reshaper):
             dbg_msg = 'Writing output file for variable: ' + out_name
             if (is_once_file):
                 dbg_msg = 'Writing "once" file.'
-            self._messenger.print_all(dbg_msg, vlevel=1)
+            self._vprint(dbg_msg, header=True, verbosity=1)
 
             # Create the attributes of the time-series variable
             if (write_tser):
@@ -748,12 +768,12 @@ class Slice2SeriesReshaper(Reshaper):
             dbg_msg = 'Closed output file for variable: ' + out_name
             if (is_once_file):
                 dbg_msg = 'Closed "once" file.'
-            self._messenger.print_all(dbg_msg, vlevel=1)
+            self._vprint(dbg_msg, header=True, verbosity=1)
 
         # Information
-        self._messenger.sync()
-        self._messenger.print_once(
-            'Finished converting time-slices to time-series.', vlevel=1)
+        self._simplecomm.sync()
+        if self._simplecomm.is_manager():
+            self._vprint('Finished converting time-slices to time-series.', verbosity=1)
 
         # Finish clocking the entire convert procedure
         self._timer.stop('Complete Conversion Process')
@@ -818,13 +838,13 @@ class MultiSpecReshaper(object):
         self._serial = serial
 
         ## Pointer to its own messenger
-        self._messenger = create_messenger(serial=serial)
+        self._simplecomm = create_comm(serial=serial)
 
         ## Store the verbosity
         self._verbosity = verbosity
 
-        # Set the messenger's verbosity
-        self._messenger.verbosity = verbosity
+        # Set the verbose printer
+        self._vprint = VPrinter(verbosity=verbosity)
 
         ## Storage for timing data
         self._times = {}
@@ -854,8 +874,9 @@ class MultiSpecReshaper(object):
 
         # Loop over all specifiers
         for spec_name in self._specifiers:
-            self._messenger.print_once('--- Converting Specifier: ' \
-                + str(spec_name), vlevel=0)
+            if self._simplecomm.is_manager():
+                self._vprint('--- Converting Specifier: ' \
+                             + str(spec_name), verbosity=0)
 
             rshpr = create_reshaper(self._specifiers[spec_name],
                                     serial=self._serial,
@@ -864,14 +885,15 @@ class MultiSpecReshaper(object):
             rshpr.convert(output_limit=output_limit)
 
             this_times = rshpr._timer.get_all_times()
-            self._times[spec_name] = rshpr._messenger.max(this_times)
+            self._times[spec_name] = rshpr._simplecomm.allreduce(this_times, op='max')
             self._time_orders[spec_name] = rshpr._timer.get_order()
             this_count = rshpr._byte_counts
-            self._byte_counts[spec_name] = rshpr._messenger.sum(this_count)
+            self._byte_counts[spec_name] = rshpr._simplecomm.allreduce(this_count, op='sum')
 
-            self._messenger.print_once('--- Finished converting Specifier: ' \
-                + str(spec_name) + os.linesep, vlevel=0)
-            self._messenger.sync()
+            if self._simplecomm.is_manager():
+                self._vprint('--- Finished converting Specifier: ' \
+                             + str(spec_name) + os.linesep, verbosity=0)
+            self._simplecomm.sync()
 
     def print_diagnostics(self):
         '''
@@ -880,15 +902,18 @@ class MultiSpecReshaper(object):
         '''
         # Loop through all timers
         for name in self._specifiers:
-            self._messenger.print_once('Specifier: ' + str(name), vlevel=0)
+            if self._simplecomm.is_manager():
+                self._vprint('Specifier: ' + str(name), verbosity=0)
 
             times = self._times[name]
             o = self._time_orders[name]
             times_str = _pprint_dictionary('TIMING DATA', times, order=o)
-            self._messenger.print_once(times_str, vlevel=0)
+            if self._simplecomm.is_manager():
+                self._vprint(times_str, verbosity=0)
 
             counts = self._byte_counts[name]
             for name in counts:
                 counts[name] = counts[name] / float(1024 * 1024)
             counts_str = _pprint_dictionary('BYTE COUNTS (MB)', counts)
-            self._messenger.print_once(counts_str, vlevel=0)
+            if self._simplecomm.is_manager():
+                self._vprint(counts_str, verbosity=0)
