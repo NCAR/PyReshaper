@@ -21,8 +21,8 @@
         "output_suffix": ".00010102-00101201.nc",
         "metadata": ["time", "time_bound"]
     },
-    "pop-0.1deg": {
-        "common_name": "POP-0.1",
+    "pop-0.25deg": {
+        "common_name": "POP-0.25",
         "input_dir": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/hist",
         "results_dir": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/mon/tseries/",
         "input_globs": ["v5_rel04_BC5_ne120_t12_pop62.pop.h.*.nc"],
@@ -42,8 +42,8 @@
         "output_suffix": ".000101-001012.nc",
         "metadata": ["time", "time_bounds"]
     },
-    "cice-0.1deg": {
-        "common_name": "CICE-0.1",
+    "cice-0.25deg": {
+        "common_name": "CICE-0.25",
         "input_dir": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/cice-hist",
         "results_dir": "/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/cice-hist/mon/tseries",
         "input_globs": ["v5_rel04_BC5_ne120_t12_pop62.cice.h.000*.nc",
@@ -132,8 +132,8 @@
         "output_suffix": ".00010102-00101201.nc",
         "metadata": ["time", "time_bound"]
     },
-    "pop-0.1deg-4": {
-        "common_name": "POP-0.1",
+    "pop-0.25deg-4": {
+        "common_name": "POP-0.25",
         "input_dir": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/hist",
         "results_dir": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/mon/tseries/",
         "input_globs": ["v5_rel04_BC5_ne120_t12_pop62.pop.h.*.nc"],
@@ -153,8 +153,8 @@
         "output_suffix": ".000101-001012.nc",
         "metadata": ["time", "time_bounds"]
     },
-    "cice-0.1deg-4": {
-        "common_name": "CICE-0.1",
+    "cice-0.25deg-4": {
+        "common_name": "CICE-0.25",
         "input_dir": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/cice-hist",
         "results_dir": "/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/cice-hist/mon/tseries",
         "input_globs": ["v5_rel04_BC5_ne120_t12_pop62.cice.h.000*.nc",
@@ -243,8 +243,8 @@
         "output_suffix": ".00010102-00101201.nc",
         "metadata": ["time", "time_bound"]
     },
-    "pop-0.1deg-4c": {
-        "common_name": "POP-0.1",
+    "pop-0.25deg-4c": {
+        "common_name": "POP-0.25",
         "input_dir": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/hist",
         "results_dir": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/mon/tseries/",
         "input_globs": ["v5_rel04_BC5_ne120_t12_pop62.pop.h.*.nc"],
@@ -264,8 +264,8 @@
         "output_suffix": ".000101-001012.nc",
         "metadata": ["time", "time_bounds"]
     },
-    "cice-0.1deg-4c": {
-        "common_name": "CICE-0.1",
+    "cice-0.25deg-4c": {
+        "common_name": "CICE-0.25",
         "input_dir": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/cice-hist",
         "results_dir": "/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/cice-hist/mon/tseries",
         "input_globs": ["v5_rel04_BC5_ne120_t12_pop62.cice.h.000*.nc",
