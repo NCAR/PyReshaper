@@ -1485,7 +1485,7 @@
         },
         "startYear": "0001"
     },
-    "CICE-0.1": {
+    "CICE-0.25": {
         "baseline": "/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/cice-hist/mon/tseries",
         "endYear": "0010",
         "input": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/cice-hist",
@@ -3304,7 +3304,7 @@
         },
         "startYear": "0001"
     },
-    "POP-0.1": {
+    "POP-0.25": {
         "baseline": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/mon",
         "endYear": "0010",
         "input": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/hist",
