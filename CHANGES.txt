@@ -43,4 +43,9 @@ VERSION 0.9.1
 - Added new plotting utility and module.  Some changes to the getsizes
   utility in the Yellowstone testing area.  Some more tweaks here, too.
   
-  
+4 March 2015
+- Updated the PyReshaper to use the newly created PyTools/trunk.  (Will
+  modify the externals to use a tag once the new PyTools has been tested and
+  verified).
+- Renamed all 0.1 degree tests in the tests/yellowstone directory to 0.25
+  degree, which they actually are.
