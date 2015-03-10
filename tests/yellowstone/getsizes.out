@@ -1,51 +1,3 @@
-camse-1deg:
-  No. of TI Metadata Variables:       18
-  No. of TV Metadata Variables:       15
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  89
-  No. of Time-Series Variables (3D):  43
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           165
-  Size of TI Metadata Variables: 1.114 MB
-  Size of TV Metadata Variables: 10.781 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 1.934 GB
-  Size of Time-Series Variables (3D): 28.028 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       29.962 GB
-
-pop-0.25deg-4:
-  No. of TI Metadata Variables:       58
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  22
-  No. of Time-Series Variables (?D):  12
-  No. of Variables (TOTAL):           94
-  Size of TI Metadata Variables: 1.255 GB
-  Size of TV Metadata Variables: 2.812 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 84.972 GB
-  Size of Time-Series Variables (?D): 2.806 TB
-  TOTAL Size of Variables:       2.890 TB
-
-pop-1deg-4c:
-  No. of TI Metadata Variables:       63
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  55
-  No. of Time-Series Variables (?D):  59
-  No. of Variables (TOTAL):           179
-  Size of TI Metadata Variables: 18.285 MB
-  Size of TV Metadata Variables: 2.812 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 3.021 GB
-  Size of Time-Series Variables (?D): 184.638 GB
-  TOTAL Size of Variables:       187.678 GB
-
 camfv-1deg:
   No. of TI Metadata Variables:       26
   No. of TV Metadata Variables:       15
@@ -61,38 +13,6 @@ camfv-1deg:
   Size of Time-Series Variables (3D): 2.027 GB
   Size of Time-Series Variables (?D): 25.754 GB
   TOTAL Size of Variables:       27.781 GB
-
-pop-daily-1deg-4c:
-  No. of TI Metadata Variables:       58
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  4
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           64
-  Size of TI Metadata Variables: 18.283 MB
-  Size of TV Metadata Variables: 85.523 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 6.682 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       6.699 GB
-
-camse-0.25deg-4c:
-  No. of TI Metadata Variables:       18
-  No. of TV Metadata Variables:       15
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  101
-  No. of Time-Series Variables (3D):  97
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           231
-  Size of TI Metadata Variables: 17.799 MB
-  Size of TV Metadata Variables: 10.781 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 35.109 GB
-  Size of Time-Series Variables (3D): 1014.689 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       1.025 TB
 
 camse-0.25deg:
   No. of TI Metadata Variables:       18
@@ -110,103 +30,23 @@ camse-0.25deg:
   Size of Time-Series Variables (?D): 0.000 Bytes
   TOTAL Size of Variables:       1.025 TB
 
-clmse-1deg:
-  No. of TI Metadata Variables:       15
-  No. of TV Metadata Variables:       9
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  290
-  No. of Time-Series Variables (3D):  7
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           321
-  Size of TI Metadata Variables: 17.984 MB
-  Size of TV Metadata Variables: 4.688 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 6.301 GB
-  Size of Time-Series Variables (3D): 2.173 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       8.491 GB
-
-pop-daily-1deg:
-  No. of TI Metadata Variables:       58
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  4
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           64
-  Size of TI Metadata Variables: 18.283 MB
-  Size of TV Metadata Variables: 85.523 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 6.682 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       6.699 GB
-
-camfv-1deg-4c:
-  No. of TI Metadata Variables:       26
+camse-1deg:
+  No. of TI Metadata Variables:       18
   No. of TV Metadata Variables:       15
   No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  82
-  No. of Time-Series Variables (?D):  40
-  No. of Variables (TOTAL):           163
-  Size of TI Metadata Variables: 13.758 KB
+  No. of Time-Series Variables (2D):  89
+  No. of Time-Series Variables (3D):  43
+  No. of Time-Series Variables (?D):  0
+  No. of Variables (TOTAL):           165
+  Size of TI Metadata Variables: 1.114 MB
   Size of TV Metadata Variables: 10.781 KB
   Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 2.027 GB
-  Size of Time-Series Variables (?D): 25.754 GB
-  TOTAL Size of Variables:       27.781 GB
-
-clmse-0.25deg:
-  No. of TI Metadata Variables:       15
-  No. of TV Metadata Variables:       9
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  144
-  No. of Time-Series Variables (3D):  6
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           174
-  Size of TI Metadata Variables: 287.733 MB
-  Size of TV Metadata Variables: 4.688 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 50.057 GB
-  Size of Time-Series Variables (3D): 29.547 GB
+  Size of Time-Series Variables (2D): 1.934 GB
+  Size of Time-Series Variables (3D): 28.028 GB
   Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       79.885 GB
+  TOTAL Size of Variables:       29.962 GB
 
-cice-1deg-4c:
-  No. of TI Metadata Variables:       20
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  117
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           139
-  Size of TI Metadata Variables: 15.000 MB
-  Size of TV Metadata Variables: 1.406 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 6.427 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       6.442 GB
-
-pop-daily-1deg-4:
-  No. of TI Metadata Variables:       58
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  4
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           64
-  Size of TI Metadata Variables: 18.283 MB
-  Size of TV Metadata Variables: 85.523 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 6.682 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       6.699 GB
-
-cice-0.25deg-4:
+cice-0.1deg:
   No. of TI Metadata Variables:       20
   No. of TV Metadata Variables:       2
   No. of Time-Series Variables (1D):  0
@@ -221,150 +61,6 @@ cice-0.25deg-4:
   Size of Time-Series Variables (3D): 432.587 GB
   Size of Time-Series Variables (?D): 0.000 Bytes
   TOTAL Size of Variables:       433.617 GB
-
-pop-0.25deg:
-  No. of TI Metadata Variables:       58
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  22
-  No. of Time-Series Variables (?D):  12
-  No. of Variables (TOTAL):           94
-  Size of TI Metadata Variables: 1.255 GB
-  Size of TV Metadata Variables: 2.812 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 84.972 GB
-  Size of Time-Series Variables (?D): 2.806 TB
-  TOTAL Size of Variables:       2.890 TB
-
-camse-1deg-4:
-  No. of TI Metadata Variables:       18
-  No. of TV Metadata Variables:       15
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  89
-  No. of Time-Series Variables (3D):  43
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           165
-  Size of TI Metadata Variables: 1.114 MB
-  Size of TV Metadata Variables: 10.781 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 1.934 GB
-  Size of Time-Series Variables (3D): 28.028 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       29.962 GB
-
-clmse-1deg-4:
-  No. of TI Metadata Variables:       15
-  No. of TV Metadata Variables:       9
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  290
-  No. of Time-Series Variables (3D):  7
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           321
-  Size of TI Metadata Variables: 17.984 MB
-  Size of TV Metadata Variables: 4.688 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 6.301 GB
-  Size of Time-Series Variables (3D): 2.173 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       8.491 GB
-
-clmse-0.25deg-4c:
-  No. of TI Metadata Variables:       15
-  No. of TV Metadata Variables:       9
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  144
-  No. of Time-Series Variables (3D):  6
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           174
-  Size of TI Metadata Variables: 287.733 MB
-  Size of TV Metadata Variables: 4.688 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 50.057 GB
-  Size of Time-Series Variables (3D): 29.547 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       79.885 GB
-
-cice-1deg-4:
-  No. of TI Metadata Variables:       20
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  117
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           139
-  Size of TI Metadata Variables: 15.000 MB
-  Size of TV Metadata Variables: 1.406 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 6.427 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       6.442 GB
-
-camfv-1deg-4:
-  No. of TI Metadata Variables:       26
-  No. of TV Metadata Variables:       15
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  82
-  No. of Time-Series Variables (?D):  40
-  No. of Variables (TOTAL):           163
-  Size of TI Metadata Variables: 13.758 KB
-  Size of TV Metadata Variables: 10.781 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 2.027 GB
-  Size of Time-Series Variables (?D): 25.754 GB
-  TOTAL Size of Variables:       27.781 GB
-
-clmse-1deg-4c:
-  No. of TI Metadata Variables:       15
-  No. of TV Metadata Variables:       9
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  290
-  No. of Time-Series Variables (3D):  7
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           321
-  Size of TI Metadata Variables: 17.984 MB
-  Size of TV Metadata Variables: 4.688 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 6.301 GB
-  Size of Time-Series Variables (3D): 2.173 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       8.491 GB
-
-camse-1deg-4c:
-  No. of TI Metadata Variables:       18
-  No. of TV Metadata Variables:       15
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  89
-  No. of Time-Series Variables (3D):  43
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           165
-  Size of TI Metadata Variables: 1.114 MB
-  Size of TV Metadata Variables: 10.781 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 1.934 GB
-  Size of Time-Series Variables (3D): 28.028 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       29.962 GB
-
-clmse-0.25deg-4:
-  No. of TI Metadata Variables:       15
-  No. of TV Metadata Variables:       9
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  144
-  No. of Time-Series Variables (3D):  6
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           174
-  Size of TI Metadata Variables: 287.733 MB
-  Size of TV Metadata Variables: 4.688 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 50.057 GB
-  Size of Time-Series Variables (3D): 29.547 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       79.885 GB
 
 cice-1deg:
   No. of TI Metadata Variables:       20
@@ -382,53 +78,53 @@ cice-1deg:
   Size of Time-Series Variables (?D): 0.000 Bytes
   TOTAL Size of Variables:       6.442 GB
 
-pop-1deg-4:
-  No. of TI Metadata Variables:       63
+clmse-0.25deg:
+  No. of TI Metadata Variables:       15
+  No. of TV Metadata Variables:       9
+  No. of Time-Series Variables (1D):  0
+  No. of Time-Series Variables (2D):  144
+  No. of Time-Series Variables (3D):  6
+  No. of Time-Series Variables (?D):  0
+  No. of Variables (TOTAL):           174
+  Size of TI Metadata Variables: 287.733 MB
+  Size of TV Metadata Variables: 4.688 KB
+  Size of Time-Series Variables (1D): 0.000 Bytes
+  Size of Time-Series Variables (2D): 50.057 GB
+  Size of Time-Series Variables (3D): 29.547 GB
+  Size of Time-Series Variables (?D): 0.000 Bytes
+  TOTAL Size of Variables:       79.885 GB
+
+clmse-1deg:
+  No. of TI Metadata Variables:       15
+  No. of TV Metadata Variables:       9
+  No. of Time-Series Variables (1D):  0
+  No. of Time-Series Variables (2D):  290
+  No. of Time-Series Variables (3D):  7
+  No. of Time-Series Variables (?D):  0
+  No. of Variables (TOTAL):           321
+  Size of TI Metadata Variables: 17.984 MB
+  Size of TV Metadata Variables: 4.688 KB
+  Size of Time-Series Variables (1D): 0.000 Bytes
+  Size of Time-Series Variables (2D): 6.301 GB
+  Size of Time-Series Variables (3D): 2.173 GB
+  Size of Time-Series Variables (?D): 0.000 Bytes
+  TOTAL Size of Variables:       8.491 GB
+
+pop-0.1deg:
+  No. of TI Metadata Variables:       58
   No. of TV Metadata Variables:       2
   No. of Time-Series Variables (1D):  0
   No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  55
-  No. of Time-Series Variables (?D):  59
-  No. of Variables (TOTAL):           179
-  Size of TI Metadata Variables: 18.285 MB
+  No. of Time-Series Variables (3D):  22
+  No. of Time-Series Variables (?D):  12
+  No. of Variables (TOTAL):           94
+  Size of TI Metadata Variables: 1.255 GB
   Size of TV Metadata Variables: 2.812 KB
   Size of Time-Series Variables (1D): 0.000 Bytes
   Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 3.021 GB
-  Size of Time-Series Variables (?D): 184.638 GB
-  TOTAL Size of Variables:       187.678 GB
-
-camse-0.25deg-4:
-  No. of TI Metadata Variables:       18
-  No. of TV Metadata Variables:       15
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  101
-  No. of Time-Series Variables (3D):  97
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           231
-  Size of TI Metadata Variables: 17.799 MB
-  Size of TV Metadata Variables: 10.781 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 35.109 GB
-  Size of Time-Series Variables (3D): 1014.689 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       1.025 TB
-
-cice-0.25deg:
-  No. of TI Metadata Variables:       20
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  112
-  No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           134
-  Size of TI Metadata Variables: 1.030 GB
-  Size of TV Metadata Variables: 1.406 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 432.587 GB
-  Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       433.617 GB
+  Size of Time-Series Variables (3D): 84.972 GB
+  Size of Time-Series Variables (?D): 2.806 TB
+  TOTAL Size of Variables:       2.890 TB
 
 pop-1deg:
   No. of TI Metadata Variables:       63
@@ -446,35 +142,19 @@ pop-1deg:
   Size of Time-Series Variables (?D): 184.638 GB
   TOTAL Size of Variables:       187.678 GB
 
-pop-0.25deg-4c:
+pop-daily-1deg:
   No. of TI Metadata Variables:       58
   No. of TV Metadata Variables:       2
   No. of Time-Series Variables (1D):  0
   No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  22
-  No. of Time-Series Variables (?D):  12
-  No. of Variables (TOTAL):           94
-  Size of TI Metadata Variables: 1.255 GB
-  Size of TV Metadata Variables: 2.812 KB
-  Size of Time-Series Variables (1D): 0.000 Bytes
-  Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 84.972 GB
-  Size of Time-Series Variables (?D): 2.806 TB
-  TOTAL Size of Variables:       2.890 TB
-
-cice-0.25deg-4c:
-  No. of TI Metadata Variables:       20
-  No. of TV Metadata Variables:       2
-  No. of Time-Series Variables (1D):  0
-  No. of Time-Series Variables (2D):  0
-  No. of Time-Series Variables (3D):  112
+  No. of Time-Series Variables (3D):  4
   No. of Time-Series Variables (?D):  0
-  No. of Variables (TOTAL):           134
-  Size of TI Metadata Variables: 1.030 GB
-  Size of TV Metadata Variables: 1.406 KB
+  No. of Variables (TOTAL):           64
+  Size of TI Metadata Variables: 18.283 MB
+  Size of TV Metadata Variables: 85.523 KB
   Size of Time-Series Variables (1D): 0.000 Bytes
   Size of Time-Series Variables (2D): 0.000 Bytes
-  Size of Time-Series Variables (3D): 432.587 GB
+  Size of Time-Series Variables (3D): 6.682 GB
   Size of Time-Series Variables (?D): 0.000 Bytes
-  TOTAL Size of Variables:       433.617 GB
+  TOTAL Size of Variables:       6.699 GB
 
