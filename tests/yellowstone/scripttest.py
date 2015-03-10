@@ -45,8 +45,12 @@ parser.add_option('-c', '--code', default='STDD0002',
                   help='The name of the project code for charging in '
                        'parallel runs (ignored if running in serial) '
                        '[Default: STDD0002]')
-parser.add_option('-f', '--force', default=False,
+parser.add_option('-F', '--force', default=False,
                   action='store_true', dest='force',
+                  help='True or False, indicating whether to force deleting '
+                       'any existing test or run directories, if found '
+                       '[Default: False]')
+parser.add_option('-f', '--format', default='netcdf4c', dest='ncformat',
                   help='True or False, indicating whether to force deleting '
                        'any existing test or run directories, if found '
                        '[Default: False]')
@@ -238,6 +242,7 @@ for test_name in test_names:
         test_dir = os.path.join(test_dir, 'par' + str(num_procs))
     else:
         test_dir = os.path.join(test_dir, 'ser')
+    test_dir = os.path.join(test_dir, options.ncformat)
 
     # Delete old directory, if forced
     if (os.path.isdir(test_dir)):

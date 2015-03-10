@@ -1,8 +1,8 @@
 {
     "CAMFV-1.0": {
-        "baseline": "/glade/u/tdd/asap/data/b40.20th.track1.1deg.006/atm/mon/tseries",
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/camfv-1.0",
         "endYear": "1859",
-        "input": "/glade/u/tdd/asap/data/b40.20th.track1.1deg.006/atm/hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/camfv-1.0",
         "isize": 28447.744,
         "n2dVars": 82,
         "n3dVars": 40,
@@ -494,9 +494,9 @@
         "startYear": "1850"
     },
     "CAMSE-0.25": {
-        "baseline": "/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/atm-hist/mon/tseries",
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/camse-0.25",
         "endYear": "0010",
-        "input": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/atm-hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/camse-0.25",
         "isize": 1074790.4,
         "n2dVars": 101,
         "n3dVars": 97,
@@ -993,9 +993,9 @@
         "startYear": "0001"
     },
     "CAMSE-1.0": {
-        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/atm/mon/tseries",
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/camse-1.0",
         "endYear": "0010",
-        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/atm/hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/camse-1.0",
         "isize": 30681.088,
         "n2dVars": 89,
         "n3dVars": 43,
@@ -1485,10 +1485,10 @@
         },
         "startYear": "0001"
     },
-    "CICE-0.25": {
-        "baseline": "/glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/cice-hist/mon/tseries",
+    "CICE-0.1": {
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/cice-0.1",
         "endYear": "0010",
-        "input": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/cice-hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/cice-0.1",
         "isize": 444023.808,
         "n2dVars": 112,
         "nVars": 112,
@@ -1978,9 +1978,9 @@
         "startYear": "0001"
     },
     "CICE-1.0": {
-        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ice/mon/tseries",
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/cice-1.0",
         "endYear": "0010",
-        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ice/hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/cice-1.0",
         "isize": 6596.608,
         "n2dVars": 117,
         "nVars": 117,
@@ -2399,9 +2399,9 @@
         "startYear": "0001"
     },
     "CLM-0.25": {
-        "baseline": " /glade/scratch/mickelso/Data/v5_rel04_BC5_ne120_t12_pop62/lnd-hist/mon/tseries",
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/clmse-0.25",
         "endYear": "0010",
-        "input": "/glade/p/ncgd0001/v5_rel04_BC5_ne120_t12_pop62/lnd-hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/clmse-0.25",
         "isize": 81802.24,
         "n2dVars": 150,
         "nVars": 150,
@@ -2839,9 +2839,9 @@
         "startYear": "0001"
     },
     "CLM-1.0": {
-        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/lnd/mon/tseries",
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/clmse-1.0",
         "endYear": "0010",
-        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/lnd/hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/clmse-1.0",
         "isize": 8694.784,
         "n2dVars": 297,
         "n3dVars": 0,
@@ -3304,10 +3304,10 @@
         },
         "startYear": "0001"
     },
-    "POP-0.25": {
-        "baseline": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/mon",
+    "POP-0.1": {
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/pop-0.1",
         "endYear": "0010",
-        "input": "/glade/scratch/dennis/data/v5_rel04_BC5_ne120_t12_pop62/ocn/hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/pop-0.1",
         "isize": 3030384.64,
         "n2dVars": 23,
         "n3dVars": 11,
@@ -3720,9 +3720,9 @@
         "startYear": "0001"
     },
     "POP-1.0": {
-        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/mon/tseries",
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/pop-1.0",
         "endYear": "0010",
-        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/pop-1.0",
         "isize": 192182.272,
         "n2dVars": 78,
         "n3dVars": 36,
@@ -4123,9 +4123,9 @@
         "startYear": "0001"
     },
     "POP-DAILY-1.0": {
-        "baseline": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/mon/tseries",
+        "baseline": "/glade/u/tdd/asap/bakeoff/tseries/pop-daily-1.0",
         "endYear": "0010",
-        "input": "/glade/u/tdd/asap/data/b.e12.B1850C5CN.ne30_g16.init.ch.027/ocn/hist",
+        "input": "/glade/u/tdd/asap/bakeoff/hist/pop-daily-1.0",
         "isize": 6859.776,
         "n2dVars": 0,
         "n3dVars": 4,
