@@ -61,6 +61,12 @@ def sync():
     else:
         MPI.COMM_WORLD.Barrier()
 
+def gather(data):
+    if (options.serial):
+        return data
+    else:
+        return MPI.COMM_WORLD.gather(data)
+
 #==============================================================================
 # Parse input and set up comparison information
 #==============================================================================
@@ -99,8 +105,8 @@ log_output = {}
 # Parse each test argument for test directories
 possible_test_dirs = []
 if (options.all):
-    possible_test_dirs = glob.glob(os.path.join('*', 'ser'))
-    possible_test_dirs.extend(glob.glob(os.path.join('*', 'par*')))
+    possible_test_dirs = glob.glob(os.path.join('*', 'ser', '*'))
+    possible_test_dirs.extend(glob.glob(os.path.join('*', 'par*', '*')))
 else:
     possible_test_dirs = arguments
 
@@ -108,11 +114,13 @@ else:
 for possible_test_dir in possible_test_dirs:
     if (mpi_rank == 0):
         print 'Validating possible test dir:', possible_test_dir
-    temp, run_type = os.path.split(possible_test_dir)
+    temp, ncformat = os.path.split(possible_test_dir)
+    temp, run_type = os.path.split(temp)
     temp, test_name = os.path.split(temp)
     if (mpi_rank == 0):
         print '  Test Name:', test_name
         print '  Run Type:', run_type
+        print '  NetCDF Format:', ncformat
 
     good_test = (test_name in test_info)
 
@@ -276,14 +284,14 @@ for check_file in check_files[mpi_rank::mpi_size]:
 
 # Now wait for all files to be processed
 if (not options.serial):
-    MPI.COMM_WORLD.Barrier()
+    sync()
 
 # Gather all of the statitics and log files from all processors
 all_log_output = log_output
 all_num_failures = num_failures
 if (not options.serial):
-    all_log_output = MPI.COMM_WORLD.gather(log_output)
-    all_num_failures = MPI.COMM_WORLD.gather(num_failures)
+    all_log_output = gather(log_output)
+    all_num_failures = gather(num_failures)
 
 # Open and write all log files
 if (mpi_rank == 0):
