@@ -51,9 +51,8 @@ parser.add_option('-F', '--force', default=False,
                        'any existing test or run directories, if found '
                        '[Default: False]')
 parser.add_option('-f', '--format', default='netcdf4c', dest='ncformat',
-                  help='True or False, indicating whether to force deleting '
-                       'any existing test or run directories, if found '
-                       '[Default: False]')
+                  help='The NetCDF file format to use for the output data '
+                       'produced by the test.  [Default: netcdf4c]')
 parser.add_option('-i', '--test_info', default=None,
                   help='Location of the testinfo.json file '
                        '[Default: None]')
