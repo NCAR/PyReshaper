@@ -47,5 +47,11 @@ VERSION 0.9.1
 - Updated the PyReshaper to use the newly created PyTools/trunk.  (Will
   modify the externals to use a tag once the new PyTools has been tested and
   verified).
-- Renamed all 0.1 degree tests in the tests/yellowstone directory to 0.25
-  degree, which they actually are.
+- Renamed any ATM/LND 0.1 degree tests in the tests/yellowstone directory to 
+  0.25 degree, which they actually are.  Similarly, any 0.25 degree OCN/ICE
+  tests were named 0.1 degree.
+  
+ 16 March 2015:
+ - Updated the Specifier and Reshaper Doxygen comments to use Doxypypy
+   formatting.
+ 
