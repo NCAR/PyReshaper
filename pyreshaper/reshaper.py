@@ -280,7 +280,7 @@ class Reshaper(object):
         self._simplecomm.sync()
 
         # Print timing maxima
-        o = self._timer.get_order()
+        o = self._timer.get_names()
         time_table_str = _pprint_dictionary('TIMING DATA', max_times, order=o)
         if self._simplecomm.is_manager():
             self._vprint(time_table_str, verbosity=0)
@@ -1018,7 +1018,7 @@ class MultiSpecS2SReshaper(MultiSpecReshaper):
             this_times = rshpr._timer.get_all_times()
             self._times[spec_name] = rshpr._simplecomm.allreduce(
                 this_times, op='max')
-            self._time_orders[spec_name] = rshpr._timer.get_order()
+            self._time_orders[spec_name] = rshpr._timer.get_names()
             this_count = rshpr._byte_counts
             self._byte_counts[spec_name] = rshpr._simplecomm.allreduce(
                 this_count, op='sum')
