@@ -1,2 +1,7 @@
 #!/bin/sh
-python -m doxypypy.doxypypy -a -c $1
+DOXYPYPY=$(which doxypypy)
+if [ -x ${DOXYPYPY} ]; then
+	$DOXYPYPY -a -c $1
+else
+	cat $1
+fi

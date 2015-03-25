@@ -1,19 +1,18 @@
-==========
 PyReshaper
 ==========
 
 A package for converting NetCDF files from time-slice (history) format 
 to time-series (single-variable) format.
 
-:AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-:VERSION: 1.0.0
-:COPYRIGHT: See the document entitled LICENSE.txt
+- **AUTHORS**: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
+- **VERSION**: 1.0.0
+- **COPYRIGHT**: See the document entitled LICENSE.txt
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
 
 
 OVERVIEW
-========
+--------
 
 The PyReshaper package is a Python-based package for performing time-slice
 to time-series convertion of NetCDF files, compliant with the CF 1.6 
@@ -25,7 +24,7 @@ the time-slice NetCDF files.
 
 
 DEPENDENCIES
-============
+------------
 
 The PyReshaper directly depends upon the PyNIO and mpi4py packages.  Access
 and manipulation of the NetCDF files is done through PyNIO, and the parallelism
@@ -53,7 +52,7 @@ installed.
 
 
 OBTAINING THE SOURCE CODE
-=========================
+-------------------------
 
 Currently, the most up-to-date source code is available via svn from the site::
 
@@ -64,7 +63,7 @@ can be given to those to make changes to the source.
 
 
 BUILDING & INSTALLATION
-=======================
+-----------------------
 
 Installation of the PyReshaper is very simple.  After checking out the source
 from the above svn link, via::
@@ -75,7 +74,7 @@ change into the top-level source directory and run the Python distutils
 setup.  On unix, this involves::
 
     $  cd pyReshaper
-    $  python setup.py install [--prefix=/path/to/install/location]
+    $  python setup.py install [--prefix-/path/to/install/location]
     
 The prefix is optional, as the default prefix is typically /usr/local on
 linux machines.  However, you must have permissions to write to the prefix
@@ -95,9 +94,9 @@ the command (on unix machines)::
 
     $  doxygen Doxyfile
 
-The Doxygen filter doxypypy must be installed in order to completely filter
-the Python source code when generating the API documentation.  To obtain 
-the doxypypy filter, download and install doxypypy from:
+The filter doxypypy is used by Doxygen to format the Python source code, if it
+is found.  If it is not found, then the raw Python code is send (unfiltered)
+to Doxygen.  To obtain a copy of the doxypypy filter:
 
     https://github.com/Feneric/doxypypy.git
 
@@ -105,7 +104,7 @@ The resulting API documentation will be placed in the docs/api/html directory.
 
 
 BEFORE USING THE PYRESHAPER PACKAGE
-===================================
+-----------------------------------
 
 Before the PyReshaper package can be used, you must make sure that the 
 site-packages directory containing the 'pyreshaper' source directory is in
@@ -129,7 +128,7 @@ PyReshaper package without issue.
 
 
 INSTRUCTIONS & USE
-==================
+------------------
 
 For instructions on how to use the PyReshaper, see the additional documents
 found in the docs/api and docs/user directories.
@@ -142,6 +141,6 @@ will be able to open the 'docs/api/html/index.html' page in any browser.
 The docs/user directory contains user manual describing how to use the binary 
 scripts from the command-line as well as how to use the PyReshaper from 
 within Python.  Both this README and the User Manual are written in 
-reStructuredText (ReST), and can easily be converted to HTML or many other
-formats with the help of a tool such as Docutils or Sphinx.
+Markdown, and can easily be converted to HTML or many other formats with
+the help of a tool such as pandoc, Docutils, or Sphinx.
 
