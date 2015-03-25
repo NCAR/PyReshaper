@@ -1,5 +1,8 @@
-# __init__.py
+"""@package pyreshaper
+A tool for converting NetCDF time-slice files into time-series format
+"""
 
-__version__ = "0.9.1"
+__version__ = "1.0.0"
 
-import reshaper, specification
+import reshaper
+import specification

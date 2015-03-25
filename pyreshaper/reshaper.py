@@ -10,10 +10,10 @@ Author: Kevin Paul <kpaul@ucar.edu>
 '''
 
 from specification import Specifier, Slice2SeriesSpecifier
-from pyreshaper.simplecomm import create_comm, SimpleComm
-from timekeeper import TimeKeeper
-from partition import WeightBalanced
-from vprinter import VPrinter
+from asaptools.simplecomm import create_comm, SimpleComm
+from asaptools.timekeeper import TimeKeeper
+from asaptools.partition import WeightBalanced
+from asaptools.vprinter import VPrinter
 
 import abc
 import os
@@ -307,7 +307,7 @@ class Slice2SeriesReshaper(Reshaper):
     reshaping operation is to be performed.
     '''
 
-    def __init__(self, spec, serial=False,
+    def __init__(self, specifier, serial=False,
                  verbosity=1, once=False, simplecomm=None):
         '''
         Constructor
@@ -845,8 +845,8 @@ class MultiSpecReshaper(object):
         Constructor
 
         Args:
-            specifier: An instance of the Specifier class, defining the
-                input specification for this reshaper operation.
+            specifiers: A list of instances of the Specifier class, defining 
+                the input specification for this reshaper operation.
             serial: True or False, indicating whether the operation
                 should be performed in serial (True) or parallel
                 (False).  The default is to assume parallel operation
@@ -960,8 +960,8 @@ class MultiSpecS2SReshaper(MultiSpecReshaper):
         Constructor
 
         Args:
-            specifier: An instance of the Specifier class, defining the
-                input specification for this reshaper operation.
+            specifiers: A list of instances of the Specifier class, defining 
+                the input specification for this reshaper operation.
             serial: True or False, indicating whether the operation
                 should be performed in serial (True) or parallel
                 (False).  The default is to assume parallel operation

@@ -1,4 +1,6 @@
 '''
+The PyReshaper configuration specification class
+
 This is a configuration specification class, through which the input to
 the PyReshaper code is specified.  Currently all types of supported
 operations for the PyReshaper are specified with derived dypes of the
@@ -22,9 +24,9 @@ def create_specifier(spec_type='slice-to-series', **kwargs):
     Factory function for Specifier class objects.  Defined for convenience.
 
     Args:
-        spec_type: A string specifying the type of Specifier class to
-            instantiate.
-        **kwargs: Optional arguments to be passed to the newly created
+        spec_type: A string specifying the type of
+            Specifier class to instantiate.
+        kwargs: Optional arguments to be passed to the newly created
             Specifier object's constructor.
 
     Returns:
@@ -49,8 +51,9 @@ def create_specifier(spec_type='slice-to-series', **kwargs):
 class Specifier(object):
 
     '''
-    This is the base class for the PyReshaper input specification.  The
-    base class has no functionality, but it defines the type of specifier
+    This is the base class for the PyReshaper input specification.
+
+    The base class has no functionality, but it defines the type of specifier
     that is created.
     '''
     __metaclass__ = ABCMeta
@@ -61,9 +64,8 @@ class Specifier(object):
 
         Kwargs:
             infiles: List of full-path input filenames
-            ncfmt: String specifying the NetCDF data format
-                ('netcdf','netcdf4','netcdf4c')
-
+            ncfmt: String specifying the NetCDF data 
+                format ('netcdf','netcdf4','netcdf4c')
         '''
 
         # String specifier type
@@ -147,6 +149,8 @@ class Specifier(object):
 class Slice2SeriesSpecifier(Specifier):
 
     '''
+    Time-slice to Time-series Convertion Specifier
+
     This class acts as a container for the various input data needed
     by the Reshaper to perform the time-slice to time-series operation.
     '''
@@ -168,8 +172,8 @@ class Slice2SeriesSpecifier(Specifier):
 
         Args:
             infiles: List of full-path input filenames
-            ncfmt: String specifying the NetCDF data format
-                ('netcdf','netcdf4','netcdf4c')
+            ncfmt: String specifying the NetCDF
+                data format ('netcdf','netcdf4','netcdf4c')
             prefix: String specifying the full-path prefix common
                 to all time-series output files
             suffix: String specifying the suffix common
