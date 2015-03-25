@@ -6,7 +6,7 @@ A package for converting NetCDF files from time-slice (history) format
 to time-series (single-variable) format.
 
 :AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-:VERSION: 0.9.1
+:VERSION: 1.0.0
 :COPYRIGHT: See the document entitled LICENSE.txt
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
@@ -57,7 +57,7 @@ OBTAINING THE SOURCE CODE
 
 Currently, the most up-to-date source code is available via svn from the site::
 
-    https://subversion.ucar.edu/asap/pyReshaper/tags/v0.9.0
+    https://proxy.subversion.ucar.edu/pubasap/pyReshaper/tags/v1.0.0
 
 The source is available in read-only mode to everyone, but special permissions
 can be given to those to make changes to the source.
@@ -69,7 +69,7 @@ BUILDING & INSTALLATION
 Installation of the PyReshaper is very simple.  After checking out the source
 from the above svn link, via::
 
-    svn co https://subversion.ucar.edu/asap/pyReshaper/tags/v0.9.0 pyReshaper
+    svn co https://proxy.subversion.ucar.edu/pubasap/pyReshaper/tags/v1.0.0 pyReshaper
 
 change into the top-level source directory and run the Python distutils
 setup.  On unix, this involves::
@@ -95,7 +95,13 @@ the command (on unix machines)::
 
     $  doxygen Doxyfile
 
-The resulting API documentation will be placed in the apidocs/ directory.
+The Doxygen filter doxypypy must be installed in order to completely filter
+the Python source code when generating the API documentation.  To obtain 
+the doxypypy filter, download and install doxypypy from:
+
+    https://github.com/Feneric/doxypypy.git
+
+The resulting API documentation will be placed in the docs/api/html directory.
 
 
 BEFORE USING THE PYRESHAPER PACKAGE
@@ -126,14 +132,14 @@ INSTRUCTIONS & USE
 ==================
 
 For instructions on how to use the PyReshaper, see the additional documents
-found in the apidocs/ and docs/ directories.
+found in the docs/api and docs/user directories.
 
 If you are a developer wanting to use the PyReshaper API directly from your
 own Python code, please read the 'BUILDING & INSTALLATION' section above
 for instructions on how to build the API documentation.  Once built, you
-will be able to open the 'apidocs/index.html' page in any browser.
+will be able to open the 'docs/api/html/index.html' page in any browser.
 
-The docs/ directory contains user manual describing how to use the binary 
+The docs/user directory contains user manual describing how to use the binary 
 scripts from the command-line as well as how to use the PyReshaper from 
 within Python.  Both this README and the User Manual are written in 
 reStructuredText (ReST), and can easily be converted to HTML or many other
