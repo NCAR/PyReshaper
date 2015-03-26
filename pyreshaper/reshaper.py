@@ -330,13 +330,13 @@ class Slice2SeriesReshaper(Reshaper):
         '''
 
         # Type checking (or double-checking)
-        if not isinstance(spec, Slice2SeriesSpecifier):
+        if not isinstance(specifier, Slice2SeriesSpecifier):
             err_msg = "Slice2SeriesReshaper requires a Slice2SeriesSpecifier" \
                 + " as input."
             raise TypeError(err_msg)
 
         # Call the base-class constructor
-        super(Slice2SeriesReshaper, self).__init__(spec,
+        super(Slice2SeriesReshaper, self).__init__(specifier,
                                                    serial=serial,
                                                    verbosity=verbosity,
                                                    once=once,

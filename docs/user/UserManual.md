@@ -1,8 +1,7 @@
-The PyReshaper User's Manual (Version 1.0.0)
-============================================
+The PyReshaper User's Manual
+============================
 
-#### Kevin Paul
-
+**Version 1.0.0**
 
 What is it?
 ===========
@@ -18,15 +17,16 @@ The PyReshaper is built upon 2 third-party Python packages, which
 separately depend upon other packages, as indicated below.
 
 - PyNIO (v1.4.1)
-    -   numpy (v1.4)
-    -   NetCDF
+  - numpy (v1.4)
+  - NetCDF
 - mpi4py (v1.3)
-    -   A dynamic/shared library installation of MPI or MPI-2
+  - A dynamic/shared library installation of MPI or MPI-2
 
 No thorough testing has been done to show whether earlier versions of
 these dependencies will work with the PyReshaper. The versions listed
 have been shown to work, and it is assumed that later versions will
 continue to work.
+
 
 How can I get it?
 =================
@@ -34,13 +34,12 @@ How can I get it?
 The best way to obtain the PyReshaper code is to check it out from the
 UCAR subversion site, as shown below.
 
-Unix Command Line:
-
-    $ svn co https://subversion.ucar.edu/asap/pyReshaper/tags/v0.9.0 pyReshaper
+    $ svn co https://subversion.ucar.edu/asap/pyReshaper/tags/v1.0.0 pyReshaper
 
 This is the most recent stable version of the source code. The trunk is
 also available for download, if you choose to have the most up-to-date
 version.
+
 
 How do I set it up?
 ===================
@@ -56,19 +55,13 @@ As described in the previous section, first check out the source code
 from the subversion repository. On unix-like systems, the command is
 shown below.
 
-Unix Command Line:
-
-    $ svn co https://subversion.ucar.edu/asap/pyReshaper/tags/v0.9.0 pyReshaper
+    $ svn co https://subversion.ucar.edu/asap/pyReshaper/tags/v1.0.0 pyReshaper
 
 Enter into the newly created directory.
-
-Unix Command Line:
 
     $ cd pyReshaper
 
 The contents of the repository will look like the following.
-
-Unix Command Line:
 
     $ ls
     CHANGES.txt Doxyfile    LICENSE.txt README.md   bin/  
@@ -76,14 +69,13 @@ Unix Command Line:
 
 To install in package, type the following command from this directory.
 
-Unix Command Line:
-
     $ python setup.py install --user
 
 If you are a system administrator, you can leave off the `--user`
 option, and the package will be installed in `/usr/local`, by default.
 Alternatively, you may specify your own installation root directory with
 the `--prefix` option.
+
 
 Generating the API Documentation
 --------------------------------
@@ -95,32 +87,26 @@ Doxygen available and installed. If you do, the API documentation can be
 easily generated with the following command from the top-level
 PyReshaper directory.
 
-Unix Command Line:
-
     $ doxygen Doxyfile
 
-The API documentation will be placed in the `apidocs/html/` directory.
+The API documentation will be placed in the `docs/html/` directory.
+
 
 Generating the User Documentation
 ---------------------------------
 
-The `README.rst` file and this User Manual should be consulted for help
+The `README.md` file and this User Manual should be consulted for help
 on installing and using the software. Both documents are included with
-the source. The `README.rst` file is included with the top-level
+the source. The `README.md` file is included with the top-level
 PyReshaper directory, and the User Manual is contained in the
-`docs/UserManual.rst` file. Both files are reStructuredText (ReST)
+`docs/user/UserManual.md` file. Both files are Markdown formatted
 files, meaning they are simple text files that can be read with any text
 viewer.
 
-They can also be converted to HTML files with the help of Docutils
-script, `rst2html`. If Docutils is installed on your system, you can
-perform this conversion with the unix command shown below.
+An HTML version of the User Manual will automatically be created by
+Doxygen, as described in the previous section.  A link will be created
+from the "Related Pages" tab on the Doxygen-generated page.
 
-Unix Command-Line:
-
-    $ rst2html README.rst README.html
-    $ cd docs
-    $ rst2html UserManual.rst UserManual.html
 
 Before Using the PyReshaper
 ---------------------------
@@ -133,8 +119,6 @@ adding the `$HOME/.local/lib/python2.X/site-packages` directory to your
 must point to that prefix directory. For bash users, this is done with
 the following command.
 
-Unix Command Line:
-
     $ export PYTHONPATH=$PYTHONPATH:$PREFIX/lib/python2.X/site-packages
 
 where the `$PREFIX` is the root installation directory used when
@@ -146,9 +130,8 @@ If you want to use the command-line interface to the PyReshaper, you
 must also add the PyReshaper executables directory to your `PATH`. Like
 for the `PYTHONPATH`, this can be done with the following command.
 
-Unix Command Line:
-
     $ export PATH=$PATH:$PREFIX/bin
+
 
 How do I use it?
 ================
@@ -166,36 +149,36 @@ variable with multiple time-values per file) format. This statement
 contains a number of assumptions that pertain to the time-slice (input)
 data, which we list below.
 
-1.  Each time-slice NetCDF file has multiple time-dependent variables
-    inside it, but can have many time-independent variables inside it,
-    as well.
-2.  Each time-slice NetCDF file contains data for times that do not
-    overlap with each other. (That is, each time-slice NetCDF file can
-    contain data spanning a number of simulation time steps. However,
-    the span of time contained in one time slice cannot overlap the span
-    of time in another time-slice.)
-3.  Every time-slice NetCDF file contains the same time-dependent
-    variables, just at differing times.
+1. Each time-slice NetCDF file has multiple time-dependent variables
+   inside it, but can have many time-independent variables inside it,
+   as well.
+2. Each time-slice NetCDF file contains data for times that do not
+   overlap with each other. (That is, each time-slice NetCDF file can
+   contain data spanning a number of simulation time steps. However,
+   the span of time contained in one time slice cannot overlap the span
+   of time in another time-slice.)
+3. Every time-slice NetCDF file contains the same time-dependent
+   variables, just at differing times.
 
 Similarly, there are a number of assumptions made about the time-series
 data produced by the PyReshaper conversion process.
 
-1.  By default, every time-dependent variable will be written to its own
-    time-series NetCDF file.
-2.  Any time-dependent variables that should be included in every
-    time-series file (e.g., such as `time` itself), instead of getting
-    their own time-series file, must be specified by name.
-3.  Every time-independent variable that appears in the time-slice files
-    will be written to every time-series file.
-4.  Every time-series file written by the PyReshaper will span the total
-    range of time spanned by all time-slice files specified.
-5.  Every time-series file will be named with the same prefix and
-    suffix, according to the rule:
+1. By default, every time-dependent variable will be written to its own
+   time-series NetCDF file.
+2. Any time-dependent variables that should be included in every
+   time-series file (e.g., such as `time` itself), instead of getting
+   their own time-series file, must be specified by name.
+3. Every time-independent variable that appears in the time-slice files
+   will be written to every time-series file.
+4. Every time-series file written by the PyReshaper will span the total
+   range of time spanned by all time-slice files specified.
+5. Every time-series file will be named with the same prefix and
+   suffix, according to the rule:
 
-        time_series_filename = prefix + variable_name + suffix
+       time_series_filename = prefix + variable_name + suffix
 
-    where the variable\_name is the name of the time-dependent variable
-    associated with that time-series file.
+   where the variable\_name is the name of the time-dependent variable
+   associated with that time-series file.
 
 It is important to understand the implications of the last assumption on
 the list above. Namely, it is important to note what this assumption
@@ -209,6 +192,7 @@ PyReshaper in multiple subsets, or chunks. Throughout this manual, we
 will refer to such "chunks" as streams. As such, every single PyReshaper
 operation is designed to act on a single stream.
 
+
 Using the PyReshaper from within Python
 ---------------------------------------
 
@@ -219,34 +203,35 @@ external third-party library. The library API for the PyReshaper is
 designed to be simple and light-weight, making it easy to use in your
 own Python tools or scripts.
 
+
 ### Single-Stream Usage
 
 Below, we show an example of how to use the PyReshaper from within
 Python to convert a single stream from time-slice format to time-series
 format.
 
-Python Source: Single-Stream Example:
+~~~~~~~~~~~{.py}
+from pyreshaper import specification, reshaper
 
-    from pyreshaper import specification, reshaper
+# Create a Specifier object (that defined a single stream to be converted
+specifier = specification.create_specifier()
 
-    # Create a Specifier object (that defined a single stream to be converted)
-    specifier = specification.create_specifier()
+# Specify the input needed to perform the PyReshaper conversion
+specifier.input_file_list = [ "/path/to/infile1.nc", "/path/to/infile2.nc", ...]
+specifier.netcdf_format = "netcdf4c"
+specifier.output_file_prefix = "/path/to/outfile_prefix."
+specifier.output_file_suffix = ".000101-001012.nc"
+specifier.time_variant_metadata = ["time", "time_bounds", ...]
 
-    # Specify the input needed to perform the PyReshaper conversion
-    specifier.input_file_list = [ "/path/to/infile1.nc", "/path/to/infile2.nc", ...]
-    specifier.netcdf_format = "netcdf4c"
-    specifier.output_file_prefix = "/path/to/outfile_prefix."
-    specifier.output_file_suffix = ".000101-001012.nc"
-    specifier.time_variant_metadata = ["time", "time_bounds", ...]
+# Create the Reshaper object
+rshpr = reshaper.create_reshaper(specifier, serial=False, verbosity=1)
 
-    # Create the Reshaper object
-    rshpr = reshaper.create_reshaper(specifier, serial=False, verbosity=1)
+# Run the conversion (slice-to-series) process
+rshpr.convert()
 
-    # Run the conversion (slice-to-series) process
-    rshpr.convert()
-
-    # Print timing diagnostics
-    rshpr.print_diagnostics()
+# Print timing diagnostics
+rshpr.print_diagnostics()
+~~~~~~~~~~~
 
 In the above example, it is important to understand the input given to
 the PyReshaper. Namely, all of the input for this single stream is
@@ -254,70 +239,70 @@ contained by a single instantiation of a Specifier object (the code for
 which is defined in the specification module). We will describe each
 attribute of the Specifier object below.
 
-### Specifier Object Attributes
+
+#### Specifier Object Attributes
 
 - `input_file_list`:
-    This specifies a list of input (time-slice) file paths that all
-    conform to the input file assumptions (described above). The list
-    of input files need not be time-ordered, as the PyReshaper will
-    order them appropriately. (This means that this list can easily be
-    generated by using filename globs.)
+  This specifies a list of input (time-slice) file paths that all
+  conform to the input file assumptions (described above). The list
+  of input files need not be time-ordered, as the PyReshaper will
+  order them appropriately. (This means that this list can easily be
+  generated by using filename globs.)
 
-    In the example above, each file path is full and absolute, for
-    safety's sake.
+  In the example above, each file path is full and absolute, for
+  safety's sake.
 
 - `netcdf_format`:
-    This is a string specifying what NetCDF format will be used to
-    write the output (time-series) files.
+  This is a string specifying what NetCDF format will be used to
+  write the output (time-series) files.
 
-    In the above example, NetCDF4 with level-1 compression is
-    requested.
+  In the above example, NetCDF4 with level-1 compression is
+  requested.
 
-    Acceptable Options are:
+  Acceptable Options are:
 
-    -   `"netcdf"`: NetCDF3
-    -   `"netcdf4"`: NetCDF4 uncompressed
-    -   `"netcdf4c"`: NetCDF4 compressed (level 1)
+  - `"netcdf"`: NetCDF3
+  - `"netcdf4"`: NetCDF4 uncompressed
+  - `"netcdf4c"`: NetCDF4 compressed (level 1)
     
-
 - `output_file_prefix`:
-    This is a string specifying the common output (time-series)
-    filename prefix. It is assumed that each time-series file will be
-    named according to the rule:
+  This is a string specifying the common output (time-series)
+  filename prefix. It is assumed that each time-series file will be
+  named according to the rule:
 
-        filename = prefix + variable_name + suffix
+      filename = prefix + variable_name + suffix
 
-    It is important to understand, as in the example above, that the
-    prefix can include the full, absolute path information for the
-    output (time-series) files.
+  It is important to understand, as in the example above, that the
+  prefix can include the full, absolute path information for the
+  output (time-series) files.
 
 - `output_file_suffix`:
-    This is a string specifying the common output (time-series)
-    filename suffix. It is assumed that each time-series file will be
-    named according to the above rule.
+  This is a string specifying the common output (time-series)
+  filename suffix. It is assumed that each time-series file will be
+  named according to the above rule.
 
 - `time_variant_metadata`:
-    This specifies a list of variable names corresponding to variables
-    that should be written to every output (time-series) NetCDF file.
+  This specifies a list of variable names corresponding to variables
+  that should be written to every output (time-series) NetCDF file.
 
 Even though the PyReshaper is designed to work on a single stream at a
 time, multiple streams can be defined as input to the PyReshaper. When
 running the PyReshaper with multiple stream, multiple Specifier objects
 must be created, one for each stream.
 
+
 ### Multiple Stream Usage
 
 In the example below, we show one way to define a multiple stream
 PyReshaper run.
 
-Python Source: Multiple-Stream Example:
+~~~~~~~~~~~{.py}
+from pyreshaper import specification, reshaper
 
-    from pyreshaper import specification, reshaper
-
-    # Assuming all data defining each stream is contained 
-    # in a list called "streams"
-    specifiers = {}
-    for stream in streams:
+# Assuming all data defining each stream is contained 
+# in a list called "streams"
+specifiers = {}
+for stream in streams:
     specifier = specification.create_specifier()
 
     # Define the Pyreshaper input for this stream
@@ -330,14 +315,15 @@ Python Source: Multiple-Stream Example:
     # Append this Specifier to the dictionary of specifiers
     specifiers[stream.name] = specifier
 
-    # Create the Reshaper object
-    rshpr = reshaper.create_reshaper(specifiers, serial=False, verbosity=1)
+# Create the Reshaper object
+rshpr = reshaper.create_reshaper(specifiers, serial=False, verbosity=1)
 
-    # Run the conversion (slice-to-series) process
-    rshpr.convert()
+# Run the conversion (slice-to-series) process
+rshpr.convert()
 
-    # Print timing diagnostics
-    rshpr.print_diagnostics()
+# Print timing diagnostics
+rshpr.print_diagnostics()
+~~~~~~~~~~~
 
 In the above example, we assume the properly formatted data (like the
 data shown in the single-stream example above) is contained in the list
@@ -355,7 +341,8 @@ list of Specifier objects will be converted to a dictionary, with the
 keys of the dictionary corresponding to the list index (i.e., an
 integer).
 
-### Arguments to the `create_reshaper()` Function
+
+#### Arguments to the `create_reshaper()` Function
 
 In both examples above, the Reshaper object (rshpr) is created by
 passing the single Specifier object, list of Specifier objects, or
@@ -376,19 +363,20 @@ which specified what level of output (to `stdout`) will be produced
 during the `convert()` step. Currently, there are only three (3)
 verbosity levels:
 
-1.  `verbosity = 0`: This means that no output will be produced unless
-    specifically requested (i.e., by calling the `print_diagnostics()`
-    function).
-2.  `verbosity = 1`: This means that only output that would be produced
-    by the head rank of a parallel process will be generated.
-3.  `verbosity = 2`: This means that all output from all processors will
-    be generated, but any output that is the same on all processors will
-    only be generated once.
+1. `verbosity = 0`: This means that no output will be produced unless
+   specifically requested (i.e., by calling the `print_diagnostics()`
+   function).
+2. `verbosity = 1`: This means that only output that would be produced
+   by the head rank of a parallel process will be generated.
+3. `verbosity = 2`: This means that all output from all processors will
+   be generated, but any output that is the same on all processors will
+   only be generated once.
 
 By setting the `verbosity` parameter in the `create_reshaper()` function
 to a value of 2 or above will result in the greatest amount of output.
 
-### Arguments to the `convert()` Function
+
+#### Arguments to the `convert()` Function
 
 While not shown in the above examples, there is an argument to the
 `convert()` function of the Reshaper object called `output_limit`. This
@@ -398,8 +386,8 @@ useful for debugging purposes, as it can greatly reduce the length of
 time consumed in the `convert()` function. (A value of `0` indicates no
 limit, or all output files will be generated.)
 
-Using the PyReshaper from the Unix Command-Line
------------------------------------------------
+
+### Using the PyReshaper from the Unix Command-Line
 
 While the most flexible way of using the PyReshaper is from within
 Python, as described above, it is also possible to run the PyReshaper
@@ -412,14 +400,12 @@ directory.)
 Below is an example of how to use the PyReshaper CLI, `slice2series`,
 for a serial run.
 
-Unix Command-Line Interface: Serial Example:
-
     $ slice2series --serial \
-       --netcdf_format="netcdf4c" \
-       --output_prefix="/path/to/outfile_prefix." \
-       --output_suffix="000101-001012.nc" \
-       -m "time" -m "time_bounds" \
-       /path/to/infiles/*.nc
+      --netcdf_format="netcdf4c" \
+      --output_prefix="/path/to/outfile_prefix." \
+      --output_suffix="000101-001012.nc" \
+      -m "time" -m "time_bounds" \
+      /path/to/infiles/*.nc
 
 In this example, you will note that we have specified each
 time-dependent metadata variable name with its own `-m` option. (In this
@@ -435,20 +421,19 @@ For parallel operation, one must launch the `slice2series` script from
 the appropriate MPI launcher. On the Yellowstone system
 (`yellowstone.ucar.edu`), this is done with the following command.
 
-Unix Command-Line Interface: Yellowstone Parallel Example:
-
     $ mpirun.lsf slice2series \
-       --netcdf_format="netcdf4c" \
-       --output_prefix="/path/to/outfile_prefix." \
-       --output_suffix="000101-001012.nc" \
-       -m "time" -m "time_bounds" \
-       /path/to/infiles/*.nc
+      --netcdf_format="netcdf4c" \
+      --output_prefix="/path/to/outfile_prefix." \
+      --output_suffix="000101-001012.nc" \
+      -m "time" -m "time_bounds" \
+      /path/to/infiles/*.nc
 
 In the above example, this will launch the `slice2series` script into
 the MPI environment already created by either a request for an
 interactive session or from an LSF submission script.
 
-### Additional Arguments to the `slice2series` Script
+
+#### Additional Arguments to the `slice2series` Script
 
 While the basic options shown in the previous two (2) examples above are
 sufficient for most purposes, two additional options are available. The

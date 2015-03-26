@@ -1,5 +1,5 @@
-PyReshaper
-==========
+The PyReshaper
+==============
 
 A package for converting NetCDF files from time-slice (history) format 
 to time-series (single-variable) format.
