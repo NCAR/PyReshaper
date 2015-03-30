@@ -54,17 +54,6 @@ def create_reshaper(specifier, serial=False, verbosity=1,
     Returns:
         An instance of the Reshaper object requested
     '''
-    # Type checking
-    if type(serial) is not bool:
-        err_msg = "Serial indicator must be True or False."
-        raise TypeError(err_msg)
-    if type(once) is not bool:
-        err_msg = "Once-file indicator must be True or False."
-        raise TypeError(err_msg)
-    if not isinstance(simplecomm, SimpleComm):
-        err_msg = "Simple communicator object is not a SimpleComm"
-        raise TypeError(err_msg)
-
     # Determine the type of Reshaper object to instantiate
     if type(specifier) is Slice2SeriesSpecifier:
         return Slice2SeriesReshaper(specifier,
@@ -207,6 +196,10 @@ class Reshaper(object):
         if type(once) is not bool:
             err_msg = "Once-file indicator must be True or False."
             raise TypeError(err_msg)
+        if simplecomm is not None:
+            if simplecomm is not isinstance(simplecomm, SimpleComm):
+                err_msg = "Simple communicator object is not a SimpleComm"
+                raise TypeError(err_msg)
 
         # Whether to write a once file
         self._use_once_file = once
@@ -871,6 +864,10 @@ class MultiSpecReshaper(object):
         if type(verbosity) is not int:
             err_msg = "Verbosity level must be an integer."
             raise TypeError(err_msg)
+        if simplecomm is not None:
+            if simplecomm is not isinstance(simplecomm, SimpleComm):
+                err_msg = "Simple communicator object is not a SimpleComm"
+                raise TypeError(err_msg)
 
         # Whether to write to a once file
         self._use_once_file = once
