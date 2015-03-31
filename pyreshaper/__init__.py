@@ -1,5 +1,10 @@
-# __init__.py
+"""
+The PyReshaper
 
-__version__ = "0.9.1"
+A tool for converting NetCDF time-slice files into time-series format
+"""
 
-import reshaper, specification
+__version__ = "1.0.0"
+
+import reshaper
+import specification

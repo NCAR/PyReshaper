@@ -1,17 +1,17 @@
-PyReshaper
-==========
+The PyReshaper
+==============
 
 A package for converting NetCDF files from time-slice (history) format 
 to time-series (single-variable) format.
 
-- **AUTHORS**: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-- **VERSION**: 1.0.0
-- **COPYRIGHT**: See the document entitled LICENSE.txt
+:AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
+:VERSION: 1.0.0
+:COPYRIGHT: See the document entitled LICENSE.txt
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
 
 
-OVERVIEW
+Overview
 --------
 
 The PyReshaper package is a Python-based package for performing time-slice
@@ -23,7 +23,7 @@ achieveable for a given operation is one core/processor per variables in
 the time-slice NetCDF files.
 
 
-DEPENDENCIES
+Dependencies
 ------------
 
 The PyReshaper directly depends upon the PyNIO and mpi4py packages.  Access
@@ -51,7 +51,7 @@ so problems might occur if an earlier versions of these packages have been
 installed.
 
 
-OBTAINING THE SOURCE CODE
+Obtaining the Source Code
 -------------------------
 
 Currently, the most up-to-date source code is available via svn from the site::
@@ -62,7 +62,7 @@ The source is available in read-only mode to everyone, but special permissions
 can be given to those to make changes to the source.
 
 
-BUILDING & INSTALLATION
+Building & Installation
 -----------------------
 
 Installation of the PyReshaper is very simple.  After checking out the source
@@ -89,21 +89,23 @@ to install.  To do this, type (on unix machines)::
 This can be handy since the site-packages directory will be common for all
 user installs, and therefore only needs to be added to the PYTHONPATH once.
 
-To install API documentation for developer use, you must run doxygen with
-the command (on unix machines)::
+To install the documentation, you must have Sphinx installed on your system.
+Sphinx can be easily installed with pip, via::
 
-    $  doxygen Doxyfile
+    $  pip install Sphinx
+    
+Once Sphinx is installed, you can build the PyReshaper HTML documentation
+with::
 
-The filter doxypypy is used by Doxygen to format the Python source code, if it
-is found.  If it is not found, then the raw Python code is send (unfiltered)
-to Doxygen.  To obtain a copy of the doxypypy filter:
+    $  cd docs
+    $  make html
 
-    https://github.com/Feneric/doxypypy.git
+The resulting HTML documentation will be placed in the docs/build/html
+directory, and the main page can be loaded with any browser pointing to
+'docs/build/html/index.html'.
 
-The resulting API documentation will be placed in the docs/api/html directory.
 
-
-BEFORE USING THE PYRESHAPER PACKAGE
+Before Using the PyReshaper Package
 -----------------------------------
 
 Before the PyReshaper package can be used, you must make sure that the 
@@ -127,20 +129,10 @@ site-packages directory has been added to your PYTHONPATH, you may use the
 PyReshaper package without issue.
 
 
-INSTRUCTIONS & USE
+Instructions & Use
 ------------------
 
-For instructions on how to use the PyReshaper, see the additional documents
-found in the docs/api and docs/user directories.
-
-If you are a developer wanting to use the PyReshaper API directly from your
-own Python code, please read the 'BUILDING & INSTALLATION' section above
-for instructions on how to build the API documentation.  Once built, you
-will be able to open the 'docs/api/html/index.html' page in any browser.
-
-The docs/user directory contains user manual describing how to use the binary 
-scripts from the command-line as well as how to use the PyReshaper from 
-within Python.  Both this README and the User Manual are written in 
-Markdown, and can easily be converted to HTML or many other formats with
-the help of a tool such as pandoc, Docutils, or Sphinx.
+Please see the more detailed instructions found in the docs/ directory for
+usage and examples.  See the 'Building & Installation' section for how to
+build the documentation with Sphinx. 
 

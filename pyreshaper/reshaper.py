@@ -1,19 +1,17 @@
 '''
+The module containing the Reshaper class
+
 This is the main reshaper module.  This is where the specific operations
 are defined.  Currently, only one operation has been implemented (i.e.,
 the time-slice to time-series operation).
 
-________________________
-Created on Apr 30, 2014
-
-Author: Kevin Paul <kpaul@ucar.edu>
 '''
 
 from specification import Specifier, Slice2SeriesSpecifier
-from pyreshaper.simplecomm import create_comm, SimpleComm
-from timekeeper import TimeKeeper
-from partition import WeightBalanced
-from vprinter import VPrinter
+from asaptools.simplecomm import create_comm, SimpleComm
+from asaptools.timekeeper import TimeKeeper
+from asaptools.partition import WeightBalanced
+from asaptools.vprinter import VPrinter
 
 import abc
 import os
@@ -30,9 +28,9 @@ def create_reshaper(specifier, serial=False, verbosity=1,
     '''
     Factory function for Reshaper class instantiations.
 
-    Args:
-        specifier: An instantiation of a Specifier class that defines
-            the type of operation to be performed.  (That is, a
+    Parameters:
+        specifier (Specifier): An instantiation of a Specifier class that 
+            defines the type of operation to be performed.  (That is, a
             Slice2SeriesSpecifier will invoke the creation of a
             matching Slice2SeriesReshaper object.)
             Alternatively, this can be a list of Specifier objects,
@@ -40,19 +38,21 @@ def create_reshaper(specifier, serial=False, verbosity=1,
             In this case, a reshaper will be created for each
             specifier in the list, and each reshaper will be
             created and run in sequence.
-        serial: True or False, indicating whether the Reshaper object
+
+    Keyword Arguments:
+        serial (bool): True or False, indicating whether the Reshaper object
             should perform its operation in serial (True) or
             parallel (False).
-        verbosity: Level of printed output (stdout).  A value of 0 means
+        verbosity (int): Level of printed output (stdout).  A value of 0 means
             no output, and a higher value means more output.  The
             default value is 1.
-        once: True or False, indicating whether the Reshaper should
+        once (bool): True or False, indicating whether the Reshaper should
             write all metadata to a 'once' file (separately).
-        simplecomm: A SimpleComm object to handle the parallel communication,
-            if necessary
+        simplecomm (SimpleComm): A SimpleComm object to handle the parallel
+            communication, if necessary
 
     Returns:
-        An instance of the Reshaper object requested
+        Reshaper: An instance of the Reshaper object requested
     '''
     # Determine the type of Reshaper object to instantiate
     if type(specifier) is Slice2SeriesSpecifier:
@@ -98,15 +98,17 @@ def _pprint_dictionary(title, dictionary, order=None):
     Hidden method for pretty-printing a dictionary of numeric values,
     with a given title.
 
-    Args:
-        title: The title to give to the printed table
-        dictionary: A dictionary of numeric values
-        order: The print order for the keys in the dictionary (only items
-            that are in both the order list and the dictionary will be
+    Parameters:
+        title (str): The title to give to the printed table
+        dictionary (dict): A dictionary of numeric values
+
+    Keyword Arguments:
+        order (list): The print order for the keys in the dictionary (only 
+            items that are in both the order list and the dictionary will be
             printed)
 
     Return:
-        A string with the pretty-printed dictionary data
+        str: A string with the pretty-printed dictionary data
     '''
     # Type checking
     if (type(title) is not str):
@@ -166,20 +168,22 @@ class Reshaper(object):
         '''
         Constructor
 
-        Args:
-            specifier: An instance of the Specifier class, defining the
-                input specification for this reshaper operation.
-            serial: True or False, indicating whether the operation
+        Parameters:
+            specifier (Specifier): An instance of the Specifier class, 
+                defining the input specification for this reshaper operation.
+
+        Keyword Arguments:
+            serial (bool): True or False, indicating whether the operation
                 should be performed in serial (True) or parallel
                 (False).  The default is to assume parallel operation
                 (but serial will be chosen if the mpi4py cannot be
                 found when trying to initialize decomposition.
-            verbosity: Level of printed output (stdout).  A value of 0 means
-                no output, and a higher value means more output.  The
+            verbosity(int): Level of printed output (stdout).  A value of 0 
+                means no output, and a higher value means more output.  The
                 default value is 1.
-            once: True or False, indicating whether the Reshaper should
+            once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
-            simplecomm: A SimpleComm object to handle the parallel 
+            simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
                 communication, if necessary
         '''
 
@@ -240,13 +244,13 @@ class Reshaper(object):
             self._vprint('Specifier validated', verbosity=1)
 
     @abc.abstractmethod
-    def convert(self, output_limit):
+    def convert(self, output_limit=0):
         '''
         Method to perform the Reshaper's designated operation.
 
-        Args:
-            output_limit: Limit on the number of output (time-series) files
-                to write during the convert() operation.  If set
+        Keyword Arguments:
+            output_limit (int): Limit on the number of output (time-series) 
+                files to write during the convert() operation.  If set
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
                 parallel run.
@@ -300,36 +304,38 @@ class Slice2SeriesReshaper(Reshaper):
     reshaping operation is to be performed.
     '''
 
-    def __init__(self, spec, serial=False,
+    def __init__(self, specifier, serial=False,
                  verbosity=1, once=False, simplecomm=None):
         '''
         Constructor
 
-        Args:
-            specifier: An instance of the Specifier class, defining the
-                input specification for this reshaper operation.
-            serial: True or False, indicating whether the operation
+        Parameters:
+            specifier (Specifier): An instance of the Specifier class, 
+                defining the input specification for this reshaper operation.
+
+        Keyword Arguments:
+            serial (bool): True or False, indicating whether the operation
                 should be performed in serial (True) or parallel
                 (False).  The default is to assume parallel operation
                 (but serial will be chosen if the mpi4py cannot be
                 found when trying to initialize decomposition.
-            verbosity: Level of printed output (stdout).  A value of 0 means
-                no output, and a higher value means more output.  The
+            verbosity(int): Level of printed output (stdout).  A value of 0 
+                means no output, and a higher value means more output.  The
                 default value is 1.
-            once: True or False, indicating whether the Reshaper should
+            once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
-            simplecomm: A SimpleComm object to handle the parallel 
+            simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
                 communication, if necessary
         '''
 
         # Type checking (or double-checking)
-        if not isinstance(spec, Slice2SeriesSpecifier):
+        if not isinstance(specifier, Slice2SeriesSpecifier):
             err_msg = "Slice2SeriesReshaper requires a Slice2SeriesSpecifier" \
                 + " as input."
             raise TypeError(err_msg)
 
         # Call the base-class constructor
-        super(Slice2SeriesReshaper, self).__init__(spec,
+        super(Slice2SeriesReshaper, self).__init__(specifier,
                                                    serial=serial,
                                                    verbosity=verbosity,
                                                    once=once,
@@ -571,12 +577,12 @@ class Slice2SeriesReshaper(Reshaper):
 
         In this case, convert a list of time-slice files to time-series files.
 
-        Kwargs:
-            output_limit:   Limit on the number of output (time-series) files
-                            to write during the convert() operation.  If set
-                            to 0, no limit is placed.  This limits the number
-                            of output files produced by each processor in a
-                            parallel run.
+        Keyword Arguments:
+            output_limit (int): Limit on the number of output (time-series) 
+                files to write during the convert() operation.  If set
+                to 0, no limit is placed.  This limits the number
+                of output files produced by each processor in a
+                parallel run.
         '''
         # Type checking input
         if type(output_limit) is not int:
@@ -837,20 +843,22 @@ class MultiSpecReshaper(object):
         '''
         Constructor
 
-        Args:
-            specifier: An instance of the Specifier class, defining the
-                input specification for this reshaper operation.
-            serial: True or False, indicating whether the operation
+        Parameters:
+            specifier (Specifier): An instance of the Specifier class, 
+                defining the input specification for this reshaper operation.
+
+        Keyword Arguments:
+            serial (bool): True or False, indicating whether the operation
                 should be performed in serial (True) or parallel
                 (False).  The default is to assume parallel operation
                 (but serial will be chosen if the mpi4py cannot be
                 found when trying to initialize decomposition.
-            verbosity: Level of printed output (stdout).  A value of 0 means
-                no output, and a higher value means more output.  The
+            verbosity(int): Level of printed output (stdout).  A value of 0 
+                means no output, and a higher value means more output.  The
                 default value is 1.
-            once: True or False, indicating whether the Reshaper should
+            once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
-            simplecomm: A SimpleComm object to handle the parallel 
+            simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
                 communication, if necessary
         '''
 
@@ -905,9 +913,9 @@ class MultiSpecReshaper(object):
         '''
         Method to perform the Reshaper's designated operation.
 
-        Args:
-            output_limit: Limit on the number of output (time-series) files
-                to write during the convert() operation.  If set
+        Keyword Arguments:
+            output_limit (int): Limit on the number of output (time-series) 
+                files to write during the convert() operation.  If set
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
                 parallel run.
@@ -956,20 +964,22 @@ class MultiSpecS2SReshaper(MultiSpecReshaper):
         '''
         Constructor
 
-        Args:
-            specifier: An instance of the Specifier class, defining the
-                input specification for this reshaper operation.
-            serial: True or False, indicating whether the operation
+        Parameters:
+            specifier (Specifier): An instance of the Specifier class, 
+                defining the input specification for this reshaper operation.
+
+        Keyword Arguments:
+            serial (bool): True or False, indicating whether the operation
                 should be performed in serial (True) or parallel
                 (False).  The default is to assume parallel operation
                 (but serial will be chosen if the mpi4py cannot be
                 found when trying to initialize decomposition.
-            verbosity: Level of printed output (stdout).  A value of 0 means
-                no output, and a higher value means more output.  The
+            verbosity(int): Level of printed output (stdout).  A value of 0 
+                means no output, and a higher value means more output.  The
                 default value is 1.
-            once: True or False, indicating whether the Reshaper should
+            once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
-            simplecomm: A SimpleComm object to handle the parallel 
+            simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
                 communication, if necessary
         '''
 
@@ -988,9 +998,9 @@ class MultiSpecS2SReshaper(MultiSpecReshaper):
         convert() method, and pulls the timing data out for each convert 
         operation.
 
-        Args:
-            output_limit: Limit on the number of output (time-series) files
-                to write during the convert() operation.  If set
+        Keyword Arguments:
+            output_limit (int): Limit on the number of output (time-series) 
+                files to write during the convert() operation.  If set
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
                 parallel run.
