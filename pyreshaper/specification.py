@@ -18,14 +18,14 @@ def create_specifier(spec_type='slice-to-series', **kwargs):
     '''
     Factory function for Specifier class objects.  Defined for convenience.
 
-    Args:
-        spec_type: A string specifying the type of
+    Keyword Arguments:
+        spec_type (str): A string specifying the type of
             Specifier class to instantiate.
-        kwargs: Optional arguments to be passed to the newly created
+        kwargs (dict): Optional arguments to be passed to the newly created
             Specifier object's constructor.
 
     Returns:
-        An instantiation of the type of Specifier class desired.
+        Specifier: An instantiation of the type of Specifier class desired.
     '''
     # Type checking
     if not isinstance(spec_type, str):
@@ -53,13 +53,15 @@ class Specifier(object):
     '''
     __metaclass__ = ABCMeta
 
-    def __init__(self, infiles=[], ncfmt='netcdf4c'):
+    def __init__(self,
+                 infiles=[],
+                 ncfmt='netcdf4c'):
         '''
         Constructor
 
-        Kwargs:
-            infiles: List of full-path input filenames
-            ncfmt: String specifying the NetCDF data 
+        Keyword Arguments:
+            infiles (list): List of full-path input filenames
+            ncfmt (str): String specifying the NetCDF data 
                 format ('netcdf','netcdf4','netcdf4c')
         '''
 
@@ -150,7 +152,8 @@ class Slice2SeriesSpecifier(Specifier):
     by the Reshaper to perform the time-slice to time-series operation.
     '''
 
-    def __init__(self, infiles=[],
+    def __init__(self,
+                 infiles=[],
                  ncfmt='netcdf4c',
                  prefix='tseries.',
                  suffix='.nc',
@@ -165,15 +168,15 @@ class Slice2SeriesSpecifier(Specifier):
 
         The output_file_name should be a full-path filename.
 
-        Args:
-            infiles: List of full-path input filenames
-            ncfmt: String specifying the NetCDF
+        Keyword Arguments:
+            infiles (list): List of full-path input filenames
+            ncfmt (str): String specifying the NetCDF
                 data format ('netcdf','netcdf4','netcdf4c')
-            prefix: String specifying the full-path prefix common
+            prefix (str): String specifying the full-path prefix common
                 to all time-series output files
-            suffix: String specifying the suffix common
+            suffix (str): String specifying the suffix common
                 to all time-series output files
-            metadata: List of variable names specifying the
+            metadata (list): List of variable names specifying the
                 variables that should be included in every
                 time-series output file
         '''
