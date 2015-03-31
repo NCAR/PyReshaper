@@ -5,11 +5,6 @@ This is a configuration specification class, through which the input to
 the PyReshaper code is specified.  Currently all types of supported
 operations for the PyReshaper are specified with derived dypes of the
 Specification class.
-
-_______________________
-Created on Apr 30, 2014
-
-Author: Kevin Paul <kpaul@ucar.edu>
 '''
 
 from os import path as ospath

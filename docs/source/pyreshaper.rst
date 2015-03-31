@@ -1,30 +1,17 @@
-pyreshaper package
-==================
-
-Submodules
-----------
-
-pyreshaper.reshaper module
---------------------------
-
-.. automodule:: pyreshaper.reshaper
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pyreshaper.specification module
--------------------------------
-
-.. automodule:: pyreshaper.specification
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
+The PyReshaper Package
+======================
 
 .. automodule:: pyreshaper
     :members:
     :undoc-members:
     :show-inheritance:
+    
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 2
+   
+   specification
+   reshaper
+   
