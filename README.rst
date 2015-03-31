@@ -74,7 +74,7 @@ change into the top-level source directory and run the Python distutils
 setup.  On unix, this involves::
 
     $  cd pyReshaper
-    $  python setup.py install [--prefix-/path/to/install/location]
+    $  python setup.py install [--prefix=/path/to/install/location]
     
 The prefix is optional, as the default prefix is typically /usr/local on
 linux machines.  However, you must have permissions to write to the prefix
