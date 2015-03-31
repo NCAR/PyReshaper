@@ -10,7 +10,12 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-
+   
+   readme
+   manual
+   pyreshaper
+   changelog
+   license
 
 
 Indices and tables
