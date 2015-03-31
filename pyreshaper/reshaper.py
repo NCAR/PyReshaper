@@ -1,12 +1,10 @@
 '''
+The module containing the Reshaper class
+
 This is the main reshaper module.  This is where the specific operations
 are defined.  Currently, only one operation has been implemented (i.e.,
 the time-slice to time-series operation).
 
-________________________
-Created on Apr 30, 2014
-
-Author: Kevin Paul <kpaul@ucar.edu>
 '''
 
 from specification import Specifier, Slice2SeriesSpecifier

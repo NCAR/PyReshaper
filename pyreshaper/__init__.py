@@ -1,4 +1,6 @@
-"""@package pyreshaper
+"""
+The PyReshaper
+
 A tool for converting NetCDF time-slice files into time-series format
 """
 

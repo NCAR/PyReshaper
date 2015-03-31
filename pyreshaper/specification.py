@@ -1,5 +1,5 @@
 '''
-The PyReshaper configuration specification class
+The module containing the PyReshaper configuration specification class
 
 This is a configuration specification class, through which the input to
 the PyReshaper code is specified.  Currently all types of supported
