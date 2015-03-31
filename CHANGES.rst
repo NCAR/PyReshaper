@@ -1,5 +1,5 @@
-PyReshaper CHANGELOG
-====================
+PyReshaper Change Log
+=====================
 
 VERSION 0.9.0
 -------------
