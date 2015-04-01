@@ -253,55 +253,66 @@ def compare_results(comparison_info, comm):
                 os.makedirs(cprnc_out_dir)
 
     comm.sync()
+
+    # Create a flat list of files to check
+    files_to_check = []
+    for full_test_name in comparison_info.keys():
+        for file_name in comparison_info[full_test_name]['results_filenames']:
+            check_dict = {'file_name': file_name,
+                          'full_test_name': full_test_name}
+            files_to_check.append(check_dict)
+
     if (comm.rank == 0):
         print 'Checking files:'
         print
 
     # Loop over all files (designated for this processor)
-    for full_test_name in comparison_info.keys():
-        for file_name in comparison_info[full_test_name]['results_filenames']:
+    for file_to_check in files_to_check[comm.rank::comm.size]:
 
-            new_results_dir = comparison_info[
-                full_test_name]['new_results_dirs']
-            old_results_dir = comparison_info[
-                full_test_name]['old_results_dirs']
-            cprnc_out_dir = comparison_info[
-                full_test_name]['cprnc_out_dirs']
+        full_test_name = file_to_check['full_test_name']
+        file_name = file_to_check['file_name']
 
-            # Create the old and new file paths
-            new_results_path = os.path.join(new_results_dir, file_name)
-            old_results_path = os.path.join(old_results_dir, file_name)
+        new_results_dir = comparison_info[
+            full_test_name]['new_results_dirs']
+        old_results_dir = comparison_info[
+            full_test_name]['old_results_dirs']
+        cprnc_out_dir = comparison_info[
+            full_test_name]['cprnc_out_dirs']
 
-            # CPRNC output file
-            cprnc_out_filename = file_name + '.cprnc'
-            cprnc_out_path = os.path.join(cprnc_out_dir, cprnc_out_filename)
+        # Create the old and new file paths
+        new_results_path = os.path.join(new_results_dir, file_name)
+        old_results_path = os.path.join(old_results_dir, file_name)
 
-            # If the output file already exists, read it, otherwise write it
-            cprnc_out = ''
-            if (os.path.exists(cprnc_out_path)):
-                cprnc_out_file = open(cprnc_out_path, 'r')
-                cprnc_out = cprnc_out_file.read()
-                cprnc_out_file.close()
-            else:
-                # Set the arguments to CPRNC, run, and catch output
-                cprnc_args[2:] = [old_results_path, new_results_path]
-                cprnc_proc = Popen(cprnc_args, stdout=PIPE, stderr=STDOUT)
-                cprnc_out = cprnc_proc.communicate()[0]
+        # CPRNC output file
+        cprnc_out_filename = file_name + '.cprnc'
+        cprnc_out_path = os.path.join(cprnc_out_dir, cprnc_out_filename)
 
-                # Write the output file
-                cprnc_out_file = open(cprnc_out_path, 'w')
-                cprnc_out_file.write(cprnc_out)
-                cprnc_out_file.close()
+        # If the output file already exists, read it, otherwise write it
+        cprnc_out = ''
+        if (os.path.exists(cprnc_out_path)):
+            cprnc_out_file = open(cprnc_out_path, 'r')
+            cprnc_out = cprnc_out_file.read()
+            cprnc_out_file.close()
+        else:
+            # Set the arguments to CPRNC, run, and catch output
+            cprnc_args[2:] = [old_results_path, new_results_path]
+            cprnc_proc = Popen(cprnc_args, stdout=PIPE, stderr=STDOUT)
+            cprnc_out = cprnc_proc.communicate()[0]
 
-            # Add to the list of log file output
-            log_result = ' GOOD: '
-            if (string.rfind(cprnc_out, ident_str) < 0):
-                comparison_info[full_test_name]['num_failures'] += 1
-                log_result = '* BAD: '
-            log_str = log_result + file_name + os.linesep
-            comparison_info[full_test_name]['log_output'].append(log_str)
+            # Write the output file
+            cprnc_out_file = open(cprnc_out_path, 'w')
+            cprnc_out_file.write(cprnc_out)
+            cprnc_out_file.close()
 
-            print '   ', log_result + file_name
+        # Add to the list of log file output
+        log_result = ' GOOD: '
+        if (string.rfind(cprnc_out, ident_str) < 0):
+            comparison_info[full_test_name]['num_failures'] += 1
+            log_result = '* BAD: '
+        log_str = log_result + file_name + os.linesep
+        comparison_info[full_test_name]['log_output'].append(log_str)
+
+        print '   ', log_result + file_name
 
     # Now wait for all files to be processed
     comm.sync()
