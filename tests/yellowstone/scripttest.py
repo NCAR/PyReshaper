@@ -339,6 +339,7 @@ def run_test(test_info):
         # Close the script file and print submission info
         run_script_file.close()
         print job_output
+        print
         sys.stdout.flush()
 
     os.chdir(cwd)
