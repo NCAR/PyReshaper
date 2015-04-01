@@ -70,13 +70,13 @@ def parse_cli():
                       action='store_true', dest='once_file',
                       help='True or False, indicating whether to write metadata '
                            'to a once file. [Default: False]')
-    parser.add_option('-p', '--processes', default=0, type='int',
-                      help='The integer number of processes to request in parallel'
-                           ' runs (0 means run in serial) [Default: 0]')
     parser.add_option('-q', '--queue', default='economy',
                       help='The name of the queue to request in parallel runs '
                            '(ignored if running in serial) '
                            '[Default: economy]')
+    parser.add_option('-n', '--nodes', default=0, type='int',
+                      help='The integer number of nodes to request in parallel'
+                           ' runs (0 means run in serial) [Default: 0]')
     parser.add_option('-t', '--tiling', default=16, type='int',
                       help='The integer number of processes per node to request '
                            'in parallel runs (ignored if running in serial) '
@@ -154,10 +154,10 @@ def gen_run_command(options, test_name, output_dir, testing_database):
 
     # Generate the command line run_args
     run_cmd = []
-    if (options.processes > 0):
+    if (options.nodes > 0):
         run_cmd.append('mpirun.lsf')
     run_cmd.append('slice2series')
-    if (options.processes == 0):
+    if (options.nodes == 0):
         run_cmd.append('--serial')
     if (options.once_file):
         run_cmd.append('--once')
@@ -197,7 +197,11 @@ def gen_submission_script(options, test_name, run_command):
     run_script_list = ['#!/bin/bash']
 
     # If necessary, add the parallel preamble
-    if (options.processes > 0):
+    if (options.nodes > 0):
+
+        # Number of processors total
+        num_procs = options.nodes * options.tiling
+
         # Generate walltime in string form
         wtime_hours = options.wtime / 60
         if (wtime_hours > 99):
@@ -208,7 +212,7 @@ def gen_submission_script(options, test_name, run_command):
 
         # String list representing LSF preamble
         run_script_list.extend([
-            '#BSUB -n ' + str(options.processes),
+            '#BSUB -n ' + str(num_procs),
             '#BSUB -R "span[ptile=' + str(options.tiling) + ']"',
             '#BSUB -q ' + options.queue,
             '#BSUB -a poe',
@@ -247,8 +251,10 @@ def init_test(options, test_name, testing_database):
 
     # Create the test directory
     test_dir = os.path.abspath(test_name)
-    if (options.processes > 0):
-        test_dir = os.path.join(test_dir, 'par' + str(options.processes))
+    if (options.nodes > 0):
+
+        test_dir = os.path.join(
+            test_dir, 'par' + str(options.nodes) + 'x' + str(options.tiling))
     else:
         test_dir = os.path.join(test_dir, 'ser')
     test_dir = os.path.join(test_dir, options.ncformat)
@@ -300,7 +306,7 @@ def run_test(test_info):
     cwd = os.getcwd()
     os.chdir(test_info['directory'])
     print '  Launching test job:',
-    if (options.processes == 0):
+    if (options.nodes == 0):
         # Make the script executable
         os.chmod(test_info['script'],
                  stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
