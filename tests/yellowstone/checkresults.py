@@ -143,7 +143,8 @@ def get_comparison_info(options, arguments, comm, testing_database):
         if (good_test):
             if (comm.rank == 0):
                 print '  Test found in test info'
-            new_results_dir = os.path.join(cwd, test_name, run_type, 'output')
+            new_results_dir = os.path.join(
+                cwd, test_name, run_type, ncformat, 'output')
             good_test = good_test and os.path.isdir(new_results_dir)
             if (comm.rank == 0):
                 print '  New results dir found:', new_results_dir
@@ -183,11 +184,12 @@ def get_comparison_info(options, arguments, comm, testing_database):
                     print '  All new test files found in old results dir'
 
         if (good_test):
-            cprnc_out_dir = os.path.join(cwd, test_name, run_type, 'compare')
+            cprnc_out_dir = os.path.join(
+                cwd, test_name, run_type, ncformat, 'compare')
             if (comm.rank == 0):
                 print '  CPRNC output directory will be:', cprnc_out_dir
 
-            full_test_name = os.path.join(test_name, run_type)
+            full_test_name = os.path.join(test_name, run_type, ncformat)
             if (comm.rank == 0):
                 print '  Full test name:', full_test_name
 
