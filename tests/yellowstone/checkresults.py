@@ -41,8 +41,15 @@ def parse_cli():
                            'in serial (True), rather than parallel (False). '
                            '[Default: False]')
 
-    # Parse the CLI options and arguments and return
-    return parser.parse_args()
+    # Parse the CLI options and arguments
+    (options, arguments) = parser.parse_args()
+
+    # Set serial if listing only
+    if options.list_tests:
+        options.serial = True
+
+    #  and return
+    return (options, arguments)
 
 
 #==============================================================================
