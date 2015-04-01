@@ -55,7 +55,7 @@ def parse_cli():
     parser.add_option('-f', '--format', default='netcdf4c', dest='ncformat',
                       help='The NetCDF file format to use for the output data '
                            'produced by the test.  [Default: netcdf4c]')
-    parser.add_option('-i', '--test_database', default=None,
+    parser.add_option('-i', '--testing_database', default=None,
                       help='Location of the testinfo.json file '
                            '[Default: None]')
     parser.add_option('-l', '--list', default=False,
@@ -86,49 +86,57 @@ def parse_cli():
                            'in parallel runs (ignored if running in serial) '
                            '[Default: 240]')
 
-    # Parse the CLI run_opts and assemble the Reshaper inputs
+    # Return the parsed CLI options
     return parser.parse_args()
 
 
 #==============================================================================
-# Initial pre-processing before running test
+# Find and generate the testing database
 #==============================================================================
-def initialize(run_opts, run_args):
+def gen_testing_database(options):
 
     # See if there is a user-defined testinfo file, otherwise look for default
-    test_database_filename = ''
-    if (run_opts.test_database == None):
+    testing_database_filename = ''
+    if (options.testing_database == None):
         runtest_dir = os.path.dirname(__file__)
-        test_database_filename = os.path.join(runtest_dir, 'testinfo.json')
+        testing_database_filename = os.path.join(runtest_dir, 'testinfo.json')
     else:
-        test_database_filename = os.path.abspath(run_opts.test_database)
+        testing_database_filename = os.path.abspath(options.testing_database)
 
     # Try opening and reading the testinfo file
-    test_database = {}
+    testing_database = {}
     try:
-        test_database_file = open(test_database_filename, 'r')
-        test_database = dict(json.load(test_database_file))
-        test_database_file.close()
+        testing_database_file = open(testing_database_filename, 'r')
+        testing_database = dict(json.load(testing_database_file))
+        testing_database_file.close()
     except:
         err_msg = 'Problem reading and parsing test info file: ' \
-            + str(test_database_filename)
+            + str(testing_database_filename)
         raise ValueError(err_msg)
 
     # List tests only, if option is set
-    if (run_opts.list_tests):
+    if (options.list_tests):
         print 'Tests found in the Test Info file are:'
         print
-        for test_name in test_database:
+        for test_name in testing_database:
             print '   ' + str(test_name)
         sys.exit(0)
 
+    return testing_database
+
+
+#==============================================================================
+# Generate the list of tests to run
+#==============================================================================
+def gen_tests_to_run(options, arguments, testing_database):
+
     # Determine which tests to run
-    tests_to_run = run_args
-    if (run_opts.all):
-        tests_to_run = test_database.keys()
+    tests_to_run = arguments
+    if (options.all):
+        tests_to_run = testing_database.keys()
     else:
         for test_name in tests_to_run:
-            if (test_name not in test_database):
+            if (test_name not in testing_database):
                 print str(test_name) + ' not in testinfo file.  Ignoring.'
     print 'Tests to be run:',
     for test_name in tests_to_run:
@@ -136,186 +144,218 @@ def initialize(run_opts, run_args):
     print ' '
     print
 
-    return test_database, tests_to_run
+    return tests_to_run
 
 
 #==============================================================================
-# gen_lsf_preamble - write LSF preamble as a string
+# Generate the test run command
 #==============================================================================
-def gen_lsf_preamble(test_name, run_opts):
-    # Generate walltime in string form
-    wtime_hours = run_opts.wtime / 60
-    if (wtime_hours > 99):
-        wtime_hours = 99
-        print 'Requested number of hours too large.  Limiting to', wtime_hours, '.'
-    wtime_minutes = run_opts.wtime % 60
-    wtime_str = '%02d:%02d' % (wtime_hours, wtime_minutes)
-
-    # String list representing LSF preamble
-    run_script_str = [
-        '#BSUB -n ' + str(run_opts.processes),
-        '#BSUB -R "span[ptile=' + str(run_opts.tiling) + ']"',
-        '#BSUB -q ' + run_opts.queue,
-        '#BSUB -a poe',
-        '#BSUB -x',
-        '#BSUB -o reshaper-' + test_name + '.%J.log',
-        '#BSUB -J reshaper-' + test_name,
-        '#BSUB -P ' + run_opts.code,
-        '#BSUB -W ' + wtime_str,
-        '',
-        'export MP_TIMEOUT=14400',
-        'export MP_PULSE=1800',
-        'export MP_DEBUG_NOTIMEOUT=yes']
-    return run_script_str
-
-
-#==============================================================================
-# gen_run_script - write bash run script as string
-#==============================================================================
-def gen_run_script(test_name, output_dir, run_opts, test_database):
-
-    # Start creating the run scripts for each test
-    run_script_str = ['#!/bin/bash']
-
-    # If necessary, add the parallel preamble
-    if (run_opts.processes > 0):
-        run_script_str.extend(gen_lsf_preamble(test_name))
-
-    # Now create the rest of the run script
-    run_script_str.extend(['',
-                           '# NOTE: Your PATH and PYTHONPATH must be properly set',
-                           '#       before this script will run without error',
-                           '',
-                           '# Necessary modules to load',
-                           'module load python',
-                           'module load all-python-libs',
-                           ''])
+def gen_run_command(options, test_name, output_dir, testing_database):
 
     # Generate the command line run_args
-    run_cmd_str = ''
-    if (run_opts.processes > 0):
-        run_cmd_str += 'mpirun.lsf '
-    run_cmd_str += 'slice2series '
-    if (run_opts.processes == 0):
-        run_cmd_str += '--serial '
-    if (run_opts.once_file):
-        run_cmd_str += '--once '
-    run_cmd_str += '-v3 '
-    if (run_opts.only > 0):
-        run_cmd_str += '-l' + str(run_opts.only) + ' '
+    run_cmd = []
+    if (options.processes > 0):
+        run_cmd.append('mpirun.lsf')
+    run_cmd.append('slice2series')
+    if (options.processes == 0):
+        run_cmd.append('--serial')
+    if (options.once_file):
+        run_cmd.append('--once')
+    run_cmd.extend(['-v', '3'])
+    if (options.only > 0):
+        run_cmd.extend(['-l', str(options.only)])
 
-    format_str = str(test_database[test_name]['netcdf_format'])
-    run_cmd_str += '-f ' + format_str + ' '
+    format_str = str(testing_database[test_name]['netcdf_format'])
+    run_cmd.extend(['-f', format_str])
 
-    prefix_str = os.path.join(output_dir,
-                              str(test_database[test_name]['output_prefix']))
-    run_cmd_str += '-p ' + prefix_str + ' '
+    prefix_str = os.path.join(
+        output_dir, str(testing_database[test_name]['output_prefix']))
+    run_cmd.extend(['-p', prefix_str])
 
-    suffix_str = str(test_database[test_name]['output_suffix'])
-    run_cmd_str += '-s ' + suffix_str + ' '
+    suffix_str = str(testing_database[test_name]['output_suffix'])
+    run_cmd.extend(['-s', suffix_str])
 
-    for var_name in test_database[test_name]['metadata']:
-        run_cmd_str += '-m ' + str(var_name) + ' '
+    for var_name in testing_database[test_name]['metadata']:
+        run_cmd.extend(['-m', str(var_name)])
 
     input_files_list = []
-    for input_glob in test_database[test_name]['input_globs']:
-        full_input_glob = os.path.join(str(test_database[test_name]['input_dir']),
-                                       input_glob)
+    for input_glob in testing_database[test_name]['input_globs']:
+        full_input_glob = os.path.join(
+            str(testing_database[test_name]['input_dir']), input_glob)
         input_files_list.extend(glob.glob(full_input_glob))
-    run_cmd_str += ' '.join(input_files_list)
+    run_cmd.extend(input_files_list)
 
-    run_script_str.append(run_cmd_str)
-
-    return run_script_str
+    return ' '.join(run_cmd)
 
 
 #==============================================================================
-# For each test, create the run directory, script, output dir, and launch
+# gen_submission_script - write bash run script as string
 #==============================================================================
-def run_tests(run_opts, test_database, tests_to_run):
+def gen_submission_script(options, test_name, run_command):
+
+    # Start creating the run scripts for each test
+    run_script_list = ['#!/bin/bash']
+
+    # If necessary, add the parallel preamble
+    if (options.processes > 0):
+        # Generate walltime in string form
+        wtime_hours = options.wtime / 60
+        if (wtime_hours > 99):
+            wtime_hours = 99
+            print 'Requested number of hours too large.  Limiting to', wtime_hours, '.'
+        wtime_minutes = options.wtime % 60
+        wtime_str = '%02d:%02d' % (wtime_hours, wtime_minutes)
+
+        # String list representing LSF preamble
+        run_script_list.extend([
+            '#BSUB -n ' + str(options.processes),
+            '#BSUB -R "span[ptile=' + str(options.tiling) + ']"',
+            '#BSUB -q ' + options.queue,
+            '#BSUB -a poe',
+            '#BSUB -x',
+            '#BSUB -o reshaper-' + test_name + '.%J.log',
+            '#BSUB -J reshaper-' + test_name,
+            '#BSUB -P ' + options.code,
+            '#BSUB -W ' + wtime_str,
+            '',
+            'export MP_TIMEOUT=14400',
+            'export MP_PULSE=1800',
+            'export MP_DEBUG_NOTIMEOUT=yes',
+            ''])
+
+    # Now create the rest of the run script
+    run_script_list.extend(['# NOTE: Your PATH and PYTHONPATH must be properly set',
+                            '#       before this script will run without error',
+                            '',
+                            '# Necessary modules to load',
+                            'module load python',
+                            'module load all-python-libs',
+                            ''])
+
+    run_script_list.append(run_command)
+    run_script_list.append('')
+
+    return run_script_list
+
+
+#==============================================================================
+# Initialize the test for running
+#==============================================================================
+def init_test(options, test_name, testing_database):
+
+    print 'Currently preparing test:', test_name
+
+    # Create the test directory
+    test_dir = os.path.abspath(test_name)
+    if (options.processes > 0):
+        test_dir = os.path.join(test_dir, 'par' + str(options.processes))
+    else:
+        test_dir = os.path.join(test_dir, 'ser')
+    test_dir = os.path.join(test_dir, options.ncformat)
+
+    # Delete old directory, if forced
+    if (os.path.isdir(test_dir)):
+        if (options.force):
+            shutil.rmtree(test_dir, ignore_errors=True)
+            print '  Directory (' + test_dir + ') removed.'
+        else:
+            err_msg = '  Test directory (' + test_dir + ') already exists.'
+            raise RuntimeError(err_msg)
+
+    # Make new test directory
+    os.makedirs(test_dir)
+    print '  Test directory (' + test_dir + ') created.'
+
+    # Create the output subdirectory
+    output_dir = os.path.join(test_dir, 'output')
+    os.makedirs(output_dir)
+    print '  Output data directory (' + output_dir + ') created.'
+
+    # Generate the run script
+    run_script_filename = 'run-' + test_name + '.sh'
+    run_script_abspath = os.path.join(test_dir, run_script_filename)
+    run_command = gen_run_command(
+        options, test_name, output_dir, testing_database)
+    run_script_list = gen_submission_script(
+        options, test_name, run_command)
+    run_script_file = open(run_script_abspath, 'w')
+    run_script_file.write(os.linesep.join(run_script_list))
+    run_script_file.close()
+    print '  Run script written to', run_script_abspath
+
+    # Container for test info
+    test_info = {'name': test_name,
+                 'directory': test_dir,
+                 'output': output_dir,
+                 'script': run_script_abspath}
+
+    return test_info
+
+
+#==============================================================================
+# run_test - Run/Launch a test
+#==============================================================================
+def run_test(test_info):
+    # Now launch the test
     cwd = os.getcwd()
-    for test_name in tests_to_run:
-        print 'Currently preparing test:', test_name
+    os.chdir(test_info['directory'])
+    print '  Launching test job:',
+    if (options.processes == 0):
+        # Make the script executable
+        os.chmod(test_info['script'],
+                 stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
 
-        # Create the test directory
-        test_dir = os.path.abspath(test_name)
-        if (run_opts.processes > 0):
-            test_dir = os.path.join(test_dir, 'par' + str(run_opts.processes))
-        else:
-            test_dir = os.path.join(test_dir, 'ser')
-        test_dir = os.path.join(test_dir, run_opts.ncformat)
+        # Launch the serial job as a subprocess
+        job = Popen([test_info['script']], stdout=PIPE, stderr=STDOUT,
+                    env=os.environ.copy())
+        print 'PID:', str(job.pid)
+        sys.stdout.flush()
 
-        # Delete old directory, if forced
-        if (os.path.isdir(test_dir)):
-            if (run_opts.force):
-                shutil.rmtree(test_dir, ignore_errors=True)
-                print '  Directory (' + test_dir + ') removed.'
-            else:
-                err_msg = '  Test directory (' + test_dir + ') already exists.'
-                raise RuntimeError(err_msg)
+        # Wait for job to finish and grab job output
+        job_output = job.communicate()[0]
 
-        # Make new test directory
-        os.makedirs(test_dir)
-        print '  Test directory (' + test_dir + ') created.'
+        # Write output to log file
+        log_file = open('reshaper-' + test_info['name'] + '.log', 'w')
+        log_file.write(job_output)
+        log_file.close()
 
-        # Create the output subdirectory
-        output_dir = os.path.join(test_dir, 'output')
-        os.makedirs(output_dir)
-        print '  Output data directory (' + output_dir + ') created.'
+    else:
+        # Open up the run script for input to LSF's bsub
+        run_script_file = open(test_info['script'], 'r')
 
-        # Generate the run script
-        run_script_str = ''
-        run_script_filename = 'run-' + test_name + '.sh'
-        run_script_abspath = os.path.join(test_dir, run_script_filename)
-        run_script_str = gen_run_script(
-            test_name, output_dir, run_opts, test_database)
-        run_script_file = open(run_script_abspath, 'w')
-        run_script_file.write(os.linesep.join(run_script_str))
+        # Launch the parallel job with LSF bsub
+        job = Popen(['bsub'], stdout=PIPE, stderr=STDOUT,
+                    stdin=run_script_file, env=os.environ.copy())
+
+        # Grab the bsub output
+        job_output = job.communicate()[0]
+
+        # Close the script file and print submission info
         run_script_file.close()
-        print '  Run script written to', run_script_abspath
+        print job_output
+        sys.stdout.flush()
 
-        # Now launch the test
-        os.chdir(test_dir)
-        print '  Launching test job:',
-        if (run_opts.processes == 0):
-            # Make the script executable
-            os.chmod(run_script_abspath,
-                     stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
+    os.chdir(cwd)
 
-            # Launch the serial job as a subprocess
-            job = Popen([run_script_abspath], stdout=PIPE, stderr=STDOUT,
-                        env=os.environ.copy())
-            print 'PID:', str(job.pid)
-            sys.stdout.flush()
 
-            # Wait for job to finish and grab job output
-            job_output = job.communicate()[0]
+#==============================================================================
+# For each test, initialize and run the test
+#==============================================================================
+def run_tests(options, tests_to_run, testing_database):
+    for test_name in tests_to_run:
+        test_info = init_test(options, test_name, testing_database)
+        run_test(test_info)
 
-            # Write output to log file
-            log_file = open('reshaper-' + test_name + '.log', 'w')
-            log_file.write(job_output)
-            log_file.close()
 
-        else:
-            # Open up the run script for input to LSF's bsub
-            run_script_file = open(run_script_abspath, 'r')
-
-            # Launch the parallel job with LSF bsub
-            job = Popen(['bsub'], stdout=PIPE, stderr=STDOUT,
-                        stdin=run_script_file, env=os.environ.copy())
-
-            # Grab the bsub output
-            job_output = job.communicate()[0]
-
-            # Close the script file and print submission info
-            run_script_file.close()
-            print job_output
-            sys.stdout.flush()
-
-        os.chdir(cwd)
+#==============================================================================
+# Main Execution Routine
+#==============================================================================
+def main(options, arguments):
+    testing_database = gen_testing_database(options)
+    tests_to_run = gen_tests_to_run(options, arguments, testing_database)
+    run_tests(options, tests_to_run, testing_database)
 
 
 if __name__ == '__main__':
-    run_opts, run_args = parse_cli()
-    test_database, tests_to_run = initialize(run_opts, run_args)
-    run_tests(run_opts, test_database, tests_to_run)
+    options, arguments = parse_cli()
+    main(options, arguments)
