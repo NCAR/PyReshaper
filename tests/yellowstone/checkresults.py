@@ -202,11 +202,11 @@ def get_comparison_info(options, arguments, comm, testing_database):
             comparison_info[full_test_name][
                 'results_filenames'] = new_results_ls
             comparison_info[full_test_name][
-                'new_results_dirs'] = new_results_dir
+                'new_results_dir'] = new_results_dir
             comparison_info[full_test_name][
-                'old_results_dirs'] = old_results_dir
-            comparison_info[full_test_name]['cprnc_out_dirs'] = cprnc_out_dir
-            comparison_info[full_test_name]['log_filenames'] = log_filename
+                'old_results_dir'] = old_results_dir
+            comparison_info[full_test_name]['cprnc_out_dir'] = cprnc_out_dir
+            comparison_info[full_test_name]['log_filename'] = log_filename
             comparison_info[full_test_name]['log_output'] = []
 
         if (comm.rank == 0):
@@ -251,7 +251,7 @@ def compare_results(comparison_info, comm):
 
     # Before checking files, create CPRNC output directories for each test
     for full_test_name in comparison_info.keys():
-        cprnc_out_dir = comparison_info[full_test_name]['cprnc_out_dirs']
+        cprnc_out_dir = comparison_info[full_test_name]['cprnc_out_dir']
         if (comm.rank == 0):
             if (not os.path.isdir(cprnc_out_dir)):
                 os.makedirs(cprnc_out_dir)
@@ -277,11 +277,11 @@ def compare_results(comparison_info, comm):
         file_name = file_to_check['file_name']
 
         new_results_dir = comparison_info[
-            full_test_name]['new_results_dirs']
+            full_test_name]['new_results_dir']
         old_results_dir = comparison_info[
-            full_test_name]['old_results_dirs']
+            full_test_name]['old_results_dir']
         cprnc_out_dir = comparison_info[
-            full_test_name]['cprnc_out_dirs']
+            full_test_name]['cprnc_out_dir']
 
         # Create the old and new file paths
         new_results_path = os.path.join(new_results_dir, file_name)
@@ -321,32 +321,41 @@ def compare_results(comparison_info, comm):
     # Now wait for all files to be processed
     comm.sync()
 
-    # Gather all of the statitics and log files from all processors
-    all_log_output = comm.gather(
-        comparison_info[full_test_name]['log_output'])
-    all_num_failures = comm.gather(
-        comparison_info[full_test_name]['num_failures'])
+    # Assemble rank info to gather
+    rank_log_output = {}
+    rank_num_failures = {}
+    for full_test_name in comparison_info.keys():
+        rank_log_output[full_test_name] = comparison_info[
+            full_test_name]['log_output']
+        rank_num_failures[full_test_name] = comparison_info[
+            full_test_name]['num_failures']
 
-    # Open and write all log files
-    if (comm.rank == 0):
+    # Gather all of the statitics and log files from all processors
+    all_log_output = comm.gather(rank_log_output)
+    all_num_failures = comm.gather(rank_num_failures)
+
+    if comm.rank == 0:
+
+        # Open and write all log files
+        print
+        print 'Writing log files.'
+        print
         for full_test_name in comparison_info.keys():
             log_file = open(
-                comparison_info[full_test_name]['log_filenames'], 'w')
-            for rank_log_output in all_log_output:
-                log_strings = rank_log_output[full_test_name]
+                comparison_info[full_test_name]['log_filename'], 'w')
+            for r_log_output in all_log_output:
+                log_strings = r_log_output[full_test_name]
                 for log_str in log_strings:
                     log_file.write(log_str)
             log_file.close()
 
-    # Print diagnostic info to stdout
-    if (comm.rank == 0):
+        # Print diagnostic info to stdout
         print
         print 'Number of File Comparison Failures:'
         print
         for full_test_name in comparison_info.keys():
-            num_test_failures = 0
-            for rank_num_failures in all_num_failures:
-                num_test_failures += rank_num_failures[full_test_name]
+            num_test_failures = sum([nf[full_test_name]
+                                     for nf in all_num_failures])
             print '  ', full_test_name + ':', num_test_failures,
             print 'failures (of',
             print comparison_info[full_test_name]['num_checks'],
