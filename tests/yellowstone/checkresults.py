@@ -130,9 +130,9 @@ def get_comparison_info(options, arguments, comm, testing_database):
     for possible_test_dir in possible_test_dirs:
         if (comm.rank == 0):
             print 'Validating possible test dir:', possible_test_dir
-        temp, ncformat = os.path.split(possible_test_dir)
-        temp, run_type = os.path.split(temp)
-        temp, test_name = os.path.split(temp)
+        root, ncformat = os.path.split(possible_test_dir)
+        root, run_type = os.path.split(root)
+        root, test_name = os.path.split(root)
         if (comm.rank == 0):
             print '  Test Name:', test_name
             print '  Run Type:', run_type
@@ -214,9 +214,13 @@ def get_comparison_info(options, arguments, comm, testing_database):
 
     # Print out tests to be checked
     if (comm.rank == 0):
-        print 'Valid tests for checking are:'
-        for full_test_name in comparison_info.keys():
-            print '  ', full_test_name
+        if len(comparison_info.keys()) == 0:
+            print 'No valid tests found.'
+            sys.exit(0)
+        else:
+            print 'Valid tests for checking are:'
+            for full_test_name in comparison_info.keys():
+                print '  ', full_test_name
         print
 
     # Exit now, if only listing tests
