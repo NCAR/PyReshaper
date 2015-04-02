@@ -27,7 +27,7 @@ def parse_cli():
     parser.add_option('-o', '--timings_database', default=None,
                       help='Location of the timings.json file '
                            '[Default: None]')
-    # Parse the CLI options and assemble the Reshaper inputs
+    # Parse the CLI options and return
     return parser.parse_args()[0]
 
 
@@ -94,21 +94,22 @@ def make_timings_file(options, testing_database):
     cwd = os.getcwd()
 
     # Parse each test argument for test directories
-    test_names = glob.glob(os.path.join('*', 'ser'))
-    test_names.extend(glob.glob(os.path.join('*', 'par*')))
+    test_names = glob.glob(os.path.join('*', 'ser', '*'))
+    test_names.extend(glob.glob(os.path.join('*', 'par*', '*')))
 
     # Extract each possible test
     for full_test_name in test_names:
         print
         print 'Extracting times from test dir:', full_test_name
-        temp, run_type = os.path.split(full_test_name)
-        temp, test_name = os.path.split(temp)
+        root, run_type = os.path.split(full_test_name)
+        root, test_name = os.path.split(root)
+        root, ncfmt = os.path.split(root)
         print '  Test Name:', test_name
         print '  Run Type:', run_type
+        print '  NetCDF Format:', ncfmt
 
         common_name = testing_database[test_name]['common_name']
         print '  Common Name:', common_name
-        ncfmt = testing_database[test_name]['netcdf_format']
         method_name = 'pyreshaper4c'
         if (ncfmt == 'netcdf'):
             method_name = 'pyreshaper'
@@ -156,8 +157,8 @@ def make_timings_file(options, testing_database):
             loc = 0
 
             # Look for the use of a metadata "once" file...
-            once_file_str, once_loc = find_shortest_str(log_str,
-                                                        'Closed "once" ', loc=0)
+            once_file_str, once_loc = find_shortest_str(
+                log_str, 'Closed "once" ', loc=0)
             used_once_file = False
             if (once_loc > 0):
                 used_once_file = True
