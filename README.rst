@@ -34,6 +34,7 @@ MPI).
 
 Currently the explicit dependencies are known to be:
 
+* ASAPTools (>=0.3)
 * PyNIO (>=1.4.1)
 * mpi4py (>=1.3)
 
