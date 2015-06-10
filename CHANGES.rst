@@ -70,3 +70,9 @@ VERSION 0.9.2
  - Restructured source tree
  - Installation of LICENSE file with package
  - Updates for upload to PyPI
+
+VERSION 0.9.3
+-------------
+
+10 June 2015:
+ - Bugfix: Now installs properly from PyPI
