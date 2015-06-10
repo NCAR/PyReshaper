@@ -5,7 +5,7 @@ A package for converting NetCDF files from time-slice (history) format
 to time-series (single-variable) format.
 
 :AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-:VERSION: 1.0.0
+:VERSION: 0.9.1
 :COPYRIGHT: See the document entitled LICENSE.txt
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
@@ -55,12 +55,13 @@ installed.
 Obtaining the Source Code
 -------------------------
 
-Currently, the most up-to-date source code is available via svn from the site::
+Currently, the most up-to-date development source code is available via svn from the site::
 
-    https://proxy.subversion.ucar.edu/pubasap/pyReshaper/tags/v1.0.0
+    https://github.com/NCAR-CISL-ASAP/PyReshaper
 
-The source is available in read-only mode to everyone, but special permissions
-can be given to those to make changes to the source.
+The most stable tag is the 'v0.9.1' tag, which is recommended for general use.  The source is
+available in read-only mode to everyone, but special permissions can be given to those to 
+make changes to the source.
 
 
 Building & Installation
@@ -69,12 +70,15 @@ Building & Installation
 Installation of the PyReshaper is very simple.  After checking out the source
 from the above svn link, via::
 
-    svn co https://proxy.subversion.ucar.edu/pubasap/pyReshaper/tags/v1.0.0 pyReshaper
+    $ git clone https://github.com/NCAR-CISL-ASAP/PyReshaper
+    
+Enter the newly cloned directory and check out the most recent stable tag::
 
-change into the top-level source directory and run the Python distutils
-setup.  On unix, this involves::
+    $ cd PyReshaper
+    $ git checkout v0.9.1
 
-    $  cd pyReshaper
+Then, run the Python distutils setup.  On unix, this involves::
+
     $  python setup.py install [--prefix=/path/to/install/location]
     
 The prefix is optional, as the default prefix is typically /usr/local on
@@ -119,7 +123,7 @@ path will be::
 where X will be 6 or 7 (or other) depending on the version of Python that you
 are using to install the package.
 
-To use the PyReshaper scripts (namely, 'slice2series'), you must add the
+To use the PyReshaper scripts (e.g., 'slice2series'), you must add the
 script binary directory to your PATH.  Depending on the PREFIX used during
 installation, this path will be::
 
