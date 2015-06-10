@@ -36,7 +36,7 @@ UCAR subversion site, as shown below.
 
     $  git clone https://github.com/NCAR-CISL-ASAP/PyReshaper
     $  cd PyReshaper
-    $  git checkout v0.9.3
+    $  git checkout v0.9.2
 
 This is the most recent stable version of the source code. The trunk is
 also available for download, if you choose to have the most up-to-date
@@ -65,15 +65,15 @@ Enter into the newly created directory and check out the stable tag.
 ::
 
     $  cd PyReshaper
-    $  git checkout v0.9.3
+    $  git checkout v0.9.2
 
 The contents of the repository will look like the following.
 
 ::
 
-    $ ls
-    CHANGES.txt Doxyfile    LICENSE.txt README.md   bin/  
-    docs/       pyreshaper/ setup.py    tests/
+    $  ls
+    CHANGES.rst README.rst  docs/       setup.py    tests/
+    LICENSE.txt bin/        setup.cfg   source/
 
 To install in package, type the following command from this directory.
 
