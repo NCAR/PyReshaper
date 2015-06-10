@@ -34,7 +34,9 @@ UCAR subversion site, as shown below.
 
 ::
 
-    $ svn co https://subversion.ucar.edu/asap/pyReshaper/tags/v1.0.0 pyReshaper
+    $  git clone https://github.com/NCAR-CISL-ASAP/PyReshaper
+    $  cd PyReshaper
+    $  git checkout v0.9.3
 
 This is the most recent stable version of the source code. The trunk is
 also available for download, if you choose to have the most up-to-date
@@ -56,13 +58,14 @@ shown below.
 
 ::
 
-    $ svn co https://subversion.ucar.edu/asap/pyReshaper/tags/v1.0.0 pyReshaper
+    $  git clone https://github.com/NCAR-CISL-ASAP/PyReshaper
 
-Enter into the newly created directory.
+Enter into the newly created directory and check out the stable tag.
 
 ::
 
-    $ cd pyReshaper
+    $  cd PyReshaper
+    $  git checkout v0.9.3
 
 The contents of the repository will look like the following.
 
@@ -76,7 +79,7 @@ To install in package, type the following command from this directory.
 
 ::
 
-    $ python setup.py install --user
+    $  python setup.py install --user
 
 If you are a system administrator, you can leave off the ``--user``
 option, and the package will be installed in ``/usr/local``, by default.
@@ -89,30 +92,30 @@ Generating the API Documentation
 If you are a developer, you may find the Doxygen-generated API
 documentation helpful in understanding the design and functionality of
 the PyReshaper code. To generate this documentation, you must have
-Doxygen available and installed. If you do, the API documentation can be
-easily generated with the following command from the top-level
-PyReshaper directory.
+Sphinx available and installed. If you do, the API documentation can be
+easily generated with the following command from the ``docs``
+directory.
 
 ::
 
-    $ doxygen Doxyfile
+    $  make html
 
-The API documentation will be placed in the ``docs/html/`` directory.
+The API documentation will be placed in the ``docs/build/html/`` directory.
 
 Generating the User Documentation
 ---------------------------------
 
-The ``README.md`` file and this User Manual should be consulted for help
+The ``README.rst`` file and this User Manual should be consulted for help
 on installing and using the software. Both documents are included with
-the source. The ``README.md`` file is included with the top-level
+the source. The ``README.rst`` file is included with the top-level
 PyReshaper directory, and the User Manual is contained in the
-``docs/user/UserManual.md`` file. Both files are Markdown formatted
+``docs/source/manual.rst`` file. Both files are reStructuredText formatted
 files, meaning they are simple text files that can be read with any text
 viewer.
 
 An HTML version of the User Manual will automatically be created by
-Doxygen, as described in the previous section. A link will be created
-from the "Related Pages" tab on the Doxygen-generated page.
+Sphinx, as described in the previous section. A link will be created
+to the manual in the HTML documentation.
 
 Before Using the PyReshaper
 ---------------------------
