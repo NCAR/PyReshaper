@@ -5,7 +5,7 @@ A package for converting NetCDF files from time-slice (history) format
 to time-series (single-variable) format.
 
 :AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-:VERSION: 0.9.1
+:VERSION: 0.9.2
 :COPYRIGHT: See the document entitled LICENSE.txt
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
@@ -59,7 +59,7 @@ Currently, the most up-to-date development source code is available via svn from
 
     https://github.com/NCAR-CISL-ASAP/PyReshaper
 
-The most stable tag is the 'v0.9.1' tag, which is recommended for general use.  The source is
+The most stable tag is the 'v0.9.2' tag, which is recommended for general use.  The source is
 available in read-only mode to everyone, but special permissions can be given to those to 
 make changes to the source.
 
@@ -75,7 +75,7 @@ from the above svn link, via::
 Enter the newly cloned directory and check out the most recent stable tag::
 
     $ cd PyReshaper
-    $ git checkout v0.9.1
+    $ git checkout v0.9.2
 
 Then, run the Python distutils setup.  On unix, this involves::
 
