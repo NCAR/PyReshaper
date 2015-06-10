@@ -60,10 +60,13 @@ VERSION 0.9.1
  - Updated the Specifier and Reshaper Doxygen comments to use Doxypypy
    formatting.
   
-VERSION 1.0.0
+VERSION 0.9.2
 -------------
 
 26 March 2015:
- - Tagging new branch for version 1.0 release.
-
+ - Tagging new branch for version 0.9.2 release.
  
+10 June 2015:
+ - Restructured source tree
+ - Installation of LICENSE file with package
+ - Updates for upload to PyPI
