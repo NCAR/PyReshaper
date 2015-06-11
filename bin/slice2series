@@ -6,11 +6,6 @@ This script uses the optparse module, which has been deprecated since
 Python version 2.7 with the introduction of the argparse module, which is
 more flexible and capable.  However, since the PyReshaper module needs to
 work on systems with only Python 2.6 available, we use the optparse module.
-
-__________________________
-Created on Apr 30, 2014
-
-@author: Kevin Paul <kpaul@ucar.edu>
 '''
 
 import optparse
@@ -93,6 +88,10 @@ def main(options, input_file_list):
     reshpr.print_diagnostics()
 
 
-if __name__ == '__main__':
-    options, input_file_list = cli()
-    main(options, input_file_list)
+#==============================================================================
+# Command-line Opeartion
+#==============================================================================
+def main(options, input_file_list):
+    if __name__ == '__main__':
+        options, input_file_list = cli()
+        main(options, input_file_list)
