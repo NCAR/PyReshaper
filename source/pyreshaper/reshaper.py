@@ -7,7 +7,7 @@ the time-slice to time-series operation).
 
 '''
 
-from specification import Specifier, Slice2SeriesSpecifier
+from specification import Specifier
 from asaptools.simplecomm import create_comm, SimpleComm
 from asaptools.timekeeper import TimeKeeper
 from asaptools.partition import WeightBalanced
@@ -55,7 +55,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         Reshaper: An instance of the Reshaper object requested
     '''
     # Determine the type of Reshaper object to instantiate
-    if type(specifier) is Slice2SeriesSpecifier:
+    if type(specifier) is Specifier:
         return Slice2SeriesReshaper(specifier,
                                     serial=serial,
                                     verbosity=verbosity,
@@ -74,12 +74,12 @@ def create_reshaper(specifier, serial=False, verbosity=1,
             err_msg = 'Multiple specifiers must all have the same type'
             raise TypeError(err_msg)
         spec_type = spec_types.pop()
-        if spec_type is Slice2SeriesSpecifier:
-            return MultiSpecS2SReshaper(specifier,
-                                        serial=serial,
-                                        verbosity=verbosity,
-                                        once=once,
-                                        simplecomm=simplecomm)
+        if spec_type is Specifier:
+            return MultiSpecReshaper(specifier,
+                                     serial=serial,
+                                     verbosity=verbosity,
+                                     once=once,
+                                     simplecomm=simplecomm)
         else:
             err_msg = 'Multiple specifiers of type ' + str(spec_type) \
                 + ' are not valid.'
@@ -152,16 +152,42 @@ def _pprint_dictionary(title, dictionary, order=None):
 
 
 #==============================================================================
-# Reshaper Base Class
+# Reshaper Abstract Base Class
 #==============================================================================
 class Reshaper(object):
 
     '''
-    The Reshaper abstract base class  
-
-    Specific operations should be defined as derived types.
+    Abstract base class for Reshaper objects
     '''
+
     __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def convert(self):
+        '''
+        Method to perform the Reshaper's designated operation.
+        '''
+        return
+
+    @abc.abstractmethod
+    def print_diagnostics(self):
+        '''
+        Print out timing and I/O information collected up to this point
+        '''
+        return
+
+
+#==============================================================================
+# Reshaper Class
+#==============================================================================
+class Slice2SeriesReshaper(Reshaper):
+
+    '''
+    The time-slice to time-series Reshaper class
+
+    This is the class that defines how the time-slice to time-series 
+    reshaping operation is to be performed.
+    '''
 
     def __init__(self, specifier, serial=False,
                  verbosity=1, once=False, simplecomm=None):
@@ -187,7 +213,7 @@ class Reshaper(object):
                 communication, if necessary
         '''
 
-        # Check types
+        # Type checking (or double-checking)
         if not isinstance(specifier, Specifier):
             err_msg = "Input must be given in the form of a Specifier object"
             raise TypeError(err_msg)
@@ -242,104 +268,6 @@ class Reshaper(object):
         self._timer.stop('Specifier Validation')
         if self._simplecomm.is_manager():
             self._vprint('Specifier validated', verbosity=1)
-
-    @abc.abstractmethod
-    def convert(self, output_limit=0):
-        '''
-        Method to perform the Reshaper's designated operation.
-
-        Keyword Arguments:
-            output_limit (int): Limit on the number of output (time-series) 
-                files to write during the convert() operation.  If set
-                to 0, no limit is placed.  This limits the number
-                of output files produced by each processor in a
-                parallel run.
-        '''
-        return
-
-    def print_diagnostics(self):
-        '''
-        Print out timing and I/O information collected up to this point
-        '''
-
-        # Get all totals and maxima
-        my_times = self._timer.get_all_times()
-        # print str(self._simplecomm.get_rank()) + ': all_times =', my_times
-        max_times = self._simplecomm.allreduce(my_times, op='max')
-        # print str(self._simplecomm.get_rank()) + ': max_times =', max_times
-        my_bytes = self._byte_counts
-        # print str(self._simplecomm.get_rank()) + ': byte_counts =', my_bytes
-        total_bytes = self._simplecomm.allreduce(my_bytes, op='sum')
-        # print str(self._simplecomm.get_rank()) + ': total_bytes =',
-        # total_bytes
-
-        # Synchronize
-        self._simplecomm.sync()
-
-        # Print timing maxima
-        o = self._timer.get_names()
-        time_table_str = _pprint_dictionary('TIMING DATA', max_times, order=o)
-        if self._simplecomm.is_manager():
-            self._vprint(time_table_str, verbosity=0)
-
-        # Convert byte count to MB
-        for name in total_bytes:
-            total_bytes[name] = total_bytes[name] / float(1024 * 1024)
-
-        # Print byte count totals
-        byte_count_str = _pprint_dictionary('BYTE COUNTS (MB)', total_bytes)
-        if self._simplecomm.is_manager():
-            self._vprint(byte_count_str, verbosity=0)
-
-
-#==============================================================================
-# Slice2SeriesReshaper Class
-#==============================================================================
-class Slice2SeriesReshaper(Reshaper):
-
-    '''
-    The time-slice to time-series Reshaper class
-
-    This is the class that defines how the time-slice to time-series 
-    reshaping operation is to be performed.
-    '''
-
-    def __init__(self, specifier, serial=False,
-                 verbosity=1, once=False, simplecomm=None):
-        '''
-        Constructor
-
-        Parameters:
-            specifier (Specifier): An instance of the Specifier class, 
-                defining the input specification for this reshaper operation.
-
-        Keyword Arguments:
-            serial (bool): True or False, indicating whether the operation
-                should be performed in serial (True) or parallel
-                (False).  The default is to assume parallel operation
-                (but serial will be chosen if the mpi4py cannot be
-                found when trying to initialize decomposition.
-            verbosity(int): Level of printed output (stdout).  A value of 0 
-                means no output, and a higher value means more output.  The
-                default value is 1.
-            once (bool): True or False, indicating whether the Reshaper should
-                write all metadata to a 'once' file (separately).
-            simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
-                communication, if necessary
-        '''
-
-        # Type checking (or double-checking)
-        if not isinstance(specifier, Slice2SeriesSpecifier):
-            err_msg = "Slice2SeriesReshaper requires a Slice2SeriesSpecifier" \
-                + " as input."
-            raise TypeError(err_msg)
-
-        # Call the base-class constructor
-        super(Slice2SeriesReshaper, self).__init__(specifier,
-                                                   serial=serial,
-                                                   verbosity=verbosity,
-                                                   once=once,
-                                                   simplecomm=simplecomm)
 
         # Setup PyNIO options (including disabling the default PreFill option)
         opt = Nio.options()
@@ -820,23 +748,49 @@ class Slice2SeriesReshaper(Reshaper):
         # Finish clocking the entire convert procedure
         self._timer.stop('Complete Conversion Process')
 
+    def print_diagnostics(self):
+        '''
+        Print out timing and I/O information collected up to this point
+        '''
+
+        # Get all totals and maxima
+        my_times = self._timer.get_all_times()
+        max_times = self._simplecomm.allreduce(my_times, op='max')
+        my_bytes = self._byte_counts
+        total_bytes = self._simplecomm.allreduce(my_bytes, op='sum')
+
+        # Synchronize
+        self._simplecomm.sync()
+
+        # Print timing maxima
+        o = self._timer.get_names()
+        time_table_str = _pprint_dictionary('TIMING DATA', max_times, order=o)
+        if self._simplecomm.is_manager():
+            self._vprint(time_table_str, verbosity=0)
+
+        # Convert byte count to MB
+        for name in total_bytes:
+            total_bytes[name] = total_bytes[name] / float(1024 * 1024)
+
+        # Print byte count totals
+        byte_count_str = _pprint_dictionary('BYTE COUNTS (MB)', total_bytes)
+        if self._simplecomm.is_manager():
+            self._vprint(byte_count_str, verbosity=0)
+
 
 #==============================================================================
-# MultiSpecReshaper Base Class
+# MultiSpecReshaper Class
 #==============================================================================
-class MultiSpecReshaper(object):
+class MultiSpecReshaper(Reshaper):
 
     '''
-    Multiple-Specification Reshaper abstract base class
+    Multiple Slice-to-Series Reshaper class
 
-    This class is designed to deal with dictionaries of multiple named 
-    Specifiers at a time.  Instead of being instantiated (or initialized) with
-    a single Specifier, it takes a dictionary of named Specifier objects.
-
-    This class does not inherit from the base Reshaper class.  This is really
-    more like a container + wrapper class around the base Reshaper class.
+    This class is designed to deal with lists of multiple 
+    Slice2SeriesSpecifiers at a time.  Instead of being instantiated 
+    (or initialized) with a single Slice2SeriesSpecifier,
+    it takes a dictionary of Slice2SeriesSpecifier objects.
     '''
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, specifiers, serial=False,
                  verbosity=1, once=False, simplecomm=None):
@@ -844,8 +798,8 @@ class MultiSpecReshaper(object):
         Constructor
 
         Parameters:
-            specifier (Specifier): An instance of the Specifier class, 
-                defining the input specification for this reshaper operation.
+            specifiers (dict): A dict of named Specifier instances, each
+                defining an input specification for this reshaper operation.
 
         Keyword Arguments:
             serial (bool): True or False, indicating whether the operation
@@ -908,88 +862,6 @@ class MultiSpecReshaper(object):
         # Storage for all byte counters
         self._byte_counts = {}
 
-    @abc.abstractmethod
-    def convert(self, output_limit):
-        '''
-        Method to perform the Reshaper's designated operation.
-
-        Keyword Arguments:
-            output_limit (int): Limit on the number of output (time-series) 
-                files to write during the convert() operation.  If set
-                to 0, no limit is placed.  This limits the number
-                of output files produced by each processor in a
-                parallel run.
-        '''
-        return
-
-    def print_diagnostics(self):
-        '''
-        Print out timing and I/O information collected up to this point
-        '''
-        # Loop through all timers
-        for name in self._specifiers:
-            if self._simplecomm.is_manager():
-                self._vprint('Specifier: ' + str(name), verbosity=0)
-
-            times = self._times[name]
-            o = self._time_orders[name]
-            times_str = _pprint_dictionary('TIMING DATA', times, order=o)
-            if self._simplecomm.is_manager():
-                self._vprint(times_str, verbosity=0)
-
-            counts = self._byte_counts[name]
-            for name in counts:
-                counts[name] = counts[name] / float(1024 * 1024)
-            counts_str = _pprint_dictionary('BYTE COUNTS (MB)', counts)
-            if self._simplecomm.is_manager():
-                self._vprint(counts_str, verbosity=0)
-
-
-#==============================================================================
-# MultiSpecS2SReshaper Class
-#==============================================================================
-class MultiSpecS2SReshaper(MultiSpecReshaper):
-
-    '''
-    Multiple Slice-to-Series Reshaper class
-
-    This class is designed to deal with lists of multiple 
-    Slice2SeriesSpecifiers at a time.  Instead of being instantiated 
-    (or initialized) with a single Slice2SeriesSpecifier,
-    it takes a dictionary of Slice2SeriesSpecifier objects.
-    '''
-
-    def __init__(self, specifiers, serial=False,
-                 verbosity=1, once=False, simplecomm=None):
-        '''
-        Constructor
-
-        Parameters:
-            specifier (Specifier): An instance of the Specifier class, 
-                defining the input specification for this reshaper operation.
-
-        Keyword Arguments:
-            serial (bool): True or False, indicating whether the operation
-                should be performed in serial (True) or parallel
-                (False).  The default is to assume parallel operation
-                (but serial will be chosen if the mpi4py cannot be
-                found when trying to initialize decomposition.
-            verbosity(int): Level of printed output (stdout).  A value of 0 
-                means no output, and a higher value means more output.  The
-                default value is 1.
-            once (bool): True or False, indicating whether the Reshaper should
-                write all metadata to a 'once' file (separately).
-            simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
-                communication, if necessary
-        '''
-
-        # Call the base class
-        super(MultiSpecS2SReshaper, self).__init__(specifiers,
-                                                   serial=serial,
-                                                   verbosity=verbosity,
-                                                   once=once,
-                                                   simplecomm=simplecomm)
-
     def convert(self, output_limit=0):
         '''
         Method to perform each Reshaper's designated operation.
@@ -1034,3 +906,25 @@ class MultiSpecS2SReshaper(MultiSpecReshaper):
                 self._vprint('--- Finished converting Specifier: '
                              + str(spec_name) + os.linesep, verbosity=0)
             self._simplecomm.sync()
+
+    def print_diagnostics(self):
+        '''
+        Print out timing and I/O information collected up to this point
+        '''
+        # Loop through all timers
+        for name in self._specifiers:
+            if self._simplecomm.is_manager():
+                self._vprint('Specifier: ' + str(name), verbosity=0)
+
+            times = self._times[name]
+            o = self._time_orders[name]
+            times_str = _pprint_dictionary('TIMING DATA', times, order=o)
+            if self._simplecomm.is_manager():
+                self._vprint(times_str, verbosity=0)
+
+            counts = self._byte_counts[name]
+            for name in counts:
+                counts[name] = counts[name] / float(1024 * 1024)
+            counts_str = _pprint_dictionary('BYTE COUNTS (MB)', counts)
+            if self._simplecomm.is_manager():
+                self._vprint(counts_str, verbosity=0)
