@@ -8,6 +8,7 @@ Specification class.
 '''
 
 from os import path as ospath
+from datetime import datetime
 
 
 #==============================================================================
@@ -25,6 +26,40 @@ def create_specifier(**kwargs):
         Specifier: An instantiation of the type of Specifier class desired.
     '''
     return Specifier(**kwargs)
+
+
+#==============================================================================
+# split_specifier helper function
+#==============================================================================
+def split_specifier_on_dates(specifier,
+                             date_markers=[]):
+    '''
+    Split a Specifier object into multiple specifiers according to date range
+
+    The *input_file_list* member of the Specifier is divided among N+1 new 
+    Specifiers, where N is the length of the *date_markers* parameter.  The
+    *output_file_suffix* for each new Specifier is prepended with a string of
+    the format:
+
+        "YYYYMMDDTHHMMSSZ-YYYYMMDDTHHMMSSZ" + output_file_suffix
+
+    where each "YYYYMMDDTHHMMSSZ" indicates the year/month/day date and
+    hour/minute/second/zone time of the first and last datetimes in the new 
+    Specifier's range. All other members of the Specifier are left unchanged.
+
+    Parameters:
+        specifier (Specifier): A single Specifier instance detailing one
+            Reshaper operation that should be split into multiple (independent)
+            operations
+
+    Keyword Arguments:
+        date_markers (list): A list of datetime markers that indicate
+            date-time ranges and their boundaries.  Each date marker indicates
+            an *inclusive* lower bound on the time range.
+
+    Returns:
+        list: A list of Specifier instantiations
+    '''
 
 
 #==============================================================================
@@ -196,3 +231,10 @@ class Specifier(object):
         # Validate the output file suffix string (should end in .nc)
         if (self.output_file_suffix[-3:] != '.nc'):
             self.output_file_suffix += '.nc'
+
+
+#==============================================================================
+# Command-line Operation
+#==============================================================================
+if __name__ == '__main__':
+    pass
