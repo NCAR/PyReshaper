@@ -44,7 +44,8 @@ class Specifier(object):
                  ncfmt='netcdf4c',
                  prefix='tseries.',
                  suffix='.nc',
-                 metadata=[]):
+                 metadata=[],
+                 **kwargs):
         '''
         Initializes the internal data with optional arguments.
 
@@ -66,6 +67,8 @@ class Specifier(object):
             metadata (list): List of variable names specifying the
                 variables that should be included in every
                 time-series output file
+            kwargs (dict): Optional arguments describing the 
+                Reshaper run
         '''
 
         # The list of input (time-slice) NetCDF files (absolute paths)
@@ -85,6 +88,9 @@ class Specifier(object):
         # List of time-variant variables that should be included in all
         #  output files.
         self.time_variant_metadata = metadata
+
+        # Optional arguments associated with the reshaper operation
+        self.options = kwargs
 
     def validate(self):
         '''
