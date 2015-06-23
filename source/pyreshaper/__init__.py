@@ -10,7 +10,5 @@ A tool for converting NetCDF time-slice files into time-series format
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
 """
 
-__version__ = "1.0.0"
-
 import reshaper
 import specification
