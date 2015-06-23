@@ -1,6 +1,6 @@
-'''
+"""
 Parallel Tests for the Reshaper class
-'''
+"""
 
 import unittest
 

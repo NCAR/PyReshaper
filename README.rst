@@ -6,7 +6,8 @@ to time-series (single-variable) format.
 
 :AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
 :VERSION: 0.9.3
-:COPYRIGHT: See the document entitled LICENSE.txt
+:COPYRIGHT: 2015, University Corporation for Atmospheric Research
+:LICENSE: See the LICENSE.txt file for details
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
 

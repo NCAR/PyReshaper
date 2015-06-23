@@ -1,6 +1,9 @@
 PyReshaper Change Log
 =====================
 
+Copyright 2015, University Corporation for Atmospheric Research
+See the LICENSE.txt file for details
+
 VERSION 0.9.0
 -------------
 

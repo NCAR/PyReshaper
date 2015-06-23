@@ -1,11 +1,13 @@
-'''
+"""
 The module containing the Reshaper class
 
 This is the main reshaper module.  This is where the specific operations
 are defined.  Currently, only one operation has been implemented (i.e.,
 the time-slice to time-series operation).
 
-'''
+Copyright 2015, University Corporation for Atmospheric Research
+See the LICENSE.txt file for details
+"""
 
 from specification import Specifier
 from asaptools.simplecomm import create_comm, SimpleComm
@@ -25,7 +27,7 @@ import itertools
 #==============================================================================
 def create_reshaper(specifier, serial=False, verbosity=1,
                     once=False, simplecomm=None):
-    '''
+    """
     Factory function for Reshaper class instantiations.
 
     Parameters:
@@ -53,7 +55,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
 
     Returns:
         Reshaper: An instance of the Reshaper object requested
-    '''
+    """
     # Determine the type of Reshaper object to instantiate
     if type(specifier) is Specifier:
         return Slice2SeriesReshaper(specifier,
@@ -94,7 +96,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
 # _pprint_dictionary - Helper method for printing diagnostic data
 #==============================================================================
 def _pprint_dictionary(title, dictionary, order=None):
-    '''
+    """
     Hidden method for pretty-printing a dictionary of numeric values,
     with a given title.
 
@@ -109,7 +111,7 @@ def _pprint_dictionary(title, dictionary, order=None):
 
     Return:
         str: A string with the pretty-printed dictionary data
-    '''
+    """
     # Type checking
     if (type(title) is not str):
         err_msg = 'Title must be a str type'
@@ -156,24 +158,24 @@ def _pprint_dictionary(title, dictionary, order=None):
 #==============================================================================
 class Reshaper(object):
 
-    '''
+    """
     Abstract base class for Reshaper objects
-    '''
+    """
 
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def convert(self):
-        '''
+        """
         Method to perform the Reshaper's designated operation.
-        '''
+        """
         return
 
     @abc.abstractmethod
     def print_diagnostics(self):
-        '''
+        """
         Print out timing and I/O information collected up to this point
-        '''
+        """
         return
 
 
@@ -182,16 +184,16 @@ class Reshaper(object):
 #==============================================================================
 class Slice2SeriesReshaper(Reshaper):
 
-    '''
+    """
     The time-slice to time-series Reshaper class
 
     This is the class that defines how the time-slice to time-series 
     reshaping operation is to be performed.
-    '''
+    """
 
     def __init__(self, specifier, serial=False,
                  verbosity=1, once=False, simplecomm=None):
-        '''
+        """
         Constructor
 
         Parameters:
@@ -211,7 +213,7 @@ class Slice2SeriesReshaper(Reshaper):
                 write all metadata to a 'once' file (separately).
             simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
                 communication, if necessary
-        '''
+        """
 
         # Type checking (or double-checking)
         if not isinstance(specifier, Specifier):
@@ -327,12 +329,12 @@ class Slice2SeriesReshaper(Reshaper):
         self._simplecomm.sync()
 
     def _validate_input_files(self):
-        '''
+        """
         Perform validation of input data files themselves.  
 
         We check the file contents here, assuming that the files are already 
         open.
-        '''
+        """
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
@@ -383,7 +385,7 @@ class Slice2SeriesReshaper(Reshaper):
             self._vprint(warning, header=True, verbosity=1)
 
     def _sort_input_files_by_time(self):
-        '''
+        """
         Internal method for sorting the input files by time
 
         This assumes that 'time' is the unlimited dimension, and it checks
@@ -399,7 +401,7 @@ class Slice2SeriesReshaper(Reshaper):
         to consider the 'time:units" attribute of each file, together
         with that file's time variable values.  To do that properly,
         however, one should use UDUNITS to do the comparisons.
-        '''
+        """
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
@@ -448,7 +450,7 @@ class Slice2SeriesReshaper(Reshaper):
                            dtype='float')
 
     def _sort_variables(self):
-        '''
+        """
         Internal method for sorting the variables in each time-slice file
 
         This method determines if each variable is to be treated as 
@@ -459,7 +461,7 @@ class Slice2SeriesReshaper(Reshaper):
         and are contained in the Specifier data member:
 
             Specifier.time_variant_metadata.
-        '''
+        """
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
@@ -500,7 +502,7 @@ class Slice2SeriesReshaper(Reshaper):
             self._time_series_variables['once'] = 1
 
     def convert(self, output_limit=0):
-        '''
+        """
         Method to perform the Reshaper's designated operation.
 
         In this case, convert a list of time-slice files to time-series files.
@@ -511,7 +513,7 @@ class Slice2SeriesReshaper(Reshaper):
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
                 parallel run.
-        '''
+        """
         # Type checking input
         if type(output_limit) is not int:
             err_msg = 'Output limit must be an integer'
@@ -749,9 +751,9 @@ class Slice2SeriesReshaper(Reshaper):
         self._timer.stop('Complete Conversion Process')
 
     def print_diagnostics(self):
-        '''
+        """
         Print out timing and I/O information collected up to this point
-        '''
+        """
 
         # Get all totals and maxima
         my_times = self._timer.get_all_times()
@@ -783,18 +785,18 @@ class Slice2SeriesReshaper(Reshaper):
 #==============================================================================
 class MultiSpecReshaper(Reshaper):
 
-    '''
+    """
     Multiple Slice-to-Series Reshaper class
 
     This class is designed to deal with lists of multiple 
     Slice2SeriesSpecifiers at a time.  Instead of being instantiated 
     (or initialized) with a single Slice2SeriesSpecifier,
     it takes a dictionary of Slice2SeriesSpecifier objects.
-    '''
+    """
 
     def __init__(self, specifiers, serial=False,
                  verbosity=1, once=False, simplecomm=None):
-        '''
+        """
         Constructor
 
         Parameters:
@@ -814,7 +816,7 @@ class MultiSpecReshaper(Reshaper):
                 write all metadata to a 'once' file (separately).
             simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
                 communication, if necessary
-        '''
+        """
 
         # Check types
         if not isinstance(specifiers, dict):
@@ -863,7 +865,7 @@ class MultiSpecReshaper(Reshaper):
         self._byte_counts = {}
 
     def convert(self, output_limit=0):
-        '''
+        """
         Method to perform each Reshaper's designated operation.
 
         Loops through and creates each Reshaper, calls each Reshaper's 
@@ -876,7 +878,7 @@ class MultiSpecReshaper(Reshaper):
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
                 parallel run.
-        '''
+        """
         # Type checking input
         if type(output_limit) is not int:
             err_msg = 'Output limit must be an integer'
@@ -908,9 +910,9 @@ class MultiSpecReshaper(Reshaper):
             self._simplecomm.sync()
 
     def print_diagnostics(self):
-        '''
+        """
         Print out timing and I/O information collected up to this point
-        '''
+        """
         # Loop through all timers
         for name in self._specifiers:
             if self._simplecomm.is_manager():

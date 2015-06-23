@@ -1,6 +1,6 @@
-'''
+"""
 Unit tests for the Specifier class
-'''
+"""
 
 import unittest
 
@@ -9,11 +9,11 @@ from pyreshaper import specification
 
 class SpecifierTests(unittest.TestCase):
 
-    '''
+    """
     SpecifierTests Class
 
     This class defines all of the unit tests for the specification module.
-    '''
+    """
 
     def test_init(self):
         spec = specification.Slice2SeriesSpecifier()

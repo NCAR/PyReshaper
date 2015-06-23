@@ -1,21 +1,26 @@
-'''
+"""
 The module containing the PyReshaper configuration specification class
 
 This is a configuration specification class, through which the input to
 the PyReshaper code is specified.  Currently all types of supported
 operations for the PyReshaper are specified with derived dypes of the
 Specification class.
-'''
+
+Copyright 2015, University Corporation for Atmospheric Research
+See the LICENSE.txt file for details
+"""
 
 from os import path as ospath
 from datetime import datetime
+
+import Nio
 
 
 #==============================================================================
 # create_specifier factory function
 #==============================================================================
 def create_specifier(**kwargs):
-    '''
+    """
     Factory function for Specifier class objects.  Defined for convenience.
 
     Keyword Arguments:
@@ -24,7 +29,7 @@ def create_specifier(**kwargs):
 
     Returns:
         Specifier: An instantiation of the type of Specifier class desired.
-    '''
+    """
     return Specifier(**kwargs)
 
 
@@ -32,8 +37,9 @@ def create_specifier(**kwargs):
 # split_specifier helper function
 #==============================================================================
 def split_specifier_on_dates(specifier,
-                             date_markers=[]):
-    '''
+                             date_markers=[],
+                             time_name='time'):
+    """
     Split a Specifier object into multiple specifiers according to date range
 
     The *input_file_list* member of the Specifier is divided among N+1 new 
@@ -56,10 +62,34 @@ def split_specifier_on_dates(specifier,
         date_markers (list): A list of datetime markers that indicate
             date-time ranges and their boundaries.  Each date marker indicates
             an *inclusive* lower bound on the time range.
+        time_name (str): The string name of the time variable in the NetCDF
+            file
 
     Returns:
         list: A list of Specifier instantiations
-    '''
+    """
+
+    # Check types
+    if not isinstance(specifier, Specifier):
+        err_msg = "Specifier argumetn must be of type Specifier"
+        raise TypeError(err_msg)
+    if type(date_markers) is not tuple or type(date_markers) is not list:
+        err_msg = "Date markers must be in a list or tuple"
+        raise TypeError(err_msg)
+    for date_marker in date_markers:
+        if type(date_marker) is not datetime:
+            err_msg = "Date markers must be datetime objects"
+            raise TypeError(err_msg)
+
+    # Get list of files in input specifier
+    input_files = specifier.input_file_list
+    beg_dates = [datetime] * len(input_files)
+    end_dates = [datetime] * len(input_files)
+    for input_file in input_files:
+        nio_file = Nio.open_file(input_file)
+        time_var = nio_file.variables[time_name]
+        time_units = 
+        nio_file.close()
 
 
 #==============================================================================
@@ -67,12 +97,12 @@ def split_specifier_on_dates(specifier,
 #==============================================================================
 class Specifier(object):
 
-    '''
+    """
     Time-slice to Time-series Convertion Specifier
 
     This class acts as a container for the various input data needed
     by the Reshaper to perform the time-slice to time-series operation.
-    '''
+    """
 
     def __init__(self,
                  infiles=[],
@@ -81,7 +111,7 @@ class Specifier(object):
                  suffix='.nc',
                  metadata=[],
                  **kwargs):
-        '''
+        """
         Initializes the internal data with optional arguments.
 
         The time-series output files are named according to the
@@ -104,7 +134,7 @@ class Specifier(object):
                 time-series output file
             kwargs (dict): Optional arguments describing the 
                 Reshaper run
-        '''
+        """
 
         # The list of input (time-slice) NetCDF files (absolute paths)
         self.input_file_list = infiles
@@ -128,9 +158,9 @@ class Specifier(object):
         self.options = kwargs
 
     def validate(self):
-        '''
+        """
         Perform self-validation of internal data
-        '''
+        """
 
         # Validate types
         self.validate_types()
@@ -139,11 +169,11 @@ class Specifier(object):
         self.validate_values()
 
     def validate_types(self):
-        '''
+        """
         Method for checking the types of the Specifier data.
 
         This method is called by the validate() method.
-        '''
+        """
 
         # Validate the type of the input file list
         if not isinstance(self.input_file_list, list):
@@ -184,7 +214,7 @@ class Specifier(object):
                 raise TypeError(err_msg)
 
     def validate_values(self):
-        '''
+        """
         Method to validate the values of the Specifier data.
 
         This method is called by the validate() method.
@@ -196,7 +226,7 @@ class Specifier(object):
         header information).
 
         This method will correct some input if it is safe to do so.
-        '''
+        """
 
         # Make sure there is at least 1 input file given
         if len(self.input_file_list) == 0:

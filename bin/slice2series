@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-'''
+"""
 This script provides the command-line interface (CLI) to the PyReshaper
 
 This script uses the optparse module, which has been deprecated since
 Python version 2.7 with the introduction of the argparse module, which is
 more flexible and capable.  However, since the PyReshaper module needs to
 work on systems with only Python 2.6 available, we use the optparse module.
-'''
+
+Copyright 2015, University Corporation for Atmospheric Research
+See the LICENSE.txt file for details
+"""
 
 import optparse
 from pyreshaper import specification

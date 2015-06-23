@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""
+PyReshaper -- Setup Script
+
+Copyright 2015, University Corporation for Atmospheric Research
+See the LICENSE.txt file for details
+"""
 
 from distutils.core import setup
 
@@ -15,4 +21,4 @@ setup(name='PyReshaper',
       package_data={'pyreshaper': ['LICENSE.txt']},
       scripts=['bin/slice2series'],
       requires=['Nio', 'mpi4py']
-     )
+      )
