@@ -5,7 +5,6 @@ A package for converting NetCDF files from time-slice (history) format
 to time-series (single-variable) format.
 
 :AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-:VERSION: 0.9.3
 :COPYRIGHT: 2015, University Corporation for Atmospheric Research
 :LICENSE: See the LICENSE.txt file for details
 
@@ -35,7 +34,7 @@ MPI).
 
 Currently the explicit dependencies are known to be:
 
-* ASAPTools (>=0.3)
+* ASAPTools (>=0.4)
 * PyNIO (>=1.4.1)
 * mpi4py (>=1.3)
 
@@ -53,16 +52,28 @@ so problems might occur if an earlier versions of these packages have been
 installed.
 
 
+Easy Installation
+-----------------
+
+The easiest way to install the ASAP Python Toolbox is from the Python
+Package Index (PyPI) with the pip package manager::
+
+    $  pip install [--user] PyReshaper
+    
+The optional '--user' argument can be used to install the package in the
+local user's directory, which is useful if the user doesn't have root
+privileges.
+
+
 Obtaining the Source Code
 -------------------------
 
-Currently, the most up-to-date development source code is available via svn from the site::
+Currently, the most up-to-date development source code is available via git from the site::
 
     https://github.com/NCAR-CISL-ASAP/PyReshaper
 
-The most stable tag is the 'v0.9.3' tag, which is recommended for general use.  The source is
-available in read-only mode to everyone, but special permissions can be given to those to 
-make changes to the source.
+Check out the most recent stable tag.  The source is available in read-only mode to 
+everyone, but special permissions can be given to those to make changes to the source.
 
 
 Building & Installation
@@ -76,7 +87,7 @@ from the above svn link, via::
 Enter the newly cloned directory and check out the most recent stable tag::
 
     $ cd PyReshaper
-    $ git checkout v0.9.3
+    $ git checkout [latest tag]
 
 Then, run the Python distutils setup.  On unix, this involves::
 
