@@ -22,5 +22,5 @@ setup(name='PyReshaper',
       package_dir={'pyreshaper': 'source/pyreshaper'},
       package_data={'pyreshaper': ['LICENSE.txt']},
       scripts=['bin/slice2series'],
-      install_requires=['Nio', 'mpi4py>=1.3', 'asaptools>=0.4']
+      install_requires=['Nio>=1.4', 'mpi4py>=1.3', 'asaptools>=0.4']
       )
