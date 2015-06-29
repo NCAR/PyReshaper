@@ -8,13 +8,15 @@ See the LICENSE.txt file for details
 
 from setuptools import setup
 
+exec(open('source/pyreshaper/version.py').read())
+
 setup(name='PyReshaper',
-      version='0.9.4',
+      version=__version__,
       description='Python Time-Slice to Time-Series NetCDF Converter',
       author='Kevin Paul',
       author_email='kpaul@ucar.edu',
       url='https://github.com/NCAR-CISL-ASAP/PyReshaper',
-      download_url='https://github.com/NCAR-CISL-ASAP/PyReshaper/tarball/v0.9.4',
+      download_url='https://github.com/NCAR-CISL-ASAP/PyReshaper/tarball/v' + __version__,
       license='https://github.com/NCAR-CISL-ASAP/PyReshaper/blob/master/LICENSE.txt',
       packages=['pyreshaper'],
       package_dir={'pyreshaper': 'source/pyreshaper'},
