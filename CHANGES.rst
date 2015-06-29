@@ -79,3 +79,9 @@ VERSION 0.9.3
 
 10 June 2015:
  - Bugfix: Now installs properly from PyPI
+ 
+VERSION 0.9.4
+-------------
+
+29 June 2015:
+ - Newly automated versioning information
