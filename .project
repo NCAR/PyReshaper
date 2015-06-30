@@ -3,6 +3,7 @@
 	<name>PyReshaper</name>
 	<comment></comment>
 	<projects>
+		<project>ASAPPyTools</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
