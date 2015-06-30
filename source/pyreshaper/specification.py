@@ -10,10 +10,8 @@ Copyright 2015, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
+# Built-in imports
 from os import path as ospath
-from datetime import datetime
-
-import Nio
 
 
 #==============================================================================
@@ -31,65 +29,6 @@ def create_specifier(**kwargs):
         Specifier: An instantiation of the type of Specifier class desired.
     """
     return Specifier(**kwargs)
-
-
-#==============================================================================
-# split_specifier helper function
-#==============================================================================
-def split_specifier_on_dates(specifier,
-                             date_markers=[],
-                             time_name='time'):
-    """
-    Split a Specifier object into multiple specifiers according to date range
-
-    The *input_file_list* member of the Specifier is divided among N+1 new 
-    Specifiers, where N is the length of the *date_markers* parameter.  The
-    *output_file_suffix* for each new Specifier is prepended with a string of
-    the format:
-
-        "YYYYMMDDTHHMMSSZ-YYYYMMDDTHHMMSSZ" + output_file_suffix
-
-    where each "YYYYMMDDTHHMMSSZ" indicates the year/month/day date and
-    hour/minute/second/zone time of the first and last datetimes in the new 
-    Specifier's range. All other members of the Specifier are left unchanged.
-
-    Parameters:
-        specifier (Specifier): A single Specifier instance detailing one
-            Reshaper operation that should be split into multiple (independent)
-            operations
-
-    Keyword Arguments:
-        date_markers (list): A list of datetime markers that indicate
-            date-time ranges and their boundaries.  Each date marker indicates
-            an *inclusive* lower bound on the time range.
-        time_name (str): The string name of the time variable in the NetCDF
-            file
-
-    Returns:
-        list: A list of Specifier instantiations
-    """
-
-    # Check types
-    if not isinstance(specifier, Specifier):
-        err_msg = "Specifier argumetn must be of type Specifier"
-        raise TypeError(err_msg)
-    if type(date_markers) is not tuple or type(date_markers) is not list:
-        err_msg = "Date markers must be in a list or tuple"
-        raise TypeError(err_msg)
-    for date_marker in date_markers:
-        if type(date_marker) is not datetime:
-            err_msg = "Date markers must be datetime objects"
-            raise TypeError(err_msg)
-
-    # Get list of files in input specifier
-    input_files = specifier.input_file_list
-    beg_dates = [datetime] * len(input_files)
-    end_dates = [datetime] * len(input_files)
-    for input_file in input_files:
-        nio_file = Nio.open_file(input_file)
-        time_var = nio_file.variables[time_name]
-        time_units = 
-        nio_file.close()
 
 
 #==============================================================================
