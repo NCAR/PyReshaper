@@ -9,17 +9,21 @@ Copyright 2015, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
-from specification import Specifier
+# Built-in imports
+import abc
+import os
+import itertools
+
+# Third-party imports
+import Nio
+import numpy
 from asaptools.simplecomm import create_comm, SimpleComm
 from asaptools.timekeeper import TimeKeeper
 from asaptools.partition import WeightBalanced
 from asaptools.vprinter import VPrinter
 
-import abc
-import os
-import Nio
-import numpy
-import itertools
+# PyReshaper imports
+from specification import Specifier
 
 
 #==============================================================================
