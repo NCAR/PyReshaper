@@ -172,7 +172,7 @@ def gen_run_command(options, test_name, output_dir, testing_database):
     if (options.only > 0):
         run_cmd.extend(['-l', str(options.only)])
 
-    format_str = str(testing_database[test_name]['netcdf_format'])
+    format_str = options.ncformat
     run_cmd.extend(['-f', format_str])
 
     prefix_str = os.path.join(
@@ -189,7 +189,8 @@ def gen_run_command(options, test_name, output_dir, testing_database):
     for input_glob in testing_database[test_name]['input_globs']:
         full_input_glob = os.path.join(
             str(testing_database[test_name]['input_dir']), input_glob)
-        input_files_list.extend(glob.glob(full_input_glob))
+        #input_files_list.extend(glob.glob(full_input_glob))
+        input_files_list.append(full_input_glob)
     run_cmd.extend(input_files_list)
 
     return ' '.join(run_cmd)
@@ -259,7 +260,6 @@ def init_test(options, test_name, testing_database):
     # Create the test directory
     test_dir = os.path.abspath(test_name)
     if (options.nodes > 0):
-
         test_dir = os.path.join(
             test_dir, 'par' + str(options.nodes) + 'x' + str(options.tiling))
     else:
@@ -289,8 +289,11 @@ def init_test(options, test_name, testing_database):
 
     # Create the output subdirectory
     output_dir = os.path.join(test_dir, 'output')
-    os.makedirs(output_dir)
-    print '  Output data directory (' + output_dir + ') created.'
+    if os.path.isdir(output_dir):
+        print '  Output data directory (' + output_dir + ') already exists.'
+    else:
+        os.makedirs(output_dir)
+        print '  Output data directory (' + output_dir + ') created.'
 
     # Generate the run script
     run_script_filename = 'run-' + test_name + '.sh'
