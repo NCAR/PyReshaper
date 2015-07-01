@@ -30,7 +30,7 @@ from specification import Specifier
 # create_reshaper factory function
 #==============================================================================
 def create_reshaper(specifier, serial=False, verbosity=1,
-                    once=False, simplecomm=None):
+                    skip_existing=False, once=False, simplecomm=None):
     """
     Factory function for Reshaper class instantiations.
 
@@ -52,6 +52,9 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         verbosity (int): Level of printed output (stdout).  A value of 0 means
             no output, and a higher value means more output.  The
             default value is 1.
+        skip_existing (bool): Flag specifying whether to skip the generation
+            of time-series for variables with time-series files that already
+            exist.  Default is False.
         once (bool): True or False, indicating whether the Reshaper should
             write all metadata to a 'once' file (separately).
         simplecomm (SimpleComm): A SimpleComm object to handle the parallel
@@ -65,6 +68,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         return Slice2SeriesReshaper(specifier,
                                     serial=serial,
                                     verbosity=verbosity,
+                                    skip_existing=skip_existing,
                                     once=once,
                                     simplecomm=simplecomm)
     elif isinstance(specifier, list):
@@ -72,6 +76,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         return create_reshaper(spec_dict,
                                serial=serial,
                                verbosity=verbosity,
+                               skip_existing=skip_existing,
                                once=once,
                                simplecomm=simplecomm)
     elif isinstance(specifier, dict):
@@ -84,6 +89,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
             return MultiSpecReshaper(specifier,
                                      serial=serial,
                                      verbosity=verbosity,
+                                     skip_existing=skip_existing,
                                      once=once,
                                      simplecomm=simplecomm)
         else:
@@ -196,7 +202,8 @@ class Slice2SeriesReshaper(Reshaper):
     """
 
     def __init__(self, specifier, serial=False,
-                 verbosity=1, once=False, simplecomm=None):
+                 verbosity=1, skip_existing=False,
+                 once=False, simplecomm=None):
         """
         Constructor
 
@@ -213,6 +220,9 @@ class Slice2SeriesReshaper(Reshaper):
             verbosity(int): Level of printed output (stdout).  A value of 0 
                 means no output, and a higher value means more output.  The
                 default value is 1.
+            skip_existing (bool): Flag specifying whether to skip the generation
+                of time-series for variables with time-series files that already
+                exist.  Default is False.
             once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
             simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
@@ -228,6 +238,9 @@ class Slice2SeriesReshaper(Reshaper):
             raise TypeError(err_msg)
         if type(verbosity) is not int:
             err_msg = "Verbosity level must be an integer."
+            raise TypeError(err_msg)
+        if type(skip_existing) is not bool:
+            err_msg = "Skip_existing flag must be True or False."
             raise TypeError(err_msg)
         if type(once) is not bool:
             err_msg = "Once-file indicator must be True or False."
@@ -265,12 +278,9 @@ class Slice2SeriesReshaper(Reshaper):
         if self._simplecomm.is_manager():
             self._vprint('Initializing Reshaper', verbosity=1)
 
-        # Input specification
-        self._specifier = specifier
-
         # Validate the user input data
         self._timer.start('Specifier Validation')
-        self._specifier.validate()
+        specifier.validate()
         self._timer.stop('Specifier Validation')
         if self._simplecomm.is_manager():
             self._vprint('Specifier validated', verbosity=1)
@@ -281,12 +291,12 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Determine the Format and CompressionLevel options
         # from the NetCDF format string in the Specifier
-        if self._specifier.netcdf_format == 'netcdf':
+        if specifier.netcdf_format == 'netcdf':
             opt.Format = 'Classic'
-        elif self._specifier.netcdf_format == 'netcdf4':
+        elif specifier.netcdf_format == 'netcdf4':
             opt.Format = 'NetCDF4Classic'
             opt.CompressionLevel = 0
-        elif self._specifier.netcdf_format == 'netcdf4c':
+        elif specifier.netcdf_format == 'netcdf4c':
             opt.Format = 'NetCDF4Classic'
             opt.CompressionLevel = 1
         self._nio_options = opt
@@ -296,7 +306,7 @@ class Slice2SeriesReshaper(Reshaper):
         # Open all of the input files
         self._timer.start('Open Input Files')
         self._input_files = []
-        for filename in self._specifier.input_file_list:
+        for filename in specifier.input_file_list:
             self._input_files.append(Nio.open_file(filename, "r"))
         self._timer.stop('Open Input Files')
         if self._simplecomm.is_manager():
@@ -325,6 +335,13 @@ class Slice2SeriesReshaper(Reshaper):
         if self._simplecomm.is_manager():
             self._vprint('Variables sorted', verbosity=2)
 
+        # Validate the output files
+        self._timer.start('Output File Validation')
+        self._validate_output_files(skip_existing)
+        self._timer.stop('Output File Validation')
+        if self._simplecomm.is_manager():
+            self._vprint('Output files validated', verbosity=2)
+
         # Helpful debugging message
         if self._simplecomm.is_manager():
             self._vprint('Reshaper initialized.', verbosity=1)
@@ -332,12 +349,15 @@ class Slice2SeriesReshaper(Reshaper):
         # Sync before continuing..
         self._simplecomm.sync()
 
-    def _validate_input_files(self):
+    def _validate_input_files(self, specifier):
         """
         Perform validation of input data files themselves.  
 
         We check the file contents here, assuming that the files are already 
         open.
+
+        Parameters:
+            specifier (Specifier): The reshaper specifier object
         """
 
         # Helpful debugging message
@@ -363,15 +383,15 @@ class Slice2SeriesReshaper(Reshaper):
             ifile = self._input_files[i]
             if self._unlimited_dim not in ifile.dimensions:
                 err_msg = 'Unlimited dimension not found in file (' \
-                    + self._specifier.input_file_list[i] + ')'
+                    + specifier.input_file_list[i] + ')'
                 raise LookupError(err_msg)
             if not ifile.unlimited(self._unlimited_dim):
                 err_msg = 'Unlimited dimension not unlimited in file (' \
-                    + self._specifier.input_file_list[i] + ')'
+                    + specifier.input_file_list[i] + ')'
                 raise LookupError(err_msg)
             if self._unlimited_dim not in ifile.variables:
                 err_msg = 'Unlimited dimension variable not found in file (' \
-                    + self._specifier.input_file_list[i] + ')'
+                    + specifier.input_file_list[i] + ')'
                 raise LookupError(err_msg)
 
         # Make sure that the list of variables in each file is the same
@@ -388,7 +408,7 @@ class Slice2SeriesReshaper(Reshaper):
                 warning += ' ' + str(var)
             self._vprint(warning, header=True, verbosity=1)
 
-    def _sort_input_files_by_time(self):
+    def _sort_input_files_by_time(self, specifier):
         """
         Internal method for sorting the input files by time
 
@@ -405,6 +425,9 @@ class Slice2SeriesReshaper(Reshaper):
         to consider the 'time:units" attribute of each file, together
         with that file's time variable values.  To do that properly,
         however, one should use UDUNITS to do the comparisons.
+
+        Parameters:
+            specifier (Specifier): The reshaper specifier object
         """
 
         # Helpful debugging message
@@ -430,7 +453,7 @@ class Slice2SeriesReshaper(Reshaper):
         new_values = [None] * len(new_order)
         for i in order:
             new_file_list[i] = self._input_files[new_order[i]]
-            new_filenames[i] = self._specifier.input_file_list[new_order[i]]
+            new_filenames[i] = specifier.input_file_list[new_order[i]]
             new_values[i] = time_values[new_order[i]]
 
         # Save this data in the new orders
@@ -453,7 +476,7 @@ class Slice2SeriesReshaper(Reshaper):
             numpy.fromiter(itertools.chain.from_iterable(new_values),
                            dtype='float')
 
-    def _sort_variables(self):
+    def _sort_variables(self, specifier):
         """
         Internal method for sorting the variables in each time-slice file
 
@@ -465,6 +488,9 @@ class Slice2SeriesReshaper(Reshaper):
         and are contained in the Specifier data member:
 
             Specifier.time_variant_metadata.
+
+        Parameters:
+            specifier (Specifier): The reshaper specifier object
         """
 
         # Helpful debugging message
@@ -485,7 +511,7 @@ class Slice2SeriesReshaper(Reshaper):
             size = size * numpy.prod(var.shape)
             if self._unlimited_dim not in var.dimensions:
                 self._time_invariant_metadata[var_name] = size
-            elif var_name in self._specifier.time_variant_metadata:
+            elif var_name in specifier.time_variant_metadata:
                 self._time_variant_metadata[var_name] = size
             else:
                 self._time_series_variables[var_name] = size
@@ -504,6 +530,56 @@ class Slice2SeriesReshaper(Reshaper):
         #       a catch for all metadata IFF the 'once-file' is enabled.
         if self._use_once_file:
             self._time_series_variables['once'] = 1
+
+    def _validate_output_files(self, specifier, skip_existing=False):
+        """
+        Perform validation of output data files themselves.  
+
+        We compute the output file name from the prefix and suffix, and then
+        we check whether the output files exist.  By default, if the output
+        file
+
+        Parameters:
+            specifier (Specifier): The reshaper specifier object
+
+        Keyword Arguments:
+            skip_existing (bool): Flag specifying whether to skip the generation
+                of time-series for variables with time-series files that already
+                exist.  Default is False.
+        """
+
+        # Helpful debugging message
+        if self._simplecomm.is_manager():
+            self._vprint('Validating output files', verbosity=1)
+
+        # Loop through the time-series variables and generate output filenames
+        prefix = specifier.output_file_prefix
+        suffix = specifier.output_file_suffix
+        self._time_series_filenames = \
+            dict([(var_name, prefix + var_name + suffix)
+                  for var_name in self._time_series_variables])
+
+        # Find which files already exist
+        existing = []
+        for variable, filename in self._time_series_filenames:
+            if os.path.isfile(filename):
+                existing.append(variable)
+
+        # If skip_existing is set, remove the existing time-series variables
+        # from the list of time-series variables to convert
+        if skip_existing:
+            if self._simplecomm.is_manager():
+                self._vprint('WARNING: Skipping time-series variables with '
+                             'existing output files: ' + str(existing),
+                             verbosity=1)
+            for variable in existing:
+                self._time_series_variables.pop(variable)
+
+        # Otherwise, throw an exception if any existing output files are found
+        elif len(existing) > 0:
+            err_msg = "Found existing output files for time-series variables:"\
+                + str(existing)
+            raise RuntimeError(err_msg)
 
     def convert(self, output_limit=0):
         """
@@ -592,8 +668,7 @@ class Slice2SeriesReshaper(Reshaper):
             is_once_file, write_meta, write_tser = _get_once_info(out_name)
 
             # Determine the output file name for this variable
-            out_filename = self._specifier.output_file_prefix \
-                + out_name + self._specifier.output_file_suffix
+            out_filename = self._time_series_filenames[out_name]
             dbg_msg = 'Creating output file for variable: ' + out_name
             if is_once_file:
                 dbg_msg = 'Creating "once" file.'
@@ -799,7 +874,8 @@ class MultiSpecReshaper(Reshaper):
     """
 
     def __init__(self, specifiers, serial=False,
-                 verbosity=1, once=False, simplecomm=None):
+                 verbosity=1, skip_existing=False,
+                 once=False, simplecomm=None):
         """
         Constructor
 
@@ -816,6 +892,9 @@ class MultiSpecReshaper(Reshaper):
             verbosity(int): Level of printed output (stdout).  A value of 0 
                 means no output, and a higher value means more output.  The
                 default value is 1.
+            skip_existing (bool): Flag specifying whether to skip the generation
+                of time-series for variables with time-series files that already
+                exist.  Default is False.
             once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
             simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
@@ -832,6 +911,12 @@ class MultiSpecReshaper(Reshaper):
         if type(verbosity) is not int:
             err_msg = "Verbosity level must be an integer."
             raise TypeError(err_msg)
+        if type(skip_existing) is not bool:
+            err_msg = "Skip_existing flag must be True or False."
+            raise TypeError(err_msg)
+        if type(once) is not bool:
+            err_msg = "Once-file indicator must be True or False."
+            raise TypeError(err_msg)
         if simplecomm is not None:
             if simplecomm is not isinstance(simplecomm, SimpleComm):
                 err_msg = "Simple communicator object is not a SimpleComm"
@@ -839,6 +924,9 @@ class MultiSpecReshaper(Reshaper):
 
         # Whether to write to a once file
         self._use_once_file = once
+
+        # Whether to write to a once file
+        self._skip_existing = skip_existing
 
         # Store the list of specifiers
         self._specifiers = specifiers
@@ -897,7 +985,9 @@ class MultiSpecReshaper(Reshaper):
             rshpr = create_reshaper(self._specifiers[spec_name],
                                     serial=self._serial,
                                     verbosity=self._verbosity,
-                                    once=self._use_once_file)
+                                    skip_existing=self._skip_existing,
+                                    once=self._use_once_file,
+                                    simplecomm=self._simplecomm)
             rshpr.convert(output_limit=output_limit)
 
             this_times = rshpr._timer.get_all_times()
