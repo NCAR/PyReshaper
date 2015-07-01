@@ -47,8 +47,8 @@ def parse_cli():
                       help='The name of the project code for charging in '
                            'parallel runs (ignored if running in serial) '
                            '[Default: STDD0002]')
-    parser.add_option('-F', '--force', default=False,
-                      action='store_true', dest='force',
+    parser.add_option('-O', '--overwrite', default=False,
+                      action='store_true', dest='overwrite',
                       help='True or False, indicating whether to force deleting '
                            'any existing test or run directories, if found '
                            '[Default: False]')
@@ -70,6 +70,11 @@ def parse_cli():
                       action='store_true', dest='once_file',
                       help='True or False, indicating whether to write metadata '
                            'to a once file. [Default: False]')
+    parser.add_option('--skip_existing', default=False,
+                      action='store_true', dest='skip_existing',
+                      help='Whether to skip time-series generation for '
+                           'variables with existing output files. '
+                           '[Default: False]')
     parser.add_option('-q', '--queue', default='economy',
                       help='The name of the queue to request in parallel runs '
                            '(ignored if running in serial) '
@@ -161,6 +166,8 @@ def gen_run_command(options, test_name, output_dir, testing_database):
         run_cmd.append('--serial')
     if (options.once_file):
         run_cmd.append('--once')
+    if (options.skip_existing):
+        run_cmd.append('--skip_existing')
     run_cmd.extend(['-v', '3'])
     if (options.only > 0):
         run_cmd.extend(['-l', str(options.only)])
@@ -259,18 +266,26 @@ def init_test(options, test_name, testing_database):
         test_dir = os.path.join(test_dir, 'ser')
     test_dir = os.path.join(test_dir, options.ncformat)
 
-    # Delete old directory, if forced
+    # What to do with existing directory / files?
     if (os.path.isdir(test_dir)):
-        if (options.force):
-            shutil.rmtree(test_dir, ignore_errors=True)
-            print '  Directory (' + test_dir + ') removed.'
-        else:
-            err_msg = '  Test directory (' + test_dir + ') already exists.'
-            raise RuntimeError(err_msg)
+        print '  Test directory (' + test_dir + ') already exists.'
 
-    # Make new test directory
-    os.makedirs(test_dir)
-    print '  Test directory (' + test_dir + ') created.'
+        # Remove old existing test dir and make new one
+        if options.overwrite:
+            if (os.path.isdir(test_dir)):
+                shutil.rmtree(test_dir, ignore_errors=True)
+                print '  Test Directory (' + test_dir + ') removed.'
+            os.makedirs(test_dir)
+            print '  Test directory (' + test_dir + ') created.'
+
+        # Use existing directory and just skip existing output files
+        elif options.skip_existing:
+            print '  Skipping existing output files in test directory.'
+
+        # Throw an exception
+        else:
+            err_msg = '  Overwrite or skipping existing files not allowed.'
+            raise RuntimeError(err_msg)
 
     # Create the output subdirectory
     output_dir = os.path.join(test_dir, 'output')
