@@ -86,8 +86,8 @@ def main(options, input_file_list):
     reshpr = reshaper.create_reshaper(spec,
                                       serial=options.serial,
                                       verbosity=options.verbosity,
-                                      once=options.once,
-                                      skip_existing=skip_existing)
+                                      skip_existing=options.skip_existing,
+                                      once=options.once)
 
     # Run the conversion (slice-to-series) process
     reshpr.convert(output_limit=options.limit)
