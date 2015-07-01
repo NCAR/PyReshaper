@@ -580,7 +580,7 @@ class Slice2SeriesReshaper(Reshaper):
         if overwrite:
             if self._simplecomm.is_manager():
                 self._vprint('WARNING: Deleting existing output files for '
-                             'time-series variables:' + str(existing),
+                             'time-series variables: ' + str(existing),
                              verbosity=1)
             for variable in existing:
                 os.remove(self._time_series_filenames[variable])
