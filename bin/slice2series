@@ -48,6 +48,11 @@ def cli():
                       action='store_true', dest='once',
                       help='Whether to write a "once" file with all metadata. '
                            '[Default: False]')
+    parser.add_option('--skip_existing', default=False,
+                      action='store_true', dest='skip_existing',
+                      help='Whether to skip time-series generation for '
+                           'variables with existing output files. '
+                           '[Default: False]')
     parser.add_option('-v', '--verbosity', default=1, type='int',
                       help='Verbosity level for level of output.  A value of 0 '
                            'means no output, and a value greater than 0 means '
@@ -66,9 +71,6 @@ def cli():
 # Main script
 #==============================================================================
 def main(options, input_file_list):
-    serial = options.serial
-    verbosity = options.verbosity
-    once = options.once
 
     # Create the input object for the Reshaper
     spec = specification.create_specifier()
@@ -81,8 +83,11 @@ def main(options, input_file_list):
     spec.time_variant_metadata = options.metadata
 
     # Create the PyReshaper object
-    reshpr = reshaper.create_reshaper(
-        spec, serial=serial, verbosity=verbosity, once=once)
+    reshpr = reshaper.create_reshaper(spec,
+                                      serial=options.serial,
+                                      verbosity=options.verbosity,
+                                      once=options.once,
+                                      skip_existing=skip_existing)
 
     # Run the conversion (slice-to-series) process
     reshpr.convert(output_limit=options.limit)
