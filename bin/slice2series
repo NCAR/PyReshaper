@@ -99,7 +99,6 @@ def main(options, input_file_list):
 #==============================================================================
 # Command-line Opeartion
 #==============================================================================
-def main(options, input_file_list):
-    if __name__ == '__main__':
-        options, input_file_list = cli()
-        main(options, input_file_list)
+if __name__ == '__main__':
+    options, input_file_list = cli()
+    main(options, input_file_list)
