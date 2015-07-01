@@ -53,6 +53,10 @@ def cli():
                       help='Whether to skip time-series generation for '
                            'variables with existing output files. '
                            '[Default: False]')
+    parser.add_option('--overwrite', default=False,
+                      action='store_true', dest='overwrite',
+                      help='Whether to overwrite existing output files. '
+                           '[Default: False]')
     parser.add_option('-v', '--verbosity', default=1, type='int',
                       help='Verbosity level for level of output.  A value of 0 '
                            'means no output, and a value greater than 0 means '
@@ -87,6 +91,7 @@ def main(options, input_file_list):
                                       serial=options.serial,
                                       verbosity=options.verbosity,
                                       skip_existing=options.skip_existing,
+                                      overwrite=options.overwrite,
                                       once=options.once)
 
     # Run the conversion (slice-to-series) process
