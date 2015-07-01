@@ -168,6 +168,8 @@ def gen_run_command(options, test_name, output_dir, testing_database):
         run_cmd.append('--once')
     if (options.skip_existing):
         run_cmd.append('--skip_existing')
+    if (options.overwrite):
+        run_cmd.append('--overwrite')
     run_cmd.extend(['-v', '3'])
     if (options.only > 0):
         run_cmd.extend(['-l', str(options.only)])
@@ -266,26 +268,12 @@ def init_test(options, test_name, testing_database):
         test_dir = os.path.join(test_dir, 'ser')
     test_dir = os.path.join(test_dir, options.ncformat)
 
-    # What to do with existing directory / files?
+    # Look for output directory...and make it
     if (os.path.isdir(test_dir)):
         print '  Test directory (' + test_dir + ') already exists.'
-
-        # Remove old existing test dir and make new one
-        if options.overwrite:
-            if (os.path.isdir(test_dir)):
-                shutil.rmtree(test_dir, ignore_errors=True)
-                print '  Test Directory (' + test_dir + ') removed.'
-            os.makedirs(test_dir)
-            print '  Test directory (' + test_dir + ') created.'
-
-        # Use existing directory and just skip existing output files
-        elif options.skip_existing:
-            print '  Skipping existing output files in test directory.'
-
-        # Throw an exception
-        else:
-            err_msg = '  Overwrite or skipping existing files not allowed.'
-            raise RuntimeError(err_msg)
+    else:
+        os.makedirs(test_dir)
+        print '  Test directory (' + test_dir + ') created.'
 
     # Create the output subdirectory
     output_dir = os.path.join(test_dir, 'output')
