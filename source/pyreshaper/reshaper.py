@@ -561,7 +561,7 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Find which files already exist
         existing = []
-        for variable, filename in self._time_series_filenames:
+        for variable, filename in self._time_series_filenames.items():
             if os.path.isfile(filename):
                 existing.append(variable)
 
