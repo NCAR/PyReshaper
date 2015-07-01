@@ -314,14 +314,14 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Validate the input files themselves
         self._timer.start('Input File Validation')
-        self._validate_input_files()
+        self._validate_input_files(specifier)
         self._timer.stop('Input File Validation')
         if self._simplecomm.is_manager():
             self._vprint('Input files validated', verbosity=2)
 
         # Sort the input files by time
         self._timer.start('Sort Input Files')
-        self._sort_input_files_by_time()
+        self._sort_input_files_by_time(specifier)
         self._timer.stop('Sort Input Files')
         if self._simplecomm.is_manager():
             self._vprint('Input files sorted', verbosity=2)
@@ -330,14 +330,14 @@ class Slice2SeriesReshaper(Reshaper):
         # (To determine if it is time-invariant metadata, time-variant
         # metadata, or if it is a time-series variable)
         self._timer.start('Sort Variables')
-        self._sort_variables()
+        self._sort_variables(specifier)
         self._timer.stop('Sort Variables')
         if self._simplecomm.is_manager():
             self._vprint('Variables sorted', verbosity=2)
 
         # Validate the output files
         self._timer.start('Output File Validation')
-        self._validate_output_files(skip_existing)
+        self._validate_output_files(specifier, skip_existing)
         self._timer.stop('Output File Validation')
         if self._simplecomm.is_manager():
             self._vprint('Output files validated', verbosity=2)
