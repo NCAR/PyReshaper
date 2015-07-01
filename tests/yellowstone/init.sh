@@ -11,5 +11,5 @@ BIN_DIR=`abspath ../../bin`
 export PATH=$PATH:$BIN_DIR
 
 # Add the PyReshaper module path to the python path
-MOD_DIR=`abspath ../../`
+MOD_DIR=`abspath ../../source`
 export PYTHONPATH=$PYTHONPATH:$MOD_DIR
