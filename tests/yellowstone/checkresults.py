@@ -248,8 +248,8 @@ def get_comparison_info(options, arguments, comm, testing_database):
                 num_files = len(
                     comparison_info[full_test_name]['results_filenames'])
                 total_num_files += num_files
-                print '  ', full_test_name, ' (', num_files, ' files)'
-            print 'Total number of file comparisons: ', total_num_files
+                print '  ', full_test_name, ' (' + str(num_files) + ' files)'
+            print 'Total number of file comparisons:', total_num_files
         print
 
     # Exit now, if only listing tests
