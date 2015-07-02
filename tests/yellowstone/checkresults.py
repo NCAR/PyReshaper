@@ -50,6 +50,7 @@ def parse_cli():
     # Set serial if listing only
     if options.list_tests:
         options.serial = True
+        options.all = True
 
     # Check for CPRNC executable
     if not options.executable:
