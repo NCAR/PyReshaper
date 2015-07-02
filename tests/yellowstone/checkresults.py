@@ -40,6 +40,9 @@ def parse_cli():
                       help='True or False, indicating whether to check tests '
                            'in serial (True), rather than parallel (False). '
                            '[Default: False]')
+    parser.add_option('-x', '--executable', default=None,
+                      help='The path to the CPRNC executable. '
+                           '[Default: None]')
 
     # Parse the CLI options and arguments
     (options, arguments) = parser.parse_args()
@@ -47,6 +50,15 @@ def parse_cli():
     # Set serial if listing only
     if options.list_tests:
         options.serial = True
+
+    # Check for CPRNC executable
+    if not options.executable:
+        options.executable = "/glade/p/work/kpaul/installs/intel/12.1.5/" + \
+            "cprnc/bin/cprnc"
+    if not os.path.isfile(options.executable):
+        err_msg = "Cannot find cprnc executable file: " + \
+            str(options.executable)
+        raise RuntimeError(err_msg)
 
     #  and return
     return (options, arguments)
@@ -130,6 +142,9 @@ def get_comparison_info(options, arguments, comm, testing_database):
     for possible_test_dir in possible_test_dirs:
         if (comm.rank == 0):
             print 'Validating possible test dir:', possible_test_dir
+
+        # Split out the NetCDF format, run type (serial, parallel), and
+        # test name from the directory name
         root, ncformat = os.path.split(possible_test_dir)
         root, run_type = os.path.split(root)
         root, test_name = os.path.split(root)
@@ -138,8 +153,11 @@ def get_comparison_info(options, arguments, comm, testing_database):
             print '  Run Type:', run_type
             print '  NetCDF Format:', ncformat
 
+        # Check that the test name is in the database
+        # Define this as a "Good" test
         good_test = (test_name in testing_database)
 
+        # If still "good", check for results/output directory
         if (good_test):
             if (comm.rank == 0):
                 print '  Test found in test info'
@@ -149,6 +167,7 @@ def get_comparison_info(options, arguments, comm, testing_database):
             if (comm.rank == 0):
                 print '  New results dir found:', new_results_dir
 
+        # If still "good", check for >0 output/result file
         if (good_test):
             os.chdir(new_results_dir)
             new_results_ls = glob.glob('*.nc')
@@ -157,12 +176,15 @@ def get_comparison_info(options, arguments, comm, testing_database):
             if (comm.rank == 0):
                 print '  ' + str(len(new_results_ls)) + ' files found in directory'
 
+        # If still "good", check for results dir for comparison
         if (good_test):
             old_results_dir = testing_database[test_name]['results_dir']
             good_test = good_test and os.path.isdir(old_results_dir)
             if (comm.rank == 0):
                 print '  Old results dir found:', old_results_dir
 
+        # If still "good", look for missing files and make sure there are
+        # some new files to compare against the old
         if (good_test):
             os.chdir(old_results_dir)
             old_results_ls = glob.glob('*.nc')
@@ -183,12 +205,9 @@ def get_comparison_info(options, arguments, comm, testing_database):
                 if (comm.rank == 0):
                     print '  All new test files found in old results dir'
 
+        # If still "good", generate the name of the log file and the directory
+        # in which comparison (CPRNC) results will be placed
         if (good_test):
-            cprnc_out_dir = os.path.join(
-                cwd, test_name, run_type, ncformat, 'compare')
-            if (comm.rank == 0):
-                print '  CPRNC output directory will be:', cprnc_out_dir
-
             full_test_name = os.path.join(test_name, run_type, ncformat)
             if (comm.rank == 0):
                 print '  Full test name:', full_test_name
@@ -197,6 +216,10 @@ def get_comparison_info(options, arguments, comm, testing_database):
             log_filename = os.path.join(log_dir, 'check-' + test_name + '.log')
             if (comm.rank == 0):
                 print '  Log file will be:', log_filename
+
+            cprnc_out_dir = os.path.join(log_dir, 'compare')
+            if (comm.rank == 0):
+                print '  CPRNC output directory will be:', cprnc_out_dir
 
             comparison_info[full_test_name] = {}
             comparison_info[full_test_name][
@@ -227,8 +250,7 @@ def get_comparison_info(options, arguments, comm, testing_database):
     if (options.list_tests):
         sys.exit(0)
 
-    # Reorganize the filenames to allow top-level looping over individual files
-    # and initialize comparison statistics
+    # Add slots for counting failures and total results
     for full_test_name in comparison_info.keys():
         comparison_info[full_test_name]['num_failures'] = 0
         comparison_info[full_test_name]['num_checks'] = len(
@@ -240,11 +262,10 @@ def get_comparison_info(options, arguments, comm, testing_database):
 #==============================================================================
 # Run comparison tests
 #==============================================================================
-def compare_results(comparison_info, comm):
+def compare_results(comparison_info, comm, cprnc_exec):
 
     # Base arguments to running cprnc
-    cprnc_args = ["/glade/p/work/kpaul/installs/intel/12.1.5/cprnc/bin/cprnc",
-                  "-m", "", ""]
+    cprnc_args = [cprnc_exec, "-m", "", ""]
 
     # String indicating IDENTITY (valid comparison)
     ident_str = "files seem to be IDENTICAL"
@@ -256,6 +277,7 @@ def compare_results(comparison_info, comm):
             if (not os.path.isdir(cprnc_out_dir)):
                 os.makedirs(cprnc_out_dir)
 
+    # Wait for for master rank to create the output directory
     comm.sync()
 
     # Create a flat list of files to check
@@ -266,6 +288,7 @@ def compare_results(comparison_info, comm):
                           'full_test_name': full_test_name}
             files_to_check.append(check_dict)
 
+    # Start comparing output files
     if (comm.rank == 0):
         print 'Checking files:'
         print
@@ -370,9 +393,12 @@ def main(options, arguments):
     testing_database = get_testing_database(options)
     comparison_info = get_comparison_info(
         options, arguments, comm, testing_database)
-    compare_results(comparison_info, comm)
+    compare_results(comparison_info, comm, options.executable)
 
 
+#==============================================================================
+# Command-Line Operation
+#==============================================================================
 if __name__ == '__main__':
     options, arguments = parse_cli()
     main(options, arguments)
