@@ -29,9 +29,9 @@ import plottools as pt
 usage = 'usage: %prog [options] [dataset] [dataset] ...'
 parser = optparse.OptionParser(usage=usage)
 parser.add_option('-f', '--data_file', action='store', type='str',
-                  dest='data_file', default='timings.json',
+                  dest='data_file', default='../timings.json',
                   help='Path to the timings.json file '
-                       '[Default: "timings.json"]')
+                       '[Default: "../timings.json"]')
 parser.add_option('-m', '--method', action='append', type='str',
                   dest='methods', default=[],
                   help='Include a methods to plot, by name.  If no methods '

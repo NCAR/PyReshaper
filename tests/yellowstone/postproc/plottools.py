@@ -55,16 +55,20 @@ default_options = {'figsize': (4, 3),
                    'legendfontsize': 8,
                    'figformat': 'pdf'}
 
+
 #==============================================================================
 # Convert a date-time string to a datetime object
 #==============================================================================
+
 def _dtstring(dtstr):
     return datetime.datetime.strptime(dtstr, '%y%m%d-%H%M%S')
+
 
 #==============================================================================
 # Read the data file, returns a dictionary
 #==============================================================================
-def read_json_data(file_name='timings.json'):
+
+def read_json_data(file_name='../timings.json'):
     if (not os.path.isfile(file_name)):
         return None
     data_file = open(file_name)
@@ -72,15 +76,19 @@ def read_json_data(file_name='timings.json'):
     data_file.close()
     return json_data
 
+
 #==============================================================================
 # Return the list of datasets in the dictionary
 #==============================================================================
+
 def list_datasets(input_dict):
     return input_dict.keys()
+
 
 #==============================================================================
 # Return the dictionary of methods found for each given dataset
 #==============================================================================
+
 def list_methods(input_dict, datasets=None):
     if not datasets:
         datasets = list_datasets(input_dict)
@@ -95,9 +103,11 @@ def list_methods(input_dict, datasets=None):
                 methods[dataset] = input_dict[dataset][__RESULTS__].keys()
     return methods
 
+
 #==============================================================================
 # Get the 'results' section (as a dictionary) for given dataset(s)
 #==============================================================================
+
 def get_results(input_dict, datasets=None):
     if not datasets:
         datasets = list_datasets(input_dict)
@@ -112,9 +122,11 @@ def get_results(input_dict, datasets=None):
                 results[dataset] = input_dict[dataset][__RESULTS__]
     return results
 
+
 #==============================================================================
 # Get everything but the 'results' section (as a dictionary) for given dataset(s)
 #==============================================================================
+
 def get_nonresults(input_dict, datasets=None):
     if not datasets:
         datasets = list_datasets(input_dict)
@@ -131,10 +143,12 @@ def get_nonresults(input_dict, datasets=None):
                     other[dataset][key] = input_dict[dataset][key]
     return other
 
+
 #==============================================================================
 # Return the subset of the input dictionary that contains only the listed
 # datasets.
 #==============================================================================
+
 def subselect_datasets(input_dict, datasets):
     if (type(datasets) is not list):
         raise TypeError('List of datasets must be of list type.')
@@ -146,6 +160,7 @@ def subselect_datasets(input_dict, datasets):
         subset_dict[dataset] = input_dict[dataset]
     return subset_dict
 
+
 #==============================================================================
 # Return the subset of the input dictionary that contains only the listed
 # methods.  If a dataset does not use a listed method, the dataset is removed.
@@ -156,6 +171,7 @@ def subselect_datasets(input_dict, datasets):
 # When True, the exclusive option will include a dataset only if it contains
 # ALL of the listed methods.
 #==============================================================================
+
 def subselect_methods(input_dict, methods, exclusive=False):
     if (type(methods) is not list):
         raise TypeError('List of methods must be of list type.')
@@ -174,12 +190,14 @@ def subselect_methods(input_dict, methods, exclusive=False):
     subset_dict = {}
     for dataset in methods_by_dataset:
         if methods_by_dataset[dataset]:
-            subset_dict[dataset] = get_nonresults(input_dict, datasets=[dataset])[dataset]
+            subset_dict[dataset] = get_nonresults(
+                input_dict, datasets=[dataset])[dataset]
             subset_dict[dataset][__RESULTS__] = {}
         for method in methods_by_dataset[dataset]:
             subset_dict[dataset][__RESULTS__][method] = \
                 input_dict[dataset][__RESULTS__][method]
     return subset_dict
+
 
 #==============================================================================
 # Return the subset of the input dictionary with jobs that satisfy various
@@ -198,6 +216,7 @@ def subselect_methods(input_dict, methods, exclusive=False):
 #                EITHER (False) before or after conditions must be met for the
 #                job to be kept.
 #==============================================================================
+
 def subselect_jobs_by_time(input_dict, before=__MAXTIME__, after=__MINTIME__, exclusive=True):
     subset_dict = {}
     for dataset in input_dict:
@@ -215,7 +234,8 @@ def subselect_jobs_by_time(input_dict, before=__MAXTIME__, after=__MINTIME__, ex
                         good_job = before_val or after_val
                     if good_job:
                         if dataset not in subset_dict:
-                            subset_dict[dataset] = get_nonresults(input_dict, datasets=[dataset])[dataset]
+                            subset_dict[dataset] = get_nonresults(
+                                input_dict, datasets=[dataset])[dataset]
                         if __RESULTS__ not in subset_dict[dataset]:
                             subset_dict[dataset][__RESULTS__] = {}
                         if method not in subset_dict[dataset][__RESULTS__]:
@@ -223,6 +243,7 @@ def subselect_jobs_by_time(input_dict, before=__MAXTIME__, after=__MINTIME__, ex
                         subset_dict[dataset][__RESULTS__][method][job_id] = \
                             input_dict[dataset][__RESULTS__][method][job_id]
     return subset_dict
+
 
 #==============================================================================
 # Return the subset of the input dictionary with jobs that satisfy various
@@ -247,6 +268,7 @@ def subselect_jobs_by_time(input_dict, before=__MAXTIME__, after=__MINTIME__, ex
 #               If ANY of the dictionaries' criteria return a valid result,
 #               then the job is considered valid.
 #==============================================================================
+
 def subselect_jobs_by_data(input_dict, criteria_list):
     if type(criteria_list) is not list:
         raise TypeError('Data criteria list must be of type list.')
@@ -277,7 +299,8 @@ def subselect_jobs_by_data(input_dict, criteria_list):
                     good_job = reduce(lambda x, y: x or y, good_jobs)
                     if good_job:
                         if dataset not in subset_dict:
-                            subset_dict[dataset] = get_nonresults(input_dict, datasets=[dataset])[dataset]
+                            subset_dict[dataset] = get_nonresults(
+                                input_dict, datasets=[dataset])[dataset]
                         if __RESULTS__ not in subset_dict[dataset]:
                             subset_dict[dataset][__RESULTS__] = {}
                         if method not in subset_dict[dataset][__RESULTS__]:
@@ -286,9 +309,11 @@ def subselect_jobs_by_data(input_dict, criteria_list):
                             input_dict[dataset][__RESULTS__][method][job_id]
     return subset_dict
 
+
 #==============================================================================
 # Create a union of 2 nested dictionaries
 #==============================================================================
+
 def union(dict1, dict2):
     if type(dict1) is dict and type(dict2) is dict:
         udict = dict1.copy()
@@ -301,9 +326,11 @@ def union(dict1, dict2):
     else:
         return dict1
 
+
 #==============================================================================
 # Create the intersection of 2 nested dictionaries
 #==============================================================================
+
 def intersect(dict1, dict2):
     if type(dict1) is dict and type(dict2) is dict:
         udict = {}
@@ -319,9 +346,11 @@ def intersect(dict1, dict2):
         else:
             return None
 
+
 #==============================================================================
 # Gather duration data from a data dictionary and return a plot dictionary
 #==============================================================================
+
 def get_duration_pdata(data_dict):
     plot_dict = {}
     for dataset in data_dict:
@@ -334,9 +363,11 @@ def get_duration_pdata(data_dict):
                     plot_dict[dataset][method].append(real_time)
     return plot_dict
 
+
 #==============================================================================
 # Gather throughput data from a data dictionary and return a plot dictionary
 #==============================================================================
+
 def get_throughput_pdata(data_dict):
     plot_dict = {}
     for dataset in data_dict:
@@ -350,9 +381,11 @@ def get_throughput_pdata(data_dict):
                     plot_dict[dataset][method].append(throughput)
     return plot_dict
 
+
 #==============================================================================
 # Compute the reduction of data for multiple jobs in a plot dicitonary
 #==============================================================================
+
 def reduce_pdata(plot_dict, func=numpy.average):
     for dataset in plot_dict:
         for method in plot_dict[dataset]:
@@ -360,15 +393,18 @@ def reduce_pdata(plot_dict, func=numpy.average):
             plot_dict[dataset][method] = reduced_data
     return plot_dict
 
+
 #==============================================================================
 # Make a bar plot from a REDUCED plot dictionary
 #==============================================================================
+
 def make_bar_plot(pdata, filename,
                   dataset_order, method_order, method_colors,
                   dataset_labels, method_labels,
                   title=None, xlabel=None, ylabel=None,
                   figsize=(4, 3),
-                  figadjustments={'left': 0.175, 'right': 0.98, 'top': 0.915, 'bottom': 0.275},
+                  figadjustments={
+                      'left': 0.175, 'right': 0.98, 'top': 0.915, 'bottom': 0.275},
                   labelrotation=35,
                   titlefontsize=12,
                   labelfontsize=10,
@@ -388,15 +424,20 @@ def make_bar_plot(pdata, filename,
 
     # Check that the order and colors lists contain enough names
     if not set(dataset_order).issubset(dataset_names):
-        raise ValueError('Dataset order must contain all dataset names found in the plot dictionary')
+        raise ValueError(
+            'Dataset order must contain all dataset names found in the plot dictionary')
     if not set(dataset_labels).issubset(dataset_names):
-        raise ValueError('Dataset labels must contain all dataset names found in the plot dictionary')
+        raise ValueError(
+            'Dataset labels must contain all dataset names found in the plot dictionary')
     if not set(method_order).issubset(method_names):
-        raise ValueError('Method order must contain all method names found in the plot dictionary')
+        raise ValueError(
+            'Method order must contain all method names found in the plot dictionary')
     if not set(method_colors).issubset(method_names):
-        raise ValueError('Method colors must contain all method names found in the plot dictionary')
+        raise ValueError(
+            'Method colors must contain all method names found in the plot dictionary')
     if not set(method_labels).issubset(method_names):
-        raise ValueError('Method labels must contain all method names found in the plot dictionary')
+        raise ValueError(
+            'Method labels must contain all method names found in the plot dictionary')
 
     # Number of datasets and methods (for convenience)
     n_methods = len(method_names)
@@ -443,6 +484,7 @@ def make_bar_plot(pdata, filename,
     plt.yticks(fontsize=tickfontsize)
     if xlabel != None:
         plt.xlabel(xlabel, fontsize=labelfontsize, ha='center', va='top')
-    plt.xticks(xbase, xlabels, rotation=labelrotation, ha='right', fontsize=tickfontsize)
+    plt.xticks(xbase, xlabels, rotation=labelrotation,
+               ha='right', fontsize=tickfontsize)
     plt.legend(loc=2, fontsize=legendfontsize)
     plt.savefig(filename, format=figformat)

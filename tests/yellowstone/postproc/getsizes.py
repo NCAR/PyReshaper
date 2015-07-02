@@ -28,15 +28,17 @@ parser.add_option('-i', '--testinfo', default=None,
 (options, arguments) = parser.parse_args()
 
 # Read the data file
-data_file_name = 'testinfo.json'
-if (options.testinfo != None and os.path.isfile(options.testinfo)):
+data_file_name = '../testinfo.json'
+if options.testinfo != None and os.path.isfile(options.testinfo):
     data_file_name = options.testinfo
 data_file = open(data_file_name)
 jsondata = dict(json.load(data_file))
 data_file.close()
 
+
 #==============================================================================
 # Helper function to convert typecodes into dtype itemsizes
+
 def get_itemsize(tc):
     dt = None
     if (tc == 'd'):
@@ -57,16 +59,20 @@ def get_itemsize(tc):
         dt = np.float
     return np.dtype(dt).itemsize
 
+
 #==============================================================================
 # Helper function to return the size of an array given its shape
+
 def get_size(shp):
     if (len(shp) > 0):
         return reduce(lambda x, y: x * y, shp)
     else:
         return 1
 
+
 #==============================================================================
 # Helper function to represent an integer number of bytes as a string w/ units
+
 def nbyte_str(n, exp=0):
     if (n > 1024.):
         return nbyte_str(n / 1024., exp=exp + 1)
@@ -89,9 +95,11 @@ def nbyte_str(n, exp=0):
             units = 'PB'
         return '%.3f %s' % (n, units)
 
+
 #==============================================================================
 # Loop over all tests
 #==============================================================================
+
 for test_name in jsondata:
     print test_name + ':'
 
@@ -201,7 +209,8 @@ for test_name in jsondata:
     tsod_size = np.sum(timeseries_vars_oD.values())
     timd_size = np.sum(ti_metadata_vars.values())
     tvmd_size = np.sum(tv_metadata_vars.values())
-    tot_isize = ts1d_size + ts2d_size + ts3d_size + tsod_size + timd_size + tvmd_size
+    tot_isize = ts1d_size + ts2d_size + \
+        ts3d_size + tsod_size + timd_size + tvmd_size
 
     print '  Size of TI Metadata Variables:', nbyte_str(timd_size)
     print '  Size of TV Metadata Variables:', nbyte_str(tvmd_size)
