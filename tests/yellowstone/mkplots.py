@@ -21,7 +21,8 @@
 #==============================================================================
 
 import optparse
-import plottools as pt
+
+from utilities import plottools as pt
 
 #==============================================================================
 # Command-Line Interface Definition
