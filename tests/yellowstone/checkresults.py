@@ -20,7 +20,7 @@ from subprocess import Popen, PIPE, STDOUT
 # Command-Line Interface Definition
 #==============================================================================
 def parse_cli():
-    usage = 'usage: %prog [options] test_name1 test_name2 ...'
+    usage = 'usage: %prog [options] test_dir1 test_dir2 ...'
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-a', '--all', default=False,
                       action='store_true', dest='all',
@@ -134,8 +134,10 @@ def get_comparison_info(options, arguments, comm, testing_database):
     # Parse each test argument for test directories
     possible_test_dirs = []
     if (options.all):
-        possible_test_dirs = glob.glob(os.path.join('*', 'ser', '*'))
-        possible_test_dirs.extend(glob.glob(os.path.join('*', 'par*', '*')))
+        possible_test_dirs = glob.glob(
+            os.path.join('results', '*', 'ser', '*'))
+        possible_test_dirs.extend(
+            glob.glob(os.path.join('results', '*', 'par*', '*')))
     else:
         possible_test_dirs = arguments
 
@@ -163,7 +165,7 @@ def get_comparison_info(options, arguments, comm, testing_database):
             if (comm.rank == 0):
                 print '  Test found in test info'
             new_results_dir = os.path.join(
-                cwd, test_name, run_type, ncformat, 'output')
+                cwd, 'results', test_name, run_type, ncformat, 'output')
             good_test = good_test and os.path.isdir(new_results_dir)
             if (comm.rank == 0):
                 print '  New results dir found:', new_results_dir
@@ -213,7 +215,7 @@ def get_comparison_info(options, arguments, comm, testing_database):
             if (comm.rank == 0):
                 print '  Full test name:', full_test_name
 
-            log_dir = os.path.join(cwd, full_test_name)
+            log_dir = os.path.join(cwd, 'results', full_test_name)
             log_filename = os.path.join(log_dir, 'check-' + test_name + '.log')
             if (comm.rank == 0):
                 print '  Log file will be:', log_filename

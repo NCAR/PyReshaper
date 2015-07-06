@@ -3,14 +3,14 @@ compute system.  The general order of operations is described below:
 
 1) Run Tests
 
-   runtests-ind.py: Run any number of selected tests as individual jobs
-                    submitted to the queue.  This uses a single Specifier
-                    for each PyReshaper job, and each job runs in parallel
-                    with all of the other jobs.
+   runtestsi.py: Run any number of selected tests as individual jobs
+                 submitted to the queue.  This uses a single Specifier
+                 for each PyReshaper job, and each job runs in parallel
+                 with all of the other jobs.
                     
-   runtests-mul.py: Run any number of selected tests as a single job submitted
-                    to the queue.  This uses a list of Specifiers for a single
-                    MultiSpecReshaper job.
+   runtestsm.py: Run any number of selected tests as a single job submitted
+                 to the queue.  This uses a list of Specifiers for a single
+                 MultiSpecReshaper job.
                     
 2) Check Test Results
 

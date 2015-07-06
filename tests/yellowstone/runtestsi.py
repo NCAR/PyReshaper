@@ -98,7 +98,7 @@ def parse_cli():
 #==============================================================================
 # Find and generate the testing database
 #==============================================================================
-def gen_testing_database(options):
+def get_testing_database(options):
 
     # See if there is a user-defined testinfo file, otherwise look for default
     testing_database_filename = ''
@@ -133,7 +133,7 @@ def gen_testing_database(options):
 #==============================================================================
 # Generate the list of tests to run
 #==============================================================================
-def gen_tests_to_run(options, arguments, testing_database):
+def get_tests_to_run(options, arguments, testing_database):
 
     # Determine which tests to run
     tests_to_run = arguments
@@ -153,9 +153,40 @@ def gen_tests_to_run(options, arguments, testing_database):
 
 
 #==============================================================================
+# Initialize the test for running
+#==============================================================================
+def get_test_dirname(options, test_name):
+
+    # Create the test directory
+    test_dir = os.path.abspath(os.path.join('results', test_name))
+    if (options.nodes > 0):
+        test_dir = os.path.join(
+            test_dir, 'par' + str(options.nodes) + 'x' + str(options.tiling))
+    else:
+        test_dir = os.path.join(test_dir, 'ser')
+    test_dir = os.path.join(test_dir, options.ncformat)
+
+    return test_dir
+
+
+#==============================================================================
+# Create the output directory
+#==============================================================================
+def create_dir(name, path):
+    # Create the output subdirectory
+    if os.path.isdir(path):
+        print '  ' + name.capitalize() + ' directory (' \
+            + output_dir + ') already exists.'
+    else:
+        os.makedirs(path)
+        print '  ' + name.capitalize() + ' directory (' \
+            + output_dir + ') created.'
+
+
+#==============================================================================
 # Generate the test run command
 #==============================================================================
-def gen_run_command(options, test_name, output_dir, testing_database):
+def create_run_command(options, test_name, output_dir, test_database):
 
     # Generate the command line run_args
     run_cmd = []
@@ -178,19 +209,19 @@ def gen_run_command(options, test_name, output_dir, testing_database):
     run_cmd.extend(['-f', format_str])
 
     prefix_str = os.path.join(
-        output_dir, str(testing_database[test_name]['output_prefix']))
+        output_dir, str(test_database[test_name]['output_prefix']))
     run_cmd.extend(['-p', prefix_str])
 
-    suffix_str = str(testing_database[test_name]['output_suffix'])
+    suffix_str = str(test_database[test_name]['output_suffix'])
     run_cmd.extend(['-s', suffix_str])
 
-    for var_name in testing_database[test_name]['metadata']:
+    for var_name in test_database[test_name]['metadata']:
         run_cmd.extend(['-m', str(var_name)])
 
     input_files_list = []
-    for input_glob in testing_database[test_name]['input_globs']:
+    for input_glob in test_database[test_name]['input_globs']:
         full_input_glob = os.path.join(
-            str(testing_database[test_name]['input_dir']), input_glob)
+            str(test_database[test_name]['input_dir']), input_glob)
         #input_files_list.extend(glob.glob(full_input_glob))
         input_files_list.append(full_input_glob)
     run_cmd.extend(input_files_list)
@@ -199,9 +230,13 @@ def gen_run_command(options, test_name, output_dir, testing_database):
 
 
 #==============================================================================
-# gen_submission_script - write bash run script as string
+# create_run_script - write bash run script as string
 #==============================================================================
-def gen_submission_script(options, test_name, run_command):
+def create_run_script(options, test_name, test_dir, run_command):
+
+    # Generate the run script name and path
+    run_script_filename = 'run-' + test_name + '.sh'
+    run_script_abspath = os.path.join(test_dir, run_script_filename)
 
     # Start creating the run scripts for each test
     run_script_list = ['#!/bin/bash']
@@ -249,76 +284,28 @@ def gen_submission_script(options, test_name, run_command):
     run_script_list.append(run_command)
     run_script_list.append('')
 
-    return run_script_list
-
-
-#==============================================================================
-# Initialize the test for running
-#==============================================================================
-def init_test(options, test_name, testing_database):
-
-    print 'Currently preparing test:', test_name
-
-    # Create the test directory
-    test_dir = os.path.abspath(test_name)
-    if (options.nodes > 0):
-        test_dir = os.path.join(
-            test_dir, 'par' + str(options.nodes) + 'x' + str(options.tiling))
-    else:
-        test_dir = os.path.join(test_dir, 'ser')
-    test_dir = os.path.join(test_dir, options.ncformat)
-
-    # Look for output directory...and make it
-    if (os.path.isdir(test_dir)):
-        print '  Test directory (' + test_dir + ') already exists.'
-    else:
-        os.makedirs(test_dir)
-        print '  Test directory (' + test_dir + ') created.'
-
-    # Create the output subdirectory
-    output_dir = os.path.join(test_dir, 'output')
-    if os.path.isdir(output_dir):
-        print '  Output data directory (' + output_dir + ') already exists.'
-    else:
-        os.makedirs(output_dir)
-        print '  Output data directory (' + output_dir + ') created.'
-
-    # Generate the run script
-    run_script_filename = 'run-' + test_name + '.sh'
-    run_script_abspath = os.path.join(test_dir, run_script_filename)
-    run_command = gen_run_command(
-        options, test_name, output_dir, testing_database)
-    run_script_list = gen_submission_script(
-        options, test_name, run_command)
     run_script_file = open(run_script_abspath, 'w')
     run_script_file.write(os.linesep.join(run_script_list))
     run_script_file.close()
     print '  Run script written to', run_script_abspath
 
-    # Container for test info
-    test_info = {'name': test_name,
-                 'directory': test_dir,
-                 'output': output_dir,
-                 'script': run_script_abspath}
-
-    return test_info
+    return run_script_abspath
 
 
 #==============================================================================
 # run_test - Run/Launch a test
 #==============================================================================
-def run_test(test_info):
+def run_test(test_name, test_dir, run_script):
     # Now launch the test
     cwd = os.getcwd()
-    os.chdir(test_info['directory'])
+    os.chdir(test_dir)
     print '  Launching test job:',
     if (options.nodes == 0):
         # Make the script executable
-        os.chmod(test_info['script'],
-                 stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
+        os.chmod(run_script, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
 
         # Launch the serial job as a subprocess
-        job = Popen([test_info['script']], stdout=PIPE, stderr=STDOUT,
+        job = Popen([run_script], stdout=PIPE, stderr=STDOUT,
                     env=os.environ.copy())
         print 'PID:', str(job.pid)
         sys.stdout.flush()
@@ -327,13 +314,13 @@ def run_test(test_info):
         job_output = job.communicate()[0]
 
         # Write output to log file
-        log_file = open('reshaper-' + test_info['name'] + '.log', 'w')
+        log_file = open('reshaper-' + test_name + '.log', 'w')
         log_file.write(job_output)
         log_file.close()
 
     else:
         # Open up the run script for input to LSF's bsub
-        run_script_file = open(test_info['script'], 'r')
+        run_script_file = open(run_script, 'r')
 
         # Launch the parallel job with LSF bsub
         job = Popen(['bsub'], stdout=PIPE, stderr=STDOUT,
@@ -352,23 +339,25 @@ def run_test(test_info):
 
 
 #==============================================================================
-# For each test, initialize and run the test
+# Command-Line Operation
 #==============================================================================
-def run_tests(options, tests_to_run, testing_database):
-    for test_name in tests_to_run:
-        test_info = init_test(options, test_name, testing_database)
-        run_test(test_info)
-
-
-#==============================================================================
-# Main Execution Routine
-#==============================================================================
-def main(options, arguments):
-    testing_database = gen_testing_database(options)
-    tests_to_run = gen_tests_to_run(options, arguments, testing_database)
-    run_tests(options, tests_to_run, testing_database)
-
-
 if __name__ == '__main__':
     options, arguments = parse_cli()
-    main(options, arguments)
+    testing_database = get_testing_database(options)
+    tests_to_run = get_tests_to_run(options, arguments, testing_database)
+    for test_name in tests_to_run:
+        print 'Currently preparing test:', test_name
+
+        test_dir = get_test_dirname(options, test_name)
+        create_dir('test', test_dir)
+
+        output_dir = os.path.join(test_dir, 'output')
+        create_dir('output', output_dir)
+
+        run_command = create_run_command(
+            options, test_name, output_dir, testing_database)
+
+        run_script = create_run_script(
+            options, test_name, test_dir, run_command)
+
+        #run_test(test_name, test_dir, run_script)
