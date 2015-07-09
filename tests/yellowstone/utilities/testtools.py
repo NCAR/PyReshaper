@@ -208,7 +208,7 @@ class TestDB(object):
         for test_name in self._database:
 
             # Create a specifier for this test
-            spec = self.create_specifier(test_name, ncfmt='netcdf')
+            spec = self.create_specifier(str(test_name), ncfmt='netcdf')
 
             # Validate the test information
             spec.validate()
