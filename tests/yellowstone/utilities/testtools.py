@@ -305,7 +305,7 @@ class TestDB(object):
             self._statistics[test_name]['counts']['tseries'] = num_tser
             self._statistics[test_name]['counts']['tvariant'] = num_tvmd
             self._statistics[test_name]['counts']['tinvariant'] = num_timd
-            self._statistics[test_name]['counts']['other'] = snum_lost
+            self._statistics[test_name]['counts']['other'] = num_lost
 
             # Compute shapes
             self._statistics[test_name]['xshapes'] = {}
