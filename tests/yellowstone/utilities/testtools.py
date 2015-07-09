@@ -241,7 +241,7 @@ class TestDB(object):
                 tvariant = False
                 xshape = var_obj.shape
                 if tdim in var_obj.dimensions:
-                    xshape = list(shape)
+                    xshape = list(xshape)
                     tindex = var_obj.dimensions.index(tdim)
                     xshape.pop(tindex)
                     xshape = tuple(xshape)
