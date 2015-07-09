@@ -41,7 +41,7 @@ def _shape2size(shp):
 def _nbyte_str(n, exp=0):
     BYTE_UNITS = ['Bytes', 'KB', 'MB', 'GB', 'PB']
     if (n > 1024.):
-        return __nbyte_str(n / 1024., exp=exp + 1)
+        return _nbyte_str(n / 1024., exp=exp + 1)
     else:
         if exp < len(BYTE_UNITS):
             units = BYTE_UNITS[exp]
@@ -251,8 +251,8 @@ class TestDB(object):
                 self._statistics[test_name]['variables'][
                     var_name]['xshape'] = xshape
 
-                xlen = __shape2size(xshape)
-                xsize = xlen * __bytesize(var_obj.typecode())
+                xlen = _shape2size(xshape)
+                xsize = xlen * _bytesize(var_obj.typecode())
                 self._statistics[test_name]['variables'][
                     var_name]['xsize'] = xsize
 
@@ -389,18 +389,18 @@ class TestDB(object):
             tvmd_totsize = test_stats['totalsizes']['tvariant']
             timd_totsize = test_stats['totalsizes']['tinvariant']
 
-            print "   Time-Series Variable Total Size:   ", __nbyte_str(tser_totsize)
-            print "   Time-Variant Metadata Total Size:  ", __nbyte_str(tvmd_totsize)
-            print "   Time-Invariant Metadata Total Size:", __nbyte_str(timd_totsize)
+            print "   Time-Series Variable Total Size:   ", _nbyte_str(tser_totsize)
+            print "   Time-Variant Metadata Total Size:  ", _nbyte_str(tvmd_totsize)
+            print "   Time-Invariant Metadata Total Size:", _nbyte_str(timd_totsize)
             print
 
             tser_maxsize = test_stats['maxsizes']['tseries']
             tvmd_maxsize = test_stats['maxsizes']['tvariant']
             timd_maxsize = test_stats['maxsizes']['tinvariant']
 
-            print "   Time-Series Variable Max Size:   ", __nbyte_str(tser_maxsize)
-            print "   Time-Variant Metadata Max Size:  ", __nbyte_str(tvmd_maxsize)
-            print "   Time-Invariant Metadata Max Size:", __nbyte_str(timd_maxsize)
+            print "   Time-Series Variable Max Size:   ", _nbyte_str(tser_maxsize)
+            print "   Time-Variant Metadata Max Size:  ", _nbyte_str(tvmd_maxsize)
+            print "   Time-Invariant Metadata Max Size:", _nbyte_str(timd_maxsize)
             print
 
     def save_statistics(self, filename="teststats.json"):
