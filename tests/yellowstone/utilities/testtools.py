@@ -138,9 +138,7 @@ class TestDB(object):
             input_glob_str = str(input_glob)
             full_input_glob = str(os.path.join(input_dir, input_glob))
             infiles.extend(glob.glob(full_input_glob))
-        prefix = str(
-            os.path.join(output_dir,
-                         str(self._database[test_name]['output_prefix'])))
+        prefix = str(self._database[test_name]['output_prefix'])
         suffix = str(self._database[test_name]['output_suffix'])
         metadata = map(str, self._database[test_name]['metadata'])
 
