@@ -72,7 +72,7 @@ class TestDB(object):
         # otherwise look for default
         abs_path = ''
         if file_name:
-            abs_path = os.path.abs_path(file_name)
+            abs_path = os.path.abspath(file_name)
         else:
             this_dir = os.path.dirname(__file__)
             abs_path = os.path.join(this_dir, 'testinfo.json')
