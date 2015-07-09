@@ -205,6 +205,7 @@ class TestDB(object):
 
         # Generate statistics for each test
         for test_name in self._database:
+            print "Analyzing test:", str(test_name)
 
             # Create a specifier for this test
             spec = self.create_specifier(str(test_name), ncfmt='netcdf')
@@ -243,8 +244,7 @@ class TestDB(object):
                 xshape = var_obj.shape
                 if tdim in var_obj.dimensions:
                     xshape = list(xshape)
-                    tindex = var_obj.dimensions.index(tdim)
-                    xshape.pop(tindex)
+                    xshape.pop(var_obj.dimensions.index(tdim))
                     xshape = tuple(xshape)
                     tvariant = True
                 self._statistics[test_name]['variables'][
@@ -252,8 +252,7 @@ class TestDB(object):
                 self._statistics[test_name]['variables'][
                     var_name]['xshape'] = xshape
 
-                xlen = _shape2size(xshape)
-                xsize = xlen * _bytesize(var_obj.typecode())
+                xsize = _shape2size(xshape) * _bytesize(var_obj.typecode())
                 self._statistics[test_name]['variables'][
                     var_name]['xsize'] = xsize
 
@@ -261,8 +260,8 @@ class TestDB(object):
                     self._statistics[test_name][
                         'variables'][var_name]['meta'] = True
                 else:
-                    self._statistics[test_name]['variables'][
-                        var_name]['meta'] = False
+                    self._statistics[test_name][
+                        'variables'][var_name]['meta'] = False
 
             # Close the first file
             infile.close()
@@ -274,8 +273,8 @@ class TestDB(object):
                 infile = Nio.open_file(file_name, 'r')
 
                 # And number of time steps to the test data
-                self._statistics[test_name][
-                    'length'] += infile.dimensions[tdim]
+                self._statistics[test_name]['length'] += \
+                    infile.dimensions[tdim]
 
                 # Close the file
                 infile.close()
@@ -284,23 +283,20 @@ class TestDB(object):
             num_steps = self._statistics[test_name]['length']
             var_stats = self._statistics[test_name]['variables']
             num_vars = len(var_stats)
-            meta_mask = [var_stats[v]['meta'] for v in var_stats.keys()]
-            tvar_mask = [var_stats[v]['tvariant'] for v in var_stats.keys()]
-
-            timd_mask = [meta_mask[i] and not tvar_mask[i]
-                         for i in range(num_vars)]
-            tvmd_mask = [meta_mask[i] and tvar_mask[i]
-                         for i in range(num_vars)]
-            tser_mask = [not meta_mask[i] and tvar_mask[i]
-                         for i in range(num_vars)]
-            lost_mask = [not meta_mask[i] and not tvar_mask[i]
-                         for i in range(num_vars)]
+            tser_vars = [str(v) for (v, s) in var_stats.items()
+                         if not s['meta'] and s['tvariant']]
+            tvmd_vars = [str(v) for (v, s) in var_stats.items()
+                         if s['meta'] and s['tvariant']]
+            timd_vars = [str(v) for (v, s) in var_stats.items()
+                         if s['meta'] and not s['tvariant']]
+            lost_vars = [str(v) for (v, s) in var_stats.items()
+                         if not s['meta'] and not s['tvariant']]
 
             # Compute numbers/counts
-            num_tser = sum(tser_mask)
-            num_tvmd = sum(tvmd_mask)
-            num_timd = sum(timd_mask)
-            num_lost = sum(lost_mask)
+            num_tser = sum(tser_vars)
+            num_tvmd = sum(tvmd_vars)
+            num_timd = sum(timd_vars)
+            num_lost = sum(lost_vars)
             self._statistics[test_name]['counts'] = {}
             self._statistics[test_name]['counts']['tseries'] = num_tser
             self._statistics[test_name]['counts']['tvariant'] = num_tvmd
@@ -309,47 +305,32 @@ class TestDB(object):
 
             # Compute shapes
             self._statistics[test_name]['xshapes'] = {}
-            self._statistics[test_name]['xshapes'][
-                'tseries'] = set([d['xshape'] for d, m in
-                                  zip(var_stats.values(), tser_mask) if m])
-            self._statistics[test_name]['xshapes'][
-                'tvariant'] = set([d['xshape'] for d, m in
-                                   zip(var_stats.values(), tvmd_mask) if m])
-            self._statistics[test_name]['xshapes'][
-                'tinvariant'] = set([d['xshape'] for d, m in
-                                     zip(var_stats.values(), timd_mask) if m])
+            self._statistics[test_name]['xshapes']['tseries'] = list(
+                set([var_stats[v]['xshape'] for v in tser_vars]))
+            self._statistics[test_name]['xshapes']['tvariant'] = list(
+                set([var_stats[v]['xshape'] for v in tvmd_vars]))
+            self._statistics[test_name]['xshapes']['tinvariant'] = list(
+                set([var_stats[v]['xshape'] for v in timd_vars]))
 
             # Compute bytesizes
             self._statistics[test_name]['totalsizes'] = {}
-            self._statistics[test_name]['totalsizes'][
-                'tseries'] = sum([d['xsize'] for d, m in
-                                  zip(var_stats.values(), tser_mask) if m]) * num_steps
-            self._statistics[test_name]['totalsizes'][
-                'tvariant'] = sum([d['xsize'] for d, m in
-                                   zip(var_stats.values(), tvmd_mask) if m]) * num_steps
-            self._statistics[test_name]['totalsizes'][
-                'tinvariant'] = sum([d['xsize'] for d, m in
-                                     zip(var_stats.values(), timd_mask) if m])
+            self._statistics[test_name]['totalsizes']['tseries'] = \
+                sum([var_stats[v]['xsize'] for v in tser_vars])
+            self._statistics[test_name]['totalsizes']['tvariant'] = \
+                sum([var_stats[v]['xsize'] for v in tvmd_vars])
+            self._statistics[test_name]['totalsizes']['tinvariant'] = \
+                sum([var_stats[v]['xsize'] for v in timd_vars])
 
             # Compute maxima
             self._statistics[test_name]['maxsizes'] = {}
-            if num_tser > 0:
-                maxsize = max([d['xsize'] for d, m in
-                               zip(var_stats.values(), tser_mask) if m]) * num_steps
-            else:
-                maxsize = 0
+            maxsize = 0 if num_tser == 0 else \
+                max([var_stats[v]['xsize'] for v in tser_vars]) * num_steps
             self._statistics[test_name]['maxsizes']['tseries'] = maxsize
-            if num_tvmd > 0:
-                maxsize = max([d['xsize'] for d, m in
-                               zip(var_stats.values(), tvmd_mask) if m]) * num_steps
-            else:
-                maxsize = 0
+            maxsize = 0 if num_tvmd == 0 else \
+                max([var_stats[v]['xsize'] for v in tvmd_vars]) * num_steps
             self._statistics[test_name]['maxsizes']['tvariant'] = maxsize
-            if num_timd > 0:
-                maxsize = max([d['xsize'] for d, m in
-                               zip(var_stats.values(), timd_mask) if m])
-            else:
-                maxsize = 0
+            maxsize = 0 if num_timd == 0 else \
+                max([var_stats[v]['xsize'] for v in timd_vars])
             self._statistics[test_name]['maxsizes']['tinvariant'] = maxsize
 
         # Set the analyzed flag to True
