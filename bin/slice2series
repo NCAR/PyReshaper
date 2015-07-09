@@ -11,7 +11,11 @@ Copyright 2015, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
+# Builtin Modules
 import optparse
+import pickle
+
+# Package Modules
 from pyreshaper import specification
 from pyreshaper import reshaper
 
@@ -57,6 +61,11 @@ def cli():
                       action='store_true', dest='overwrite',
                       help='Whether to overwrite existing output files. '
                            '[Default: False]')
+    parser.add_option('--specfile', default=None,
+                      help='Allows the user to use a Pickled Specifier (file) '
+                           'as input to the script, instead of the command-'
+                           'line options and arguments.'
+                           '[Default: None]')
     parser.add_option('-v', '--verbosity', default=1, type='int',
                       help='Verbosity level for level of output.  A value of 0 '
                            'means no output, and a value greater than 0 means '
@@ -76,15 +85,30 @@ def cli():
 #==============================================================================
 def main(options, input_file_list):
 
-    # Create the input object for the Reshaper
-    spec = specification.create_specifier()
+    # Check for a Specifier file
+    if options.specfile:
 
-    # Add input to the specifier
-    spec.input_file_list = input_file_list
-    spec.netcdf_format = options.netcdf_format
-    spec.output_file_prefix = options.output_prefix
-    spec.output_file_suffix = options.output_suffix
-    spec.time_variant_metadata = options.metadata
+        # Try importing the file
+        try:
+            specfile = open(options.specfile, 'r')
+            spec = pickle.load(specfile)
+            specfile.close()
+        except:
+            err_msg = "Specifier File '" + str(options.specfile) + "' " + \
+                      "could not be opened and read"
+            raise RuntimeError(err_msg)
+
+    else:
+
+        # Create the input object for the Reshaper
+        spec = specification.create_specifier()
+
+        # Add input to the specifier
+        spec.input_file_list = input_file_list
+        spec.netcdf_format = options.netcdf_format
+        spec.output_file_prefix = options.output_prefix
+        spec.output_file_suffix = options.output_suffix
+        spec.time_variant_metadata = options.metadata
 
     # Create the PyReshaper object
     reshpr = reshaper.create_reshaper(spec,
