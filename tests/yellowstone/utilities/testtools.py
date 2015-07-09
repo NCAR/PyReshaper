@@ -293,10 +293,10 @@ class TestDB(object):
                          if not s['meta'] and not s['tvariant']]
 
             # Compute numbers/counts
-            num_tser = sum(tser_vars)
-            num_tvmd = sum(tvmd_vars)
-            num_timd = sum(timd_vars)
-            num_lost = sum(lost_vars)
+            num_tser = len(tser_vars)
+            num_tvmd = len(tvmd_vars)
+            num_timd = len(timd_vars)
+            num_lost = len(lost_vars)
             self._statistics[test_name]['counts'] = {}
             self._statistics[test_name]['counts']['tseries'] = num_tser
             self._statistics[test_name]['counts']['tvariant'] = num_tvmd
