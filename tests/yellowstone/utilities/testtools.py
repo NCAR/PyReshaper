@@ -284,8 +284,8 @@ class TestDB(object):
             num_steps = self._statistics[test_name]['length']
             var_stats = self._statistics[test_name]['variables']
             num_vars = len(var_stats)
-            meta_mask = [var_stats[v]['meta'] for v in var_stats]
-            tvar_mask = [var_stats[v]['tvariant'] for v in var_stats]
+            meta_mask = [var_stats[v]['meta'] for v in var_stats.keys()]
+            tvar_mask = [var_stats[v]['tvariant'] for v in var_stats.keys()]
 
             timd_mask = [meta_mask[i] and not tvar_mask[i]
                          for i in range(num_vars)]
@@ -333,15 +333,24 @@ class TestDB(object):
 
             # Compute maxima
             self._statistics[test_name]['maxsizes'] = {}
-            self._statistics[test_name]['maxsizes'][
-                'tseries'] = max([d['xsize'] for d, m in
-                                  zip(var_stats.values(), tser_mask) if m]) * num_steps
-            self._statistics[test_name]['maxsizes'][
-                'tvariant'] = max([d['xsize'] for d, m in
-                                   zip(var_stats.values(), tvmd_mask) if m]) * num_steps
-            self._statistics[test_name]['maxsizes'][
-                'tinvariant'] = max([d['xsize'] for d, m in
-                                     zip(var_stats.values(), timd_mask) if m])
+            if len(tser_mask) > 0:
+                maxsize = max([d['xsize'] for d, m in
+                               zip(var_stats.values(), tser_mask) if m]) * num_steps
+            else:
+                maxsize = 0
+            self._statistics[test_name]['maxsizes']['tseries'] = maxsize
+            if len(tser_mask) > 0:
+                maxsize = max([d['xsize'] for d, m in
+                               zip(var_stats.values(), tvmd_mask) if m]) * num_steps
+            else:
+                maxsize = 0
+            self._statistics[test_name]['maxsizes']['tvariant'] = maxsize
+            if len(tser_mask) > 0:
+                maxsize = max([d['xsize'] for d, m in
+                               zip(var_stats.values(), timd_mask) if m])
+            else:
+                maxsize = 0
+            self._statistics[test_name]['maxsizes']['tinvariant'] = maxsize
 
         # Set the analyzed flag to True
         self._analyzed = True
