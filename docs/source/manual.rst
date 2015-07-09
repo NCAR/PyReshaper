@@ -45,8 +45,22 @@ version.
 How do I set it up?
 ===================
 
-Installation
-------------
+Easy Installation
+-----------------
+
+The easiest way to install the PyReshaper is from the Python Package Index,
+PyPI.  To do this, use the ``pip`` tool like follows.
+
+::
+
+    $  pip install [--user] PyReshaper
+    
+If you do not have the required dependencies installed, then ``pip`` will
+install them for you at this time.  The ``--user`` option will be necessary
+if you do not have system install privileges on the machine you are using.
+    
+Installation from Source
+------------------------
 
 In this section, we describe how to install the PyReshaper package on a
 unix-like system. The procedure is similar for a Mac, but we have not
@@ -65,7 +79,7 @@ Enter into the newly created directory and check out the stable tag.
 ::
 
     $  cd PyReshaper
-    $  git checkout v0.9.2
+    $  git checkout [latest release]
 
 The contents of the repository will look like the following.
 
@@ -79,7 +93,7 @@ To install in package, type the following command from this directory.
 
 ::
 
-    $  python setup.py install --user
+    $  python setup.py install [--user]
 
 If you are a system administrator, you can leave off the ``--user``
 option, and the package will be installed in ``/usr/local``, by default.
@@ -89,12 +103,11 @@ the ``--prefix`` option.
 Generating the API Documentation
 --------------------------------
 
-If you are a developer, you may find the Doxygen-generated API
-documentation helpful in understanding the design and functionality of
-the PyReshaper code. To generate this documentation, you must have
-Sphinx available and installed. If you do, the API documentation can be
-easily generated with the following command from the ``docs``
-directory.
+If you are a developer, you may find the Sphinx API documentation helpful 
+in understanding the design and functionality of the PyReshaper code. To 
+generate this documentation, you must have Sphinx available and installed. 
+If you do, the API documentation can be easily generated with the following 
+command from the ``docs`` directory.
 
 ::
 
@@ -120,11 +133,14 @@ to the manual in the HTML documentation.
 Before Using the PyReshaper
 ---------------------------
 
-After the Pyreshaper package has been installed using the procedure
-above, you must add the installation site-packages directory to your
+If you installed the PyReshaper using ``pip``, then you should be ready to
+go.  However, if you using the ``--user`` option, the local install directories
+using by ``pip`` may not be in your paths.
+
+First, you must add the installation site-packages directory to your
 ``PYTHONPATH``. If you installed with the ``--user`` option, this means
-adding the ``$HOME/.local/lib/python2.X/site-packages`` directory to
-your ``PYTHONPATH``. If you specified a different ``--prefix`` option,
+adding the ``$HOME/.local/lib/python2.X/site-packages`` (on Linux) directory 
+to your ``PYTHONPATH``. If you specified a different ``--prefix`` option,
 then you must point to that prefix directory. For bash users, this is
 done with the following command.
 
@@ -134,7 +150,7 @@ done with the following command.
 
 where the ``$PREFIX`` is the root installation directory used when
 installing the PyReshaper package (``$HOME/.local/`` if using the
-``--user`` option), and the value of ``X`` will correspond to the
+``--user`` option on Linux), and the value of ``X`` will correspond to the
 version of Python used to install the PyReshaper package.
 
 If you want to use the command-line interface to the PyReshaper, you
@@ -383,6 +399,21 @@ By setting the ``verbosity`` parameter in the ``create_reshaper()``
 function to a value of 2 or above will result in the greatest amount of
 output.
 
+By default, the PyReshaper will not overwrite existing output files, if they
+exist.  In normal operation, this means the PyReshaper will error (and stop
+execution) if output files are already present.  This behavior can be 
+controlled with 2 other parameters: ``skip_existing`` and ``overwrite``.
+Both parameters can be ``True`` or ``False``, and they both default to
+``False``.  When the ``overwrite`` parameter is set to ``True``, the 
+PyReshaper will delete existing files before running the reshaper operation.
+When the ``skip_existing`` parameter is set to ``True``, the PyReshaper will
+skip generating time-series files for the variables with existing files
+present.  Both decisions are done *before* the time-slice to time-series
+convertion takes place, and in the case of the ``skip_existing`` parameter,
+this means the remaining variables for which existing output files were not
+found will be parallelized over during parallel operation.  If both parameters
+are used, then the ``overwrite`` parameter takes precedence.  
+
 Arguments to the ``convert()`` Function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -395,7 +426,7 @@ time consumed in the ``convert()`` function. (A value of ``0`` indicates
 no limit, or all output files will be generated.)
 
 Using the PyReshaper from the Unix Command-Line
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------
 
 While the most flexible way of using the PyReshaper is from within
 Python, as described above, it is also possible to run the PyReshaper
@@ -406,7 +437,8 @@ Python script ``slice2series``, which provides a command-line interface
 directory.)
 
 Below is an example of how to use the PyReshaper CLI, ``slice2series``,
-for a serial run.
+for a serial run, with all options and parameters specified on the
+command line.
 
 ::
 
@@ -444,14 +476,51 @@ In the above example, this will launch the ``slice2series`` script into
 the MPI environment already created by either a request for an
 interactive session or from an LSF submission script.
 
+It is also possible to run the ``slice2series` script with an existing
+*specification* (or ``Specifier`` class instance).  In this case, the existing
+``Specifier`` instance must be saved to a *serialized* file (``pickle``),
+such as with the following Python code.
+
+.. code:: py
+
+    import pickle
+    
+    # Assume "spec" is an existing Specifier instance
+    pickle.dump(spec, open("specfile.p", "wb") )
+    
+Similarly, a serialized (*pickled*) ``Specifier`` instance can be read from
+such a file with the following Python code.
+
+.. code:: py
+
+    import pickle
+    
+    spec = pickle.load( open("specfile.p", "rb") )
+    
+This is what the ``slice2series`` code actually does under the hood.  To
+use such a serialized ``Specifier`` instance from the command-line interface,
+use the ``--specfile`` option, as shown below.
+
+::
+
+    $  slice2series --serial --specfile=specfile.p
+
+Similarly, the parallel operation is simply preceded with the ``mpirun``
+command.
+
 Additional Arguments to the ``slice2series`` Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While the basic options shown in the previous two (2) examples above are
+While the basic options shown in the previous examples above are
 sufficient for most purposes, two additional options are available. The
 ``--verbosity`` option can be used to set the verbosity level, just like
 the ``verbosity`` argument to the ``create_reshaper()`` function
-described in the previous sections. Additionally, the ``--limit``
+described in the previous sections. The ``--limit``
 command-line option can be used to set the ``output_limit`` argument of
 the Reshaper ``convert()`` function, also described in the previous
 sections.
+
+Additionally, the ``--skip_existing`` command-line option, if present, will
+set the ``skip_existing`` parameter of the ``create_reshaper()`` function
+to ``True``.  Similarly, the ``--overwrite`` command-line option, if present,
+will set the ``overwrite`` parameter to ``True``.
