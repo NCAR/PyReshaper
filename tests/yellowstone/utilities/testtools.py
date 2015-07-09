@@ -339,13 +339,13 @@ class TestDB(object):
             else:
                 maxsize = 0
             self._statistics[test_name]['maxsizes']['tseries'] = maxsize
-            if len(tser_mask) > 0:
+            if len(tvmd_mask) > 0:
                 maxsize = max([d['xsize'] for d, m in
                                zip(var_stats.values(), tvmd_mask) if m]) * num_steps
             else:
                 maxsize = 0
             self._statistics[test_name]['maxsizes']['tvariant'] = maxsize
-            if len(tser_mask) > 0:
+            if len(timd_mask) > 0:
                 maxsize = max([d['xsize'] for d, m in
                                zip(var_stats.values(), timd_mask) if m])
             else:
