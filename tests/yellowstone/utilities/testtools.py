@@ -9,6 +9,7 @@
 
 # Builtin Modules
 import glob
+import json
 
 # Third-Party Modules
 import numpy as np
@@ -280,7 +281,70 @@ class TestDB(object):
                 # Close the file
                 infile.close()
 
-        # Set the analyzed flag to Tru
+            # Compute self-analysis parameters
+            num_steps = self._statistics[test_name]['length']
+            var_stats = self._statistics[test_name]['variables']
+            num_vars = len(var_stats)
+            meta_mask = [var_stats[v]['meta'] for v in var_stats]
+            tvar_mask = [var_stats[v]['tvariant'] for v in var_stats]
+
+            timd_mask = [meta_mask[i] and not tvar_mask[i]
+                         for i in range(num_vars)]
+            tvmd_mask = [meta_mask[i] and tvar_mask[i]
+                         for i in range(num_vars)]
+            tser_mask = [not meta_mask[i] and tvar_mask[i]
+                         for i in range(num_vars)]
+            lost_mask = [not meta_mask[i] and not tvar_mask[i]
+                         for i in range(num_vars)]
+
+            # Compute numbers/counts
+            self._statistics[test_name]['counts'] = {}
+            self._statistics[test_name]['counts'][
+                'tseries'] = sum(tser_mask)
+            self._statistics[test_name]['counts'][
+                'tvariant'] = sum(tvmd_mask)
+            self._statistics[test_name]['counts'][
+                'tinvariant'] = sum(timd_mask)
+            self._statistics[test_name]['counts'][
+                'other'] = sum(lost_mask)
+
+            # Compute shapes
+            self._statistics[test_name]['xshapes'] = {}
+            self._statistics[test_name]['xshapes'][
+                'tseries'] = set([d['xshape'] for d, m in
+                                  zip(var_stats.values(), tser_mask) if m])
+            self._statistics[test_name]['xshapes'][
+                'tvariant'] = set([d['xshape'] for d, m in
+                                   zip(var_stats.values(), tvmd_mask) if m])
+            self._statistics[test_name]['xshapes'][
+                'tinvariant'] = set([d['xshape'] for d, m in
+                                     zip(var_stats.values(), timd_mask) if m])
+
+            # Compute bytesizes
+            self._statistics[test_name]['totalsizes'] = {}
+            self._statistics[test_name]['totalsizes'][
+                'tseries'] = sum([d['xsize'] for d, m in
+                                  zip(var_stats.values(), tser_mask) if m]) * num_steps
+            self._statistics[test_name]['totalsizes'][
+                'tseries'] = sum([d['xsize'] for d, m in
+                                  zip(var_stats.values(), tvmd_mask) if m]) * num_steps
+            self._statistics[test_name]['totalsizes'][
+                'tseries'] = sum([d['xsize'] for d, m in
+                                  zip(var_stats.values(), timd_mask) if m])
+
+            # Compute maxima
+            self._statistics[test_name]['maxsizes'] = {}
+            self._statistics[test_name]['maxsizes'][
+                'tseries'] = max([d['xsize'] for d, m in
+                                  zip(var_stats.values(), tser_mask) if m]) * num_steps
+            self._statistics[test_name]['maxsizes'][
+                'tseries'] = max([d['xsize'] for d, m in
+                                  zip(var_stats.values(), tvmd_mask) if m]) * num_steps
+            self._statistics[test_name]['maxsizes'][
+                'tseries'] = max([d['xsize'] for d, m in
+                                  zip(var_stats.values(), timd_mask) if m])
+
+        # Set the analyzed flag to True
         self._analyzed = True
 
     def print_statistics(self):
@@ -301,63 +365,85 @@ class TestDB(object):
             var_stats = test_stats['variables']
             num_steps = test_stats['length']
 
-            num_vars = len(var_stats)
-            meta_mask = [var_stats[v]['meta'] for v in var_stats]
-            tvar_mask = [var_stats[v]['tvariant'] for v in var_stats]
+            print "   Number of Time Steps:", num_steps
+            print
 
-            timd_mask = [meta_mask[i] and not tvar_mask[i]
-                         for i in range(num_vars)]
-            tvmd_mask = [meta_mask[i] and tvar_mask[i]
-                         for i in range(num_vars)]
-            tser_mask = [not meta_mask[i] and tvar_mask[i]
-                         for i in range(num_vars)]
-            lost_mask = [not meta_mask[i] and not tvar_mask[i]
-                         for i in range(num_vars)]
-
-            num_tser = sum(tser_mask)
+            num_tser = test_stats['counts']['tseries']
             print "   Number of Time-Series Variables:            ", num_tser
-            num_tvmd = sum(tvmd_mask)
+            num_tvmd = test_stats['counts']['tvariant']
             print "   Number of Time-Variant Metadata Variables:  ", num_tvmd
-            num_timd = sum(timd_mask)
+            num_timd = test_stats['counts']['tinvariant']
             print "   Number of Time-Invariant Metadata Variables:", num_timd
-            num_lost = sum(lost_mask)
+            num_lost = test_stats['counts']['other']
             if num_lost > 0:
                 print "   WARNING:", num_lost, " unclassified variables"
             print
 
-            print "   Number of Time Steps:", num_steps
-
-            tvmd_shapes = set()
-            timd_shapes = set()
-            tser_shapes = set()
-            for name, stats in var_stats.items():
-                if stats['meta']:
-                    if stats['tvariant']:
-                        tvmd_shapes.add(stats['xshape'])
-                    else:
-                        timd_shapes.add(stats['xshape'])
-                else:
-                    tser_shapes.add(stats['xshape'])
-
-            print "   Time-Series Variable Shapes:"
-            print "      ", " ".join(tser_shapes)
-            print "   Time-Variant Metadata Shapes:"
-            print "      ", " ".join(tvmd_shapes)
-            print "   Time-Invariant Metadata Shapes:"
-            print "      ", " ".join(timd_shapes)
+            print "   Time-Series Variable Transverse Shapes:"
+            print "      ", " ".join(test_stats['xshapes']['tseries'])
+            print "   Time-Variant Metadata Transverse Shapes:"
+            print "      ", " ".join(test_stats['xshapes']['tvariant'])
+            print "   Time-Invariant Metadata Transverse Shapes:"
+            print "      ", " ".join(test_stats['xshapes']['tinvariant'])
             print
 
-            tser_xsize = sum([d['xsize']
-                              for d, m in zip(var_stats.values(), tser_mask)])
-            tvmd_xsize = sum([d['xsize']
-                              for d, m in zip(var_stats.values(), tvmd_mask)])
-            timd_xsize = sum([d['xsize']
-                              for d, m in zip(var_stats.values(), timd_mask)])
+            tser_totsize = test_stats['totalsizes']['tseries']
+            tvmd_totsize = test_stats['totalsizes']['tvariant']
+            timd_totsize = test_stats['totalsizes']['tinvariant']
 
-            tser_bytesize = tser_xsize * num_steps
-            tvmd_bytesize = tvmd_xsize * num_steps
-            timd_bytesize = timd_xsize
+            print "   Time-Series Variable Total Size:   ", __nbyte_str(tser_totsize)
+            print "   Time-Variant Metadata Total Size:  ", __nbyte_str(tvmd_totsize)
+            print "   Time-Invariant Metadata Total Size:", __nbyte_str(timd_totsize)
+            print
 
-            print "   Time-Series Variable Total Size:   ", __nbyte_str(tser_bytesize)
-            print "   Time-Variant Metadata Total Size:  ", __nbyte_str(tser_bytesize)
-            print "   Time-Invariant Metadata Total Size:", __nbyte_str(tser_bytesize)
+            tser_maxsize = test_stats['maxsizes']['tseries']
+            tvmd_maxsize = test_stats['maxsizes']['tvariant']
+            timd_maxsize = test_stats['maxsizes']['tinvariant']
+
+            print "   Time-Series Variable Max Size:   ", __nbyte_str(tser_maxsize)
+            print "   Time-Variant Metadata Max Size:  ", __nbyte_str(tvmd_maxsize)
+            print "   Time-Invariant Metadata Max Size:", __nbyte_str(timd_maxsize)
+            print
+
+    def save_statistics(self, filename="teststats.json"):
+        """
+        Save the statistics information to a JSON data file
+
+        Parameters:
+            filename (str): The name of the JSON data file to write
+        """
+
+        # Check type
+        if type(filename) is not str:
+            err_msg = "File name must be a string"
+            raise TypeError(err_msg)
+
+        # Check if statistics are available
+        if self._analyzed:
+            json.dump(self._statistics, open(filename, 'w'))
+
+    def load_statistics(self, filename="teststats.json"):
+        """
+        Load the statistics information from a JSON data file
+
+        Parameters:
+            filename (str): The name of the JSON data file to read
+        """
+
+        # Check type
+        if type(filename) is not str:
+            err_msg = "File name must be a string"
+            raise TypeError(err_msg)
+
+        # Check if statistics are available
+        try:
+            statfile = open(filename, 'r')
+            self._statistics = dict(json.load(statfile))
+            statfile.close()
+        except:
+            err_msg = "Failed to open and read statistics file '" + \
+                str(filename) + "'"
+            raise RuntimeError(err_msg)
+
+        # Set the analyzed flag
+        self._analyzed = True
