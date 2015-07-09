@@ -19,41 +19,34 @@ from pyreshaper import specification
 
 
 #==============================================================================
-# Data Type Mapping & Sizes
+# Private Bytesize from Typecode Calculator
 #==============================================================================
-__DTYPE_MAP = {'d': np.float64, 'f': np.float32, 'l': np.long, 'i': np.int32,
-               'h': np.int16, 'b': np.int8, 'S1': np.character}
-
-
-def __dtype_itemsize(tc):
-    dt = np.float
-    if tc in __DTYPE_MAP:
-        dt = __DTYPE_MAP(tc)
-    return np.dtype(dt).itemsize
-
-
-def __shape_size(shp):
-    if (len(shp) > 0):
-        return reduce(lambda x, y: x * y, shp)
-    else:
-        return 1
+def __bytesize(tc):
+    DTYPE_MAP = {'d': np.float64, 'f': np.float32, 'l': np.long, 'i': np.int32,
+                 'h': np.int16, 'b': np.int8, 'S1': np.character}
+    return np.dtype(DTYPE_MAP.get(tc, np.float)).itemsize
 
 
 #==============================================================================
-# Byte Size Conversion & Units
+# Private Size from Shape Calculator
 #==============================================================================
-__BYTE_UNITS = ['Bytes', 'KB', 'MB', 'GB', 'PB']
+def __shape2size(shp):
+    return 1 if len(shp) < 1 else reduce(lambda x, y: x * y, shp)
 
 
+#==============================================================================
+# Private Bytesize to Unit-string Converter
+#==============================================================================
 def __nbyte_str(n, exp=0):
+    BYTE_UNITS = ['Bytes', 'KB', 'MB', 'GB', 'PB']
     if (n > 1024.):
         return __nbyte_str(n / 1024., exp=exp + 1)
     else:
-        if exp < len(__BYTE_UNITS):
-            units = __BYTE_UNITS[exp]
+        if exp < len(BYTE_UNITS):
+            units = BYTE_UNITS[exp]
         else:
-            n *= 1024.**(exp + 1 - len(__BYTE_UNITS))
-            units = __BYTE_UNITS[-1]
+            n *= 1024.**(exp + 1 - len(BYTE_UNITS))
+            units = BYTE_UNITS[-1]
         return '%.4f %s' % (n, units)
 
 
@@ -187,6 +180,10 @@ class TestDB(object):
             err_msg = "Test list must be a list of string test names"
             raise TypeError(err_msg)
 
+        # If test list is empty, assume all tests
+        if len(test_list) == 0:
+            test_list = self._database.keys()
+
         # Construct the list of specifiers
         spec_list = [self.create_specifier(test_name, ncfmt, **kwargs)
                      for test_name in test_list]
@@ -236,32 +233,36 @@ class TestDB(object):
 
             # Gather statistics for variables in dataset
             self._statistics[test_name] = {}
+            self._statistics[test_name]['length'] = infile.dimensions[tdim]
+            self._statistics[test_name]['variables'] = {}
             for var_name in infile.variables.keys():
-                self._statistics[test_name][var_name] = {}
+                self._statistics[test_name]['variables'][var_name] = {}
                 var_obj = infile.variables[var_name]
 
-                xshape = var_obj.shape
-                tlength = 1
                 tvariant = False
+                xshape = var_obj.shape
                 if tdim in var_obj.dimensions:
-                    xshape = list(xshape)
+                    xshape = list(shape)
                     tindex = var_obj.dimensions.index(tdim)
-                    tlength = xshape.pop(tindex)
+                    xshape.pop(tindex)
                     xshape = tuple(xshape)
                     tvariant = True
-                self._statistics[test_name][var_name]['tvariant'] = tvariant
-                self._statistics[test_name][var_name]['xshape'] = xshape
-                self._statistics[test_name][var_name]['length'] = tlength
+                self._statistics[test_name]['variables'][
+                    var_name]['tvariant'] = tvariant
+                self._statistics[test_name]['variables'][
+                    var_name]['xshape'] = xshape
 
-                xlen = __shape_size(xshape)
-                typecode = var_obj.typecode()
-                xsize = xlen * __dtype_itemsize(typecode)
-                self._statistics[test_name][var_name]['xsize'] = xsize
+                xlen = __shape2size(xshape)
+                xsize = xlen * __bytesize(var_obj.typecode())
+                self._statistics[test_name]['variables'][
+                    var_name]['xsize'] = xsize
 
                 if var_name in metadata_names:
-                    self._statistics[test_name][var_name]['meta'] = True
+                    self._statistics[test_name][
+                        'variables'][var_name]['meta'] = True
                 else:
-                    self._statistics[test_name][var_name]['meta'] = False
+                    self._statistics[test_name]['variables'][
+                        var_name]['meta'] = False
 
             # Close the first file
             infile.close()
@@ -272,14 +273,9 @@ class TestDB(object):
                 # Open the file
                 infile = Nio.open_file(file_name, 'r')
 
-                # Get the number of time steps in the file
-                tlength = infile.dimensions[tdim]
-
-                # Add the time length to each time-variant variable
-                for var_name in self._statistics[test_name]:
-                    if self._statistics[test_name][var_name]['tvariant']:
-                        self._statistics[test_name][
-                            var_name]['length'] += tlength
+                # And number of time steps to the test data
+                self._statistics[test_name][
+                    'length'] += infile.dimensions[tdim]
 
                 # Close the file
                 infile.close()
@@ -302,23 +298,66 @@ class TestDB(object):
             print
 
             test_stats = self._statistics[test_name]
-            num_vars = len(test_stats)
-            meta_mask = [test_stats[v]['meta'] for v in test_stats]
-            tvar_mask = [test_stats[v]['tvariant'] for v in test_stats]
+            var_stats = test_stats['variables']
+            num_steps = test_stats['length']
 
+            num_vars = len(var_stats)
+            meta_mask = [var_stats[v]['meta'] for v in var_stats]
+            tvar_mask = [var_stats[v]['tvariant'] for v in var_stats]
+
+            timd_mask = [meta_mask[i] and not tvar_mask[i]
+                         for i in range(num_vars)]
+            tvmd_mask = [meta_mask[i] and tvar_mask[i]
+                         for i in range(num_vars)]
             tser_mask = [not meta_mask[i] and tvar_mask[i]
-                         for i in range(num_vars)]
-            imet_mask = [meta_mask[i] and not tvar_mask[i]
-                         for i in range(num_vars)]
-            tmet_mask = [meta_mask[i] and tvar_mask[i]
                          for i in range(num_vars)]
             lost_mask = [not meta_mask[i] and not tvar_mask[i]
                          for i in range(num_vars)]
 
             num_tser = sum(tser_mask)
             print "   Number of Time-Series Variables:            ", num_tser
-            num_tmet = sum(tmet_mask)
-            print "   Number of Time-Variant Metadata Variables:  ", num_tmet
-            num_imet = sum(imet_mask)
-            print "   Number of Time-Invariant Metadata Variables:", num_imet
+            num_tvmd = sum(tvmd_mask)
+            print "   Number of Time-Variant Metadata Variables:  ", num_tvmd
+            num_timd = sum(timd_mask)
+            print "   Number of Time-Invariant Metadata Variables:", num_timd
             num_lost = sum(lost_mask)
+            if num_lost > 0:
+                print "   WARNING:", num_lost, " unclassified variables"
+            print
+
+            print "   Number of Time Steps:", num_steps
+
+            tvmd_shapes = set()
+            timd_shapes = set()
+            tser_shapes = set()
+            for name, stats in var_stats.items():
+                if stats['meta']:
+                    if stats['tvariant']:
+                        tvmd_shapes.add(stats['xshape'])
+                    else:
+                        timd_shapes.add(stats['xshape'])
+                else:
+                    tser_shapes.add(stats['xshape'])
+
+            print "   Time-Series Variable Shapes:"
+            print "      ", " ".join(tser_shapes)
+            print "   Time-Variant Metadata Shapes:"
+            print "      ", " ".join(tvmd_shapes)
+            print "   Time-Invariant Metadata Shapes:"
+            print "      ", " ".join(timd_shapes)
+            print
+
+            tser_xsize = sum([d['xsize']
+                              for d, m in zip(var_stats.values(), tser_mask)])
+            tvmd_xsize = sum([d['xsize']
+                              for d, m in zip(var_stats.values(), tvmd_mask)])
+            timd_xsize = sum([d['xsize']
+                              for d, m in zip(var_stats.values(), timd_mask)])
+
+            tser_bytesize = tser_xsize * num_steps
+            tvmd_bytesize = tvmd_xsize * num_steps
+            timd_bytesize = timd_xsize
+
+            print "   Time-Series Variable Total Size:   ", __nbyte_str(tser_bytesize)
+            print "   Time-Variant Metadata Total Size:  ", __nbyte_str(tser_bytesize)
+            print "   Time-Invariant Metadata Total Size:", __nbyte_str(tser_bytesize)
