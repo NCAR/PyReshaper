@@ -297,15 +297,15 @@ class TestDB(object):
                          for i in range(num_vars)]
 
             # Compute numbers/counts
+            num_tser = sum(tser_mask)
+            num_tvmd = sum(tvmd_mask)
+            num_timd = sum(timd_mask)
+            num_lost = sum(lost_mask)
             self._statistics[test_name]['counts'] = {}
-            self._statistics[test_name]['counts'][
-                'tseries'] = sum(tser_mask)
-            self._statistics[test_name]['counts'][
-                'tvariant'] = sum(tvmd_mask)
-            self._statistics[test_name]['counts'][
-                'tinvariant'] = sum(timd_mask)
-            self._statistics[test_name]['counts'][
-                'other'] = sum(lost_mask)
+            self._statistics[test_name]['counts']['tseries'] = num_tser
+            self._statistics[test_name]['counts']['tvariant'] = num_tvmd
+            self._statistics[test_name]['counts']['tinvariant'] = num_timd
+            self._statistics[test_name]['counts']['other'] = snum_lost
 
             # Compute shapes
             self._statistics[test_name]['xshapes'] = {}
@@ -333,19 +333,19 @@ class TestDB(object):
 
             # Compute maxima
             self._statistics[test_name]['maxsizes'] = {}
-            if len(tser_mask) > 0:
+            if num_tser > 0:
                 maxsize = max([d['xsize'] for d, m in
                                zip(var_stats.values(), tser_mask) if m]) * num_steps
             else:
                 maxsize = 0
             self._statistics[test_name]['maxsizes']['tseries'] = maxsize
-            if len(tvmd_mask) > 0:
+            if num_tvmd > 0:
                 maxsize = max([d['xsize'] for d, m in
                                zip(var_stats.values(), tvmd_mask) if m]) * num_steps
             else:
                 maxsize = 0
             self._statistics[test_name]['maxsizes']['tvariant'] = maxsize
-            if len(timd_mask) > 0:
+            if num_timd > 0:
                 maxsize = max([d['xsize'] for d, m in
                                zip(var_stats.values(), timd_mask) if m])
             else:
