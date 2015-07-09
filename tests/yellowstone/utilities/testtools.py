@@ -8,11 +8,11 @@
 #==============================================================================
 
 # Builtin Modules
+import os
 import glob
 import json
 
 # Third-Party Modules
-import numpy as np
 import Nio
 
 # Package Modules
