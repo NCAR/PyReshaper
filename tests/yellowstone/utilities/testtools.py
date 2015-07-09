@@ -22,7 +22,7 @@ from pyreshaper import specification
 #==============================================================================
 # Private Bytesize from Typecode Calculator
 #==============================================================================
-def __bytesize(tc):
+def _bytesize(tc):
     DTYPE_MAP = {'d': np.float64, 'f': np.float32, 'l': np.long, 'i': np.int32,
                  'h': np.int16, 'b': np.int8, 'S1': np.character}
     return np.dtype(DTYPE_MAP.get(tc, np.float)).itemsize
@@ -31,14 +31,14 @@ def __bytesize(tc):
 #==============================================================================
 # Private Size from Shape Calculator
 #==============================================================================
-def __shape2size(shp):
+def _shape2size(shp):
     return 1 if len(shp) < 1 else reduce(lambda x, y: x * y, shp)
 
 
 #==============================================================================
 # Private Bytesize to Unit-string Converter
 #==============================================================================
-def __nbyte_str(n, exp=0):
+def _nbyte_str(n, exp=0):
     BYTE_UNITS = ['Bytes', 'KB', 'MB', 'GB', 'PB']
     if (n > 1024.):
         return __nbyte_str(n / 1024., exp=exp + 1)
