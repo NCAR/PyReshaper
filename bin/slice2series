@@ -90,9 +90,7 @@ def main(options, input_file_list):
 
         # Try importing the file
         try:
-            specfile = open(options.specfile, 'r')
-            spec = pickle.load(specfile)
-            specfile.close()
+            spec = pickle.load(specfile, open(options.specfile, 'rb'))
         except:
             err_msg = "Specifier File '" + str(options.specfile) + "' " + \
                       "could not be opened and read"
