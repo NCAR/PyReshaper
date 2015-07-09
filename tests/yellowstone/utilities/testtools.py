@@ -369,11 +369,11 @@ class TestDB(object):
             print
 
             print "   Time-Series Variable Transverse Shapes:"
-            print "      ", " ".join(test_stats['xshapes']['tseries'])
+            print "      ", " ".join(str(test_stats['xshapes']['tseries']))
             print "   Time-Variant Metadata Transverse Shapes:"
-            print "      ", " ".join(test_stats['xshapes']['tvariant'])
+            print "      ", " ".join(str(test_stats['xshapes']['tvariant']))
             print "   Time-Invariant Metadata Transverse Shapes:"
-            print "      ", " ".join(test_stats['xshapes']['tinvariant'])
+            print "      ", " ".join(str(test_stats['xshapes']['tinvariant']))
             print
 
             tser_totsize = test_stats['totalsizes']['tseries']
