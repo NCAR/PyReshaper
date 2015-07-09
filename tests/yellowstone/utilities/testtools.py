@@ -325,11 +325,11 @@ class TestDB(object):
                 'tseries'] = sum([d['xsize'] for d, m in
                                   zip(var_stats.values(), tser_mask) if m]) * num_steps
             self._statistics[test_name]['totalsizes'][
-                'tseries'] = sum([d['xsize'] for d, m in
-                                  zip(var_stats.values(), tvmd_mask) if m]) * num_steps
+                'tvariant'] = sum([d['xsize'] for d, m in
+                                   zip(var_stats.values(), tvmd_mask) if m]) * num_steps
             self._statistics[test_name]['totalsizes'][
-                'tseries'] = sum([d['xsize'] for d, m in
-                                  zip(var_stats.values(), timd_mask) if m])
+                'tinvariant'] = sum([d['xsize'] for d, m in
+                                     zip(var_stats.values(), timd_mask) if m])
 
             # Compute maxima
             self._statistics[test_name]['maxsizes'] = {}
@@ -337,11 +337,11 @@ class TestDB(object):
                 'tseries'] = max([d['xsize'] for d, m in
                                   zip(var_stats.values(), tser_mask) if m]) * num_steps
             self._statistics[test_name]['maxsizes'][
-                'tseries'] = max([d['xsize'] for d, m in
-                                  zip(var_stats.values(), tvmd_mask) if m]) * num_steps
+                'tvariant'] = max([d['xsize'] for d, m in
+                                   zip(var_stats.values(), tvmd_mask) if m]) * num_steps
             self._statistics[test_name]['maxsizes'][
-                'tseries'] = max([d['xsize'] for d, m in
-                                  zip(var_stats.values(), timd_mask) if m])
+                'tinvariant'] = max([d['xsize'] for d, m in
+                                     zip(var_stats.values(), timd_mask) if m])
 
         # Set the analyzed flag to True
         self._analyzed = True
