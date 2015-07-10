@@ -456,11 +456,12 @@ class TestDB(object):
             vlist = ", ".join([str(v) for v in
                                test_stats['names']['tinvariant']])
             print "      " + "\n      ".join(textwrap.wrap(vlist))
-            print "   Unclassified Variables (neither meta not time-variant):"
-            vlist = ", ".join([str(v) for v in
-                               test_stats['names']['other']])
-            print "      " + "\n      ".join(textwrap.wrap(vlist))
-            print
+            if num_lost > 0:
+                print "   Unclassified Variables (neither meta nor time-variant):"
+                vlist = ", ".join([str(v) for v in
+                                   test_stats['names']['other']])
+                print "      " + "\n      ".join(textwrap.wrap(vlist))
+                print
 
             # Print Transverse Shapes
             print "   Time-Series Variable Transverse Shapes:"
