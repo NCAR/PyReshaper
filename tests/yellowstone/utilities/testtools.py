@@ -344,6 +344,13 @@ class TestDB(object):
             lost_vars = [str(v) for (v, s) in var_stats.items()
                          if not s['meta'] and not s['tvariant']]
 
+            # Record the variables names
+            self._statistics[test_name]['names'] = {}
+            self._statistics[test_name]['names']['tseries'] = tser_vars
+            self._statistics[test_name]['names']['tvariant'] = tvmd_vars
+            self._statistics[test_name]['names']['tinvariant'] = timd_vars
+            self._statistics[test_name]['names']['other'] = lost_vars
+
             # Compute numbers/counts
             num_tser = len(tser_vars)
             num_tvmd = len(tvmd_vars)
@@ -367,9 +374,9 @@ class TestDB(object):
             # Compute bytesizes
             self._statistics[test_name]['totalsizes'] = {}
             self._statistics[test_name]['totalsizes']['tseries'] = \
-                sum([var_stats[v]['xsize'] for v in tser_vars])
+                sum([var_stats[v]['xsize'] for v in tser_vars]) * num_steps
             self._statistics[test_name]['totalsizes']['tvariant'] = \
-                sum([var_stats[v]['xsize'] for v in tvmd_vars])
+                sum([var_stats[v]['xsize'] for v in tvmd_vars]) * num_steps
             self._statistics[test_name]['totalsizes']['tinvariant'] = \
                 sum([var_stats[v]['xsize'] for v in timd_vars])
 
