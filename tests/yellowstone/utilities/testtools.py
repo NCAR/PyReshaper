@@ -300,6 +300,8 @@ class TestDB(object):
                     xshape.pop(var_obj.dimensions.index(tdim))
                     xshape = tuple(xshape)
                     tvariant = True
+                if not tvariant:
+                    metadata_names.add(var_name)
                 self._statistics[test_name]['variables'][
                     var_name]['tvariant'] = tvariant
                 self._statistics[test_name]['variables'][
