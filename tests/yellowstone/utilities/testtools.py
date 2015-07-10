@@ -442,7 +442,7 @@ class TestDB(object):
             print
 
             # Print names
-            print "   Time-Series Variables:",
+            print "   Time-Series Variables:"
             vlist = ", ".join([str(v) for v in
                                test_stats['names']['tseries']])
             print "      " + "\n      ".join(textwrap.wrap(vlist))
