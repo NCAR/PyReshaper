@@ -465,14 +465,14 @@ class TestDB(object):
 
             # Print Transverse Shapes
             print "   Time-Series Variable Transverse Shapes:"
-            print "      ", " ".join([str(s) for s in
-                                      test_stats['xshapes']['tseries']])
+            print "      " + " ".join([str(s) for s in
+                                       test_stats['xshapes']['tseries']])
             print "   Time-Variant Metadata Transverse Shapes:"
-            print "      ", " ".join([str(s) for s in
-                                      test_stats['xshapes']['tvariant']])
+            print "      " + " ".join([str(s) for s in
+                                       test_stats['xshapes']['tvariant']])
             print "   Time-Invariant Metadata Transverse Shapes:"
-            print "      ", " ".join([str(s) for s in
-                                      test_stats['xshapes']['tinvariant']])
+            print "      " + " ".join([str(s) for s in
+                                       test_stats['xshapes']['tinvariant']])
             print
 
             # Print total bytesizes
