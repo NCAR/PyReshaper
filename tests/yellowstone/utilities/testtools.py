@@ -541,7 +541,7 @@ class TestDB(object):
 
         # Try reading the statistics
         try:
-            self._statistics = dict(json.load(statfile))
+            self._statistics = dict(json.load(fp))
         except:
             err_msg = "Failed to read statistics file"
             raise RuntimeError(err_msg)
