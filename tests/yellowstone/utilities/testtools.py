@@ -218,7 +218,7 @@ class TestDB(object):
             test_list = self._database.keys()
 
         # Construct the list of specifiers
-        specs = [self.create_specifier(test_name, ncfmt, **kwargs)
+        specs = [self.create_specifier(test_name, ncfmt, outdir, **kwargs)
                  for test_name in tests]
 
         # Return a dictionary of named specifiers
