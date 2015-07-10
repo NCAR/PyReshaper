@@ -89,10 +89,28 @@ class TestDB(object):
                 + str(abs_path)
             raise ValueError(err_msg)
 
-        # Reset the analysis state to False
-        self._analyzed = False
+        # Initialize the statistics database
+        self._statistics = {}
 
-    def list(self):
+    def get_database(self):
+        """
+        Return the testing database as a dictionary
+
+        Returns:
+            dict: The testing database
+        """
+        return self._database
+
+    def get_statistics(self):
+        """
+        Return the test analysis statistics as a dictionary
+
+        Returns:
+            dict: The statistics database
+        """
+        return self._statistics
+
+    def print_list(self):
         """
         List the tests in the test database.
         """
@@ -102,7 +120,8 @@ class TestDB(object):
             print '   ' + str(test_name)
         return
 
-    def create_specifier(self, test_name, ncfmt='netcdf4c', **kwargs):
+    def create_specifier(self, test_name, ncfmt='netcdf4c',
+                         outdir='', **kwargs):
         """
         Create a Specifier object for the given named test.
 
@@ -111,6 +130,10 @@ class TestDB(object):
                 for which to construct the Specifier.
             ncfmt (str): The NetCDF format string to be passed to the
                 Specifier.
+            outdir (str): An optional path string to be prepended to the
+                "output_prefix" argument of the Specifier.  To be used to
+                direct output to a different location.  Leave empty if using
+                absolute paths in the test's "output_prefix".
             kwargs (dict): A dictionary of additional options to be
                 sent to the Specifier.
 
@@ -126,6 +149,9 @@ class TestDB(object):
         if type(ncfmt) is not str:
             err_msg = "NetCDF format must be a string"
             raise TypeError(err_msg)
+        if type(outdir) is not str:
+            err_msg = "Output directory must be a string"
+            raise TypeError(err_msg)
 
         # Check for the given test name
         if test_name not in self._database:
@@ -139,7 +165,8 @@ class TestDB(object):
             input_glob_str = str(input_glob)
             full_input_glob = str(os.path.join(input_dir, input_glob))
             infiles.extend(glob.glob(full_input_glob))
-        prefix = str(self._database[test_name]['output_prefix'])
+        prefix = str(os.path.join(
+            outdir, self._database[test_name]['output_prefix']))
         suffix = str(self._database[test_name]['output_suffix'])
         metadata = map(str, self._database[test_name]['metadata'])
 
@@ -154,58 +181,83 @@ class TestDB(object):
                                        prefix=prefix, suffix=suffix,
                                        metadata=metadata, **kwargs)
 
-    def create_specifiers(self, test_list=[], ncfmt='netcdf4c', **kwargs):
+    def create_specifiers(self, tests=[], ncfmt='netcdf4c',
+                          outdir='', **kwargs):
         """
         Create a dictionary of named Specifier objects for a list of tests.
 
         Parameters:
-            test_list (list): A list of string names of tests in the database
+            tests (list): A list of string names of tests in the database
                 for which to construct Specifiers.
             ncfmt (str): The NetCDF format string to be passed to the
                 Specifier.
+            outdir (str): An optional path string to be prepended to the
+                "output_prefix" argument of the Specifier.  To be used to
+                direct output to a different location.  Leave empty if using
+                absolute paths in the test's "output_prefix".
             kwargs (dict): A dictionary of additional options to be
                 sent to the Specifier.
 
         Returns:
-            Specifier: A Specifier instance with the information to run the
-                named test.
+            list: A list of Specifier instances with the information to run the
+                named tests.
         """
 
         # Check types
-        if type(test_list) is not list:
-            err_msg = "Test list must be a list of string test names"
+        if not isinstance(tests, (list, tuple)):
+            err_msg = "Test list must be a list or tuple of string test names"
             raise TypeError(err_msg)
-        test_types = [type(test_name) is str for test_name in test_list]
+        test_types = [type(test_name) is str for test_name in tests]
         if not all(test_types):
             err_msg = "Test list must be a list of string test names"
             raise TypeError(err_msg)
 
         # If test list is empty, assume all tests
-        if len(test_list) == 0:
+        if len(tests) == 0:
             test_list = self._database.keys()
 
         # Construct the list of specifiers
-        spec_list = [self.create_specifier(test_name, ncfmt, **kwargs)
-                     for test_name in test_list]
+        specs = [self.create_specifier(test_name, ncfmt, **kwargs)
+                 for test_name in tests]
 
         # Return a dictionary of named specifiers
-        return dict(zip(test_list, spec_list))
+        return dict(zip(tests, specs))
 
-    def analyze(self):
+    def analyze(self, tests=[], force=False):
         """
         Analyze the test database to determine test statistics
+
+        Parameters:
+            tests (list): A list of string names of tests in the database
+                to analyze.  If empty, assume all tests.
+            force (bool): Whether to force reanalysis of tests that have
+                already been analyzed
         """
 
-        # If analysis has already been done, skip
-        if self._analyzed:
-            return
+        # Check type
+        if not isinstance(tests, (list, tuple)):
+            err_msg = "Test name list must be of list or tuple type"
+            raise TypeError(err_msg)
 
-        # Initialize test statistics database
-        self._statistics = {}
+        # Error if tests not in database
+        bad_names = [t for t in tests if t not in self._database]
+        if len(bad_names) > 0:
+            err_msg = "Tests not found in database: " + ", ".join(bad_names)
+            raise ValueError(err_msg)
+
+        # Assume all tests to be analyzed if empty input
+        if len(tests) == 0:
+            tests = self._database.keys()
+
+        # If analysis has already been done, remove those tests
+        if not force:
+            tests = [t for t in tests if t not in self._statistics]
+            for test_name in [t for t in tests if t in self._statistics]:
+                print "Not Analyzing Test:", str(test_name)
 
         # Generate statistics for each test
-        for test_name in self._database:
-            print "Analyzing test:", str(test_name)
+        for test_name in tests:
+            print "Analyzing Test:", str(test_name)
 
             # Create a specifier for this test
             spec = self.create_specifier(str(test_name), ncfmt='netcdf')
@@ -333,17 +385,29 @@ class TestDB(object):
                 max([var_stats[v]['xsize'] for v in timd_vars])
             self._statistics[test_name]['maxsizes']['tinvariant'] = maxsize
 
-        # Set the analyzed flag to True
-        self._analyzed = True
-
-    def print_statistics(self):
+    def print_statistics(self, tests=[]):
         """
         Print the statistics information determined from self analysis
+
+        Parameters:
+            tests (list): A list of string names of tests in the database
+                to print.  If empty, assume all tests.
         """
 
-        # Perform self analysis, if needed
-        if not self._analyzed:
-            self.analyze()
+        # Check type
+        if not isinstance(tests, (list, tuple)):
+            err_msg = "Test name list must be of list or tuple type"
+            raise TypeError(err_msg)
+
+        # Error if tests not in database
+        bad_names = [t for t in tests if t not in self._statistics]
+        if len(bad_names) > 0:
+            err_msg = "Tests not found in statistics: " + ", ".join(bad_names)
+            raise ValueError(err_msg)
+
+        # Assume all tests to be analyzed if empty input
+        if len(tests) == 0:
+            tests = self._statistics.keys()
 
         # Print the statistics information
         for test_name in self._statistics:
@@ -397,45 +461,58 @@ class TestDB(object):
             print "   Time-Invariant Metadata Max Size:", _nbyte_str(timd_maxsize)
             print
 
-    def save_statistics(self, filename="teststats.json"):
+    def save_statistics(self, fileobj="teststats.json"):
         """
         Save the statistics information to a JSON data file
 
         Parameters:
-            filename (str): The name of the JSON data file to write
+            fileobj (str, file): The name of the JSON data file to write, or an
+                open file instance with write permissions
         """
 
-        # Check type
-        if type(filename) is not str:
-            err_msg = "File name must be a string"
+        # Check types
+        if isinstance(fileobj, str):
+            fp = open(fileobj, 'w')
+        elif isinstance(fileobj, file):
+            fp = fileobj
+        else:
+            err_msg = "File object must be a string or file instance"
             raise TypeError(err_msg)
 
-        # Check if statistics are available
-        if self._analyzed:
-            json.dump(self._statistics, open(filename, 'w'))
+        # Dump JSON data to file
+        try:
+            json.dump(self._statistics, fp)
+        except:
+            err_msg = "Failed to write statistics file"
+            raise RuntimeError(err_msg)
 
-    def load_statistics(self, filename="teststats.json"):
+        # Close the file
+        fp.close()
+
+    def load_statistics(self, fileobj="teststats.json"):
         """
         Load the statistics information from a JSON data file
 
         Parameters:
-            filename (str): The name of the JSON data file to read
+            fileobj (str): The name of the JSON data file to read or an
+                open file instance with read permissions
         """
 
-        # Check type
-        if type(filename) is not str:
-            err_msg = "File name must be a string"
+        # Check types
+        if isinstance(fileobj, str):
+            fp = open(fileobj, 'r')
+        elif isinstance(fileobj, file):
+            fp = fileobj
+        else:
+            err_msg = "File object must be a string or file instance"
             raise TypeError(err_msg)
 
-        # Check if statistics are available
+        # Try reading the statistics
         try:
-            statfile = open(filename, 'r')
             self._statistics = dict(json.load(statfile))
-            statfile.close()
         except:
-            err_msg = "Failed to open and read statistics file '" + \
-                str(filename) + "'"
+            err_msg = "Failed to read statistics file"
             raise RuntimeError(err_msg)
 
-        # Set the analyzed flag
-        self._analyzed = True
+        # Close the file
+        fp.close()
