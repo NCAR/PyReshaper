@@ -11,6 +11,7 @@
 import os
 import glob
 import json
+import textwrap
 
 # Third-Party Modules
 import numpy as np
@@ -441,18 +442,22 @@ class TestDB(object):
             print
 
             # Print names
-            print "   Time-Series Variables:"
-            print "      ", ", ".join([str(v) for v in
-                                       test_stats['names']['tseries']])
+            print "   Time-Series Variables:",
+            vlist = ", ".join([str(v) for v in
+                               test_stats['names']['tseries']])
+            print "      " + "\n      ".join(textwrap.wrap(vlist))
             print "   Time-Variant Metadata Variables:"
-            print "      ", ", ".join([str(v) for v in
-                                       test_stats['names']['tvariant']])
+            vlist = ", ".join([str(v) for v in
+                               test_stats['names']['tvariant']])
+            print "      " + "\n      ".join(textwrap.wrap(vlist))
             print "   Time-Invariant Metadata Variables:"
-            print "      ", ", ".join([str(v) for v in
-                                       test_stats['names']['tinvariant']])
+            vlist = ", ".join([str(v) for v in
+                               test_stats['names']['tinvariant']])
+            print "      " + "\n      ".join(textwrap.wrap(vlist))
             print "   Unclassified Variables (neither meta not time-variant):"
-            print "      ", ", ".join([str(v) for v in
-                                       test_stats['names']['other']])
+            vlist = ", ".join([str(v) for v in
+                               test_stats['names']['other']])
+            print "      " + "\n      ".join(textwrap.wrap(vlist))
 
             # Print Transverse Shapes
             print "   Time-Series Variable Transverse Shapes:"
