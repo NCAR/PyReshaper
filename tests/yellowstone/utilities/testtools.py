@@ -251,9 +251,9 @@ class TestDB(object):
 
         # If analysis has already been done, remove those tests
         if not force:
-            tests = [t for t in tests if t not in self._statistics]
             for test_name in [t for t in tests if t in self._statistics]:
                 print "Not Analyzing Test:", str(test_name)
+            tests = [t for t in tests if t not in self._statistics]
 
         # Generate statistics for each test
         for test_name in tests:
