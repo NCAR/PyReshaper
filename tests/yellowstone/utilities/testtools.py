@@ -428,6 +428,7 @@ class TestDB(object):
             print "   Number of Time Steps:", num_steps
             print
 
+            # Print counts
             num_tser = test_stats['counts']['tseries']
             print "   Number of Time-Series Variables:            ", num_tser
             num_tvmd = test_stats['counts']['tvariant']
@@ -439,6 +440,21 @@ class TestDB(object):
                 print "   WARNING:", num_lost, " unclassified variables"
             print
 
+            # Print names
+            print "   Time-Series Variables:"
+            print "      ", ", ".join([str(v) for v in
+                                       test_stats['names']['tseries']])
+            print "   Time-Variant Metadata Variables:"
+            print "      ", ", ".join([str(v) for v in
+                                       test_stats['names']['tvariant']])
+            print "   Time-Invariant Metadata Variables:"
+            print "      ", ", ".join([str(v) for v in
+                                       test_stats['names']['tinvariant']])
+            print "   Unclassified Variables (neither meta not time-variant):"
+            print "      ", ", ".join([str(v) for v in
+                                       test_stats['names']['other']])
+
+            # Print Transverse Shapes
             print "   Time-Series Variable Transverse Shapes:"
             print "      ", " ".join([str(s) for s in
                                       test_stats['xshapes']['tseries']])
@@ -450,21 +466,21 @@ class TestDB(object):
                                       test_stats['xshapes']['tinvariant']])
             print
 
+            # Print total bytesizes
             tser_totsize = test_stats['totalsizes']['tseries']
-            tvmd_totsize = test_stats['totalsizes']['tvariant']
-            timd_totsize = test_stats['totalsizes']['tinvariant']
-
             print "   Time-Series Variable Total Size:   ", _nbyte_str(tser_totsize)
+            tvmd_totsize = test_stats['totalsizes']['tvariant']
             print "   Time-Variant Metadata Total Size:  ", _nbyte_str(tvmd_totsize)
+            timd_totsize = test_stats['totalsizes']['tinvariant']
             print "   Time-Invariant Metadata Total Size:", _nbyte_str(timd_totsize)
             print
 
+            # Print maximum bytesizes
             tser_maxsize = test_stats['maxsizes']['tseries']
-            tvmd_maxsize = test_stats['maxsizes']['tvariant']
-            timd_maxsize = test_stats['maxsizes']['tinvariant']
-
             print "   Time-Series Variable Max Size:   ", _nbyte_str(tser_maxsize)
+            tvmd_maxsize = test_stats['maxsizes']['tvariant']
             print "   Time-Variant Metadata Max Size:  ", _nbyte_str(tvmd_maxsize)
+            timd_maxsize = test_stats['maxsizes']['tinvariant']
             print "   Time-Invariant Metadata Max Size:", _nbyte_str(timd_maxsize)
             print
 
