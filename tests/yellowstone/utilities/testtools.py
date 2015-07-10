@@ -458,6 +458,7 @@ class TestDB(object):
             vlist = ", ".join([str(v) for v in
                                test_stats['names']['other']])
             print "      " + "\n      ".join(textwrap.wrap(vlist))
+            print
 
             # Print Transverse Shapes
             print "   Time-Series Variable Transverse Shapes:"
