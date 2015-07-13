@@ -24,6 +24,8 @@ import glob
 from subprocess import Popen, PIPE, STDOUT
 import json
 
+from utilities import testtools
+
 
 #==============================================================================
 # Command-Line Interface Definition
@@ -100,31 +102,12 @@ def parse_cli():
 #==============================================================================
 def get_testing_database(options):
 
-    # See if there is a user-defined testinfo file, otherwise look for default
-    testing_database_filename = ''
-    if (options.testing_database == None):
-        runtest_dir = os.path.dirname(__file__)
-        testing_database_filename = os.path.join(runtest_dir, 'testinfo.json')
-    else:
-        testing_database_filename = os.path.abspath(options.testing_database)
-
-    # Try opening and reading the testinfo file
-    testing_database = {}
-    try:
-        testing_database_file = open(testing_database_filename, 'r')
-        testing_database = dict(json.load(testing_database_file))
-        testing_database_file.close()
-    except:
-        err_msg = 'Problem reading and parsing test info file: ' \
-            + str(testing_database_filename)
-        raise ValueError(err_msg)
+    # Create the testing database
+    testing_database = testtools.TestDB(options.testing_database)
 
     # List tests only, if option is set
     if (options.list_tests):
-        print 'Tests found in the Test Info file are:'
-        print
-        for test_name in testing_database:
-            print '   ' + str(test_name)
+        testing_database.print_list()
         sys.exit(0)
 
     return testing_database

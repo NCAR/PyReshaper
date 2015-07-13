@@ -58,12 +58,12 @@ def _nbyte_str(n, exp=0):
 #==============================================================================
 class TestDB(object):
 
-    def __init__(self, file_name=None):
+    def __init__(self, filename=None):
         """
         Constructor
 
         Parameters:
-            file_name (str): The name of the test database file.  Defaults
+            filename (str): The name of the test database file.  Defaults
                 to 'testinfo.json'.
 
         Raises:
@@ -73,8 +73,8 @@ class TestDB(object):
         # See if there is a user-defined testinfo file,
         # otherwise look for default
         abs_path = ''
-        if file_name:
-            abs_path = os.path.abspath(file_name)
+        if filename:
+            abs_path = os.path.abspath(filename)
         else:
             this_dir = os.path.dirname(__file__)
             abs_path = os.path.join(this_dir, 'testinfo.json')
@@ -82,7 +82,7 @@ class TestDB(object):
         # Try opening and reading the testinfo file
         self._database = {}
         try:
-            dbfile = open(file_name, 'r')
+            dbfile = open(filename, 'r')
             self._database = dict(json.load(dbfile))
             dbfile.close()
         except:
@@ -322,10 +322,10 @@ class TestDB(object):
             infile.close()
 
             # Loop over all input files and compute time-variant variable sizes
-            for file_name in spec.input_file_list[1:]:
+            for filename in spec.input_file_list[1:]:
 
                 # Open the file
-                infile = Nio.open_file(file_name, 'r')
+                infile = Nio.open_file(filename, 'r')
 
                 # And number of time steps to the test data
                 self._statistics[test_name]['length'] += \
