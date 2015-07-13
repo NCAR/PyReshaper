@@ -16,7 +16,7 @@ class SpecifierTests(unittest.TestCase):
     """
 
     def test_init(self):
-        spec = specification.Slice2SeriesSpecifier()
+        spec = specification.Specifier()
         self.assertListEqual(spec.input_file_list, [],
                              'Input file list not initialized to empty')
         self.assertEqual(spec.netcdf_format, 'netcdf4c',
@@ -34,7 +34,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertListEqual(spec.input_file_list, in_list,
@@ -54,7 +54,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         spec.validate_types()
@@ -65,7 +65,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
@@ -76,7 +76,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
@@ -87,7 +87,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = dict()
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
@@ -98,7 +98,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = list()
         metadata = ['x', 'y', 'z']
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
@@ -109,7 +109,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 2]
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
@@ -120,7 +120,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = []
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         spec.validate_types()
@@ -132,7 +132,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = []
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         spec.validate_types()
@@ -144,7 +144,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = '/sfcsrytsdfv/pre.'
         suffix = '.suf.nc'
         metadata = []
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         spec.validate_types()
@@ -156,7 +156,7 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf'
         metadata = []
-        spec = specification.Slice2SeriesSpecifier(
+        spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, prefix=prefix,
             suffix=suffix, metadata=metadata)
         spec.validate_types()

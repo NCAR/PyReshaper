@@ -10,6 +10,15 @@ from setuptools import setup
 
 exec(open('source/pyreshaper/version.py').read())
 
+try:
+    import Nio
+except ImportError:
+    raise ImportError('PyNIO 1.4+ is required to install PyReshaper.')
+
+if Nio.__version__ < 1.4:
+    raise ImportError('PyNIO 1.4+ is required to install PyReshaper.')
+
+
 setup(name='PyReshaper',
       version=__version__,
       description='Python Time-Slice to Time-Series NetCDF Converter',
@@ -22,5 +31,5 @@ setup(name='PyReshaper',
       package_dir={'pyreshaper': 'source/pyreshaper'},
       package_data={'pyreshaper': ['LICENSE.txt']},
       scripts=['bin/slice2series'],
-      install_requires=['Nio>=1.4', 'mpi4py>=1.3', 'asaptools>=0.4']
+      install_requires=['mpi4py>=1.3', 'asaptools>=0.4']
       )
