@@ -35,7 +35,7 @@ def cli():
                            'will be named according to the rule: '
                            'output_prefix + variable_name + output_suffix '
                            '[Default: ".nc"]')
-    parser.add_option('-m', '--metadata', action='append',
+    parser.add_option('-m', '--metadata', action='append', default=[],
                       help='Names of a variable to be included in all output '
                            'files.  There may be more than one --metadata (-m) '
                            'option given, and each one is appended to a list.  '

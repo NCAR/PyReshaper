@@ -142,7 +142,7 @@ class Specifier(object):
 
         # Validate the type of the time-variant metadata list
         if not isinstance(self.time_variant_metadata, list):
-            err_msg = "Input file list must be a list"
+            err_msg = "Time-variant metadata must be a list"
             raise TypeError(err_msg)
 
         # Validate the type of each time-variant metadata variable name
