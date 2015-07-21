@@ -3,7 +3,7 @@
 PyReshaper -- Setup Script
 
 Copyright 2015, University Corporation for Atmospheric Research
-See the LICENSE.txt file for details
+See the LICENSE.rst file for details
 """
 
 from setuptools import setup
@@ -26,10 +26,10 @@ setup(name='PyReshaper',
       author_email='kpaul@ucar.edu',
       url='https://github.com/NCAR-CISL-ASAP/PyReshaper',
       download_url='https://github.com/NCAR-CISL-ASAP/PyReshaper/tarball/v' + __version__,
-      license='https://github.com/NCAR-CISL-ASAP/PyReshaper/blob/master/LICENSE.txt',
+      license='https://github.com/NCAR-CISL-ASAP/PyReshaper/blob/master/LICENSE.rst',
       packages=['pyreshaper'],
       package_dir={'pyreshaper': 'source/pyreshaper'},
-      package_data={'pyreshaper': ['LICENSE.txt']},
+      package_data={'pyreshaper': ['LICENSE.rst']},
       scripts=['bin/slice2series'],
       install_requires=['mpi4py>=1.3', 'asaptools>=0.4']
       )
