@@ -280,6 +280,10 @@ class TestDB(object):
                     tdim = dim
                     continue
 
+            # Add the transverse (i.e., non-time) dimensions and sizes
+            xcoords = dict([(v, s) for (v, s) in infile.dimensions.items()
+                            if v != tdim])
+
             # Get the data dimensions
             metadata_names = set(infile.dimensions.keys())
 
@@ -319,13 +323,6 @@ class TestDB(object):
                     self._statistics[test_name][
                         'variables'][var_name]['meta'] = False
 
-                if var_name in infile.dimensions and var_name != tdim:
-                    self._statistics[test_name][
-                        'variables'][var_name]['xcoord'] = True
-                else:
-                    self._statistics[test_name][
-                        'variables'][var_name]['xcoord'] = False
-
             # Close the first file
             infile.close()
 
@@ -353,12 +350,9 @@ class TestDB(object):
                          if s['meta'] and not s['tvariant']]
             lost_vars = [str(v) for (v, s) in var_stats.items()
                          if not s['meta'] and not s['tvariant']]
-            xcoords = [str(v) for (v, s) in var_stats.items()
-                       if s['xcoord']]
 
             # Store the transverse (to time) coordinate sizes
-            self._statistics[test_name]['xcoords'] = dict(
-                [(v, var_stats[v]['xshape']) for v in xcoords])
+            self._statistics[test_name]['xcoords'] = xcoords
 
             # Record the variables names
             self._statistics[test_name]['names'] = {}
