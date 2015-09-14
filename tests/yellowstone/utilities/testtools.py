@@ -60,7 +60,7 @@ class TestDB(object):
 
     def __init__(self, filename=None):
         """
-        Constructor
+        Initializer
 
         Parameters:
             filename (str): The name of the test database file.  Defaults
@@ -76,13 +76,12 @@ class TestDB(object):
         if filename:
             abs_path = os.path.abspath(filename)
         else:
-            this_dir = os.path.dirname(__file__)
-            abs_path = os.path.join(this_dir, 'testinfo.json')
+            abs_path = os.path.join(os.getcwd(), 'testinfo.json')
 
         # Try opening and reading the testinfo file
         self._database = {}
         try:
-            dbfile = open(filename, 'r')
+            dbfile = open(abs_path, 'r')
             self._database = dict(json.load(dbfile))
             dbfile.close()
         except:
@@ -111,7 +110,7 @@ class TestDB(object):
         """
         return self._statistics
 
-    def print_list(self):
+    def print_tests(self):
         """
         List the tests in the test database.
         """
@@ -216,13 +215,15 @@ class TestDB(object):
         # If test list is empty, assume all tests
         if len(tests) == 0:
             test_list = self._database.keys()
+        else:
+            test_list = tests
 
         # Construct the list of specifiers
         specs = [self.create_specifier(test_name, ncfmt, outdir, **kwargs)
-                 for test_name in tests]
+                 for test_name in test_list]
 
         # Return a dictionary of named specifiers
-        return dict(zip(tests, specs))
+        return dict(zip(test_list, specs))
 
     def analyze(self, tests=[], force=False):
         """
@@ -278,6 +279,9 @@ class TestDB(object):
                 if infile.unlimited(dim):
                     tdim = dim
                     continue
+
+            # Coordinate variables and sizes
+            coordinates = infile.dimensions
 
             # Get the data dimensions
             metadata_names = set(infile.dimensions.keys())
@@ -337,7 +341,6 @@ class TestDB(object):
             # Compute self-analysis parameters
             num_steps = self._statistics[test_name]['length']
             var_stats = self._statistics[test_name]['variables']
-            num_vars = len(var_stats)
             tser_vars = [str(v) for (v, s) in var_stats.items()
                          if not s['meta'] and s['tvariant']]
             tvmd_vars = [str(v) for (v, s) in var_stats.items()
@@ -346,6 +349,9 @@ class TestDB(object):
                          if s['meta'] and not s['tvariant']]
             lost_vars = [str(v) for (v, s) in var_stats.items()
                          if not s['meta'] and not s['tvariant']]
+
+            # Store the coordinate sizes
+            self._statistics[test_name]['coords'] = coordinates
 
             # Record the variables names
             self._statistics[test_name]['names'] = {}
@@ -425,7 +431,6 @@ class TestDB(object):
             print
 
             test_stats = self._statistics[test_name]
-            var_stats = test_stats['variables']
             num_steps = test_stats['length']
 
             print "   Number of Time Steps:", num_steps
@@ -442,6 +447,11 @@ class TestDB(object):
             if num_lost > 0:
                 print "   WARNING:", num_lost, " unclassified variables"
             print
+
+            # Print the coordinate data
+            print "   Coordinate Sizes:"
+            for coord, csize in test_stats['coords'].items():
+                print "      " + coord + ":    " + csize
 
             # Print names
             print "   Time-Series Variables:"
@@ -493,22 +503,19 @@ class TestDB(object):
             print "   Time-Invariant Metadata Max Size:", _nbyte_str(timd_maxsize)
             print
 
-    def save_statistics(self, fileobj="teststats.json"):
+    def save_statistics(self, filename="teststats.json"):
         """
         Save the statistics information to a JSON data file
 
         Parameters:
-            fileobj (str, file): The name of the JSON data file to write, or an
-                open file instance with write permissions
+            filename (str): The name of the JSON data file to write
         """
 
         # Check types
-        if isinstance(fileobj, str):
-            fp = open(fileobj, 'w')
-        elif isinstance(fileobj, file):
-            fp = fileobj
+        if isinstance(filename, str):
+            fp = open(filename, 'w')
         else:
-            err_msg = "File object must be a string or file instance"
+            err_msg = "Statistics filename must be a string"
             raise TypeError(err_msg)
 
         # Dump JSON data to file
@@ -521,22 +528,19 @@ class TestDB(object):
         # Close the file
         fp.close()
 
-    def load_statistics(self, fileobj="teststats.json"):
+    def load_statistics(self, filename="teststats.json"):
         """
         Load the statistics information from a JSON data file
 
         Parameters:
-            fileobj (str): The name of the JSON data file to read or an
-                open file instance with read permissions
+            filename (str): The name of the JSON data file to read
         """
 
         # Check types
-        if isinstance(fileobj, str):
-            fp = open(fileobj, 'r')
-        elif isinstance(fileobj, file):
-            fp = fileobj
+        if isinstance(filename, str):
+            fp = open(filename, 'r')
         else:
-            err_msg = "File object must be a string or file instance"
+            err_msg = "Statistics filename must be a string"
             raise TypeError(err_msg)
 
         # Try reading the statistics
