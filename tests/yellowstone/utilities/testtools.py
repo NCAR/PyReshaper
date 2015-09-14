@@ -164,7 +164,7 @@ class TestDB(object):
         infiles = []
         for input_glob in self._database[test_name]['input_globs']:
             input_glob_str = str(input_glob)
-            full_input_glob = str(os.path.join(input_dir, input_glob))
+            full_input_glob = str(os.path.join(input_dir, input_glob_str))
             infiles.extend(glob.glob(full_input_glob))
         prefix = str(os.path.join(
             outdir, self._database[test_name]['output_prefix']))

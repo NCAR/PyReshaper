@@ -97,4 +97,6 @@ def runtests(options={}, tests=[]):
 #==============================================================================
 if __name__ == '__main__':
     options, arguments = parse_cli()
+    print options
+    print arguments
     runtests(dict(options), tests=list(arguments))
