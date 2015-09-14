@@ -36,7 +36,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
     Factory function for Reshaper class instantiations.
 
     Parameters:
-        specifier (Specifier): An instantiation of a Specifier class that 
+        specifier (Specifier): An instantiation of a Specifier class that
             defines the type of operation to be performed.  (That is, a
             Slice2SeriesSpecifier will invoke the creation of a
             matching Slice2SeriesReshaper object.)
@@ -121,7 +121,7 @@ def _pprint_dictionary(title, dictionary, order=None):
         dictionary (dict): A dictionary of numeric values
 
     Keyword Arguments:
-        order (list): The print order for the keys in the dictionary (only 
+        order (list): The print order for the keys in the dictionary (only
             items that are in both the order list and the dictionary will be
             printed)
 
@@ -135,13 +135,13 @@ def _pprint_dictionary(title, dictionary, order=None):
     if (not isinstance(dictionary, dict)):
         err_msg = 'Input dictionary needs to be a dictionary type'
         raise TypeError(err_msg)
-    if (order != None and not isinstance(order, list)):
+    if (order is not None and not isinstance(order, list)):
         err_msg = 'Order list needs to be a list type'
         raise TypeError(err_msg)
 
     # Determine the print order, if present
     print_order = dictionary.keys()
-    if (order != None):
+    if (order is not None):
         print_order = []
         for item in order:
             if (item in dictionary):
@@ -203,7 +203,7 @@ class Slice2SeriesReshaper(Reshaper):
     """
     The time-slice to time-series Reshaper class
 
-    This is the class that defines how the time-slice to time-series 
+    This is the class that defines how the time-slice to time-series
     reshaping operation is to be performed.
     """
 
@@ -214,7 +214,7 @@ class Slice2SeriesReshaper(Reshaper):
         Constructor
 
         Parameters:
-            specifier (Specifier): An instance of the Specifier class, 
+            specifier (Specifier): An instance of the Specifier class,
                 defining the input specification for this reshaper operation.
 
         Keyword Arguments:
@@ -223,7 +223,7 @@ class Slice2SeriesReshaper(Reshaper):
                 (False).  The default is to assume parallel operation
                 (but serial will be chosen if the mpi4py cannot be
                 found when trying to initialize decomposition.
-            verbosity(int): Level of printed output (stdout).  A value of 0 
+            verbosity(int): Level of printed output (stdout).  A value of 0
                 means no output, and a higher value means more output.  The
                 default value is 1.
             skip_existing (bool): Flag specifying whether to skip the generation
@@ -233,7 +233,7 @@ class Slice2SeriesReshaper(Reshaper):
                 output files if they already exist.  Default is False.
             once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
-            simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
+            simplecomm (SimpleComm): A SimpleComm object to handle the parallel
                 communication, if necessary
         """
 
@@ -359,9 +359,9 @@ class Slice2SeriesReshaper(Reshaper):
 
     def _validate_input_files(self, specifier):
         """
-        Perform validation of input data files themselves.  
+        Perform validation of input data files themselves.
 
-        We check the file contents here, assuming that the files are already 
+        We check the file contents here, assuming that the files are already
         open.
 
         Parameters:
@@ -379,7 +379,7 @@ class Slice2SeriesReshaper(Reshaper):
             if ifile.unlimited(dim):
                 self._unlimited_dim = dim
                 continue  # There can only be 1!
-        if self._unlimited_dim == None:
+        if self._unlimited_dim is None:
             err_msg = 'Unlimited dimension not identified.'
             raise LookupError(err_msg)
 
@@ -421,8 +421,8 @@ class Slice2SeriesReshaper(Reshaper):
         Internal method for sorting the input files by time
 
         This assumes that 'time' is the unlimited dimension, and it checks
-        to make sure that all of the times spanning across each file do not 
-        overlap with each other (i.e., that the times across all files are 
+        to make sure that all of the times spanning across each file do not
+        overlap with each other (i.e., that the times across all files are
         monotonicly increasing).
 
         Currently, this method assumes that all of the input files
@@ -488,11 +488,11 @@ class Slice2SeriesReshaper(Reshaper):
         """
         Internal method for sorting the variables in each time-slice file
 
-        This method determines if each variable is to be treated as 
-        time-invariant metadata, time-variant metadata (user defined), or 
-        time-series variables.  All metadata is written to every time-series 
-        file, and any time-series variable is written to its own file.  
-        The time-variant metadata variables are determined by user input, 
+        This method determines if each variable is to be treated as
+        time-invariant metadata, time-variant metadata (user defined), or
+        time-series variables.  All metadata is written to every time-series
+        file, and any time-series variable is written to its own file.
+        The time-variant metadata variables are determined by user input,
         and are contained in the Specifier data member:
 
             Specifier.time_variant_metadata.
@@ -542,7 +542,7 @@ class Slice2SeriesReshaper(Reshaper):
     def _validate_output_files(self, specifier,
                                skip_existing=False, overwrite=False):
         """
-        Perform validation of output data files themselves.  
+        Perform validation of output data files themselves.
 
         We compute the output file name from the prefix and suffix, and then
         we check whether the output files exist.  By default, if the output
@@ -608,7 +608,7 @@ class Slice2SeriesReshaper(Reshaper):
         In this case, convert a list of time-slice files to time-series files.
 
         Keyword Arguments:
-            output_limit (int): Limit on the number of output (time-series) 
+            output_limit (int): Limit on the number of output (time-series)
                 files to write during the convert() operation.  If set
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
@@ -887,8 +887,8 @@ class MultiSpecReshaper(Reshaper):
     """
     Multiple Slice-to-Series Reshaper class
 
-    This class is designed to deal with lists of multiple 
-    Slice2SeriesSpecifiers at a time.  Instead of being instantiated 
+    This class is designed to deal with lists of multiple
+    Slice2SeriesSpecifiers at a time.  Instead of being instantiated
     (or initialized) with a single Slice2SeriesSpecifier,
     it takes a dictionary of Slice2SeriesSpecifier objects.
     """
@@ -909,7 +909,7 @@ class MultiSpecReshaper(Reshaper):
                 (False).  The default is to assume parallel operation
                 (but serial will be chosen if the mpi4py cannot be
                 found when trying to initialize decomposition.
-            verbosity(int): Level of printed output (stdout).  A value of 0 
+            verbosity(int): Level of printed output (stdout).  A value of 0
                 means no output, and a higher value means more output.  The
                 default value is 1.
             skip_existing (bool): Flag specifying whether to skip the generation
@@ -919,7 +919,7 @@ class MultiSpecReshaper(Reshaper):
                 output files if they already exist.  Default is False.
             once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
-            simplecomm (SimpleComm): A SimpleComm object to handle the parallel 
+            simplecomm (SimpleComm): A SimpleComm object to handle the parallel
                 communication, if necessary
         """
 
@@ -985,12 +985,12 @@ class MultiSpecReshaper(Reshaper):
         """
         Method to perform each Reshaper's designated operation.
 
-        Loops through and creates each Reshaper, calls each Reshaper's 
-        convert() method, and pulls the timing data out for each convert 
+        Loops through and creates each Reshaper, calls each Reshaper's
+        convert() method, and pulls the timing data out for each convert
         operation.
 
         Keyword Arguments:
-            output_limit (int): Limit on the number of output (time-series) 
+            output_limit (int): Limit on the number of output (time-series)
                 files to write during the convert() operation.  If set
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
@@ -1004,8 +1004,8 @@ class MultiSpecReshaper(Reshaper):
         # Loop over all specifiers
         for spec_name in self._specifiers:
             if self._simplecomm.is_manager():
-                self._vprint('--- Converting Specifier: '
-                             + str(spec_name), verbosity=0)
+                self._vprint('--- Converting Specifier: ' +
+                             str(spec_name), verbosity=0)
 
             rshpr = create_reshaper(self._specifiers[spec_name],
                                     serial=self._serial,
@@ -1025,8 +1025,8 @@ class MultiSpecReshaper(Reshaper):
                 this_count, op='sum')
 
             if self._simplecomm.is_manager():
-                self._vprint('--- Finished converting Specifier: '
-                             + str(spec_name) + os.linesep, verbosity=0)
+                self._vprint('--- Finished converting Specifier: ' +
+                             str(spec_name) + os.linesep, verbosity=0)
             self._simplecomm.sync()
 
     def print_diagnostics(self):
