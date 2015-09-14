@@ -280,9 +280,6 @@ class TestDB(object):
                     tdim = dim
                     continue
 
-            # Coordinate variables and sizes
-            coordinates = infile.dimensions
-
             # Get the data dimensions
             metadata_names = set(infile.dimensions.keys())
 
@@ -322,6 +319,13 @@ class TestDB(object):
                     self._statistics[test_name][
                         'variables'][var_name]['meta'] = False
 
+                if var_name in infile.dimensions and var_name != tdim:
+                    self._statistics[test_name][
+                        'variables'][var_name]['xcoord'] = True
+                else:
+                    self._statistics[test_name][
+                        'variables'][var_name]['xcoord'] = False
+
             # Close the first file
             infile.close()
 
@@ -349,9 +353,12 @@ class TestDB(object):
                          if s['meta'] and not s['tvariant']]
             lost_vars = [str(v) for (v, s) in var_stats.items()
                          if not s['meta'] and not s['tvariant']]
+            xcoords = [str(v) for (v, s) in var_stats.items()
+                       if s['xcoord']]
 
-            # Store the coordinate sizes
-            self._statistics[test_name]['coords'] = coordinates
+            # Store the transverse (to time) coordinate sizes
+            self._statistics[test_name]['xcoords'] = dict(
+                [(v, var_stats[v]['xshape']) for v in xcoords])
 
             # Record the variables names
             self._statistics[test_name]['names'] = {}
@@ -450,8 +457,9 @@ class TestDB(object):
 
             # Print the coordinate data
             print "   Coordinate Sizes:"
-            for coord, csize in test_stats['coords'].items():
-                print "      " + coord + ":    " + str(csize)
+            for xcoord, cxsize in test_stats['xcoords'].items():
+                print "      " + xcoord + ":    " + str(cxsize)
+            print
 
             # Print names
             print "   Time-Series Variables:"
