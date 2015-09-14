@@ -55,7 +55,7 @@ def parse_cli():
                            'each parallel test in sequence in the same job, '
                            'instead of running each parallel test individually '
                            'with its own job. [Default: False]')
-    parser.add_option('-O', '--overwrite', default=False,
+    parser.add_option('-o', '--overwrite', default=False,
                       action='store_true', dest='overwrite',
                       help='True or False, indicating whether to force deleting '
                            'any existing test or run directories, if found '
