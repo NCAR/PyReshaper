@@ -456,7 +456,7 @@ class TestDB(object):
             print
 
             # Print the coordinate data
-            print "   Coordinate Sizes:"
+            print "   Transverse Coordinate Shapes:"
             for xcoord, cxsize in test_stats['xcoords'].items():
                 print "      " + xcoord + ":    " + str(cxsize)
             print
