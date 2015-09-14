@@ -451,7 +451,7 @@ class TestDB(object):
             # Print the coordinate data
             print "   Coordinate Sizes:"
             for coord, csize in test_stats['coords'].items():
-                print "      " + coord + ":    " + csize
+                print "      " + coord + ":    " + str(csize)
 
             # Print names
             print "   Time-Series Variables:"
