@@ -89,12 +89,10 @@ def parse_cli():
 # Main Function
 #==============================================================================
 def runtests(arguments):
-    testdb = tt.TestDB(filename=arguments.database)
+    testdb = tt.TestDB(dbname=arguments.database)
     testdb.print_tests()
     print
-    testdb.analyze(force=True)
     testdb.print_statistics()
-    testdb.save_statistics()
 
 
 #==============================================================================

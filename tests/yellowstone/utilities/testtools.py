@@ -58,13 +58,15 @@ def _nbyte_str(n, exp=0):
 #==============================================================================
 class TestDB(object):
 
-    def __init__(self, filename=None):
+    def __init__(self, dbname=None, stname=None):
         """
         Initializer
 
         Parameters:
-            filename (str): The name of the test database file.  Defaults
+            dbname (str): The name of the test database file.  Defaults
                 to 'testinfo.json'.
+            stname (str): The name of the test statistics file.  Defaults
+                to 'teststats.json'.
 
         Raises:
             ValueError: If the test database file cannot be opened and/or
@@ -73,8 +75,8 @@ class TestDB(object):
         # See if there is a user-defined testinfo file,
         # otherwise look for default
         abs_path = ''
-        if filename:
-            abs_path = os.path.abspath(filename)
+        if dbname:
+            abs_path = os.path.abspath(dbname)
         else:
             abs_path = os.path.join(os.getcwd(), 'testinfo.json')
 
@@ -90,7 +92,19 @@ class TestDB(object):
             raise ValueError(err_msg)
 
         # Initialize the statistics database
+        if stname:
+            abs_path = os.path.abspath(stname)
+        else:
+            abs_path = os.path.join(os.getcwd(), 'teststats.json')
+
+        # Try opening and reading the testinfo file
         self._statistics = {}
+        try:
+            stfile = open(abs_path, 'r')
+            self._statistics = dict(json.load(stfile))
+            stfile.close()
+        except:
+            print "Warning: Statistics file (" + stname + ") not found."
 
     def get_database(self):
         """
@@ -451,8 +465,10 @@ class TestDB(object):
 
             # Print the coordinate data
             print "   Transverse Coordinate Shapes:"
+            maxlenxcoord = max([len(xc) for xc in test_stats['xcoords']])
             for xcoord, cxsize in test_stats['xcoords'].items():
-                print "      " + xcoord + ":    " + str(cxsize)
+                spcr = ' ' * (maxlenxcoord - len(xcoord))
+                print "      " + xcoord + ": " + spcr + str(cxsize)
             print
 
             # Print names
