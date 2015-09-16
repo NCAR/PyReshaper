@@ -169,6 +169,7 @@ class _SerialJob(_Job):
             job_output = ''
             while self._process.poll() is None:
                 line = self._process.stdout.readline()
+                job_output += line
                 print line,
             print self._process.stdout.read()
             self._process = None
