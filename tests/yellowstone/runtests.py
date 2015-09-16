@@ -171,9 +171,9 @@ def runtests(args):
 
             # Generate the command and arguments
             if args.nodes > 0:
-                runcmdargs = ['poe', 'slice2series']
+                runcmdargs = ['poe', 'slice2series', '-v3']
             else:
-                runcmdargs = ['slice2series', '--serial']
+                runcmdargs = ['slice2series', '--serial', '-v3']
             runcmdargs.extend(['--specfile', testspecfile])
             runcmd = ' '.join(runcmdargs)
 
