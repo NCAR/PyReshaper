@@ -171,7 +171,9 @@ class _SerialJob(_Job):
                 line = self._process.stdout.readline()
                 job_output += line
                 print line,
-            print self._process.stdout.read()
+            remainder = self._process.stdout.read()
+            job_output += remainder
+            print remainder
             self._process = None
 
             # Write output to log file
