@@ -133,16 +133,25 @@ def runtests(args):
     # Run the requested tests
     else:
         for test_name in test_list:
+
+            # Set the test directory
             if args.nodes > 0:
                 runtype = 'par' + str(args.nodes) + 'x' + str(args.tiling)
             else:
                 runtype = 'ser'
             testdir = os.path.abspath(os.path.join('rundirs', test_name, runtype))
+
+            # If the test directory doesn't exist, make it and move into it
+            if not os.path.exists(testdir):
+                os.makedirs(testdir)
+            os.chdir(testdir)
+
+            # Set the output directory
             outputdir = os.path.join(testdir, 'output')
 
-            # make test directory and move into it
-            os.mkdir(testdir)
-            os.chdir(testdir)
+            # If the output directory doesn't exists, create it
+            if not os.path.exists(outputdir):
+                os.mkdir(outputdir)
 
             # Create the specifier and write to file (specfile)
             testspec = testdb.create_specifier(test_name=test_name,
