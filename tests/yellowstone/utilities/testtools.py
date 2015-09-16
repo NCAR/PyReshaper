@@ -128,6 +128,7 @@ class TestDB(object):
         """
         List the tests in the test database.
         """
+        print
         print 'Tests found in the Test Database are:'
         print
         for test_name in self._database:
@@ -195,75 +196,31 @@ class TestDB(object):
                                        prefix=prefix, suffix=suffix,
                                        metadata=metadata, **kwargs)
 
-    def create_specifiers(self, tests=[], ncfmt='netcdf4c',
-                          outdir='', **kwargs):
-        """
-        Create a dictionary of named Specifier objects for a list of tests.
-
-        Parameters:
-            tests (list): A list of string names of tests in the database
-                for which to construct Specifiers.
-            ncfmt (str): The NetCDF format string to be passed to the
-                Specifier.
-            outdir (str): An optional path string to be prepended to the
-                "output_prefix" argument of the Specifier.  To be used to
-                direct output to a different location.  Leave empty if using
-                absolute paths in the test's "output_prefix".
-            kwargs (dict): A dictionary of additional options to be
-                sent to the Specifier.
-
-        Returns:
-            list: A list of Specifier instances with the information to run the
-                named tests.
-        """
-
-        # Check types
-        if not isinstance(tests, (list, tuple)):
-            err_msg = "Test list must be a list or tuple of string test names"
-            raise TypeError(err_msg)
-        test_types = [type(test_name) is str for test_name in tests]
-        if not all(test_types):
-            err_msg = "Test list must be a list of string test names"
-            raise TypeError(err_msg)
-
-        # If test list is empty, assume all tests
-        if len(tests) == 0:
-            test_list = self._database.keys()
-        else:
-            test_list = tests
-
-        # Construct the list of specifiers
-        specs = [self.create_specifier(test_name, ncfmt, outdir, **kwargs)
-                 for test_name in test_list]
-
-        # Return a dictionary of named specifiers
-        return dict(zip(test_list, specs))
-
-    def analyze(self, tests=[], force=False):
+    def analyze(self, tests=None, force=False):
         """
         Analyze the test database to determine test statistics
 
         Parameters:
             tests (list): A list of string names of tests in the database
-                to analyze.  If empty, assume all tests.
+                to analyze.  If None, assume all tests.
             force (bool): Whether to force reanalysis of tests that have
                 already been analyzed
         """
 
         # Check type
-        if not isinstance(tests, (list, tuple)):
+        if tests is not None and not isinstance(tests, (list, tuple)):
             err_msg = "Test name list must be of list or tuple type"
             raise TypeError(err_msg)
+
+        # Assume all tests to be analyzed if None input
+        elif tests is None:
+            tests = self._database.keys()
 
         # Error if tests not in database
         bad_names = [t for t in tests if t not in self._database]
         if len(bad_names) > 0:
             err_msg = "Tests not found in database: " + ", ".join(bad_names)
             raise ValueError(err_msg)
-
-        # Assume all tests to be analyzed if empty input
-        if len(tests) == 0:
-            tests = self._database.keys()
 
         # If analysis has already been done, remove those tests
         if not force:
@@ -416,19 +373,23 @@ class TestDB(object):
                 max([var_stats[v]['xsize'] for v in timd_vars])
             self._statistics[test_name]['maxsizes']['tinvariant'] = maxsize
 
-    def print_statistics(self, tests=[]):
+    def print_statistics(self, tests=None):
         """
         Print the statistics information determined from self analysis
 
         Parameters:
             tests (list): A list of string names of tests in the database
-                to print.  If empty, assume all tests.
+                to print.  If None, assume all tests.
         """
 
         # Check type
-        if not isinstance(tests, (list, tuple)):
+        if tests is not None and not isinstance(tests, (list, tuple)):
             err_msg = "Test name list must be of list or tuple type"
             raise TypeError(err_msg)
+
+        # Assume all tests to be analyzed if None input
+        elif tests is None:
+            tests = self._statistics.keys()
 
         # Error if tests not in database
         bad_names = [t for t in tests if t not in self._statistics]
@@ -436,12 +397,8 @@ class TestDB(object):
             err_msg = "Tests not found in statistics: " + ", ".join(bad_names)
             raise ValueError(err_msg)
 
-        # Assume all tests to be analyzed if empty input
-        if len(tests) == 0:
-            tests = self._statistics.keys()
-
         # Print the statistics information
-        for test_name in self._statistics:
+        for test_name in tests:
             print "Statistics for Test:", test_name
             print
 
@@ -521,17 +478,17 @@ class TestDB(object):
             print "   Time-Invariant Metadata Max Size:", _nbyte_str(timd_maxsize)
             print
 
-    def save_statistics(self, filename="teststats.json"):
+    def save_statistics(self, stname="teststats.json"):
         """
         Save the statistics information to a JSON data file
 
         Parameters:
-            filename (str): The name of the JSON data file to write
+            stname (str): The name of the JSON statistics file to write
         """
 
         # Check types
-        if isinstance(filename, str):
-            fp = open(filename, 'w')
+        if isinstance(stname, str):
+            fp = open(stname, 'w')
         else:
             err_msg = "Statistics filename must be a string"
             raise TypeError(err_msg)
@@ -546,17 +503,17 @@ class TestDB(object):
         # Close the file
         fp.close()
 
-    def load_statistics(self, filename="teststats.json"):
+    def load_statistics(self, stname="teststats.json"):
         """
         Load the statistics information from a JSON data file
 
         Parameters:
-            filename (str): The name of the JSON data file to read
+            stname (str): The name of the JSON data file to read
         """
 
         # Check types
-        if isinstance(filename, str):
-            fp = open(filename, 'r')
+        if isinstance(stname, str):
+            fp = open(stname, 'r')
         else:
             err_msg = "Statistics filename must be a string"
             raise TypeError(err_msg)
