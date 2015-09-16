@@ -33,7 +33,7 @@ class Job(object):
         self._nodes = int(nodes)
         self._hostname = socket.gethostname()
         if self._nodes <= 0:
-            self._job = _Job(**kwargs)
+            self._job = _SerialJob(**kwargs)
         elif _YellowstoneJob.HOSTNAME_PATTERN.match(self._hostname):
             self._job = _YellowstoneJob(nodes=self._nodes, **kwargs)
         else:
