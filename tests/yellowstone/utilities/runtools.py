@@ -167,11 +167,10 @@ class _SerialJob(_Job):
 
             # Wait for job to finish and grab job output
             job_output = ''
-            for line in iter(self._process.stdout.readline, b''):
+            while self._process.poll() is None:
+                line = self._process.stdout.readline()
                 print line,
-                job_output += line
-            self._process.stdout.close()
-            self._process.wait()
+            print self._process.stdout.read()
             self._process = None
 
             # Write output to log file
