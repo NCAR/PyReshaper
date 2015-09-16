@@ -140,6 +140,10 @@ def runtests(args):
             testdir = os.path.abspath(os.path.join('rundirs', test_name, runtype))
             outputdir = os.path.join(testdir, 'output')
 
+            # make test directory and move into it
+            os.mkdir(testdir)
+            os.chdir(testdir)
+
             # Create the specifier and write to file (specfile)
             testspec = testdb.create_specifier(test_name=test_name,
                                                ncfmt=args.ncformat,
