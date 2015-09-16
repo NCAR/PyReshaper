@@ -162,10 +162,10 @@ def runtests(args):
 
             # Generate the command and arguments
             if args.nodes > 0:
-                runcmdargs = ['poe']
+                runcmdargs = ['poe', 'slice2series']
             else:
-                runcmdargs = []
-            runcmdargs.extend(['slice2series', '--specfile', testspecfile])
+                runcmdargs = ['slice2series', '--serial']
+            runcmdargs.extend(['--specfile', testspecfile])
             runcmd = ' '.join(runcmdargs)
 
             # Create and start the job
