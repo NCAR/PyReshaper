@@ -11,8 +11,9 @@
 # Builtin Modules
 import os
 import sys
-import cPickle as pickle
+import shutil
 import argparse
+import cPickle as pickle
 
 # Package Modules
 from utilities import testtools as tt
@@ -134,6 +135,8 @@ def runtests(args):
     else:
         for test_name in test_list:
 
+            print "Running test:", test_name
+
             # Set the test directory
             if args.nodes > 0:
                 runtype = 'par' + str(args.nodes) + 'x' + str(args.tiling)
@@ -142,6 +145,12 @@ def runtests(args):
             testdir = os.path.abspath(os.path.join('rundirs', test_name, runtype))
 
             # If the test directory doesn't exist, make it and move into it
+            if os.path.exists(testdir):
+                if args.overwrite:
+                    shutil.rmtree(testdir)
+                else:
+                    print "   Skipping existing"
+                    continue
             if not os.path.exists(testdir):
                 os.makedirs(testdir)
             os.chdir(testdir)
@@ -157,7 +166,7 @@ def runtests(args):
             testspec = testdb.create_specifier(test_name=test_name,
                                                ncfmt=args.ncformat,
                                                outdir=outputdir)
-            testspecfile = test_name + '.p'
+            testspecfile = test_name + '.spec'
             pickle.dump(testspec, open(testspecfile, 'wb'))
 
             # Generate the command and arguments
