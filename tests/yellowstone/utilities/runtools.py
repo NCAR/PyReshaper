@@ -284,6 +284,9 @@ class _YellowstoneJob(_Job):
         # Get the process ID from bsub output
         self._process = job.communicate()[0]
 
+        # Display the job name
+        print self._process
+
         # Close the script file and print submission info
         runscript_file.close()
 
