@@ -75,7 +75,7 @@ class _Job(object):
         # Initialize internal data
         self._jobname = str(name)
         self._rundir = os.getcwd()
-        self._runscript = os.path.join([self._rundir, self._jobname + '.sh'])
+        self._runscript = os.path.join(self._rundir, self._jobname + '.sh')
         self._process = None
 
         self._runcmds = []
@@ -130,7 +130,6 @@ class _SerialJob(_Job):
         runscript_list.append('')
 
         # Write the script to file
-        print self._runscript
         runscript_file = open(self._runscript, 'w')
         runscript_file.write(os.linesep.join(runscript_list))
         runscript_file.close()
