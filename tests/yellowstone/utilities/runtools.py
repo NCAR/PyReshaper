@@ -152,7 +152,7 @@ class _SerialJob(_Job):
         # Launch the serial job as a subprocess
         self._process = Popen([self._runscript],
                               stdout=PIPE, stderr=STDOUT,
-                              env=os.environ.copy(), bufsize=1)
+                              env=os.environ.copy())
 
         os.chdir(cwd)
 
