@@ -75,7 +75,7 @@ class _Job(object):
         # Initialize internal data
         self._jobname = str(name)
         self._rundir = os.getcwd()
-        self._runscript = self._jobname + '.sh'
+        self._runscript = os.path.join([self._rundir, self._jobname + '.sh'])
         self._process = None
 
         self._runcmds = []
