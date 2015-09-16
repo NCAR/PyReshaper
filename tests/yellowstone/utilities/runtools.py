@@ -130,6 +130,7 @@ class _SerialJob(_Job):
         runscript_list.append('')
 
         # Write the script to file
+        print self._runscript
         runscript_file = open(self._runscript, 'w')
         runscript_file.write(os.linesep.join(runscript_list))
         runscript_file.close()
