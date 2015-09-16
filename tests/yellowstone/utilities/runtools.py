@@ -210,7 +210,7 @@ class _YellowstoneJob(_Job):
         """
 
         # Call the base class initialization
-        super(_SerialJob, self).__init__(runcmds=runcmds, name=name)
+        super(_YellowstoneJob, self).__init__(runcmds=runcmds, name=name)
 
         # Initialize internal data
         self._nodes = int(nodes)
