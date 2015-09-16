@@ -240,7 +240,7 @@ class _YellowstoneJob(_Job):
                           '#BSUB -x',
                           '#BSUB -o ' + self._jobname + '.%J.log',
                           '#BSUB -J ' + self._jobname,
-                          '#BSUB -P ' + self._code,
+                          '#BSUB -P ' + self._project,
                           '#BSUB -W ' + wtime_str,
                           '',
                           'export MP_TIMEOUT=14400',
