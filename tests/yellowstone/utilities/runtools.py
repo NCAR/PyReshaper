@@ -108,7 +108,7 @@ class _SerialJob(_Job):
     A class for defining a serial job type
     """
 
-    def __init__(self, runcmds=[], name="serialjob"):
+    def __init__(self, runcmds=[], name="serialjob", **kwargs):
         """
         Initializer
 
@@ -193,7 +193,7 @@ class _YellowstoneJob(_Job):
     HOSTNAME_PATTERN = re.compile('^(yslogin|caldera|geyser|pronghorn)')
 
     def __init__(self, runcmds=[], name="ysjob", nodes=1, tiling=16,
-                 minutes=120, queue="small", project="STDD0002"):
+                 minutes=120, queue="small", project="STDD0002", **kwargs):
         """
         Constructor
 
