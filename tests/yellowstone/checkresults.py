@@ -10,59 +10,46 @@ import os
 import sys
 import glob
 import string
-import optparse
+import argparse
 import json
-
 from subprocess import Popen, PIPE, STDOUT
 
+# Package Modules
+from utilities import testtools as tt
+from utilities import runtools as rt
 
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
-def parse_cli():
-    usage = 'usage: %prog [options] test_dir1 test_dir2 ...'
-    parser = optparse.OptionParser(usage=usage)
-    parser.add_option('-a', '--all', default=False,
-                      action='store_true', dest='all',
-                      help='True or False, indicating whether to run all tests '
-                           '[Default: False]')
-    parser.add_option('-i', '--testing_database', default=None,
+_DESC_ = 'Check the results of tests found in the rundirs directory.'
+_PARSER_ = argparse.ArgumentParser(desc=_DESC_)
+_PARSER_.add_argument('-c', '--code', default='STDD0002', type=str,
+                      help='The name of the project code for charging in '
+                           'parallel runs (ignored if running in serial) '
+                           '[Default: STDD0002]')
+_PARSER_.add_argument('-i', '--infofile', default=None,
                       help='Location of the testinfo.json file '
                            '[Default: None]')
-    parser.add_option('-l', '--list', default=False,
+_PARSER_.add_argument('-l', '--list', default=False,
                       action='store_true', dest='list_tests',
-                      help='True or False, indicating whether to list all tests '
-                           'that have been run with resulting output, instead of '
-                           'actually comparing any tests. '
+                      help='True or False, indicating whether to list all '
+                           'tests that have been run with resulting output, '
+                           'instead of actually comparing any tests. '
                            '[Default: False]')
-    parser.add_option('-s', '--serial', default=False,
-                      action='store_true', dest='serial',
-                      help='True or False, indicating whether to check tests '
-                           'in serial (True), rather than parallel (False). '
-                           '[Default: False]')
-    parser.add_option('-x', '--executable', default=None,
-                      help='The path to the CPRNC executable. '
-                           '[Default: None]')
-
-    # Parse the CLI options and arguments
-    (options, arguments) = parser.parse_args()
-
-    # Set serial if listing only
-    if options.list_tests:
-        options.serial = True
-        options.all = True
-
-    # Check for CPRNC executable
-    if not options.executable:
-        options.executable = "/glade/p/work/kpaul/installs/intel/12.1.5/" + \
-            "cprnc/bin/cprnc"
-    if not os.path.isfile(options.executable):
-        err_msg = "Cannot find cprnc executable file: " + \
-            str(options.executable)
-        raise RuntimeError(err_msg)
-
-    #  and return
-    return (options, arguments)
+_PARSER_.add_argument('-n', '--nodes', default=0, type=int,
+                      help='The integer number of nodes to request in parallel'
+                           ' runs (0 means run in serial) [Default: 0]')
+_PARSER_.add_argument('-q', '--queue', default='economy', type=str,
+                      help='The name of the queue to request in parallel runs '
+                           '(ignored if running in serial) '
+                           '[Default: economy]')
+_PARSER_.add_argument('-w', '--wtime', default=240, type=int,
+                      help='The number of minutes to request for the wall '
+                           'clock in parallel runs (ignored if running in '
+                           'serial) [Default: 240]')
+_PARSER_.add_argument('-x', '--executable',
+                      default='/glade/p/work/kpaul/installs/intel/12.1.5/cprnc/bin/cprnc',
+                      help='The path to the CPRNC executable.')
 
 
 #==============================================================================
@@ -96,10 +83,10 @@ class BasicComm(object):
 #==============================================================================
 # Get the testing database info
 #==============================================================================
-def get_testing_database(options):
+def get_infofile(options):
 
     # Get the testinfo.json data
-    testing_database_filename = ''
+    infofile_filename = ''
     if (options.testing_database == None):
         runtest_dir = os.path.dirname(__file__)
         testing_database_filename = os.path.join(runtest_dir, 'testinfo.json')
@@ -133,7 +120,7 @@ def get_comparison_info(options, arguments, comm, testing_database):
 
     # Parse each test argument for test directories
     possible_test_dirs = []
-    if (options.all):
+    if (options.all_tests):
         possible_test_dirs = glob.glob(
             os.path.join('results', '*', 'ser', '*'))
         possible_test_dirs.extend(
@@ -396,7 +383,7 @@ def compare_results(comparison_info, comm, cprnc_exec):
 #==============================================================================
 # Main Program
 #==============================================================================
-def main(options, arguments):
+def checkresults(args):
     comm = BasicComm(serial=options.serial)
     testing_database = get_testing_database(options)
     comparison_info = get_comparison_info(
@@ -408,5 +395,14 @@ def main(options, arguments):
 # Command-Line Operation
 #==============================================================================
 if __name__ == '__main__':
-    options, arguments = parse_cli()
-    main(options, arguments)
+    args = _PARSER_.parse_args()
+
+    # Create/read the testing info and stats files
+    testdb = tt.TestDB(dbname=args.infofile)
+
+    # List tests if only listing
+    if args.list_tests:
+        testdb.print_tests()
+        sys.exit(1)
+
+    checkresults(args, testdirs)
