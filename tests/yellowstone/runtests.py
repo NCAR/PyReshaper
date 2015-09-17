@@ -11,6 +11,7 @@
 # Builtin Modules
 import os
 import sys
+import stat
 import shutil
 import argparse
 import cPickle as pickle
@@ -95,6 +96,56 @@ _PARSER_.add_argument('test', type=str, nargs='*',
 
 
 #==============================================================================
+# Write an executable Python script to run the Reshaper
+#==============================================================================
+def write_pyscript(args, testnames, scriptname='runscript.py'):
+    """
+    Write an executable Python script to run the PyReshaper with a set of specs
+
+    Parameters:
+        args (argparse.Namespace): arguments to pass to the Reshaper
+        testnames (str, list): Name of a single test, or list of tests
+        scriptname (str): Name of the Python script to write
+    """
+
+    # Start defining the Python script
+    runscript_list = ['#!/usr/bin/env python',
+                      '',
+                      '# Created automatically by runtests.py',
+                      '',
+                      'from pyreshaper import specification',
+                      'from pyreshaper import reshaper',
+                      '']
+
+    # Check for single or multiple specifiers
+    if isinstance(testnames, (str, unicode)):
+        runscript_list.append(
+            'specs = pickle.load(open("{0!s}.spec", "rb"))'.format(testnames))
+    elif isinstance(testnames, (list, tuple)):
+        runscript_list.append('specs = []')
+        for testname in testnames:
+            runscript_list.append(
+                'specs.append(pickle.load(open("{0!s}.spec", "rb")))'.format(testname))
+
+    # Define the rest of the python script
+    runscript_list.extend([
+        'rshpr = reshaper.create_reshaper(specs, serial={0!s}, '
+        'verbosity=3, skip_existing={1!s}, overwrite={2!s})'.format(
+            args.nodes <= 0, args.skip_existing, args.overwrite),
+        'rshpr.convert()',
+        'rshpr.print_diagnostics()',
+        ''])
+
+    # Write the script to file
+    runscript_file = open(scriptname, 'w')
+    runscript_file.write(os.linesep.join(runscript_list))
+    runscript_file.close()
+
+    # Make the script executable
+    os.chmod(scriptname, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
+
+
+#==============================================================================
 # Main Function
 #==============================================================================
 def runtests(args):
@@ -131,8 +182,9 @@ def runtests(args):
         testdb.save_statistics(stname=args.statsfile)
         sys.exit(0)
 
-    # Run the requested tests
-    else:
+    # Run the requested tests individually
+    elif not args.multiple:
+
         cwd = os.getcwd()
         for test_name in test_list:
 
@@ -150,7 +202,7 @@ def runtests(args):
                 if args.overwrite:
                     shutil.rmtree(testdir)
                 else:
-                    print "   Skipping existing"
+                    print "   Already exists.  Skipping."
                     continue
             if not os.path.exists(testdir):
                 os.makedirs(testdir)
@@ -167,15 +219,18 @@ def runtests(args):
             testspec = testdb.create_specifier(test_name=str(test_name),
                                                ncfmt=args.ncformat,
                                                outdir=outputdir)
-            testspecfile = str(test_name) + '.spec'
+            testspecfile = '{0!s}.spec'.format(test_name)
             pickle.dump(testspec, open(testspecfile, 'wb'))
+
+            # Write the Python executable to be run
+            pyscript_name = '{0!s}.py'.format(test_name)
+            write_pyscript(args, testnames=test_name, scriptname=pyscript_name)
 
             # Generate the command and arguments
             if args.nodes > 0:
-                runcmdargs = ['poe', 'slice2series', '-v3']
+                runcmdargs = ['poe', pyscript_name]
             else:
-                runcmdargs = ['slice2series', '--serial', '-v3']
-            runcmdargs.extend(['--specfile', testspecfile])
+                runcmdargs = [pyscript_name]
             runcmd = ' '.join(runcmdargs)
 
             # Create and start the job
@@ -186,6 +241,69 @@ def runtests(args):
             job.start()
 
             os.chdir(cwd)
+
+    # Run the tests in a MultiSpecReshaper
+    else:
+
+        print 'Running tests in single submission:'
+        for test_name in test_list:
+            print '   {0!s}'.format(test_name)
+
+        # Set the test directory
+        if args.nodes > 0:
+            runtype = 'par{0!s}x{1!s}'.format(args.nodes, args.tiling)
+        else:
+            runtype = 'ser'
+        testdir = os.path.abspath(os.path.join('rundirs', 'multitest', runtype))
+
+        # If the test directory doesn't exist, make it and move into it
+        cwd = os.getcwd()
+        if os.path.exists(testdir):
+            if args.overwrite:
+                shutil.rmtree(testdir)
+            else:
+                print "   Already exists.  Skipping."
+                continue
+        if not os.path.exists(testdir):
+            os.makedirs(testdir)
+        os.chdir(testdir)
+
+        # Create a separate output directory and specifier for each test
+        for test_name in test_list:
+
+            # Set the output directory
+            outputdir = os.path.join(testdir, 'output', str(test_name))
+
+            # If the output directory doesn't exists, create it
+            if not os.path.exists(outputdir):
+                os.mkdir(outputdir)
+
+            # Create the specifier and write to file (specfile)
+            testspec = testdb.create_specifier(test_name=str(test_name),
+                                               ncfmt=args.ncformat,
+                                               outdir=outputdir)
+            testspecfile = str(test_name) + '.spec'
+            pickle.dump(testspec, open(testspecfile, 'wb'))
+
+        # Write the Python executable to be run
+        pyscript_name = 'multitest.py'.format(test_name)
+        write_pyscript(args, testnames=test_list, scriptname=pyscript_name)
+
+        # Generate the command and arguments
+        if args.nodes > 0:
+            runcmdargs = ['poe', pyscript_name]
+        else:
+            runcmdargs = [pyscript_name]
+        runcmd = ' '.join(runcmdargs)
+
+        # Create and start the job
+        job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
+                     name=str(test_name), tiling=args.tiling,
+                     minutes=args.wtime, queue=args.queue,
+                     project=args.code)
+        job.start()
+
+        os.chdir(cwd)
 
 
 #==============================================================================
