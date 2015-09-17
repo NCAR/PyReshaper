@@ -104,7 +104,7 @@ class TestDB(object):
             self._statistics = dict(json.load(stfile))
             stfile.close()
         except:
-            print "Warning: Statistics file (" + stname + ") not found."
+            print "Warning: Statistics file ({0!s}) not found.".format(stname)
 
     def get_database(self):
         """
@@ -132,7 +132,7 @@ class TestDB(object):
         print 'Tests found in the Test Database are:'
         print
         for test_name in self._database:
-            print '   ' + str(test_name)
+            print '   {0!s}'.format(test_name)
         return
 
     def create_specifier(self, test_name, ncfmt='netcdf4c',
@@ -225,12 +225,12 @@ class TestDB(object):
         # If analysis has already been done, remove those tests
         if not force:
             for test_name in [t for t in tests if t in self._statistics]:
-                print "Not Analyzing Test:", str(test_name)
+                print "Not Analyzing Test: {0!s}".format(test_name)
             tests = [t for t in tests if t not in self._statistics]
 
         # Generate statistics for each test
         for test_name in tests:
-            print "Analyzing Test:", str(test_name)
+            print "Analyzing Test: {0!s}".format(test_name)
 
             # Create a specifier for this test
             spec = self.create_specifier(str(test_name), ncfmt='netcdf')
@@ -399,25 +399,25 @@ class TestDB(object):
 
         # Print the statistics information
         for test_name in tests:
-            print "Statistics for Test:", test_name
+            print "Statistics for Test: {0!s}".format(test_name)
             print
 
             test_stats = self._statistics[test_name]
             num_steps = test_stats['length']
 
-            print "   Number of Time Steps:", num_steps
+            print "   Number of Time Steps: {0!s}".format(num_steps)
             print
 
             # Print counts
             num_tser = test_stats['counts']['tseries']
-            print "   Number of Time-Series Variables:            ", num_tser
+            print "   Number of Time-Series Variables:             {0!s}".format(num_tser)
             num_tvmd = test_stats['counts']['tvariant']
-            print "   Number of Time-Variant Metadata Variables:  ", num_tvmd
+            print "   Number of Time-Variant Metadata Variables:   {0!s}".format(num_tvmd)
             num_timd = test_stats['counts']['tinvariant']
-            print "   Number of Time-Invariant Metadata Variables:", num_timd
+            print "   Number of Time-Invariant Metadata Variables: {0!s}".format(num_timd)
             num_lost = test_stats['counts']['other']
             if num_lost > 0:
-                print "   WARNING:", num_lost, " unclassified variables"
+                print "   WARNING: {0!s} unclassified variables".format(num_lost)
             print
 
             # Print the coordinate data
@@ -425,57 +425,57 @@ class TestDB(object):
             maxlenxcoord = max([len(xc) for xc in test_stats['xcoords']])
             for xcoord, cxsize in test_stats['xcoords'].items():
                 spcr = ' ' * (maxlenxcoord - len(xcoord))
-                print "      " + xcoord + ": " + spcr + str(cxsize)
+                print "       {0!s}:{1!s}{2!s}".format(xcoord, spcr, cxsize)
             print
 
             # Print names
             print "   Time-Series Variables:"
             vlist = ", ".join([str(v) for v in
                                test_stats['names']['tseries']])
-            print "      " + "\n      ".join(textwrap.wrap(vlist))
+            print "     ", "\n      ".join(textwrap.wrap(vlist))
             print "   Time-Variant Metadata Variables:"
             vlist = ", ".join([str(v) for v in
                                test_stats['names']['tvariant']])
-            print "      " + "\n      ".join(textwrap.wrap(vlist))
+            print "     ", "\n      ".join(textwrap.wrap(vlist))
             print "   Time-Invariant Metadata Variables:"
             vlist = ", ".join([str(v) for v in
                                test_stats['names']['tinvariant']])
-            print "      " + "\n      ".join(textwrap.wrap(vlist))
+            print "     ", "\n      ".join(textwrap.wrap(vlist))
             if num_lost > 0:
                 print "   Unclassified Variables (neither meta nor time-variant):"
                 vlist = ", ".join([str(v) for v in
                                    test_stats['names']['other']])
-                print "      " + "\n      ".join(textwrap.wrap(vlist))
+                print "     ", "\n      ".join(textwrap.wrap(vlist))
             print
 
             # Print Transverse Shapes
             print "   Time-Series Variable Transverse Shapes:"
-            print "      " + " ".join([str(s) for s in
-                                       test_stats['xshapes']['tseries']])
+            print "     ", " ".join([str(s) for s in
+                                     test_stats['xshapes']['tseries']])
             print "   Time-Variant Metadata Transverse Shapes:"
-            print "      " + " ".join([str(s) for s in
-                                       test_stats['xshapes']['tvariant']])
+            print "     ", " ".join([str(s) for s in
+                                     test_stats['xshapes']['tvariant']])
             print "   Time-Invariant Metadata Transverse Shapes:"
-            print "      " + " ".join([str(s) for s in
-                                       test_stats['xshapes']['tinvariant']])
+            print "     ", " ".join([str(s) for s in
+                                     test_stats['xshapes']['tinvariant']])
             print
 
             # Print total bytesizes
             tser_totsize = test_stats['totalsizes']['tseries']
-            print "   Time-Series Variable Total Size:   ", _nbyte_str(tser_totsize)
+            print "   Time-Series Variable Total Size:    {}".format(_nbyte_str(tser_totsize))
             tvmd_totsize = test_stats['totalsizes']['tvariant']
-            print "   Time-Variant Metadata Total Size:  ", _nbyte_str(tvmd_totsize)
+            print "   Time-Variant Metadata Total Size:   {}".format(_nbyte_str(tvmd_totsize))
             timd_totsize = test_stats['totalsizes']['tinvariant']
-            print "   Time-Invariant Metadata Total Size:", _nbyte_str(timd_totsize)
+            print "   Time-Invariant Metadata Total Size: {}".format(_nbyte_str(timd_totsize))
             print
 
             # Print maximum bytesizes
             tser_maxsize = test_stats['maxsizes']['tseries']
-            print "   Time-Series Variable Max Size:   ", _nbyte_str(tser_maxsize)
+            print "   Time-Series Variable Max Size:    {}".format(_nbyte_str(tser_maxsize))
             tvmd_maxsize = test_stats['maxsizes']['tvariant']
-            print "   Time-Variant Metadata Max Size:  ", _nbyte_str(tvmd_maxsize)
+            print "   Time-Variant Metadata Max Size:   {}".format(_nbyte_str(tvmd_maxsize))
             timd_maxsize = test_stats['maxsizes']['tinvariant']
-            print "   Time-Invariant Metadata Max Size:", _nbyte_str(timd_maxsize)
+            print "   Time-Invariant Metadata Max Size: {}".format(_nbyte_str(timd_maxsize))
             print
 
     def save_statistics(self, stname="teststats.json"):

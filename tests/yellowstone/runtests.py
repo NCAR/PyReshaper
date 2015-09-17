@@ -135,11 +135,11 @@ def runtests(args):
     else:
         for test_name in test_list:
 
-            print "Running test:", test_name
+            print 'Running test: {0!s}'.format(test_name)
 
             # Set the test directory
             if args.nodes > 0:
-                runtype = 'par' + str(args.nodes) + 'x' + str(args.tiling)
+                runtype = 'par{0!s}x{1!s}'.format(args.nodes, args.tiling)
             else:
                 runtype = 'ser'
             testdir = os.path.abspath(os.path.join('rundirs', str(test_name), runtype))

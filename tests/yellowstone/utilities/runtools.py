@@ -165,7 +165,7 @@ class _SerialJob(_Job):
                               env=os.environ.copy(), bufsize=0)
 
         # Display PID on screen and let run in background
-        print "   Process launched in background with PID", self._process.pid
+        print "   Process launched in background with PID {0!s}".format(self._process.pid)
 
         # Go back to where you started
         os.chdir(cwd)
@@ -222,22 +222,21 @@ class _YellowstoneJob(_Job):
         wtime_hours = self._minutes / 60
         if (wtime_hours > 99):
             wtime_hours = 99
-            print 'Requested number of hours too large.  Limiting to', \
-                wtime_hours, '.'
+            print 'Requested number of hours too large.  Limiting to {0!s}.'.format(wtime_hours)
         wtime_minutes = self._minutes % 60
-        wtime_str = '%02d:%02d' % (wtime_hours, wtime_minutes)
+        wtime_str = '{:0>2}:{:0>2}'.format(wtime_hours, wtime_minutes)
 
         # String list representing LSF preamble
         runscript_list = ['#!/bin/bash',
-                          '#BSUB -n ' + str(num_procs),
-                          '#BSUB -R "span[ptile=' + str(self._tiling) + ']"',
-                          '#BSUB -q ' + self._queue,
+                          '#BSUB -n {0!s}'.format(num_procs),
+                          '#BSUB -R "span[ptile={0!s}]"'.format(self._tiling),
+                          '#BSUB -q {0!s}'.format(self._queue),
                           '#BSUB -a poe',
                           '#BSUB -x',
-                          '#BSUB -o ' + self._jobname + '.%J.log',
-                          '#BSUB -J ' + self._jobname,
-                          '#BSUB -P ' + self._project,
-                          '#BSUB -W ' + wtime_str,
+                          '#BSUB -o {0!s}.%J.log'.format(self._jobname),
+                          '#BSUB -J {0!s}'.format(self._jobname),
+                          '#BSUB -P {0!s}'.format(self._project),
+                          '#BSUB -W {0!s}'.format(wtime_str),
                           '',
                           'export MP_TIMEOUT=14400',
                           'export MP_PULSE=1800',
@@ -281,7 +280,7 @@ class _YellowstoneJob(_Job):
         output = str(job.communicate()[0]).strip()
 
         # Display the job name
-        print "  ", output
+        print '   {0!s}'.format(output)
 
         # Get the job ID (first integer in output)
         self._process = re.findall('\d+', output)[0]
