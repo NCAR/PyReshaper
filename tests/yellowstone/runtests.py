@@ -183,7 +183,6 @@ def runtests(args):
                          queue=args.queue, project=args.code)
             job.start()
             if args.nodes <= 0:
-                print "*** Waiting for serial job to complete..."
                 job.wait()
 
 
