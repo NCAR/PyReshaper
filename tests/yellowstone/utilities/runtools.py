@@ -130,7 +130,8 @@ class _SerialJob(_Job):
                           '# Necessary modules to load',
                           'module load python',
                           'module load all-python-libs',
-                          '']
+                          '',
+                          'echo $PYTHONPATH']
         runscript_list.extend(self._runcmds)
         runscript_list.append('')
 
@@ -245,7 +246,8 @@ class _YellowstoneJob(_Job):
                           '# Necessary modules to load',
                           'module load python',
                           'module load all-python-libs',
-                          '']
+                          '',
+                          'echo $PYTHONPATH']
         runscript_list.extend(self._runcmds)
         runscript_list.append('')
 
