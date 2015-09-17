@@ -75,9 +75,6 @@ _PARSER_.add_argument('-s', '--skip_existing', default=False,
                       help='Whether to skip time-series generation for '
                            'variables with existing output files. '
                            '[Default: False]')
-_PARSER_.add_argument('--statsfile', default=None, type=str,
-                      help='Location of the teststats.json database file '
-                           '[Default: None]')
 _PARSER_.add_argument('-t', '--tiling', default=16, type=int,
                       help='The integer number of processes per node to '
                            'request in parallel runs (ignored if running '
@@ -217,9 +214,9 @@ def runmultitest(args, tests):
 
 
 #==============================================================================
-# Run tests
+# Run tests individually
 #==============================================================================
-def runtests(args, tests):
+def runindivtests(args, tests):
     """
     Run a set of tests
 
@@ -314,4 +311,4 @@ if __name__ == '__main__':
     if args.multispec:
         runmultitest(args, test_list)
     else:
-        runtests(args, test_list)
+        runindivtests(args, test_list)
