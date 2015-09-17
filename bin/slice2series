@@ -13,7 +13,7 @@ See the LICENSE.txt file for details
 
 # Builtin Modules
 import optparse
-import pickle
+import cPickle as pickle
 
 # Package Modules
 from pyreshaper import specification
