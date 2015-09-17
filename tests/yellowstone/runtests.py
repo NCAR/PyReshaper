@@ -110,8 +110,9 @@ def write_pyscript(args, testnames, scriptname='runscript.py'):
 
     # Start defining the Python script
     runscript_list = ['#!/usr/bin/env python',
-                      '',
+                      '#',
                       '# Created automatically by runtests.py',
+                      '#',
                       '',
                       'import cPickle as pickle',
                       'from pyreshaper import specification',
