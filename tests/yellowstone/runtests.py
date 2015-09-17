@@ -183,8 +183,6 @@ def runtests(args):
                          tiling=args.tiling, minutes=args.wtime,
                          queue=args.queue, project=args.code)
             job.start()
-            if args.nodes <= 0:
-                job.wait()
 
             os.chdir(cwd)
 
