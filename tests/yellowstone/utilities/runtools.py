@@ -164,6 +164,9 @@ class _SerialJob(_Job):
                               stdout=self._logfile, stderr=STDOUT,
                               env=os.environ.copy(), bufsize=0)
 
+        # Display PID on screen and let run in background
+        print "   Process launched in background with PID", self._process.pid
+
         # Go back to where you started
         os.chdir(cwd)
 
@@ -173,28 +176,8 @@ class _SerialJob(_Job):
         """
 
         if self._process is not None:
-
-            # Go to the run directory
-            cwd = os.getcwd()
-            os.chdir(self._rundir)
-
-            # Open the logfile for reading
-            logfile = open(self._logfilenm, 'r')
-
-            # Wait for job to finish and continue to print output to screen
-            while self._process.poll() is None:
-                line = logfile.readline()
-                if line:
-                    print line,
-
-            # Now that the process is done, close the logfile
-            logfile.close()
-
-            # Null the process pointer
+            self._process.wait()
             self._process = None
-
-            # Go back to where you started
-            os.chdir(cwd)
 
 
 #==============================================================================
@@ -277,7 +260,7 @@ class _YellowstoneJob(_Job):
         Start the job (or submit into the queue)
         """
 
-        # Now launch the job
+        # Go to the run directory
         cwd = os.getcwd()
         os.chdir(self._rundir)
 
@@ -291,18 +274,19 @@ class _YellowstoneJob(_Job):
         runscript_file = open(self._runscript, 'r')
 
         # Launch the parallel job with LSF bsub
-        job = Popen(['bsub'], stdout=PIPE, stderr=STDOUT,
+        job = Popen(['bsub'], stdout=PIPE, stderr=PIPE,
                     stdin=runscript_file, env=os.environ.copy())
 
         # Get the process ID from bsub output
-        self._process = job.communicate()[0]
+        self._process, output = job.communicate()
 
         # Display the job name
-        print self._process
+        print "  ", output
 
         # Close the script file and print submission info
         runscript_file.close()
 
+        # Go back to where we started
         os.chdir(cwd)
 
     def wait(self):
@@ -310,16 +294,10 @@ class _YellowstoneJob(_Job):
         Wait for the job to complete
         """
 
-        cwd = os.getcwd()
-        os.chdir(self._rundir)
-        if self._process is not None:
-
-            # Wait until the process completes
-            while self._process is not None:
-                job = Popen(['bjobs', self._process],
-                            stdout=PIPE, stderr=PIPE)
-                job_output = job.communicate()[0]
-                if len(job_output) == 0:
-                    self._process = None
-
-        os.chdir(cwd)
+        # Wait until the process completes
+        while self._process is not None:
+            job = Popen(['bjobs', self._process],
+                        stdout=PIPE, stderr=PIPE)
+            job_output = job.communicate()[0]
+            if len(job_output) == 0:
+                self._process = None
