@@ -163,7 +163,7 @@ def runtests(args):
                 os.mkdir(outputdir)
 
             # Create the specifier and write to file (specfile)
-            testspec = testdb.create_specifier(test_name=test_name,
+            testspec = testdb.create_specifier(test_name=str(test_name),
                                                ncfmt=args.ncformat,
                                                outdir=outputdir)
             testspecfile = test_name + '.spec'
