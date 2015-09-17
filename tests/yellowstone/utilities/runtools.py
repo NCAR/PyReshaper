@@ -175,6 +175,8 @@ class _SerialJob(_Job):
 
         if self._process is not None:
 
+            print "*** Serial process is not None..."
+
             # Go to the run directory
             cwd = os.getcwd()
             os.chdir(self._rundir)
@@ -182,11 +184,15 @@ class _SerialJob(_Job):
             # Open the logfile for reading
             logfile = open(self._logfilenm, 'r')
 
+            print "*** Log file opened for reading..."
+
             # Get the existing contents of the log file and output to screen
             print logfile.read(),
 
             # Wait for job to finish and continue to print output to screen
+            print "*** Checking if serial process is still running..."
             while self._process.poll():
+                print "*** Serial process still running..."
                 where = file.tell()
                 line = file.readline()
                 if not line:
@@ -196,6 +202,7 @@ class _SerialJob(_Job):
                     print line,
 
             # Now that the process is done, close the logfile
+            print "*** Log file closed"
             logfile.close()
 
             # Null the process pointer
