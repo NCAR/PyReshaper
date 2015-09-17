@@ -109,28 +109,28 @@ def write_pyscript(args, testnames, scriptname='runscript.py'):
     """
 
     # Start defining the Python script
-    runscript_list = ['#!/usr/bin/env python',
-                      '#',
-                      '# Created automatically by runtests.py',
-                      '#',
-                      '',
-                      'import cPickle as pickle',
-                      'from pyreshaper import specification',
-                      'from pyreshaper import reshaper',
-                      '']
+    pyscript_list = ['#!/usr/bin/env python',
+                     '#',
+                     '# Created automatically by runtests.py',
+                     '#',
+                     '',
+                     'import cPickle as pickle',
+                     'from pyreshaper import specification',
+                     'from pyreshaper import reshaper',
+                     '']
 
     # Check for single or multiple specifiers
     if isinstance(testnames, (str, unicode)):
-        runscript_list.append(
+        pyscript_list.append(
             'specs = pickle.load(open("{0!s}.spec", "rb"))'.format(testnames))
     elif isinstance(testnames, (list, tuple)):
-        runscript_list.append('specs = []')
+        pyscript_list.append('specs = {}')
         for testname in testnames:
-            runscript_list.append(
-                'specs.append(pickle.load(open("{0!s}.spec", "rb")))'.format(testname))
+            pyscript_list.append(
+                'specs["{0!s}"] = pickle.load(open("{0!s}.spec", "rb"))'.format(testname))
 
     # Define the rest of the python script
-    runscript_list.extend([
+    pyscript_list.extend([
         'rshpr = reshaper.create_reshaper(specs, serial={0!s}, '
         'verbosity=3, skip_existing={1!s}, overwrite={2!s})'.format(
             args.nodes <= 0, args.skip_existing, args.overwrite),
@@ -139,9 +139,9 @@ def write_pyscript(args, testnames, scriptname='runscript.py'):
         ''])
 
     # Write the script to file
-    runscript_file = open(scriptname, 'w')
-    runscript_file.write(os.linesep.join(runscript_list))
-    runscript_file.close()
+    pyscript_file = open(scriptname, 'w')
+    pyscript_file.write(os.linesep.join(pyscript_list))
+    pyscript_file.close()
 
     # Make the script executable
     os.chmod(scriptname, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
