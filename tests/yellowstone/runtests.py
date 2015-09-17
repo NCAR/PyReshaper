@@ -86,13 +86,8 @@ _PARSER_.add_argument('-w', '--wtime', default=240, type=int,
                       help='The number of minutes to request for the wall '
                            'clock in parallel runs (ignored if running in '
                            'serial) [Default: 240]')
-_PARSER_.add_argument('-z', '--analyze', default=False,
-                      action='store_true',
-                      help='Whether to analyze (generate statistics for) the '
-                           'test input, rather than run the tests. '
-                           '[Default: False]')
 _PARSER_.add_argument('test', type=str, nargs='*',
-                      help='Name of test to run or analyze.')
+                      help='Name of test to run')
 
 
 #==============================================================================
@@ -145,24 +140,6 @@ def write_pyscript(args, testnames, scriptname='runscript.py'):
 
     # Make the script executable
     os.chmod(scriptname, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
-
-
-#==============================================================================
-# Analyze the tests
-#==============================================================================
-def analyzetests(args, tests):
-    """
-    Analyze a set of tests
-
-    Parameters:
-        args (argparse.Namespace): A namespace of command-line parsed arguments
-            describing the tests to run and how to run them
-        tests (list, tuple): List or tuple of test names to analyze
-    """
-
-    # Analyze test input, if requested (overwrite forces re-analysis)
-    testdb.analyze(tests=tests, force=args.overwrite)
-    testdb.save_statistics(stname=args.statsfile)
 
 
 #==============================================================================
@@ -321,7 +298,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # Create/read the testing info and stats files
-    testdb = tt.TestDB(dbname=args.infofile, stname=args.statsfile)
+    testdb = tt.TestDB(dbname=args.infofile)
 
     # List tests if only listing
     if args.list_tests:
@@ -334,9 +311,7 @@ if __name__ == '__main__':
     else:
         test_list = [t for t in args.test if t in testdb.get_database()]
 
-    if args.analyze:
-        analyzetests(args, test_list)
-    elif args.multispec:
+    if args.multispec:
         runmultitest(args, test_list)
     else:
         runtests(args, test_list)
