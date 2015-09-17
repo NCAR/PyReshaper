@@ -25,9 +25,9 @@ _PARSER_.add_argument('-a', '--all', default=False,
                       action='store_true', dest='all_tests',
                       help='True or False, indicating whether to run all '
                            'tests [Default: False]')
-_PARSER_.add_argument('-i', '--infofile', default=None, type=str,
+_PARSER_.add_argument('-i', '--infofile', default='testinfo.json', type=str,
                       help='Location of the testinfo.json database file '
-                           '[Default: None]')
+                           '[Default: testinfo.json]')
 _PARSER_.add_argument('-l', '--list', default=False,
                       action='store_true', dest='list_tests',
                       help='True or False, indicating whether to list all '
@@ -37,9 +37,9 @@ _PARSER_.add_argument('-o', '--overwrite', default=False,
                       help='True or False, indicating whether to force '
                            'deleting any existing test or run directories, '
                            'if found [Default: False]')
-_PARSER_.add_argument('-s', '--statsfile', default=None, type=str,
+_PARSER_.add_argument('-s', '--statsfile', default='teststats.json', type=str,
                       help='Location of the teststats.json database file '
-                           '[Default: None]')
+                           '[Default: teststats.json]')
 _PARSER_.add_argument('test', type=str, nargs='*',
                       help='Name of test to analyze')
 
