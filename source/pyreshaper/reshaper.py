@@ -67,7 +67,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         Reshaper: An instance of the Reshaper object requested
     """
     # Determine the type of Reshaper object to instantiate
-    if type(specifier) is Specifier:
+    if isinstance(specifier, Specifier):
         return Slice2SeriesReshaper(specifier,
                                     serial=serial,
                                     verbosity=verbosity,
@@ -75,7 +75,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
                                     overwrite=overwrite,
                                     once=once,
                                     simplecomm=simplecomm)
-    elif isinstance(specifier, list):
+    elif isinstance(specifier, (list, tuple)):
         spec_dict = dict([(str(i), s) for (i, s) in enumerate(specifier)])
         return create_reshaper(spec_dict,
                                serial=serial,
@@ -85,23 +85,16 @@ def create_reshaper(specifier, serial=False, verbosity=1,
                                once=once,
                                simplecomm=simplecomm)
     elif isinstance(specifier, dict):
-        spec_types = set([type(s) for s in specifier.values()])
-        if len(spec_types) > 1:
-            err_msg = 'Multiple specifiers must all have the same type'
+        if not all([isinstance(s, Specifier) for s in specifier.values()]):
+            err_msg = 'Multiple specifiers must all be of Specifier type'
             raise TypeError(err_msg)
-        spec_type = spec_types.pop()
-        if spec_type is Specifier:
-            return MultiSpecReshaper(specifier,
-                                     serial=serial,
-                                     verbosity=verbosity,
-                                     skip_existing=skip_existing,
-                                     overwrite=overwrite,
-                                     once=once,
-                                     simplecomm=simplecomm)
-        else:
-            err_msg = 'Multiple specifiers of type ' + str(spec_type) \
-                + ' are not valid.'
-            raise TypeError(err_msg)
+        return MultiSpecReshaper(specifier,
+                                 serial=serial,
+                                 verbosity=verbosity,
+                                 skip_existing=skip_existing,
+                                 overwrite=overwrite,
+                                 once=once,
+                                 simplecomm=simplecomm)
     else:
         err_msg = 'Specifier of type ' + str(type(specifier)) + ' is not a ' \
             + 'valid Specifier object.'
@@ -254,7 +247,7 @@ class Slice2SeriesReshaper(Reshaper):
             err_msg = "Once-file indicator must be True or False."
             raise TypeError(err_msg)
         if simplecomm is not None:
-            if simplecomm is not isinstance(simplecomm, SimpleComm):
+            if not isinstance(simplecomm, SimpleComm):
                 err_msg = "Simple communicator object is not a SimpleComm"
                 raise TypeError(err_msg)
 
@@ -940,7 +933,7 @@ class MultiSpecReshaper(Reshaper):
             err_msg = "Once-file indicator must be True or False."
             raise TypeError(err_msg)
         if simplecomm is not None:
-            if simplecomm is not isinstance(simplecomm, SimpleComm):
+            if not isinstance(simplecomm, SimpleComm):
                 err_msg = "Simple communicator object is not a SimpleComm"
                 raise TypeError(err_msg)
 
