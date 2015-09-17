@@ -145,6 +145,7 @@ def runtests(args):
             testdir = os.path.abspath(os.path.join('rundirs', str(test_name), runtype))
 
             # If the test directory doesn't exist, make it and move into it
+            cwd = os.getcwd()
             if os.path.exists(testdir):
                 if args.overwrite:
                     shutil.rmtree(testdir)
@@ -184,6 +185,8 @@ def runtests(args):
             job.start()
             if args.nodes <= 0:
                 job.wait()
+
+            os.chdir(cwd)
 
 
 #==============================================================================
