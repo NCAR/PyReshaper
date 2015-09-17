@@ -298,7 +298,7 @@ def runtests(args):
 
         # Create and start the job
         job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
-                     name=str(test_name), tiling=args.tiling,
+                     name='multitest', tiling=args.tiling,
                      minutes=args.wtime, queue=args.queue,
                      project=args.code)
         job.start()
