@@ -113,6 +113,7 @@ def write_pyscript(args, testnames, scriptname='runscript.py'):
                       '',
                       '# Created automatically by runtests.py',
                       '',
+                      'import cPickle as pickle',
                       'from pyreshaper import specification',
                       'from pyreshaper import reshaper',
                       '']
