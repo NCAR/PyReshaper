@@ -148,18 +148,174 @@ def write_pyscript(args, testnames, scriptname='runscript.py'):
 
 
 #==============================================================================
-# Main Function
+# Analyze the tests
 #==============================================================================
-def runtests(args):
+def analyzetests(args, tests):
+    """
+    Analyze a set of tests
+
+    Parameters:
+        args (argparse.Namespace): A namespace of command-line parsed arguments
+            describing the tests to run and how to run them
+        tests (list, tuple): List or tuple of test names to analyze
+    """
+
+    # Analyze test input, if requested (overwrite forces re-analysis)
+    testdb.analyze(tests=tests, force=args.overwrite)
+    testdb.save_statistics(stname=args.statsfile)
+
+
+#==============================================================================
+# Run a single multitest (using a MultiSpecReshaper)
+#==============================================================================
+def runmultitest(args, tests):
     """
     Run a set of tests
 
     Parameters:
         args (argparse.Namespace): A namespace of command-line parsed arguments
             describing the tests to run and how to run them
+        tests (list, tuple): List or tuple of test names to run
     """
 
-    # Check for tests to run
+    print 'Running tests in single submission:'
+    for test_name in tests:
+        print '   {0!s}'.format(test_name)
+    print
+
+    # Set the test directory
+    if args.nodes > 0:
+        runtype = 'par{0!s}x{1!s}'.format(args.nodes, args.tiling)
+    else:
+        runtype = 'ser'
+    testdir = os.path.abspath(os.path.join('rundirs', 'multitest', runtype))
+
+    # If the test directory doesn't exist, make it and move into it
+    cwd = os.getcwd()
+    if os.path.exists(testdir):
+        if args.overwrite:
+            shutil.rmtree(testdir)
+        else:
+            print "Already exists.  Skipping."
+            return
+    if not os.path.exists(testdir):
+        os.makedirs(testdir)
+    os.chdir(testdir)
+
+    # Create a separate output directory and specifier for each test
+    for test_name in tests:
+
+        # Set the output directory
+        outputdir = os.path.join(testdir, 'output', str(test_name))
+
+        # If the output directory doesn't exists, create it
+        if not os.path.exists(outputdir):
+            os.makedirs(outputdir)
+
+        # Create the specifier and write to file (specfile)
+        testspec = testdb.create_specifier(test_name=str(test_name),
+                                           ncfmt=args.ncformat,
+                                           outdir=outputdir)
+        testspecfile = str(test_name) + '.spec'
+        pickle.dump(testspec, open(testspecfile, 'wb'))
+
+    # Write the Python executable to be run
+    pyscript_name = 'multitest.py'
+    write_pyscript(args, testnames=tests, scriptname=pyscript_name)
+
+    # Generate the command and arguments
+    if args.nodes > 0:
+        runcmd = 'poe ./{0!s}'.format(pyscript_name)
+    else:
+        runcmd = './{0!s}'.format(pyscript_name)
+
+    # Create and start the job
+    job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
+                 name='multitest', tiling=args.tiling,
+                 minutes=args.wtime, queue=args.queue,
+                 project=args.code)
+    job.start()
+
+    os.chdir(cwd)
+
+
+#==============================================================================
+# Run tests
+#==============================================================================
+def runtests(args, tests):
+    """
+    Run a set of tests
+
+    Parameters:
+        args (argparse.Namespace): A namespace of command-line parsed arguments
+            describing the tests to run and how to run them
+        tests (list, tuple): List or tuple of test names to run
+    """
+
+    cwd = os.getcwd()
+    for test_name in test_list:
+
+        print 'Running test: {0!s}'.format(test_name)
+
+        # Set the test directory
+        if args.nodes > 0:
+            runtype = 'par{0!s}x{1!s}'.format(args.nodes, args.tiling)
+        else:
+            runtype = 'ser'
+        testdir = os.path.abspath(os.path.join('rundirs', str(test_name), runtype))
+
+        # If the test directory doesn't exist, make it and move into it
+        if os.path.exists(testdir):
+            if args.overwrite:
+                shutil.rmtree(testdir)
+            else:
+                print "   Already exists.  Skipping."
+                continue
+        if not os.path.exists(testdir):
+            os.makedirs(testdir)
+        os.chdir(testdir)
+
+        # Set the output directory
+        outputdir = os.path.join(testdir, 'output')
+
+        # If the output directory doesn't exists, create it
+        if not os.path.exists(outputdir):
+            os.mkdir(outputdir)
+
+        # Create the specifier and write to file (specfile)
+        testspec = testdb.create_specifier(test_name=str(test_name),
+                                           ncfmt=args.ncformat,
+                                           outdir=outputdir)
+        testspecfile = '{0!s}.spec'.format(test_name)
+        pickle.dump(testspec, open(testspecfile, 'wb'))
+
+        # Write the Python executable to be run
+        pyscript_name = '{0!s}.py'.format(test_name)
+        write_pyscript(args, testnames=test_name, scriptname=pyscript_name)
+
+        # Generate the command and arguments
+        if args.nodes > 0:
+            runcmd = 'poe ./{0!s}'.format(pyscript_name)
+        else:
+            runcmd = './{0!s}'.format(pyscript_name)
+
+        # Create and start the job
+        job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
+                     name=str(test_name), tiling=args.tiling,
+                     minutes=args.wtime, queue=args.queue,
+                     project=args.code)
+        job.start()
+
+        os.chdir(cwd)
+
+
+#==============================================================================
+# Main Command-line Operation
+#==============================================================================
+if __name__ == '__main__':
+    args = _PARSER_.parse_args()
+
+    # Check for tests to analyze
     if len(args.test) == 0 and not args.all_tests and not args.list_tests:
         _PARSER_.print_help()
         sys.exit(1)
@@ -178,137 +334,9 @@ def runtests(args):
     else:
         test_list = [t for t in args.test if t in testdb.get_database()]
 
-    # Analyze test input, if requested (overwrite forces re-analysis)
     if args.analyze:
-        testdb.analyze(tests=test_list, force=args.overwrite)
-        testdb.save_statistics(stname=args.statsfile)
-        sys.exit(0)
-
-    # Run the requested tests individually
-    elif not args.multispec:
-
-        cwd = os.getcwd()
-        for test_name in test_list:
-
-            print 'Running test: {0!s}'.format(test_name)
-
-            # Set the test directory
-            if args.nodes > 0:
-                runtype = 'par{0!s}x{1!s}'.format(args.nodes, args.tiling)
-            else:
-                runtype = 'ser'
-            testdir = os.path.abspath(os.path.join('rundirs', str(test_name), runtype))
-
-            # If the test directory doesn't exist, make it and move into it
-            if os.path.exists(testdir):
-                if args.overwrite:
-                    shutil.rmtree(testdir)
-                else:
-                    print "   Already exists.  Skipping."
-                    continue
-            if not os.path.exists(testdir):
-                os.makedirs(testdir)
-            os.chdir(testdir)
-
-            # Set the output directory
-            outputdir = os.path.join(testdir, 'output')
-
-            # If the output directory doesn't exists, create it
-            if not os.path.exists(outputdir):
-                os.mkdir(outputdir)
-
-            # Create the specifier and write to file (specfile)
-            testspec = testdb.create_specifier(test_name=str(test_name),
-                                               ncfmt=args.ncformat,
-                                               outdir=outputdir)
-            testspecfile = '{0!s}.spec'.format(test_name)
-            pickle.dump(testspec, open(testspecfile, 'wb'))
-
-            # Write the Python executable to be run
-            pyscript_name = '{0!s}.py'.format(test_name)
-            write_pyscript(args, testnames=test_name, scriptname=pyscript_name)
-
-            # Generate the command and arguments
-            if args.nodes > 0:
-                runcmd = 'poe ./{0!s}'.format(pyscript_name)
-            else:
-                runcmd = './{0!s}'.format(pyscript_name)
-
-            # Create and start the job
-            job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
-                         name=str(test_name), tiling=args.tiling,
-                         minutes=args.wtime, queue=args.queue,
-                         project=args.code)
-            job.start()
-
-            os.chdir(cwd)
-
-    # Run the tests in a MultiSpecReshaper
+        analyzetests(args, test_list)
+    elif args.multispec:
+        runmultitest(args, test_list)
     else:
-
-        print 'Running tests in single submission:'
-        for test_name in test_list:
-            print '   {0!s}'.format(test_name)
-
-        # Set the test directory
-        if args.nodes > 0:
-            runtype = 'par{0!s}x{1!s}'.format(args.nodes, args.tiling)
-        else:
-            runtype = 'ser'
-        testdir = os.path.abspath(os.path.join('rundirs', 'multitest', runtype))
-
-        # If the test directory doesn't exist, make it and move into it
-        cwd = os.getcwd()
-        if os.path.exists(testdir):
-            if args.overwrite:
-                shutil.rmtree(testdir)
-            else:
-                print "Already exists.  Skipping."
-                return
-        if not os.path.exists(testdir):
-            os.makedirs(testdir)
-        os.chdir(testdir)
-
-        # Create a separate output directory and specifier for each test
-        for test_name in test_list:
-
-            # Set the output directory
-            outputdir = os.path.join(testdir, 'output', str(test_name))
-
-            # If the output directory doesn't exists, create it
-            if not os.path.exists(outputdir):
-                os.makedirs(outputdir)
-
-            # Create the specifier and write to file (specfile)
-            testspec = testdb.create_specifier(test_name=str(test_name),
-                                               ncfmt=args.ncformat,
-                                               outdir=outputdir)
-            testspecfile = str(test_name) + '.spec'
-            pickle.dump(testspec, open(testspecfile, 'wb'))
-
-        # Write the Python executable to be run
-        pyscript_name = 'multitest.py'.format(test_name)
-        write_pyscript(args, testnames=test_list, scriptname=pyscript_name)
-
-        # Generate the command and arguments
-        if args.nodes > 0:
-            runcmd = 'poe ./{0!s}'.format(pyscript_name)
-        else:
-            runcmd = './{0!s}'.format(pyscript_name)
-
-        # Create and start the job
-        job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
-                     name='multitest', tiling=args.tiling,
-                     minutes=args.wtime, queue=args.queue,
-                     project=args.code)
-        job.start()
-
-        os.chdir(cwd)
-
-
-#==============================================================================
-# Main Command-line Operation
-#==============================================================================
-if __name__ == '__main__':
-    args = _PARSER_.parse_args()
-    runtests(args)
+        runtests(args, test_list)
