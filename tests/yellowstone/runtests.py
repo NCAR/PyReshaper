@@ -263,7 +263,7 @@ def runtests(args):
                 shutil.rmtree(testdir)
             else:
                 print "   Already exists.  Skipping."
-                continue
+                return
         if not os.path.exists(testdir):
             os.makedirs(testdir)
         os.chdir(testdir)
