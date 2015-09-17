@@ -183,7 +183,7 @@ def runtests(args):
         sys.exit(0)
 
     # Run the requested tests individually
-    elif not args.multiple:
+    elif not args.multispec:
 
         cwd = os.getcwd()
         for test_name in test_list:
