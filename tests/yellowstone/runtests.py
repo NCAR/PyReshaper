@@ -142,7 +142,7 @@ def runtests(args):
                 runtype = 'par' + str(args.nodes) + 'x' + str(args.tiling)
             else:
                 runtype = 'ser'
-            testdir = os.path.abspath(os.path.join('rundirs', test_name, runtype))
+            testdir = os.path.abspath(os.path.join('rundirs', str(test_name), runtype))
 
             # If the test directory doesn't exist, make it and move into it
             if os.path.exists(testdir):
@@ -166,7 +166,7 @@ def runtests(args):
             testspec = testdb.create_specifier(test_name=str(test_name),
                                                ncfmt=args.ncformat,
                                                outdir=outputdir)
-            testspecfile = test_name + '.spec'
+            testspecfile = str(test_name) + '.spec'
             pickle.dump(testspec, open(testspecfile, 'wb'))
 
             # Generate the command and arguments
@@ -178,7 +178,7 @@ def runtests(args):
             runcmd = ' '.join(runcmdargs)
 
             # Create and start the job
-            job = rt.Job(runcmds=[runcmd], nodes=args.nodes, name=test_name,
+            job = rt.Job(runcmds=[runcmd], nodes=args.nodes, name=str(test_name),
                          tiling=args.tiling, minutes=args.wtime,
                          queue=args.queue, project=args.code)
             job.start()
