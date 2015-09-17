@@ -181,12 +181,11 @@ class _SerialJob(_Job):
             # Open the logfile for reading
             logfile = open(self._logfilenm, 'r')
 
-            # Get the existing contents of the log file and output to screen
-            print logfile.read(),
-
             # Wait for job to finish and continue to print output to screen
             while self._process.poll() is None:
-                print logfile.readline(),
+                line = logfile.readline()
+                if line:
+                    print line,
 
             # Now that the process is done, close the logfile
             logfile.close()
