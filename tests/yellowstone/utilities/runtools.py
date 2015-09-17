@@ -278,7 +278,7 @@ class _YellowstoneJob(_Job):
                     stdin=runscript_file, env=os.environ.copy())
 
         # Get the process ID from bsub output
-        output = job.communicate()[0]
+        output = str(job.communicate()[0]).strip()
 
         # Display the job name
         print "  ", output
