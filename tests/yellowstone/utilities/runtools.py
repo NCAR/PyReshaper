@@ -120,8 +120,9 @@ class _SerialJob(_Job):
         # Call the base class initialization
         super(_SerialJob, self).__init__(runcmds=runcmds, name=name)
 
-        # Define the name of the log file
-        self._logfile = os.path.join(self._rundir, self._jobname + '.log')
+        # Define the name of the log file, and set the file object to None
+        self._logfilenm = os.path.join(self._rundir, self._jobname + '.log')
+        self._logfile = None
 
         # Start creating the run scripts for each test
         runscript_list = ['#!/bin/bash',
@@ -153,11 +154,15 @@ class _SerialJob(_Job):
         # if the process is already running, kill it
         if self._process is not None:
             self._process.kill()
+            self._logfile.close()
+
+        # Open the log file
+        self._logfile = open(self._logfilenm, 'w')
 
         # Launch the serial job as a subprocess
         self._process = Popen([self._runscript],
-                              stdout=open(self._logfile, 'w'),
-                              stderr=STDOUT, env=os.environ.copy(), bufsize=1)
+                              stdout=self._logfile, stderr=STDOUT,
+                              env=os.environ.copy(), bufsize=1)
 
         # Go back to where you started
         os.chdir(cwd)
@@ -174,7 +179,7 @@ class _SerialJob(_Job):
             os.chdir(self._rundir)
 
             # Open the logfile for reading
-            logfile = open(self._logfile, 'r')
+            logfile = open(self._logfilenm, 'r')
 
             # Get the existing contents of the log file and output to screen
             print logfile.read(),
