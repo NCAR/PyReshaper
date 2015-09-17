@@ -228,10 +228,9 @@ def runtests(args):
 
             # Generate the command and arguments
             if args.nodes > 0:
-                runcmdargs = ['poe', pyscript_name]
+                runcmd = 'poe ./{0!s}'.format(pyscript_name)
             else:
-                runcmdargs = [pyscript_name]
-            runcmd = ' '.join(runcmdargs)
+                runcmd = './{0!s}'.format(pyscript_name)
 
             # Create and start the job
             job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
@@ -291,10 +290,9 @@ def runtests(args):
 
         # Generate the command and arguments
         if args.nodes > 0:
-            runcmdargs = ['poe', pyscript_name]
+            runcmd = 'poe ./{0!s}'.format(pyscript_name)
         else:
-            runcmdargs = [pyscript_name]
-        runcmd = ' '.join(runcmdargs)
+            runcmd = './{0!s}'.format(pyscript_name)
 
         # Create and start the job
         job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
