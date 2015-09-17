@@ -256,6 +256,7 @@ class Slice2SeriesReshaper(Reshaper):
         if simplecomm is not None:
             if simplecomm is not isinstance(simplecomm, SimpleComm):
                 err_msg = "Simple communicator object is not a SimpleComm"
+                print "simplecomm = {0!s}".format(type(simplecomm))
                 raise TypeError(err_msg)
 
         # Whether to write a once file
