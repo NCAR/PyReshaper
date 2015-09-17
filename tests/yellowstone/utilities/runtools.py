@@ -274,14 +274,17 @@ class _YellowstoneJob(_Job):
         runscript_file = open(self._runscript, 'r')
 
         # Launch the parallel job with LSF bsub
-        job = Popen(['bsub'], stdout=PIPE, stderr=PIPE,
+        job = Popen(['bsub'], stdout=PIPE, stderr=STDOUT,
                     stdin=runscript_file, env=os.environ.copy())
 
         # Get the process ID from bsub output
-        self._process, output = job.communicate()
+        output = job.communicate()[0]
 
         # Display the job name
         print "  ", output
+
+        # Get the job ID (first integer in output)
+        self._process = re.findall('\d+', output)[0]
 
         # Close the script file and print submission info
         runscript_file.close()
