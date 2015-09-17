@@ -116,8 +116,12 @@ class _SerialJob(_Job):
             runcmds (list, tuple): The list of commands to run
             name (str): Name of the run script
         """
+
         # Call the base class initialization
         super(_SerialJob, self).__init__(runcmds=runcmds, name=name)
+
+        # Define the name of the log file
+        self._logfile = os.path.join(self._rundir, self._jobname + '.log')
 
         # Start creating the run scripts for each test
         runscript_list = ['#!/bin/bash',
@@ -134,6 +138,7 @@ class _SerialJob(_Job):
         runscript_file.write(os.linesep.join(runscript_list))
         runscript_file.close()
 
+        # Make the script executable
         os.chmod(self._runscript, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
 
     def start(self):
@@ -141,7 +146,7 @@ class _SerialJob(_Job):
         Start the job (or submit into the queue)
         """
 
-        # Now launch the job
+        # Go to the run directory
         cwd = os.getcwd()
         os.chdir(self._rundir)
 
@@ -151,9 +156,10 @@ class _SerialJob(_Job):
 
         # Launch the serial job as a subprocess
         self._process = Popen([self._runscript],
-                              stdout=PIPE, stderr=STDOUT,
-                              env=os.environ.copy(), bufsize=1)
+                              stdout=open(self._logfile, 'w'),
+                              stderr=STDOUT, env=os.environ.copy(), bufsize=1)
 
+        # Go back to where you started
         os.chdir(cwd)
 
     def wait(self):
@@ -162,24 +168,28 @@ class _SerialJob(_Job):
         """
 
         if self._process is not None:
+
+            # Go to the run directory
             cwd = os.getcwd()
             os.chdir(self._rundir)
 
-            # Wait for job to finish and grab job output
-            job_output = ''
-            while True:
-                line = self._process.stdout.readline()
-                if not line:
-                    break
-                job_output += line
-                print line,
+            # Open the logfile for reading
+            logfile = open(self._logfile, 'r')
+
+            # Get the existing contents of the log file and output to screen
+            print logfile.read(),
+
+            # Wait for job to finish and continue to print output to screen
+            while self._process.poll():
+                print logfile.readline(),
+
+            # Now that the process is done, close the logfile
+            logfile.close()
+
+            # Null the process pointer
             self._process = None
 
-            # Write output to log file
-            log_file = open(self._jobname + '.log', 'w')
-            log_file.write(job_output)
-            log_file.close()
-
+            # Go back to where you started
             os.chdir(cwd)
 
 
