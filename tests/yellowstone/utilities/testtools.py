@@ -87,24 +87,22 @@ class TestDB(object):
             self._database = dict(json.load(dbfile))
             dbfile.close()
         except:
-            err_msg = 'Problem reading and parsing test info file: ' \
-                + str(abs_path)
+            err_msg = 'Problem reading and parsing test info file: {0!s}'.format(abs_path)
             raise ValueError(err_msg)
 
-        # Initialize the statistics database
-        if stname:
-            abs_path = os.path.abspath(stname)
-        else:
-            abs_path = os.path.join(os.getcwd(), 'teststats.json')
-
-        # Try opening and reading the testinfo file
+        # Initialize test statistics
         self._statistics = {}
-        try:
-            stfile = open(abs_path, 'r')
-            self._statistics = dict(json.load(stfile))
-            stfile.close()
-        except:
-            print "Warning: Statistics file ({0!s}) not found.".format(stname)
+
+        # If the stats filename is given, then try to read it
+        if stname is not None:
+            abs_path = os.path.abspath(stname)
+            try:
+                stfile = open(abs_path, 'r')
+                self._statistics = dict(json.load(stfile))
+                stfile.close()
+            except:
+                err_msg = 'Problem reading and parsing test stats file: {0!s}'.format(abs_path)
+                raise ValueError(err_msg)
 
     def get_database(self):
         """
