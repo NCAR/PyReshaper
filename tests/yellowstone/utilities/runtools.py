@@ -165,7 +165,7 @@ class _SerialJob(_Job):
                               env=os.environ.copy(), bufsize=0)
 
         # Display PID on screen and let run in background
-        print "   Process launched in background with PID {0!s}".format(self._process.pid)
+        print "Process launched in background with PID {0!s}".format(self._process.pid)
 
         # Go back to where you started
         os.chdir(cwd)
@@ -280,7 +280,7 @@ class _YellowstoneJob(_Job):
         output = str(job.communicate()[0]).strip()
 
         # Display the job name
-        print '   {0!s}'.format(output)
+        print str(output)
 
         # Get the job ID (first integer in output)
         self._process = re.findall('\d+', output)[0]
