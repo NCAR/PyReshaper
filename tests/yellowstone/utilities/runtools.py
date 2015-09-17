@@ -191,7 +191,7 @@ class _SerialJob(_Job):
 
             # Wait for job to finish and continue to print output to screen
             print "*** Checking if serial process is still running..."
-            while self._process.poll():
+            while self._process.poll() is None:
                 print "*** Serial process still running..."
                 where = file.tell()
                 line = file.readline()
