@@ -277,7 +277,7 @@ def runtests(args):
 
             # If the output directory doesn't exists, create it
             if not os.path.exists(outputdir):
-                os.mkdir(outputdir)
+                os.makedirs(outputdir)
 
             # Create the specifier and write to file (specfile)
             testspec = testdb.create_specifier(test_name=str(test_name),
