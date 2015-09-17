@@ -41,9 +41,9 @@ _PARSER_.add_argument('-c', '--code', default='STDD0002', type=str,
                       help='The name of the project code for charging in '
                            'parallel runs (ignored if running in serial) '
                            '[Default: STDD0002]')
-_PARSER_.add_argument('-i', '--infofile', default=None, type=str,
+_PARSER_.add_argument('-i', '--infofile', default='testinfo.json', type=str,
                       help='Location of the testinfo.json database file '
-                           '[Default: None]')
+                           '[Default: testinfo.json]')
 _PARSER_.add_argument('-f', '--format', default='netcdf4c',
                       type=str, dest='ncformat',
                       help='The NetCDF file format to use for the output '
