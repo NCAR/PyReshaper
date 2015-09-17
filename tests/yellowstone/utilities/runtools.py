@@ -193,11 +193,11 @@ class _SerialJob(_Job):
             print "*** Checking if serial process is still running..."
             while self._process.poll() is None:
                 print "*** Serial process still running..."
-                where = file.tell()
-                line = file.readline()
+                where = logfile.tell()
+                line = logfile.readline()
                 if not line:
                     time.sleep(1)
-                    file.seek(where)
+                    logfile.seek(where)
                 else:
                     print line,
 
