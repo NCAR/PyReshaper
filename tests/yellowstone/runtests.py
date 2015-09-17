@@ -133,6 +133,7 @@ def runtests(args):
 
     # Run the requested tests
     else:
+        cwd = os.getcwd()
         for test_name in test_list:
 
             print 'Running test: {0!s}'.format(test_name)
@@ -145,7 +146,6 @@ def runtests(args):
             testdir = os.path.abspath(os.path.join('rundirs', str(test_name), runtype))
 
             # If the test directory doesn't exist, make it and move into it
-            cwd = os.getcwd()
             if os.path.exists(testdir):
                 if args.overwrite:
                     shutil.rmtree(testdir)
