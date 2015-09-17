@@ -12,6 +12,7 @@ import os
 import re
 import abc
 import stat
+import time
 import socket
 from subprocess import Popen, PIPE, STDOUT
 
@@ -186,7 +187,13 @@ class _SerialJob(_Job):
 
             # Wait for job to finish and continue to print output to screen
             while self._process.poll():
-                print logfile.readline(),
+                where = file.tell()
+                line = file.readline()
+                if not line:
+                    time.sleep(1)
+                    file.seek(where)
+                else:
+                    print line,
 
             # Now that the process is done, close the logfile
             logfile.close()
