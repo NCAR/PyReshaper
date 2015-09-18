@@ -178,7 +178,7 @@ def runmultitest(tests, nodes=0, tiling=16, minutes=120,
         runtype = 'par{0!s}x{1!s}'.format(nodes, tiling)
     else:
         runtype = 'ser'
-    testdir = os.path.abspath(os.path.join('results.d', 'multitest', runtype))
+    testdir = os.path.abspath(os.path.join('results.d', 'multitest', runtype, ncformat))
 
     # If the test directory doesn't exist, make it and move into it
     cwd = os.getcwd()
