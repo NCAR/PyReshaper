@@ -397,10 +397,11 @@ if __name__ == '__main__':
             print 'Results directory: {}'.format(rdir)
 
             # Look for the corresponding log file and check for successful run
-            logfile = os.path.join(rdir, '{0!s}.log'.format(test_name))
-            if not grep(r'Successfully completed.', logfile):
-                continue
-            print 'Test completed successfully.'
+            logfiles = []
+            for logfile in glob.glob(os.path.join(rdir, '{0!s}*.log'.format(test_name))):
+                if grep(r'Successfully completed.', logfile):
+                    logfiles.append(logfile)
+                    print 'Test {} completed successfully.'.format(logfile)
 
             # Look for the specfile
             specfile = os.path.join(rdir, '{0!s}.spec'.format(test_name))
