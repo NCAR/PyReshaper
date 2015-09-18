@@ -60,7 +60,7 @@ _PARSER_.add_argument('testdir', type=str, nargs='*',
 #==============================================================================
 def grep(pattern, filename):
     if not os.path.exists(filename):
-        print 'filename {} doesn\'t exist'.filename
+        print 'filename {} doesn\'t exist'.format(filename)
         return None
     fobj = open(filename, 'r')
     results = [line.rstrip() for line in fobj if re.search(pattern, line)]
