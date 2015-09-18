@@ -37,6 +37,10 @@ _PARSER_.add_argument('-l', '--list', default=False,
                            'tests that have been run with resulting output, '
                            'instead of actually comparing any tests. '
                            '[Default: False]')
+_PARSER_.add_argument('-m', '--multiple', default=False,
+                      action='store_true', dest='multispec',
+                      help='True or False, indicating whether to look for '
+                           'multispec results [Default: False]')
 _PARSER_.add_argument('-n', '--nodes', default=0, type=int,
                       help='The integer number of nodes to request in parallel'
                            ' runs (0 means run in serial) [Default: 0]')
@@ -51,8 +55,8 @@ _PARSER_.add_argument('-w', '--wtime', default=240, type=int,
 _PARSER_.add_argument('-x', '--executable', type=str,
                       default='/glade/p/work/kpaul/installs/intel/12.1.5/cprnc/bin/cprnc',
                       help='The path to the CPRNC executable.')
-_PARSER_.add_argument('testdir', type=str, nargs='*',
-                      help='Name of a test directory to check')
+_PARSER_.add_argument('rundir', type=str, nargs='*',
+                      help='Name of a test run directory to check')
 
 
 #==============================================================================
@@ -362,13 +366,25 @@ if __name__ == '__main__':
     args = _PARSER_.parse_args()
 
     # Create/read the testing info and stats files
-    testdb = tt.TestDB(dbname=args.infofile)
-    testdb_dict = testdb.get_database()
+    testdb = tt.TestDB(dbname=args.infofile).get_database()
+
+    # Get a list of valid rundir names to look for
+    if len(args.rundir) > 0:
+        rundirs = args.rundir
+    else:
+        rundirs = glob.glob(os.path.join('results.d', '*', '[ser,par]*', '*'))
+
+    # Get the list of valid run names and the output directory pattern
+    if args.multispec:
+        valid_runnames = ['multitest']
+        outdir_pattern = os.path.join('output', '*')
+    else:
+        valid_runnames = testdb.keys()
+        outdir_pattern = 'output'
 
     # Find valid tests for comparison
-    individual_tests = {}
-    multispec_tests = {}
-    for rdir in glob.glob(os.path.join('results.d', '*', '[ser,par]*', '*')):
+    tests_to_check = {}
+    for rdir in rundirs:
         tempdir, ncfmt = os.path.split(rdir)
         tempdir, runtype = os.path.split(tempdir)
         tempdir, runname = os.path.split(tempdir)
@@ -386,48 +402,34 @@ if __name__ == '__main__':
         if not successful:
             continue
 
-        # Individually run test results
-        if runname in testdb_dict:
-            test_name = runname
-
-            # Look for the new output directory
-            newdir = os.path.join(rdir, 'output')
-            if not os.path.exists(newdir):
-                continue
-
-            # Get the output directory to compare against
-            olddir = testdb_dict[test_name]['results_dir']
-
-            # Put together comparison info
-            individual_tests[test_name] = (newdir, olddir)
-
-        # Multitest results
-        elif runname == 'multitest':
+        # Check if the runname is a valid name
+        if runname in valid_runnames:
 
             # Look for the new output directories
-            for rdir2 in glob.glob(os.path.join(rdir, 'output', '*')):
+            for odir in glob.glob(os.path.join(rdir, outdir_pattern)):
 
-                tempdir, test_name = os.path.split(rdir2)
-                if test_name in testdb_dict:
+                # Get the test name (allowing for multitest results)
+                if runname in testdb:
+                    test_name = runname
+                else:
+                    tempdir, test_name = os.path.split(odir)
 
-                    # Get the output directory to compare against
-                    olddir = testdb_dict[test_name]['results_dir']
+                # Get the output directory to compare against
+                olddir = testdb[test_name]['results_dir']
 
-                    # Put together comparison info
-                    multispec_tests[test_name] = (newdir, olddir)
+                # Put together comparison info
+                tests_to_check[test_name] = (odir, olddir)
 
     # Print tests that will be checked, if list requested
     if args.list_tests:
-        if len(individual_tests) > 0:
-            print 'Individually run tests to be checked:'
-            for test_name in individual_tests:
+        if args.multispec:
+            print 'Checking multitest results.'
+        else:
+            print 'Checking individual test results.'
+        if len(tests_to_check) > 0:
+            print 'Tests to be checked:'
+            for test_name in tests_to_check:
                 print '   {0!s}'.format(test_name)
         else:
-            print 'No individually run tests to be checked.'
-        if len(multispec_tests) > 0:
-            print 'Multitest results to be checked:'
-            for test_name in multispec_tests:
-                print '   {0!s}'.format(test_name)
-        else:
-            print 'No multitest results to be checked.'
+            print 'No tests to be checked.'
         sys.exit(1)
