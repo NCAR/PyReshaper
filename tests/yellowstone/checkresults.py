@@ -449,7 +449,7 @@ if __name__ == '__main__':
             print 'Test {0!s}:'.format(test_name),
             num_files = len(files_to_check[test_name])
             if num_files > 0:
-                print ' Checking {0!s} files'.format()
+                print ' Checking {0!s} files'.format(num_files)
             else:
                 print ' Not checking.'
 
