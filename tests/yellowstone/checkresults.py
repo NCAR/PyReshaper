@@ -56,21 +56,6 @@ _PARSER_.add_argument('testdir', type=str, nargs='*',
 
 
 #==============================================================================
-# grep - Search through a file for a given pattern
-#==============================================================================
-def grep(pattern, filename):
-    if not os.path.exists(filename):
-        return None
-    fobj = open(filename, 'r')
-    results = [line.rstrip() for line in fobj if re.search(pattern, line)]
-    fobj.close()
-    if len(results) == 0:
-        return None
-    else:
-        return results
-
-
-#==============================================================================
 # Local MPI options and handling
 #==============================================================================
 class BasicComm(object):
@@ -390,28 +375,13 @@ if __name__ == '__main__':
         tempdir, runtype = os.path.split(tempdir)
         tempdir, test_name = os.path.split(tempdir)
         if test_name in valid_names:
-            print
-
-            print 'Found test results for name: {}'.format(test_name)
-            print 'Results directory: {}'.format(rdir)
-
-            # Look for the corresponding log files and check for successful run
-            logfiles = []
-            for logfile in glob.glob(os.path.join(rdir, '{0!s}*.log'.format(test_name))):
-                if grep(r'Successfully completed.', logfile):
-                    logfiles.append(logfile)
-            if len(logfiles) == 0:
-                continue
-            print 'Test(s) completed successfully.'.format(logfile)
-
-            # Look for the specfile
-            specfile = os.path.join(rdir, '{0!s}.spec'.format(test_name))
-            if not os.path.exists(specfile):
-                continue
-            print 'Found specfile: {}'.format(specfile)
 
             # Look for the output directory
             outdir = os.path.join(rdir, 'output')
             if not os.path.exists(outdir):
                 continue
-            print 'Found output directory: {}'.format(outdir)
+
+            print 'Found test results for name: {}'.format(test_name)
+            print '   Results directory: {}'.format(rdir)
+            print '   Found output directory: {}'.format(outdir)
+            print
