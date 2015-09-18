@@ -47,9 +47,11 @@ _PARSER_.add_argument('-w', '--wtime', default=240, type=int,
                       help='The number of minutes to request for the wall '
                            'clock in parallel runs (ignored if running in '
                            'serial) [Default: 240]')
-_PARSER_.add_argument('-x', '--executable',
+_PARSER_.add_argument('-x', '--executable', type=str,
                       default='/glade/p/work/kpaul/installs/intel/12.1.5/cprnc/bin/cprnc',
                       help='The path to the CPRNC executable.')
+_PARSER_.add_argument('testdir', type=str, nargs='*',
+                      help='Name of a test directory to check')
 
 
 #==============================================================================
@@ -78,33 +80,6 @@ class BasicComm(object):
             return data
         else:
             return self.MPI.COMM_WORLD.gather(data)
-
-
-#==============================================================================
-# Get the testing database info
-#==============================================================================
-def get_infofile(options):
-
-    # Get the testinfo.json data
-    infofile_filename = ''
-    if (options.testing_database == None):
-        runtest_dir = os.path.dirname(__file__)
-        testing_database_filename = os.path.join(runtest_dir, 'testinfo.json')
-    else:
-        testing_database_filename = os.path.abspath(options.testing_database)
-
-    # Try opening and reading the testinfo file
-    testing_database = {}
-    try:
-        testing_database_file = open(testing_database_filename, 'r')
-        testing_database = dict(json.load(testing_database_file))
-        testing_database_file.close()
-    except:
-        err_msg = 'Problem reading and parsing test info file: ' \
-            + str(testing_database_filename)
-        raise ValueError(err_msg)
-
-    return testing_database
 
 
 #==============================================================================
@@ -379,18 +354,6 @@ def compare_results(comparison_info, comm, cprnc_exec):
             print comparison_info[full_test_name]['num_checks'],
             print 'total comparisons)'
 
-
-#==============================================================================
-# Main Program
-#==============================================================================
-def checkresults(args):
-    comm = BasicComm(serial=options.serial)
-    testing_database = get_testing_database(options)
-    comparison_info = get_comparison_info(
-        options, arguments, comm, testing_database)
-    compare_results(comparison_info, comm, options.executable)
-
-
 #==============================================================================
 # Command-Line Operation
 #==============================================================================
@@ -400,9 +363,12 @@ if __name__ == '__main__':
     # Create/read the testing info and stats files
     testdb = tt.TestDB(dbname=args.infofile)
 
-    # List tests if only listing
-    if args.list_tests:
-        testdb.print_tests()
-        sys.exit(1)
+    # Get the list of the available test names for comparison
+    valid_names = testdb.get_database().keys()
+    print str(valid_names)
+    name_pattern = str(valid_names).replace(' ', '')
+    print str(name_pattern)
 
-    checkresults(args, testdirs)
+    # Search for all possible test run directories
+    found_testdirs = glob.glob(os.path.join('results.d', '*', '[ser,par]*'))
+    print str(found_testdirs)
