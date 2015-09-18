@@ -390,6 +390,7 @@ if __name__ == '__main__':
         tempdir, runtype = os.path.split(tempdir)
         tempdir, test_name = os.path.split(tempdir)
         if test_name in valid_names:
+            print
 
             print 'Found test results for name: {}'.format(test_name)
             print 'Results directory: {}'.format(rdir)
@@ -414,4 +415,3 @@ if __name__ == '__main__':
             if not os.path.exists(outdir):
                 continue
             print 'Found output directory: {}'.format(outdir)
-            print
