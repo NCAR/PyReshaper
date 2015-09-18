@@ -365,7 +365,7 @@ if __name__ == '__main__':
     testdb = tt.TestDB(dbname=args.infofile)
     testdb_dict = testdb.get_database()
 
-    # Find valid tests
+    # Find valid tests for comparison
     individual_tests = {}
     multispec_tests = {}
     for rdir in glob.glob(os.path.join('results.d', '*', '[ser,par]*', '*')):
@@ -402,5 +402,12 @@ if __name__ == '__main__':
                     # Put together comparison info
                     multispec_tests[test_name] = (newdir, olddir)
 
-    print individual_tests
-    print multispec_tests
+    # Print tests that will be checked, if list requested
+    if args.list_tests:
+        print 'Individually run tests to be checked:'
+        for test_name in individual_tests:
+            print '   {0!s}'.format(test_name)
+        print 'Multitest results to be checked:'
+        for test_name in multispec_tests:
+            print '   {0!s}'.format(test_name)
+        sys.exit(1)
