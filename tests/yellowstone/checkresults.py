@@ -22,7 +22,7 @@ from utilities import runtools as rt
 # Command-Line Interface Definition
 #==============================================================================
 _DESC_ = 'Check the results of tests found in the rundirs directory.'
-_PARSER_ = argparse.ArgumentParser(desc=_DESC_)
+_PARSER_ = argparse.ArgumentParser(description=_DESC_)
 _PARSER_.add_argument('-c', '--code', default='STDD0002', type=str,
                       help='The name of the project code for charging in '
                            'parallel runs (ignored if running in serial) '
