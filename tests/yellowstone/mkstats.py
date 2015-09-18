@@ -43,24 +43,6 @@ _PARSER_.add_argument('-s', '--statsfile', default='teststats.json', type=str,
 _PARSER_.add_argument('test', type=str, nargs='*',
                       help='Name of test to analyze')
 
-
-#==============================================================================
-# Analyze the tests
-#==============================================================================
-def analyzetests(args, tests):
-    """
-    Analyze a set of tests
-
-    Parameters:
-        args (argparse.Namespace): A namespace of command-line parsed arguments
-            describing the tests to run and how to run them
-        tests (list, tuple): List or tuple of test names to analyze
-    """
-
-    # Analyze test input, if requested (overwrite forces re-analysis)
-    testdb.analyze(tests=tests, force=args.overwrite)
-    testdb.save_statistics(stname=args.statsfile)
-
 #==============================================================================
 # Main Command-line Operation
 #==============================================================================
@@ -86,4 +68,8 @@ if __name__ == '__main__':
     else:
         test_list = [t for t in args.test if t in testdb.get_database()]
 
-    analyzetests(args, test_list)
+    # Analyze test input, if requested (overwrite forces re-analysis)
+    testdb.analyze(test_list, force=args.overwrite)
+
+    # Save to the stats file
+    testdb.save_statistics(stname=args.statsfile)
