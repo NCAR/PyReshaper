@@ -3,7 +3,7 @@ compute system.  The general order of operations is described below:
 
 0) Analyze Test Input:
 
-   getstats.py: Generate statistics describing the test input files.  This
+   mkstats.py: Generate statistics describing the test input files.  This
                 writes the test statistics to the 'teststats.json' file.
                 
 1) Run Tests
@@ -19,7 +19,7 @@ compute system.  The general order of operations is described below:
                     
 3) Get Timing Data
 
-   gettimings.py: Read the PyReshaper output for each test that has been run
+   mktimings.py: Read the PyReshaper output for each test that has been run
                   and extract the timing data from the output logs.  Add this
                   timing data to the 'timings.json' database.
                   
