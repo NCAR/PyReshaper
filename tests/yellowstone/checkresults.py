@@ -58,15 +58,17 @@ _PARSER_.add_argument('testdir', type=str, nargs='*',
 #==============================================================================
 # grep - Search through a file for a given pattern
 #==============================================================================
-def grep(pattern, filename, start=0, end=0):
+def grep(pattern, filename):
     if not os.path.exists(filename):
         return None
-    with open(filename, 'r') as fobj:
-        results = [line.rstrip() for line in fobj if re.search(pattern, line)]
-        if len(results) == 0:
-            return None
-        else:
-            return results
+    fobj = open(filename, 'r')
+    results = [line.rstrip() for line in fobj if re.search(pattern, line)]
+    print results
+    fobj.close()
+    if len(results) == 0:
+        return None
+    else:
+        return results
 
 
 #==============================================================================
