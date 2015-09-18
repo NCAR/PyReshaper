@@ -374,14 +374,34 @@ if __name__ == '__main__':
         tempdir, ncfmt = os.path.split(rdir)
         tempdir, runtype = os.path.split(tempdir)
         tempdir, test_name = os.path.split(tempdir)
+
+        # Individually run test results
         if test_name in valid_names:
 
-            # Look for the output directory
-            outdir = os.path.join(rdir, 'output')
-            if not os.path.exists(outdir):
+            # Look for the new output directory
+            newdir = os.path.join(rdir, 'output')
+            if not os.path.exists(newdir):
                 continue
 
-            print 'Found test results for name: {}'.format(test_name)
-            print '   Results directory: {}'.format(rdir)
-            print '   Found output directory: {}'.format(outdir)
-            print
+            # Get the output directory to compare against
+            olddir = testdb_dict[test_name]['results_dir']
+
+            # Put together comparison info
+            found_tests[test_name] = (newdir, olddir)
+
+        # Multitest results
+        elif test_name == 'multitest':
+
+            # Look for the new output directories
+            for newdir in glob.glob(os.path.join(rdir, 'output', '*')):
+
+                tempdir, results_name = os.path.split(newdir)
+                if results_name in valid_names:
+
+                    # Get the output directory to compare against
+                    olddir = testdb_dict[results_name]['results_dir']
+
+                    # Put together comparison info
+                    found_tests[test_name] = (newdir, olddir)
+
+    print found_tests
