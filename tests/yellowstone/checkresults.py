@@ -359,6 +359,7 @@ def compare_results(comparison_info, comm, cprnc_exec):
             print comparison_info[full_test_name]['num_checks'],
             print 'total comparisons)'
 
+
 #==============================================================================
 # Command-Line Operation
 #==============================================================================
@@ -406,19 +407,19 @@ if __name__ == '__main__':
         if runname in valid_runnames:
 
             # Look for the new output directories
-            for odir in glob.glob(os.path.join(rdir, outdir_pattern)):
+            for newdir in glob.iglob(os.path.join(rdir, outdir_pattern)):
 
                 # Get the test name (allowing for multitest results)
                 if runname in testdb:
                     test_name = runname
                 else:
-                    tempdir, test_name = os.path.split(odir)
+                    tempdir, test_name = os.path.split(newdir)
 
                 # Get the output directory to compare against
                 olddir = testdb[test_name]['results_dir']
 
                 # Put together comparison info
-                tests_to_check[test_name] = (odir, olddir)
+                tests_to_check[test_name] = (newdir, olddir)
 
     # Print tests that will be checked, if list requested
     if args.list_tests:
@@ -433,3 +434,20 @@ if __name__ == '__main__':
         else:
             print 'No tests to be checked.'
         sys.exit(1)
+
+    # Get a basic MPI comm
+    comm = BasicComm(serial=args.nodes <= 0)
+
+    # Expand the test directories into (new, old) file pairs
+    files_to_check = {}
+    for test_name, (newdir, olddir) in tests_to_check.items():
+        file_pairs = []
+        for newfile in glob.iglob(os.path.join(newdir, '*.nc')):
+            filename = os.path.split(newfile)[1]
+            oldfile = os.path.join(olddir, filename)
+            if os.path.exists(oldfile):
+                file_pairs.append((newfile, oldfile))
+
+        files_to_check[test_name] = file_pairs[comm.rank::comm.size]
+
+    print files_to_check
