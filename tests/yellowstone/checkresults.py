@@ -424,33 +424,34 @@ if __name__ == '__main__':
                 # Put together comparison info
                 tests_to_check[test_name] = (newdir, olddir)
 
-    # Print tests that will be checked, if list requested
-    if args.list_tests:
-        if args.multispec:
-            print 'Checking multitest results.'
-        else:
-            print 'Checking individual test results.'
-        if len(tests_to_check) > 0:
-            print 'Tests to be checked:'
-            for test_name in tests_to_check:
-                print '   {0!s}'.format(test_name)
-        else:
-            print 'No tests to be checked.'
-        sys.exit(1)
-
-    # Get a basic MPI comm
-    comm = BasicComm(serial=args.nodes <= 0)
-
     # Expand the test directories into (new, old) file pairs
     files_to_check = {}
     for test_name, (newdir, olddir) in tests_to_check.items():
-        file_pairs = []
+        files_to_check[test_name] = []
         for newfile in glob.iglob(os.path.join(newdir, '*.nc')):
             filename = os.path.split(newfile)[1]
             oldfile = os.path.join(olddir, filename)
             if os.path.exists(oldfile):
-                file_pairs.append((newfile, oldfile))
+                files_to_check[test_name].append((newfile, oldfile))
 
-        files_to_check[test_name] = file_pairs[comm.rank::comm.size]
+    # Get a basic MPI comm
+    comm = BasicComm(serial=args.nodes <= 0)
 
-    print files_to_check
+    # Print tests that will be checked
+    if comm.rank == 0:
+        if args.multispec:
+            print 'Checking multitest results.'
+        else:
+            print 'Checking individual test results.'
+        print
+
+        for test_name in files_to_check:
+            print 'Test {0!s}:'.format(test_name),
+            num_files = len(files_to_check[test_name])
+            if num_files > 0:
+                print ' Checking {0!s} files'.format()
+            else:
+                print ' Not checking.'
+
+    if args.list_tests:
+        sys.exit(1)
