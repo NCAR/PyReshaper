@@ -416,7 +416,7 @@ if __name__ == '__main__':
                     tempdir, test_name = os.path.split(newdir)
 
                 # Get the output directory to compare against
-                olddir = testdb[test_name]['results_dir']
+                olddir = str(testdb[test_name]['results_dir'])
 
                 # Put together comparison info
                 tests_to_check[test_name] = (newdir, olddir)
