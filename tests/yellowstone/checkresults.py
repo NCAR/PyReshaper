@@ -386,12 +386,15 @@ if __name__ == '__main__':
     # Find valid tests for comparison
     tests_to_check = {}
     for rdir in rundirs:
-        tempdir, ncfmt = os.path.split(rdir)
+        if not os.path.exists(rdir):
+            continue
+        rundir = os.path.realpath(rdir)
+        tempdir, ncfmt = os.path.split(rundir)
         tempdir, runtype = os.path.split(tempdir)
         tempdir, runname = os.path.split(tempdir)
 
         # Look for the newest log file
-        logfiles = glob.glob(os.path.join(rdir, '{0!s}*.log'.format(runname)))
+        logfiles = glob.glob(os.path.join(rundir, '{0!s}*.log'.format(runname)))
         if len(logfiles) == 0:
             continue
         lastlog = max(logfiles, key=os.path.getctime)
@@ -407,7 +410,7 @@ if __name__ == '__main__':
         if runname in valid_runnames:
 
             # Look for the new output directories
-            for newdir in glob.iglob(os.path.join(rdir, outdir_pattern)):
+            for newdir in glob.iglob(os.path.join(rundir, outdir_pattern)):
 
                 # Get the test name (allowing for multitest results)
                 if runname in testdb:
