@@ -364,9 +364,9 @@ if __name__ == '__main__':
     testdb = tt.TestDB(dbname=args.infofile)
 
     # Get the list of the available test names for comparison
-    valid_names = testdb.get_database().keys()
+    valid_names = [str(t) for t in testdb.get_database().keys()]
     print str(valid_names)
-    name_pattern = str(valid_names).replace(' ', '')
+    name_pattern = str(valid_names).replace(' ', '').replace("'", '')
     print str(name_pattern)
 
     # Search for all possible test run directories
