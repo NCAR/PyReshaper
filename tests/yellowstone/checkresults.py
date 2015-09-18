@@ -365,10 +365,11 @@ if __name__ == '__main__':
 
     # Get the list of the available test names for comparison
     valid_names = [str(t) for t in testdb.get_database().keys()]
+    valid_names.append('multitest')
     print str(valid_names)
     name_pattern = str(valid_names).replace(' ', '').replace("'", '')
     print str(name_pattern)
 
     # Search for all possible test run directories
-    found_testdirs = glob.glob(os.path.join('results.d', '*', '[ser,par]*'))
+    found_testdirs = glob.glob(os.path.join('results.d', name_pattern, '[ser,par]*'))
     print str(found_testdirs)
