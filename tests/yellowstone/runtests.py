@@ -90,14 +90,20 @@ _PARSER_.add_argument('test', type=str, nargs='*',
 #==============================================================================
 # Write an executable Python script to run the Reshaper
 #==============================================================================
-def write_pyscript(args, testnames, scriptname='runscript.py'):
+def write_pyscript(testnames, scriptname='runscript.py', verbosity=3,
+                   serial=False, skip_existing=False, overwrite=False):
     """
     Write an executable Python script to run the PyReshaper with a set of specs
 
     Parameters:
-        args (argparse.Namespace): arguments to pass to the Reshaper
         testnames (str, list): Name of a single test, or list of tests
         scriptname (str): Name of the Python script to write
+        verbosity (int): Level of output verbosity
+        serial (bool): Whether to run in serial (True) or not (False)
+        skip_existing (bool): Whether to skip the generation of existing
+            time-series files (True) or not (False)
+        overwrite (bool): Whether to overwrite existing time-series files
+             (True) or not (False)
     """
 
     # Start defining the Python script
@@ -124,8 +130,8 @@ def write_pyscript(args, testnames, scriptname='runscript.py'):
     # Define the rest of the python script
     pyscript_list.extend([
         'rshpr = reshaper.create_reshaper(specs, serial={0!s}, '
-        'verbosity=3, skip_existing={1!s}, overwrite={2!s})'.format(
-            args.nodes <= 0, args.skip_existing, args.overwrite),
+        'verbosity={1!s}, skip_existing={2!s}, overwrite={3!s})'.format(
+            serial, verbosity, skip_existing, overwrite),
         'rshpr.convert()',
         'rshpr.print_diagnostics()',
         ''])
@@ -142,14 +148,24 @@ def write_pyscript(args, testnames, scriptname='runscript.py'):
 #==============================================================================
 # Run a single multitest (using a MultiSpecReshaper)
 #==============================================================================
-def runmultitest(args, tests):
+def runmultitest(tests, nodes=0, tiling=16, minutes=120,
+                 queue='economy', project='STDD0002',
+                 skip_existing=False, overwrite=False, ncformat='netcdf4c'):
     """
     Run a set of tests
 
     Parameters:
-        args (argparse.Namespace): A namespace of command-line parsed arguments
-            describing the tests to run and how to run them
         tests (list, tuple): List or tuple of test names to run
+        nodes (int): Number of nodes to run the test(s) with
+        tiling (int): Number of processes per node to run the test(s) with
+        minutes (int): Number of minutes to run the test(s) for
+        queue (str): Name of the queue to submit the job(s) to
+        project (str): Name of the project to charge the job time to
+        skip_existing (bool): Whether to skip the generation of existing
+            time-series files (True) or not (False)
+        overwrite (bool): Whether to overwrite existing time-series files
+             (True) or not (False)
+        ncformat (str): NetCDF format for the output
     """
 
     print 'Running tests in single submission:'
@@ -158,8 +174,8 @@ def runmultitest(args, tests):
     print
 
     # Set the test directory
-    if args.nodes > 0:
-        runtype = 'par{0!s}x{1!s}'.format(args.nodes, args.tiling)
+    if nodes > 0:
+        runtype = 'par{0!s}x{1!s}'.format(nodes, tiling)
     else:
         runtype = 'ser'
     testdir = os.path.abspath(os.path.join('rundirs', 'multitest', runtype))
@@ -167,7 +183,7 @@ def runmultitest(args, tests):
     # If the test directory doesn't exist, make it and move into it
     cwd = os.getcwd()
     if os.path.exists(testdir):
-        if args.overwrite:
+        if overwrite:
             shutil.rmtree(testdir)
         else:
             print "Already exists.  Skipping."
@@ -188,26 +204,28 @@ def runmultitest(args, tests):
 
         # Create the specifier and write to file (specfile)
         testspec = testdb.create_specifier(test_name=str(test_name),
-                                           ncfmt=args.ncformat,
+                                           ncfmt=ncformat,
                                            outdir=outputdir)
         testspecfile = str(test_name) + '.spec'
         pickle.dump(testspec, open(testspecfile, 'wb'))
 
     # Write the Python executable to be run
     pyscript_name = 'multitest.py'
-    write_pyscript(args, testnames=tests, scriptname=pyscript_name)
+    write_pyscript(testnames=tests, scriptname=pyscript_name,
+                   serial=(nodes <= 0), skip_existing=skip_existing,
+                   overwrite=overwrite)
 
     # Generate the command and arguments
-    if args.nodes > 0:
+    if nodes > 0:
         runcmd = 'poe ./{0!s}'.format(pyscript_name)
     else:
         runcmd = './{0!s}'.format(pyscript_name)
 
     # Create and start the job
-    job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
-                 name='multitest', tiling=args.tiling,
-                 minutes=args.wtime, queue=args.queue,
-                 project=args.code)
+    job = rt.Job(runcmds=[runcmd], nodes=nodes,
+                 name='multitest', tiling=tiling,
+                 minutes=minutes, queue=queue,
+                 project=project)
     job.start()
 
     os.chdir(cwd)
@@ -216,14 +234,24 @@ def runmultitest(args, tests):
 #==============================================================================
 # Run tests individually
 #==============================================================================
-def runindivtests(args, tests):
+def runindivtests(tests, nodes=0, tiling=16, minutes=120,
+                  queue='economy', project='STDD0002',
+                  skip_existing=False, overwrite=False, ncformat='netcdf4c'):
     """
     Run a set of tests
 
     Parameters:
-        args (argparse.Namespace): A namespace of command-line parsed arguments
-            describing the tests to run and how to run them
         tests (list, tuple): List or tuple of test names to run
+        nodes (int): Number of nodes to run the test(s) with
+        tiling (int): Number of processes per node to run the test(s) with
+        minutes (int): Number of minutes to run the test(s) for
+        queue (str): Name of the queue to submit the job(s) to
+        project (str): Name of the project to charge the job time to
+        skip_existing (bool): Whether to skip the generation of existing
+            time-series files (True) or not (False)
+        overwrite (bool): Whether to overwrite existing time-series files
+             (True) or not (False)
+        ncformat (str): NetCDF format for the output
     """
 
     cwd = os.getcwd()
@@ -232,15 +260,15 @@ def runindivtests(args, tests):
         print 'Running test: {0!s}'.format(test_name)
 
         # Set the test directory
-        if args.nodes > 0:
-            runtype = 'par{0!s}x{1!s}'.format(args.nodes, args.tiling)
+        if nodes > 0:
+            runtype = 'par{0!s}x{1!s}'.format(nodes, tiling)
         else:
             runtype = 'ser'
         testdir = os.path.abspath(os.path.join('rundirs', str(test_name), runtype))
 
         # If the test directory doesn't exist, make it and move into it
         if os.path.exists(testdir):
-            if args.overwrite:
+            if overwrite:
                 shutil.rmtree(testdir)
             else:
                 print "   Already exists.  Skipping."
@@ -258,26 +286,28 @@ def runindivtests(args, tests):
 
         # Create the specifier and write to file (specfile)
         testspec = testdb.create_specifier(test_name=str(test_name),
-                                           ncfmt=args.ncformat,
+                                           ncfmt=ncformat,
                                            outdir=outputdir)
         testspecfile = '{0!s}.spec'.format(test_name)
         pickle.dump(testspec, open(testspecfile, 'wb'))
 
         # Write the Python executable to be run
         pyscript_name = '{0!s}.py'.format(test_name)
-        write_pyscript(args, testnames=test_name, scriptname=pyscript_name)
+        write_pyscript(testnames=test_name, scriptname=pyscript_name,
+                       serial=(nodes <= 0), skip_existing=skip_existing,
+                       overwrite=overwrite)
 
         # Generate the command and arguments
-        if args.nodes > 0:
+        if nodes > 0:
             runcmd = 'poe ./{0!s}'.format(pyscript_name)
         else:
             runcmd = './{0!s}'.format(pyscript_name)
 
         # Create and start the job
-        job = rt.Job(runcmds=[runcmd], nodes=args.nodes,
-                     name=str(test_name), tiling=args.tiling,
-                     minutes=args.wtime, queue=args.queue,
-                     project=args.code)
+        job = rt.Job(runcmds=[runcmd], nodes=nodes,
+                     name=str(test_name), tiling=tiling,
+                     minutes=minutes, queue=queue,
+                     project=project)
         job.start()
 
         os.chdir(cwd)
@@ -309,6 +339,12 @@ if __name__ == '__main__':
         test_list = [t for t in args.test if t in testdb.get_database()]
 
     if args.multispec:
-        runmultitest(args, test_list)
+        runmultitest(test_list, nodes=args.nodes, tiling=args.tiling,
+                     minutes=args.wtime, queue=args.queue, project=args.code,
+                     skip_existing=args.skip_existing, overwrite=args.overwrite,
+                     ncformat=args.ncformat)
     else:
-        runindivtests(args, test_list)
+        runindivtests(test_list, nodes=args.nodes, tiling=args.tiling,
+                      minutes=args.wtime, queue=args.queue, project=args.code,
+                      skip_existing=args.skip_existing, overwrite=args.overwrite,
+                      ncformat=args.ncformat)
