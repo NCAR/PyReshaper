@@ -371,10 +371,24 @@ if __name__ == '__main__':
     for rdir in glob.glob(os.path.join('results.d', '*', '[ser,par]*', '*')):
         tempdir, ncfmt = os.path.split(rdir)
         tempdir, runtype = os.path.split(tempdir)
-        tempdir, test_name = os.path.split(tempdir)
+        tempdir, runname = os.path.split(tempdir)
+
+        # Look for the newest log file
+        logfiles = glob.glob(os.path.join(rdir, '{0!s}*.log'.format(runname)))
+        if len(logfiles) == 0:
+            continue
+        lastlog = max(logfiles, key=os.path.getctime)
+        successful = False
+        for logline in open(lastlog, 'r'):
+            if re.search(r'Successfully completed.', logline):
+                successful = True
+                continue
+        if not successful:
+            continue
 
         # Individually run test results
-        if test_name in testdb_dict:
+        if runname in testdb_dict:
+            test_name = runname
 
             # Look for the new output directory
             newdir = os.path.join(rdir, 'output')
@@ -388,16 +402,16 @@ if __name__ == '__main__':
             individual_tests[test_name] = (newdir, olddir)
 
         # Multitest results
-        elif test_name == 'multitest':
+        elif runname == 'multitest':
 
             # Look for the new output directories
-            for newdir in glob.glob(os.path.join(rdir, 'output', '*')):
+            for rdir2 in glob.glob(os.path.join(rdir, 'output', '*')):
 
-                tempdir, results_name = os.path.split(newdir)
-                if results_name in testdb_dict:
+                tempdir, test_name = os.path.split(rdir2)
+                if test_name in testdb_dict:
 
                     # Get the output directory to compare against
-                    olddir = testdb_dict[results_name]['results_dir']
+                    olddir = testdb_dict[test_name]['results_dir']
 
                     # Put together comparison info
                     multispec_tests[test_name] = (newdir, olddir)
