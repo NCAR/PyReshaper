@@ -369,7 +369,8 @@ if __name__ == '__main__':
     valid_names = [str(t) for t in testdb_dict.keys()]
 
     # Find valid tests
-    found_tests = {}
+    individual_tests = {}
+    multispec_tests = {}
     for rdir in glob.glob(os.path.join('results.d', '*', '[ser,par]*', '*')):
         tempdir, ncfmt = os.path.split(rdir)
         tempdir, runtype = os.path.split(tempdir)
@@ -387,7 +388,7 @@ if __name__ == '__main__':
             olddir = testdb_dict[test_name]['results_dir']
 
             # Put together comparison info
-            found_tests[test_name] = (newdir, olddir)
+            individual_tests[test_name] = (newdir, olddir)
 
         # Multitest results
         elif test_name == 'multitest':
@@ -402,6 +403,7 @@ if __name__ == '__main__':
                     olddir = testdb_dict[results_name]['results_dir']
 
                     # Put together comparison info
-                    found_tests[test_name] = (newdir, olddir)
+                    multispec_tests[test_name] = (newdir, olddir)
 
-    print found_tests
+    print individual_tests
+    print multispec_tests
