@@ -365,9 +365,6 @@ if __name__ == '__main__':
     testdb = tt.TestDB(dbname=args.infofile)
     testdb_dict = testdb.get_database()
 
-    # Get the list of the available test names for comparison
-    valid_names = [str(t) for t in testdb_dict.keys()]
-
     # Find valid tests
     individual_tests = {}
     multispec_tests = {}
@@ -377,7 +374,7 @@ if __name__ == '__main__':
         tempdir, test_name = os.path.split(tempdir)
 
         # Individually run test results
-        if test_name in valid_names:
+        if test_name in testdb_dict:
 
             # Look for the new output directory
             newdir = os.path.join(rdir, 'output')
@@ -397,7 +394,7 @@ if __name__ == '__main__':
             for newdir in glob.glob(os.path.join(rdir, 'output', '*')):
 
                 tempdir, results_name = os.path.split(newdir)
-                if results_name in valid_names:
+                if results_name in testdb_dict:
 
                     # Get the output directory to compare against
                     olddir = testdb_dict[results_name]['results_dir']
