@@ -7,6 +7,7 @@
 #======================================================================
 
 import os
+import re
 import sys
 import glob
 import string
@@ -52,6 +53,20 @@ _PARSER_.add_argument('-x', '--executable', type=str,
                       help='The path to the CPRNC executable.')
 _PARSER_.add_argument('testdir', type=str, nargs='*',
                       help='Name of a test directory to check')
+
+
+#==============================================================================
+# grep - Search through a file for a given pattern
+#==============================================================================
+def grep(pattern, filename, start=0, end=0):
+    if not os.path.exists(filename):
+        return None
+    with open(filename, 'r') as fobj:
+        results = [line.rstrip() for line in fobj if re.search(pattern, line)]
+        if len(results) == 0:
+            return None
+        else:
+            return results
 
 
 #==============================================================================
@@ -362,14 +377,36 @@ if __name__ == '__main__':
 
     # Create/read the testing info and stats files
     testdb = tt.TestDB(dbname=args.infofile)
+    testdb_dict = testdb.get_database()
 
     # Get the list of the available test names for comparison
-    valid_names = [str(t) for t in testdb.get_database().keys()]
-    valid_names.append('multitest')
-    print str(valid_names)
-    name_pattern = str(valid_names).replace(' ', '').replace("'", '')
-    print str(name_pattern)
+    valid_names = [str(t) for t in testdb_dict.keys()]
 
-    # Search for all possible test run directories
-    found_testdirs = glob.glob(os.path.join('results.d', name_pattern, '[ser,par]*'))
-    print str(found_testdirs)
+    # Find valid tests
+    found_tests = {}
+    for rdir in glob.glob(os.path.join('results.d', '*', '[ser,par]*', '*')):
+        tempdir, ncfmt = os.path.split(rdir)
+        tempdir, runtype = os.path.split(tempdir)
+        tempdir, test_name = os.path.split(tempdir)
+        if test_name in valid_names:
+
+            print 'Found test results for name: {}'.format(test_name)
+            print 'Results directory: {}'.format(rdir)
+
+            # Look for the corresponding log file and check for successful run
+            logfile = os.path.join(rdir, '{0!s}.log'.format(test_name))
+            if not grep(r'Successfully completed.', logfile):
+                continue
+            print 'Test completed successfully.'
+
+            # Look for the specfile
+            specfile = os.path.join(rdir, '{0!s}.spec'.format(test_name))
+            if not os.path.exists(specfile):
+                continue
+            print 'Found specfile: {}'.format(specfile)
+
+            # Look for the output directory
+            outdir = os.path.join(rdir, 'output')
+            if not os.path.exists(outdir):
+                continue
+            print 'Found output directory: {}'.format(outdir)
