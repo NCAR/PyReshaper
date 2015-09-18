@@ -404,10 +404,16 @@ if __name__ == '__main__':
 
     # Print tests that will be checked, if list requested
     if args.list_tests:
-        print 'Individually run tests to be checked:'
-        for test_name in individual_tests:
-            print '   {0!s}'.format(test_name)
-        print 'Multitest results to be checked:'
-        for test_name in multispec_tests:
-            print '   {0!s}'.format(test_name)
+        if len(individual_tests) > 0:
+            print 'Individually run tests to be checked:'
+            for test_name in individual_tests:
+                print '   {0!s}'.format(test_name)
+        else:
+            print 'No individually run tests to be checked.'
+        if len(multispec_tests) > 0:
+            print 'Multitest results to be checked:'
+            for test_name in multispec_tests:
+                print '   {0!s}'.format(test_name)
+        else:
+            print 'No multitest results to be checked.'
         sys.exit(1)
