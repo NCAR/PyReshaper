@@ -173,35 +173,38 @@ if __name__ == '__main__':
             print '    Elapsed time (INTERNAL):', elapsed, 'sec'
 
             # Write the JSON data
-            if (job_num not in timedb[common_name]['results'][method_name]):
+            if job_num in timedb[common_name]['results'][method_name]:
+                print '    Job already exists in database. Skipping.'
+            else:
+                print '    Adding new job to timings database.'
                 timedb[common_name]['results'][method_name][job_num] = {}
 
-            timedb[common_name]['results'][
-                method_name][job_num]['sys'] = "yellowstone"
-            timedb[common_name]['results'][
-                method_name][job_num]['cores'] = num_cores
-            timedb[common_name]['results'][
-                method_name][job_num]['nodes'] = num_nodes
-            timedb[common_name]['results'][
-                method_name][job_num]['real'] = elapsed
-            timedb[common_name]['results'][
-                method_name][job_num]['metadata'] = True
-            timedb[common_name]['results'][
-                method_name][job_num]['once'] = used_once_file
-            timedb[common_name]['results'][
-                method_name][job_num]['actual'] = float(actual_str)
-            timedb[common_name]['results'][
-                method_name][job_num]['request'] = float(requested_str)
-            timedb[common_name]['results'][
-                method_name][job_num]['openi'] = float(openi_str)
-            timedb[common_name]['results'][
-                method_name][job_num]['openo'] = float(openo_str)
-            timedb[common_name]['results'][
-                method_name][job_num]['metaTI'] = float(metaTI_str)
-            timedb[common_name]['results'][
-                method_name][job_num]['metaTV'] = float(metaTV_str)
-            timedb[common_name]['results'][
-                method_name][job_num]['TS'] = float(TS_str)
+                timedb[common_name]['results'][
+                    method_name][job_num]['sys'] = "yellowstone"
+                timedb[common_name]['results'][
+                    method_name][job_num]['cores'] = num_cores
+                timedb[common_name]['results'][
+                    method_name][job_num]['nodes'] = num_nodes
+                timedb[common_name]['results'][
+                    method_name][job_num]['real'] = elapsed
+                timedb[common_name]['results'][
+                    method_name][job_num]['metadata'] = True
+                timedb[common_name]['results'][
+                    method_name][job_num]['once'] = used_once_file
+                timedb[common_name]['results'][
+                    method_name][job_num]['actual'] = float(actual_str)
+                timedb[common_name]['results'][
+                    method_name][job_num]['request'] = float(requested_str)
+                timedb[common_name]['results'][
+                    method_name][job_num]['openi'] = float(openi_str)
+                timedb[common_name]['results'][
+                    method_name][job_num]['openo'] = float(openo_str)
+                timedb[common_name]['results'][
+                    method_name][job_num]['metaTI'] = float(metaTI_str)
+                timedb[common_name]['results'][
+                    method_name][job_num]['metaTV'] = float(metaTV_str)
+                timedb[common_name]['results'][
+                    method_name][job_num]['TS'] = float(TS_str)
 
     # Write the JSON data file
     json_file = open(timefn, 'w')
