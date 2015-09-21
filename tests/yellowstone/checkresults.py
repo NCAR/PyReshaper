@@ -319,3 +319,10 @@ if __name__ == '__main__':
                     summ = str_rslt + ' ' + result['file'] + ' ({0!s})'.format(rslt_dict['test'])
                     sfile.write(summ + os.linesep)
             sfile.close()
+
+    # Wait for processes to sync
+    comm.sync()
+
+    # Finished
+    if comm.is_manager():
+        print "Done."
