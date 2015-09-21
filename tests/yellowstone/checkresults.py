@@ -394,7 +394,8 @@ if __name__ == '__main__':
         tempdir, runname = os.path.split(tempdir)
 
         # Look for the newest log file
-        logfiles = glob.glob(os.path.join(rundir, '{0!s}*.log'.format(runname)))
+        logfiles = glob.glob(
+            os.path.join(rundir, '{0!s}*.log'.format(runname)))
         if len(logfiles) == 0:
             continue
         lastlog = max(logfiles, key=os.path.getctime)
@@ -425,14 +426,26 @@ if __name__ == '__main__':
                 tests_to_check[test_name] = (newdir, olddir)
 
     # Expand the test directories into (new, old) file pairs
-    files_to_check = {}
+    items_to_check = []
     for test_name, (newdir, olddir) in tests_to_check.items():
-        files_to_check[test_name] = []
-        for newfile in glob.iglob(os.path.join(newdir, '*.nc')):
+        newfiles = set(glob.glob(os.path.join(newdir, '*.nc')))
+        oldfiles = set(glob.glob(os.path.join(olddir, '*.nc')))
+        for newfile in newfiles:
+            item_dict = {'test': test_name}
+            item_dict['new'] = newfile
             filename = os.path.split(newfile)[1]
             oldfile = os.path.join(olddir, filename)
-            if os.path.exists(oldfile):
-                files_to_check[test_name].append((newfile, oldfile))
+            if oldfile in oldfiles:
+                item_dict['old'] = oldfile
+                oldfiles.remove(oldfile)
+            else:
+                item_dict['old'] = None
+            items_to_check.append(item_dict)
+        for oldfile in oldfiles:
+            item_dict = {'test': test_name}
+            item_dict['new'] = None
+            item_dict['old'] = oldfile
+            items_to_check.append(item_dict)
 
     # Get a basic MPI comm
     comm = BasicComm(serial=args.nodes <= 0)
@@ -445,13 +458,13 @@ if __name__ == '__main__':
             print 'Checking individual test results.'
         print
 
-        for test_name in files_to_check:
-            print 'Test {0!s}:'.format(test_name),
-            num_files = len(files_to_check[test_name])
-            if num_files > 0:
-                print ' Checking {0!s} files'.format(num_files)
-            else:
-                print ' Not checking.'
+        for test_name in tests_to_check:
+            print 'Test {0!s}: '.format(test_name),
+            num_new = sum(bool(i['new']) for i in items_to_check)
+            num_old = sum(bool(i['old']) for i in items_to_check)
+            num_to_check = sum(bool(i['new'] and i['old'])
+                               for i in items_to_check)
+            print 'Checking {0!s} files'.format(num_to_check, num_new, num_old)
 
     if args.list_tests:
         sys.exit(1)
