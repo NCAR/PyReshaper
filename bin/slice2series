@@ -12,6 +12,7 @@ See the LICENSE.rst file for details
 """
 
 import optparse
+import glob
 from pyreshaper import specification
 from pyreshaper import reshaper
 
@@ -79,8 +80,13 @@ def main(options, input_file_list):
     # Create the input object for the Reshaper
     spec = specification.create_specifier()
 
+    # Generate the input file list from (potentially) globs/wildcards
+    full_input_file_list = []
+    for arg in input_file_list:
+        full_input_file_list.extend(glob.glob(arg))
+    
     # Add input to the specifier
-    spec.input_file_list = input_file_list
+    spec.input_file_list = full_input_file_list
     spec.netcdf_format = options.netcdf_format
     spec.output_file_prefix = options.output_prefix
     spec.output_file_suffix = options.output_suffix
