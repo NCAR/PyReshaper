@@ -467,8 +467,7 @@ if __name__ == '__main__':
             num_chk = sum(1 for i in items_to_check if i['test'] == test_name and
                           i['old'] is not None and i['new'] is not None)
             print '   Checking {0!s} of {1!s}'.format(num_chk, num_new),
-            print 'new files generated.'
-            print '   Checking against {0!s} of {1!s}'.format(num_chk, num_old),
+            print 'new files generated against {0!s}'.format(num_old),
             print 'old files found.'
 
     # Quit now, if just listing tests to be checked
