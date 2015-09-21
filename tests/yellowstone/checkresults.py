@@ -10,7 +10,6 @@ import os
 import re
 import sys
 import glob
-import string
 import argparse
 from subprocess import Popen, PIPE, STDOUT, call
 
