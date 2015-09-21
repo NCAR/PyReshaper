@@ -325,4 +325,5 @@ if __name__ == '__main__':
 
     # Finished
     if comm.is_manager():
+        print
         print "Done."
