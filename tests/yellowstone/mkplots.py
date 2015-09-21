@@ -20,36 +20,31 @@
 #
 #==============================================================================
 
-import optparse
+import argparse
 
 from utilities import plottools as pt
 
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
-usage = 'usage: %prog [options] [dataset] [dataset] ...'
-parser = optparse.OptionParser(usage=usage)
-parser.add_option('-f', '--data_file', action='store', type='str',
-                  dest='data_file', default='../timings.json',
-                  help='Path to the timings.json file '
-                       '[Default: "../timings.json"]')
-parser.add_option('-m', '--method', action='append', type='str',
-                  dest='methods', default=[],
-                  help='Include a methods to plot, by name.  If no methods '
-                       'are listed, then assume all methods in the data')
-parser.add_option('-x', '--exclusive', action='store_true',
-                  dest='exclusive', default=False,
-                  help='Option indicating that datasets that do not include '
-                       'all of the desired methods should not be plotted')
-
-
-# Parse the CLI options and assemble the Reshaper inputs
-(options, arguments) = parser.parse_args()
-
-# Read the data file
-jsondata = pt.read_json_data(options.data_file)
-if jsondata == None:
-    raise ValueError('Could not find timings JSON data file.')
+_DESC_ = 'Create throughput and duration plots of timing data'
+_PARSER_ = argparse.ArgumentParser(description=_DESC_)
+_PARSER_.add_argument('-t', '--timefile', type=str,
+                      default='timings.json',
+                      help='Path to the timings.json file '
+                           '[Default: "timings.json"]')
+_PARSER_.add_argument('-m', '--method', action='append', type=str,
+                      dest='methods', default=[],
+                      help='Include a method to plot, by name.  If no methods '
+                           'are listed, then include all methods found')
+_PARSER_.add_argument('-x', '--exclusive', action='store_true',
+                      dest='exclusive', default=False,
+                      help='Option indicating that datasets that do not '
+                           'include all of the desired methods should not '
+                           'be plotted [Default: False]')
+_PARSER_.add_argument('dataset', nargs='*', default=[],
+                      help='Dataset to be plotted.  If none are listed, '
+                           'assume all datasets found will be plotted.')
 
 #==============================================================================
 # Some common data for plotting
@@ -97,52 +92,56 @@ method_order = ['ncl', 'nco', 'pagoda', 'cdo',
                 'pyniompi', 'pyniompi4_0', 'pyniompi4_1',
                 'pyreshaper', 'pyreshaper4', 'pyreshaper4c']
 
-#==============================================================================
-# Pull out only the data we need
-#==============================================================================
-
-# Initialize the data to the entire file contents
-data = jsondata
-
-# If datasets are listed, extract only them
-if (len(arguments) > 0):
-    datasets_to_plot = []
-    for arg in arguments:
-        if arg in dataset_order:
-            datasets_to_plot.append(arg)
-    data = pt.subselect_datasets(data, datasets=datasets_to_plot)
-
-# If methods are listed, extract only them
-if (len(options.methods) > 0):
-    methods_to_plot = []
-    for method in options.methods:
-        if method in method_order:
-            methods_to_plot.append(arg)
-    data = pt.subselect_methods(data, methods=methods_to_plot,
-                                exclusive=options.exclusive)
 
 #==============================================================================
-# THROUGHPUT PLOTS
+# Command-line Operation
 #==============================================================================
+if __name__ == '__main__':
+    args = _PARSER_.parse_args()
 
-tdata = pt.get_throughput_pdata(data)
-pt.make_bar_plot(tdata, 'throughput.pdf',
-                 title='Throughput', ylabel='Throughput [MB/sec]',
-                 dataset_order=dataset_order,
-                 method_order=method_order,
-                 method_colors=method_colors,
-                 dataset_labels=dataset_labels,
-                 method_labels=method_labels)
+    # Read the data file
+    jsondata = pt.read_json_data(args.timefile)
+    if jsondata is None:
+        raise ValueError('Could not find timings JSON data file.')
 
-#==============================================================================
-# DURATION PLOTS
-#==============================================================================
+    # Initialize the data to the entire file contents
+    data = jsondata
 
-ddata = pt.get_duration_pdata(data)
-pt.make_bar_plot(ddata, 'duration.pdf',
-                 title='Duration', ylabel='Duration [min]',
-                 dataset_order=dataset_order,
-                 method_order=method_order,
-                 method_colors=method_colors,
-                 dataset_labels=dataset_labels,
-                 method_labels=method_labels)
+    # If datasets are listed, extract only them
+    datasets = args.dataset
+    if (len(datasets) > 0):
+        datasets_to_plot = []
+        for dataset in datasets:
+            if dataset in dataset_order:
+                datasets_to_plot.append(dataset)
+        data = pt.subselect_datasets(data, datasets=datasets_to_plot)
+
+    # If methods are listed, extract only them
+    methods = args.methods
+    if (len(methods) > 0):
+        methods_to_plot = []
+        for method in methods:
+            if method in method_order:
+                methods_to_plot.append(method)
+        data = pt.subselect_methods(data, methods=methods_to_plot,
+                                    exclusive=args.exclusive)
+
+    # THROUGHPUT PLOTS
+    tdata = pt.get_throughput_pdata(data)
+    pt.make_bar_plot(tdata, 'throughput.pdf',
+                     title='Throughput', ylabel='Throughput [MB/sec]',
+                     dataset_order=dataset_order,
+                     method_order=method_order,
+                     method_colors=method_colors,
+                     dataset_labels=dataset_labels,
+                     method_labels=method_labels)
+
+    # DURATION PLOTS
+    ddata = pt.get_duration_pdata(data)
+    pt.make_bar_plot(ddata, 'duration.pdf',
+                     title='Duration', ylabel='Duration [min]',
+                     dataset_order=dataset_order,
+                     method_order=method_order,
+                     method_colors=method_colors,
+                     dataset_labels=dataset_labels,
+                     method_labels=method_labels)
