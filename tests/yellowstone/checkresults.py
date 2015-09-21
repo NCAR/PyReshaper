@@ -471,5 +471,6 @@ if __name__ == '__main__':
             print '   Checking against {0!s} of {1!s}'.format(num_chk, num_old),
             print ' old files found.'
 
+    # Quit now, if just listing tests to be checked
     if args.list_tests:
         sys.exit(1)
