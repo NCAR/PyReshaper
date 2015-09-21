@@ -43,7 +43,7 @@ _PARSER_.add_argument('-m', '--multiple', default=False,
                       help='True or False, indicating whether to look for '
                            'multispec results [Default: False]')
 _PARSER_.add_argument('-s', '--serial', default=False,
-                      action='store_true', dest='multispec',
+                      action='store_true', dest='serial',
                       help='True or False, indicating whether to run checks '
                            'serial or not [Default: False]')
 _PARSER_.add_argument('-x', '--executable', type=str,
