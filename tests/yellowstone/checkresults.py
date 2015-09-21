@@ -459,12 +459,17 @@ if __name__ == '__main__':
         print
 
         for test_name in tests_to_check:
-            print 'Test {0!s}: '.format(test_name),
-            num_new = sum(bool(i['new']) for i in items_to_check)
-            num_old = sum(bool(i['old']) for i in items_to_check)
-            num_to_check = sum(bool(i['new'] and i['old'])
-                               for i in items_to_check)
-            print 'Checking {0!s} files'.format(num_to_check, num_new, num_old)
+            print 'Test {0!s}:'.format(test_name)
+            num_new = sum(1 for i in items_to_check
+                          if i['new'] is not None)
+            num_old = sum(1 for i in items_to_check
+                          if i['old'] is not None)
+            num_chk = sum(1 for i in items_to_check
+                          if i['old'] is not None and i['new'] is not None)
+            print '   Checking {0!s} of {1!s}'.format(num_chk, num_new),
+            print ' new files generated.'
+            print '   Checking against {0!s} of {1!s}'.format(num_chk, num_old),
+            print ' old files found.'
 
     if args.list_tests:
         sys.exit(1)
