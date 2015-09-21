@@ -11,51 +11,28 @@
 import os
 import glob
 import datetime
-import optparse
+import argparse
 import json
 
+# Package Modules
+from utilities import testtools as tt
 
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
-def parse_cli():
-    usage = 'usage: %prog [options]'
-    parser = optparse.OptionParser(usage=usage)
-    parser.add_option('-i', '--testing_database', default=None,
-                      help='Location of the testinfo.json file '
-                           '[Default: None]')
-    parser.add_option('-o', '--timings_database', default=None,
-                      help='Location of the timings.json file '
-                           '[Default: None]')
-    # Parse the CLI options and return
-    return parser.parse_args()[0]
+_DESC_ = """This program is designed to gather statistics for tests and
+            test input defined in the testing database file."""
 
-
-#==============================================================================
-# get_testing_database
-#==============================================================================
-def get_testing_database(options):
-
-    # Get the testinfo.json data
-    testing_database_filename = ''
-    if (options.testing_database == None):
-        runtest_dir = os.path.dirname(__file__)
-        testing_database_filename = os.path.join(runtest_dir, 'testinfo.json')
-    else:
-        testing_database_filename = os.path.abspath(options.testing_database)
-
-    # Try opening and reading the testinfo file
-    testing_database = {}
-    try:
-        testing_database_file = open(testing_database_filename, 'r')
-        testing_database = dict(json.load(testing_database_file))
-        testing_database_file.close()
-    except:
-        err_msg = 'Problem reading and parsing test info file: ' \
-            + str(testing_database_filename)
-        raise ValueError(err_msg)
-
-    return testing_database
+_PARSER_ = argparse.ArgumentParser(description=_DESC_)
+_PARSER_.add_argument('-i', '--infofile', default='testinfo.json', type=str,
+                      help='Location of the testinfo.json database file '
+                           '[Default: testinfo.json]')
+_PARSER_.add_argument('-s', '--statsfile', default='teststats.json', type=str,
+                      help='Location of the teststats.json database file '
+                           '[Default: teststats.json]')
+_PARSER_.add_argument('-t', '--timefile', default='timings.json', type=str,
+                      help='Location of the timings.json database file '
+                           '[Default: timings.json]')
 
 
 #==============================================================================
@@ -71,68 +48,69 @@ def find_shortest_str(strng, left, right=os.linesep, loc=0):
 
 
 #==============================================================================
-# Extract timing info and put in JSON file
+# Command-line Operation
 #==============================================================================
-def make_timings_file(options, testing_database):
+if __name__ == '__main__':
+    args = _PARSER_.parse_args()
 
-    # Get the timings.json data
-    timings_database_filename = ''
-    if (options.timings_database == None):
-        runtest_dir = os.path.dirname(__file__)
-        timings_database_filename = os.path.join(runtest_dir, 'timings.json')
-    else:
-        timings_database_filename = os.path.abspath(options.timings_database)
+    # Create/read the testing info and stats files
+    testdb = tt.TestDB(dbname=args.infofile, stname=args.statsfile).get_database()
+
+    # Get the timings.json data file
+    timefn = os.path.abspath(args.timefile)
 
     # Open JSON file
-    json_data = {}
-    if (os.path.isfile(timings_database_filename)):
-        json_file = open(timings_database_filename)
-        json_data = dict(json.load(json_file))
+    timedb = {}
+    if (os.path.isfile(timefn)):
+        json_file = open(timefn)
+        timedb = dict(json.load(json_file))
         json_file.close()
 
     # Current working directory
     cwd = os.getcwd()
 
-    # Parse each test argument for test directories
-    test_names = glob.glob(os.path.join('*', 'ser', '*'))
-    test_names.extend(glob.glob(os.path.join('*', 'par*', '*')))
-
     # Extract each possible test
-    for full_test_name in test_names:
+    for rundir in glob.iglob(os.path.join('results.d', '*', '[ser,par]*', '*')):
         print
-        print 'Extracting times from test dir:', full_test_name
-        root, run_type = os.path.split(full_test_name)
+        print 'Extracting times from test dir:', rundir
+        root, ncfmt = os.path.split(rundir)
+        root, run_type = os.path.split(root)
         root, test_name = os.path.split(root)
-        root, ncfmt = os.path.split(root)
         print '  Test Name:', test_name
         print '  Run Type:', run_type
         print '  NetCDF Format:', ncfmt
 
-        common_name = testing_database[test_name]['common_name']
+        # Skip if not an individual test
+        if test_name not in testdb:
+            print '  Test name not found in database. Skipping.'
+            continue
+
+        # Prepare the timing database information
+        common_name = testdb[test_name]['common_name']
         print '  Common Name:', common_name
         method_name = 'pyreshaper4c'
-        if (ncfmt == 'netcdf'):
+        if ncfmt == 'netcdf':
             method_name = 'pyreshaper'
-        elif (ncfmt == 'netcdf4'):
+        elif ncfmt == 'netcdf4':
             method_name = 'pyreshaper4'
 
-        # Check for this test in the JSON data
-        if (common_name not in json_data):
-            json_data[common_name] = {'results': {}}
+        # Check for this test in the timing database
+        if common_name not in timedb:
+            timedb[common_name] = {'results': {}}
 
         # Check for method in results
-        if (method_name not in json_data[common_name]['results']):
-            json_data[common_name]['results'][method_name] = {}
+        if method_name not in timedb[common_name]['results']:
+            timedb[common_name]['results'][method_name] = {}
 
-        # Get the number of cores from the run type
+        # Get the number of cores and nodes from the run type
         num_cores = 1
-        if (run_type[0:3] == 'par'):
-            num_cores = int(run_type[3:])
+        num_nodes = 0
+        if run_type[0:3] == 'par':
+            num_nodes, nppn = map(int, run_type[3:].split('x'))
+            num_cores = num_nodes * nppn
 
         # Look for log files
-        test_dir = os.path.join(cwd, test_name, run_type)
-        glob_name = ''.join(['reshaper-', test_name, '.*.log'])
-        glob_path = os.path.join(test_dir, glob_name)
+        glob_path = os.path.join(rundir, '{0!s}*.log'.format(test_name))
         glob_names = glob.glob(glob_path)
 
         # Continue if nothing to do here
@@ -144,8 +122,8 @@ def make_timings_file(options, testing_database):
         for log_name in glob_names:
 
             # Get the JOBID from the log filename
-            job_id = log_name.rsplit('.', 2)[1]
-            print '  Processing Job ID:', job_id
+            lognm = os.path.split(log_name)[1]
+            print '  Processing log:', lognm
 
             # Open the log file and read the contents
             log_file = open(log_name)
@@ -183,120 +161,50 @@ def make_timings_file(options, testing_database):
             requested_str, nloc = find_shortest_str(
                 log_str, 'Requested Data: ', loc=loc)
 
-            # Find the job hosts string
-            host_str, loc = find_shortest_str(
-                log_str, 'Job was executed on host(s) ', loc=loc)
-            if (loc == 0):
-                print '    Could not find host string.  Skipping.'
-                continue
-            queue_str, sloc = find_shortest_str(
-                host_str, 'in queue <', right='>', loc=0)
-            if (sloc == 0):
-                print '    Could not find queue string.  Skipping.'
-                continue
-            print '    Queue:', queue_str
-            user_str, sloc = find_shortest_str(
-                host_str, 'as user <', right='>', loc=sloc)
-            if (sloc == 0):
-                print '    Could not find user string.  Skipping.'
-                continue
-            print '    User:', user_str
-            sys_str, sloc = find_shortest_str(
-                host_str, 'in cluster <', right='>', loc=sloc)
-            if (sloc == 0):
-                print '    Could not find system string.  Skipping.'
-                continue
-            print '    System:', sys_str
-
-            # Get the starting timestamp
-            start_str, loc = find_shortest_str(
-                log_str, 'Started at ', loc=loc)
-            if (loc == 0):
-                print '    Could not find start timestamp.  Skipping.'
-                continue
-            start = datetime.datetime.strptime(start_str, '%c')
-            print '    Starting Timestamp:', start
-
-            # Get the ending timestamp
-            end_str, loc = find_shortest_str(
-                log_str, 'Results reported at ', loc=loc)
-            if (loc == 0):
-                print '    Could not find end timestamp.  Skipping.'
-                continue
-            end = datetime.datetime.strptime(end_str, '%c')
-            print '    Ending Timestamp:', end
-
-            # Compute the job number from the end timestamp
-            job_num = end.strftime('%y%m%d-%H%M%S')
+            # Compute the job number from the log file timestamp
+            timestamp = os.path.getmtime(log_name)
+            dt = datetime.datetime.fromtimestamp(timestamp)
+            job_num = dt.strftime('%y%m%d-%H%M%S')
 
             # Compute the elapsed time
-            elapsed = (end - start).total_seconds()
-            print '    Elapsed time (REAL):    ', elapsed, 'sec'
+            elapsed = float(tot_timing_str)
 
             # Display the internal timing info for comparison
-            print '    Elapsed time (INTERNAL):', float(tot_timing_str), 'sec'
-
-            # Find the BSUB submission properties
-            nprocs_str, loc = find_shortest_str(
-                log_str, '#BSUB -n ', loc=loc)
-            if (loc == 0):
-                print '    Could not find num procs string.  Skipping.'
-                continue
-            print '    BSUB Cores:', nprocs_str
-            tiling_str, loc = find_shortest_str(
-                log_str, '#BSUB -R "span[ptile=', right=']', loc=loc)
-            if (loc == 0):
-                print '    Could not find num procs string.  Skipping.'
-                continue
-            print '    BSUB Tiling:', tiling_str
-            num_nodes = int(nprocs_str) / int(tiling_str)
+            print '    Elapsed time (INTERNAL):', elapsed, 'sec'
 
             # Write the JSON data
-            if (job_num not in json_data[common_name]['results'][method_name]):
-                json_data[common_name]['results'][method_name][job_num] = {}
+            if (job_num not in timedb[common_name]['results'][method_name]):
+                timedb[common_name]['results'][method_name][job_num] = {}
 
-            json_data[common_name]['results'][
-                method_name][job_num]['sys'] = sys_str
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
+                method_name][job_num]['sys'] = "yellowstone"
+            timedb[common_name]['results'][
                 method_name][job_num]['cores'] = num_cores
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['nodes'] = num_nodes
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['real'] = elapsed
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['metadata'] = True
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['once'] = used_once_file
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['actual'] = float(actual_str)
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['request'] = float(requested_str)
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['openi'] = float(openi_str)
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['openo'] = float(openo_str)
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['metaTI'] = float(metaTI_str)
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['metaTV'] = float(metaTV_str)
-            json_data[common_name]['results'][
+            timedb[common_name]['results'][
                 method_name][job_num]['TS'] = float(TS_str)
 
     # Write the JSON data file
-    json_file = open(timings_database_filename, 'w')
-    json_file.write(json.dumps(json_data, sort_keys=True,
+    json_file = open(timefn, 'w')
+    json_file.write(json.dumps(timedb, sort_keys=True,
                                indent=4, separators=(',', ': ')))
     json_file.close()
-
-
-#==============================================================================
-# Main Program
-#==============================================================================
-def main(options):
-    testing_database = get_testing_database(options)
-    make_timings_file(options, testing_database)
-
-
-if __name__ == '__main__':
-    options = parse_cli()
-    main(options)
