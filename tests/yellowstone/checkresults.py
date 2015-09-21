@@ -42,17 +42,10 @@ _PARSER_.add_argument('-m', '--multiple', default=False,
                       action='store_true', dest='multispec',
                       help='True or False, indicating whether to look for '
                            'multispec results [Default: False]')
-_PARSER_.add_argument('-n', '--nodes', default=0, type=int,
-                      help='The integer number of nodes to request in parallel'
-                           ' runs (0 means run in serial) [Default: 0]')
-_PARSER_.add_argument('-q', '--queue', default='economy', type=str,
-                      help='The name of the queue to request in parallel runs '
-                           '(ignored if running in serial) '
-                           '[Default: economy]')
-_PARSER_.add_argument('-w', '--wtime', default=240, type=int,
-                      help='The number of minutes to request for the wall '
-                           'clock in parallel runs (ignored if running in '
-                           'serial) [Default: 240]')
+_PARSER_.add_argument('-s', '--serial', default=False,
+                      action='store_true', dest='multispec',
+                      help='True or False, indicating whether to run checks '
+                           'serial or not [Default: False]')
 _PARSER_.add_argument('-x', '--executable', type=str,
                       default='/glade/p/work/kpaul/installs/intel/12.1.5/cprnc/bin/cprnc',
                       help='The path to the CPRNC executable.')
@@ -245,7 +238,7 @@ if __name__ == '__main__':
             unchecked_old_items.append(item_dict)
 
     # Get a basic MPI comm
-    comm = create_comm(serial=args.nodes <= 0)
+    comm = create_comm(serial=args.serial)
 
     # Print tests that will be checked
     if comm.is_manager():
