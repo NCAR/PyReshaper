@@ -283,7 +283,7 @@ if __name__ == '__main__':
     for item_dict in local_items_to_check:
 
         # Name the cprnc output file
-        cprncdir = tests_to_check[item_dict['test']]
+        cprncdir = tests_to_check[item_dict['test']]['cpr']
         filename = os.path.split(item_dict['new'])[1]
         outfile = os.path.join(cprncdir, filename + '.cprnc')
 
