@@ -87,7 +87,7 @@ The contents of the repository will look like the following.
 
     $  ls
     CHANGES.rst README.rst  docs/       setup.py    tests/
-    LICENSE.txt bin/        setup.cfg   source/
+    LICENSE.rst bin/        setup.cfg   source/
 
 To install in package, type the following command from this directory.
 

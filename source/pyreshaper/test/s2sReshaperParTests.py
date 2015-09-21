@@ -6,7 +6,7 @@ import unittest
 
 from os import linesep as eol
 from pyreshaper.reshaper import Slice2SeriesReshaper, create_reshaper
-from pyreshaper.specification import Slice2SeriesSpecifier
+from pyreshaper.specification import Specifier
 
 from mpi4py import MPI
 MPI_COMM_WORLD = MPI.COMM_WORLD
@@ -21,7 +21,7 @@ class S2SReshaperParTests(unittest.TestCase):
         self.suffix = '.nc'
         self.metadata = ['meta1', 'meta2']
 
-        self.spec = Slice2SeriesSpecifier(
+        self.spec = Specifier(
             infiles=self.infiles, ncfmt=self.ncfmt, prefix=self.prefix,
             suffix=self.suffix, metadata=self.metadata)
 

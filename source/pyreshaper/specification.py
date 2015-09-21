@@ -7,7 +7,7 @@ operations for the PyReshaper are specified with derived dypes of the
 Specification class.
 
 Copyright 2015, University Corporation for Atmospheric Research
-See the LICENSE.txt file for details
+See the LICENSE.rst file for details
 """
 
 # Built-in imports
@@ -142,7 +142,7 @@ class Specifier(object):
 
         # Validate the type of the time-variant metadata list
         if not isinstance(self.time_variant_metadata, list):
-            err_msg = "Input file list must be a list"
+            err_msg = "Time-variant metadata must be a list"
             raise TypeError(err_msg)
 
         # Validate the type of each time-variant metadata variable name
