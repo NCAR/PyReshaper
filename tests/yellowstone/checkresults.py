@@ -119,9 +119,6 @@ class CPRNC(object):
             cprnc_args.append('-v')
         cprnc_args.extend([nc1, nc2])
 
-        # String indicating IDENTITY (valid comparison)
-        ident_str = "files seem to be IDENTICAL"
-
         # Start the CPRNC process
         cprnc_proc = Popen(cprnc_args, stdout=PIPE, stderr=STDOUT)
 
@@ -135,7 +132,7 @@ class CPRNC(object):
             cprnc_out_file.close()
 
         # Return whether the comparison is identical
-        return string.rfind(cprnc_out, ident_str) == 0
+        return cprnc_out.rfind("the two files seem to be IDENTICAL") >= 0
 
 
 #==============================================================================
