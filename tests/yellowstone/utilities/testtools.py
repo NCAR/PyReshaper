@@ -11,6 +11,7 @@
 import os
 import glob
 import json
+import datetime
 import textwrap
 
 # Third-Party Modules
@@ -58,7 +59,7 @@ def _nbyte_str(n, exp=0):
 #==============================================================================
 class TestDB(object):
 
-    def __init__(self, name=None):
+    def __init__(self, name='testinfo.json'):
         """
         Initializer
 
@@ -70,13 +71,8 @@ class TestDB(object):
             ValueError: If the test database file cannot be opened and/or
                 read.
         """
-        # See if there is a user-defined testinfo file,
-        # otherwise look for default
-        abs_path = ''
-        if name:
-            abs_path = os.path.abspath(name)
-        else:
-            abs_path = os.path.join(os.getcwd(), 'testinfo.json')
+        # Get the path to the testinfo file
+        abs_path = os.path.abspath(name)
 
         # Try opening and reading the testinfo file
         self._database = {}
@@ -172,16 +168,15 @@ class TestDB(object):
 
 
 #==============================================================================
-# StatsDB - Statistics Database
+# StatDB - Statistics Database
 #==============================================================================
-class StatsDB(object):
+class StatDB(object):
 
-    def __init__(self, tdb, name=None):
+    def __init__(self, name=None):
         """
         Initializer
 
         Parameters:
-            tdb (TestDB): A testing database for which to associate statistics
             name (str): The name of the test statistics file.  Defaults
                 to 'teststats.json'.
 
@@ -189,14 +184,6 @@ class StatsDB(object):
             ValueError: If the test database file cannot be opened and/or
                 read.
         """
-
-        # Check type of testing db object
-        if not isinstance(tdb, TestDB):
-            err_msg = "Testing database must be of TestDB type"
-            raise TypeError(err_msg)
-
-        # Initialize the testing database
-        self._database = tdb.getdb()
 
         # Initialize test statistics
         self._statistics = {}
@@ -222,16 +209,25 @@ class StatsDB(object):
         """
         return self._statistics
 
-    def analyze(self, tests=None, force=False):
+    def analyze(self, database, tests=None, force=False):
         """
         Analyze the test database to determine test statistics
 
         Parameters:
+            database (TestDB): The testing database to analyze
             tests (list): A list of string names of tests in the database
                 to analyze.  If None, assume all tests.
             force (bool): Whether to force reanalysis of tests that have
                 already been analyzed
         """
+
+        # Check type of testing db object
+        if not isinstance(database, TestDB):
+            err_msg = "Testing database must be of TestDB type"
+            raise TypeError(err_msg)
+
+        # Get the testing database dictionary
+        dbdict = database.getdb()
 
         # Check type
         if tests is not None and not isinstance(tests, (list, tuple)):
@@ -240,10 +236,10 @@ class StatsDB(object):
 
         # Assume all tests to be analyzed if None input
         elif tests is None:
-            tests = self._database.keys()
+            tests = dbdict.keys()
 
         # Error if tests not in database
-        bad_names = [t for t in tests if t not in self._database]
+        bad_names = [t for t in tests if t not in dbdict]
         if len(bad_names) > 0:
             err_msg = "Tests not found in database: " + ", ".join(bad_names)
             raise ValueError(err_msg)
@@ -259,7 +255,7 @@ class StatsDB(object):
             print "Analyzing Test: {0!s}".format(test_name)
 
             # Create a specifier for this test
-            spec = self.create_specifier(str(test_name), ncfmt='netcdf')
+            spec = database.create_specifier(str(test_name), ncfmt='netcdf')
 
             # Validate the test information
             spec.validate()
@@ -529,31 +525,6 @@ class StatsDB(object):
         # Close the file
         fp.close()
 
-    def load(self, name="teststats.json"):
-        """
-        Load the statistics information from a JSON data file
-
-        Parameters:
-            name (str): The name of the JSON data file to read
-        """
-
-        # Check types
-        if isinstance(name, str):
-            fp = open(name, 'r')
-        else:
-            err_msg = "Statistics filename must be a string"
-            raise TypeError(err_msg)
-
-        # Try reading the statistics
-        try:
-            self._statistics = dict(json.load(fp))
-        except:
-            err_msg = "Failed to read statistics file"
-            raise RuntimeError(err_msg)
-
-        # Close the file
-        fp.close()
-
 
 #==============================================================================
 # TimeDB - Database for Timing Data
@@ -566,7 +537,7 @@ class TimeDB(object):
 
         Parameters:
             name (str): The name of the timing database file.  Defaults
-                to 'timing.json'.
+                to 'timings.json'.
 
         Raises:
             ValueError: If the timing database file cannot be opened and/or
@@ -574,11 +545,7 @@ class TimeDB(object):
         """
         # See if there is a user-defined testinfo file,
         # otherwise look for default
-        abs_path = ''
-        if name:
-            abs_path = os.path.abspath(name)
-        else:
-            abs_path = os.path.join(os.getcwd(), 'testinfo.json')
+        abs_path = os.path.abspath('timings.json')
 
         # Try opening and reading the testinfo file
         self._timings = {}
@@ -593,20 +560,201 @@ class TimeDB(object):
 
     def getdb(self):
         """
-        Return the testing database as a dictionary
+        Return the timings database as a dictionary
 
         Returns:
-            dict: The testing database
+            dict: The timings database dictionary
         """
         return self._timings
 
-    def display(self):
+    def test_has_method(self, test, method):
+        """
+        Check if given test was done with the given method
+
+        Parameters:
+            test (str): The name of the test to query
+            method (str): The name of the method to query
+
+        Returns:
+            bool: True, if the test was performed with the given method,
+                False, otherwise.
+        """
+
+        # checking
+        if test not in self._timings:
+            err_msg = "Given test '{0!s}' not in timings database".format(test)
+            raise ValueError(err_msg)
+
+        # Start looking for the method
+        if 'results' not in self._timings[test]:
+            return False
+        return method in self._timings[test]['results']
+
+    def tests_with_methods(self, methods=None):
+        """
+        Return the list of tests that use the given methods
+
+        If no methods are given, then returns all tests
+
+        Parameters:
+            methods (list, tuple): The list of methods to query
+        """
+        if not methods:
+            return [str(t) for t in self._timings.keys()]
+
+        test_set = set()
+        for method in methods:
+            test_set.update(set(str(t) for t in self._timings
+                                if self.test_has_method(t, method)))
+        return list(test_set)
+
+    def methods_in_tests(self, tests=None):
+        """
+        Return the list of methods that are used by all of the given tests
+
+        If no tests given, return list of all methods found.
+
+        Parameters:
+            tests (list, tuple): The list of tests to query
+        """
+        if tests:
+            tests_to_search = tests
+        else:
+            tests_to_search = self._timings.keys()
+
+        method_set = set()
+        for test in tests_to_search:
+            if 'results' in self._timings[test]:
+                method_set.update(set(str(t) for t in self._timings[test]['results'].keys()))
+        return list(method_set)
+
+    def display_tests(self, methods=None):
         """
         List the tests in the test database.
+
+        If methods are given, then only the tests using these methods will be
+        displayed.
+
+        Parameters:
+            methods (list, tuple): A method names to query
         """
         print
-        print 'Tests found in the Test Database are:'
+        print "Tests",
+        if methods:
+            print "with methods {0!s}".format(methods),
+        print "in the Timings Database:"
         print
-        for test_name in self._timings:
-            print '   {0!s}'.format(test_name)
-        return
+        for test in self.tests_with_methods(methods):
+            print '   {0!s}'.format(test)
+
+    def display_methods(self, tests=None):
+        """
+        List the methods in the test database.
+
+        If tests are given, then only the methods used by these tests will be
+        displayed.
+
+        Parameters:
+            tests (list, tuple): A test names to query
+        """
+        print
+        print "Methods",
+        if tests:
+            print "used by tests {0!s}".format(tests),
+        print "in the Timings Database:"
+        print
+        for method in self.methods_in_tests(tests):
+            print '   {0!s}'.format(method)
+
+    def add_result(self, test, method, job,
+                   tser_write=0.0, tim_write=0.0, tvm_write=0.0,
+                   metadata=True, once=False, cores=1, nodes=0,
+                   input_open=0.0, output_open=0.0, total=0.0,
+                   actual_mb=0.0, requested_mb=0.0, system='yellowstone'):
+        """
+        Add new timing results to the timings database
+
+        All times are in seconds.
+
+        Parameters:
+            test (str): Name of the test associated with the result
+            method (str): Name of the method used by the test result
+            job (str): Individual job ID string to associate with the result
+            tser_write (float): Time to write Time-Series data
+            tim_write (float): Time to write Time-Invariant Metadata (TIM)
+            tvm_write (float): Time to write Time-Variant Metadata (TVM)
+            metadata (bool): Whether all metadata was written
+            once (bool): Whether metadata was written to a "once" file
+            cores (int): Number of cores used for the job
+            nodes (int): Number of nodes used for the job
+            input_open (float): Time to open all input files
+            output_open (float): Time to open all output files
+            total (float): Total time for the entire conversion process
+            actual_mb (float): Number of MB actually read (assuming a given
+                block size) from input files
+            requested_mb (float): Number of MB requested
+            system (str): Name of the system on which the test was run
+        """
+
+        if test not in self._timings:
+            self._timings[test] = {'results': {}}
+        if method not in self._timings[test]['results']:
+            self._timings[test]['results'][method] = {}
+
+        if job not in self._timings[test]['results'][method]:
+            self._timings[test]['results'][method][job] = {}
+            self._timings[test]['results'][method][job]['sys'] = system
+            self._timings[test]['results'][method][job]['cores'] = cores
+            self._timings[test]['results'][method][job]['nodes'] = nodes
+            self._timings[test]['results'][method][job]['real'] = total
+            self._timings[test]['results'][method][job]['metadata'] = metadata
+            self._timings[test]['results'][method][job]['once'] = once
+            self._timings[test]['results'][method][job]['actual'] = actual_mb
+            self._timings[test]['results'][method][job]['request'] = requested_mb
+            self._timings[test]['results'][method][job]['openi'] = input_open
+            self._timings[test]['results'][method][job]['openo'] = output_open
+            self._timings[test]['results'][method][job]['metaTI'] = tim_write
+            self._timings[test]['results'][method][job]['metaTV'] = tvm_write
+            self._timings[test]['results'][method][job]['TS'] = tser_write
+
+    def get_results(self, test, method):
+        """
+        Get timings results as a dictionary for a given test and method.
+
+        Parameters:
+            test (str): Name of the test
+            method (str); Name of the method
+        """
+        if test not in self._timings:
+            err_msg = "Test {0!s} not in timings database".format(test)
+            raise KeyError(err_msg)
+        if self.test_has_method(test, method):
+            return self._timings[test]['results'][method]
+        else:
+            err_msg = "Method {0!s} not in test {1!s} database".format(method, test)
+            raise KeyError(err_msg)
+
+    def save(self, name="timings.json"):
+        """
+        Save the timing information to a JSON data file
+
+        Parameters:
+            name (str): The name of the JSON timings file to write
+        """
+
+        # Check types
+        if isinstance(name, str):
+            fp = open(name, 'w')
+        else:
+            err_msg = "Statistics filename must be a string"
+            raise TypeError(err_msg)
+
+        # Dump JSON data to file
+        try:
+            json.dump(self._timings, fp)
+        except:
+            err_msg = "Failed to write statistics file"
+            raise RuntimeError(err_msg)
+
+        # Close the file
+        fp.close()

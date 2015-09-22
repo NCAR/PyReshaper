@@ -12,7 +12,6 @@ import os
 import glob
 import datetime
 import argparse
-import json
 
 # Package Modules
 from utilities import testtools as tt
@@ -27,9 +26,6 @@ _PARSER_ = argparse.ArgumentParser(description=_DESC_)
 _PARSER_.add_argument('-i', '--infofile', default='testinfo.json', type=str,
                       help='Location of the testinfo.json database file '
                            '[Default: testinfo.json]')
-_PARSER_.add_argument('-s', '--statsfile', default='teststats.json', type=str,
-                      help='Location of the teststats.json database file '
-                           '[Default: teststats.json]')
 _PARSER_.add_argument('-t', '--timefile', default='timings.json', type=str,
                       help='Location of the timings.json database file '
                            '[Default: timings.json]')
@@ -55,17 +51,7 @@ if __name__ == '__main__':
 
     # Create/read the testing info and stats files
     testdb = tt.TestDB(name=args.infofile).getdb()
-    statdb = tt.StatsDB(testdb, name=args.statsfile).getdb()
-
-    # Get the timings.json data file
-    timefn = os.path.abspath(args.timefile)
-
-    # Open JSON file
-    timedb = {}
-    if (os.path.isfile(timefn)):
-        json_file = open(timefn)
-        timedb = dict(json.load(json_file))
-        json_file.close()
+    timedb = tt.TimeDB(name=args.timefile)
 
     # Current working directory
     cwd = os.getcwd()
@@ -74,6 +60,7 @@ if __name__ == '__main__':
     for rundir in glob.iglob(os.path.join('results.d', '*', '[ser,par]*', '*')):
         print
         print 'Extracting times from test dir:', rundir
+        print
         root, ncfmt = os.path.split(rundir)
         root, run_type = os.path.split(root)
         root, test_name = os.path.split(root)
@@ -94,14 +81,6 @@ if __name__ == '__main__':
             method_name = 'pyreshaper'
         elif ncfmt == 'netcdf4':
             method_name = 'pyreshaper4'
-
-        # Check for this test in the timing database
-        if common_name not in timedb:
-            timedb[common_name] = {'results': {}}
-
-        # Check for method in results
-        if method_name not in timedb[common_name]['results']:
-            timedb[common_name]['results'][method_name] = {}
 
         # Get the number of cores and nodes from the run type
         num_cores = 1
@@ -174,41 +153,19 @@ if __name__ == '__main__':
             print '    Elapsed time (INTERNAL):', elapsed, 'sec'
 
             # Write the JSON data
-            if job_num in timedb[common_name]['results'][method_name]:
-                print '    Job already exists in database. Skipping.'
-            else:
-                print '    Adding new job to timings database.'
-                timedb[common_name]['results'][method_name][job_num] = {}
-
-                timedb[common_name]['results'][
-                    method_name][job_num]['sys'] = "yellowstone"
-                timedb[common_name]['results'][
-                    method_name][job_num]['cores'] = num_cores
-                timedb[common_name]['results'][
-                    method_name][job_num]['nodes'] = num_nodes
-                timedb[common_name]['results'][
-                    method_name][job_num]['real'] = elapsed
-                timedb[common_name]['results'][
-                    method_name][job_num]['metadata'] = True
-                timedb[common_name]['results'][
-                    method_name][job_num]['once'] = used_once_file
-                timedb[common_name]['results'][
-                    method_name][job_num]['actual'] = float(actual_str)
-                timedb[common_name]['results'][
-                    method_name][job_num]['request'] = float(requested_str)
-                timedb[common_name]['results'][
-                    method_name][job_num]['openi'] = float(openi_str)
-                timedb[common_name]['results'][
-                    method_name][job_num]['openo'] = float(openo_str)
-                timedb[common_name]['results'][
-                    method_name][job_num]['metaTI'] = float(metaTI_str)
-                timedb[common_name]['results'][
-                    method_name][job_num]['metaTV'] = float(metaTV_str)
-                timedb[common_name]['results'][
-                    method_name][job_num]['TS'] = float(TS_str)
+            print '    Adding job result to timings database.'
+            timedb.add_result(common_name, method_name, job_num,
+                              tser_write=float(TS_str),
+                              tim_write=float(metaTI_str),
+                              tvm_write=float(metaTV_str),
+                              metadata=True, once=used_once_file,
+                              cores=num_cores, nodes=num_nodes,
+                              input_open=float(openi_str),
+                              output_open=float(openo_str),
+                              total=elapsed,
+                              actual_mb=float(actual_str),
+                              requested_mb=float(requested_str),
+                              system='yellowstone')
 
     # Write the JSON data file
-    json_file = open(timefn, 'w')
-    json_file.write(json.dumps(timedb, sort_keys=True,
-                               indent=4, separators=(',', ': ')))
-    json_file.close()
+    timedb.save(args.timefile)
