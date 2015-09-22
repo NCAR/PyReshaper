@@ -178,7 +178,8 @@ def runmultitest(tests, nodes=0, tiling=16, minutes=120,
         runtype = 'par{0!s}x{1!s}'.format(nodes, tiling)
     else:
         runtype = 'ser'
-    testdir = os.path.abspath(os.path.join('results.d', 'multitest', runtype, ncformat))
+    testdir = os.path.abspath(
+        os.path.join('results.d', 'multitest', runtype, ncformat))
 
     # If the test directory doesn't exist, make it and move into it
     cwd = os.getcwd()
@@ -264,7 +265,8 @@ def runindivtests(tests, nodes=0, tiling=16, minutes=120,
             runtype = 'par{0!s}x{1!s}'.format(nodes, tiling)
         else:
             runtype = 'ser'
-        testdir = os.path.abspath(os.path.join('results.d', str(test_name), runtype, ncformat))
+        testdir = os.path.abspath(
+            os.path.join('results.d', str(test_name), runtype, ncformat))
 
         # If the test directory doesn't exist, make it and move into it
         if os.path.exists(testdir):
@@ -325,18 +327,18 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # Create/read the testing info and stats files
-    testdb = tt.TestDB(dbname=args.infofile)
+    testdb = tt.TestDB(name=args.infofile)
 
     # List tests if only listing
     if args.list_tests:
-        testdb.print_tests()
+        testdb.display()
         sys.exit(1)
 
     # Generate the list of tests to run/analyze
     if args.all_tests:
-        test_list = testdb.get_database().keys()
+        test_list = testdb.getdb().keys()
     else:
-        test_list = [t for t in args.test if t in testdb.get_database()]
+        test_list = [t for t in args.test if t in testdb.getdb()]
 
     if args.multispec:
         runmultitest(test_list, nodes=args.nodes, tiling=args.tiling,

@@ -55,21 +55,22 @@ if __name__ == '__main__':
         sys.exit(1)
 
     # Create/read the testing info and stats files
-    testdb = tt.TestDB(dbname=args.infofile, stname=args.statsfile)
+    testdb = tt.TestDB(name=args.infofile)
+    statdb = tt.StatsDB(testdb, name=args.statsfile)
 
     # List tests if only listing
     if args.list_tests:
-        testdb.print_tests()
+        testdb.display()
         sys.exit(1)
 
     # Generate the list of tests to run/analyze
     if args.all_tests:
-        test_list = testdb.get_database().keys()
+        test_list = testdb.getdb().keys()
     else:
-        test_list = [t for t in args.test if t in testdb.get_database()]
+        test_list = [t for t in args.test if t in testdb.getdb()]
 
     # Analyze test input, if requested (overwrite forces re-analysis)
-    testdb.analyze(test_list, force=args.overwrite)
+    statdb.analyze(test_list, force=args.overwrite)
 
     # Save to the stats file
-    testdb.save_statistics(stname=args.statsfile)
+    statdb.save_statistics(name=args.statsfile)

@@ -54,7 +54,8 @@ if __name__ == '__main__':
     args = _PARSER_.parse_args()
 
     # Create/read the testing info and stats files
-    testdb = tt.TestDB(dbname=args.infofile, stname=args.statsfile).get_database()
+    testdb = tt.TestDB(name=args.infofile).getdb()
+    statdb = tt.StatsDB(testdb, name=args.statsfile).getdb()
 
     # Get the timings.json data file
     timefn = os.path.abspath(args.timefile)

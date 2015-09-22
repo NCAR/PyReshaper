@@ -58,15 +58,13 @@ def _nbyte_str(n, exp=0):
 #==============================================================================
 class TestDB(object):
 
-    def __init__(self, dbname=None, stname=None):
+    def __init__(self, name=None):
         """
         Initializer
 
         Parameters:
-            dbname (str): The name of the test database file.  Defaults
+            name (str): The name of the test database file.  Defaults
                 to 'testinfo.json'.
-            stname (str): The name of the test statistics file.  Defaults
-                to 'teststats.json'.
 
         Raises:
             ValueError: If the test database file cannot be opened and/or
@@ -75,8 +73,8 @@ class TestDB(object):
         # See if there is a user-defined testinfo file,
         # otherwise look for default
         abs_path = ''
-        if dbname:
-            abs_path = os.path.abspath(dbname)
+        if name:
+            abs_path = os.path.abspath(name)
         else:
             abs_path = os.path.join(os.getcwd(), 'testinfo.json')
 
@@ -87,24 +85,11 @@ class TestDB(object):
             self._database = dict(json.load(dbfile))
             dbfile.close()
         except:
-            err_msg = 'Problem reading and parsing test info file: {0!s}'.format(abs_path)
+            err_msg = 'Problem reading and parsing test info file: {0!s}'.format(
+                abs_path)
             raise ValueError(err_msg)
 
-        # Initialize test statistics
-        self._statistics = {}
-
-        # If the stats filename is given, then try to read it
-        if stname is not None:
-            abs_path = os.path.abspath(stname)
-            try:
-                stfile = open(abs_path, 'r')
-                self._statistics = dict(json.load(stfile))
-                stfile.close()
-            except:
-                err_msg = 'Problem reading and parsing test stats file: {0!s}'.format(abs_path)
-                raise ValueError(err_msg)
-
-    def get_database(self):
+    def getdb(self):
         """
         Return the testing database as a dictionary
 
@@ -113,16 +98,7 @@ class TestDB(object):
         """
         return self._database
 
-    def get_statistics(self):
-        """
-        Return the test analysis statistics as a dictionary
-
-        Returns:
-            dict: The statistics database
-        """
-        return self._statistics
-
-    def print_tests(self):
+    def display(self):
         """
         List the tests in the test database.
         """
@@ -193,6 +169,58 @@ class TestDB(object):
         return specification.Specifier(infiles=infiles, ncfmt=ncfmt,
                                        prefix=prefix, suffix=suffix,
                                        metadata=metadata, **kwargs)
+
+
+#==============================================================================
+# StatsDB - Statistics Database
+#==============================================================================
+class StatsDB(object):
+
+    def __init__(self, tdb, name=None):
+        """
+        Initializer
+
+        Parameters:
+            tdb (TestDB): A testing database for which to associate statistics
+            name (str): The name of the test statistics file.  Defaults
+                to 'teststats.json'.
+
+        Raises:
+            ValueError: If the test database file cannot be opened and/or
+                read.
+        """
+
+        # Check type of testing db object
+        if not isinstance(tdb, TestDB):
+            err_msg = "Testing database must be of TestDB type"
+            raise TypeError(err_msg)
+
+        # Initialize the testing database
+        self._database = tdb.getdb()
+
+        # Initialize test statistics
+        self._statistics = {}
+
+        # If the stats filename is given, then try to read it
+        if name is not None:
+            abs_path = os.path.abspath(name)
+            try:
+                stfile = open(abs_path, 'r')
+                self._statistics = dict(json.load(stfile))
+                stfile.close()
+            except:
+                err_msg = 'Problem reading and parsing test stats file: {0!s}'.format(
+                    abs_path)
+                raise ValueError(err_msg)
+
+    def getdb(self):
+        """
+        Return the test analysis statistics as a dictionary
+
+        Returns:
+            dict: The statistics database
+        """
+        return self._statistics
 
     def analyze(self, tests=None, force=False):
         """
@@ -371,7 +399,7 @@ class TestDB(object):
                 max([var_stats[v]['xsize'] for v in timd_vars])
             self._statistics[test_name]['maxsizes']['tinvariant'] = maxsize
 
-    def print_statistics(self, tests=None):
+    def display(self, tests=None):
         """
         Print the statistics information determined from self analysis
 
@@ -476,17 +504,17 @@ class TestDB(object):
             print "   Time-Invariant Metadata Max Size: {}".format(_nbyte_str(timd_maxsize))
             print
 
-    def save_statistics(self, stname="teststats.json"):
+    def save(self, name="teststats.json"):
         """
         Save the statistics information to a JSON data file
 
         Parameters:
-            stname (str): The name of the JSON statistics file to write
+            name (str): The name of the JSON statistics file to write
         """
 
         # Check types
-        if isinstance(stname, str):
-            fp = open(stname, 'w')
+        if isinstance(name, str):
+            fp = open(name, 'w')
         else:
             err_msg = "Statistics filename must be a string"
             raise TypeError(err_msg)
@@ -501,17 +529,17 @@ class TestDB(object):
         # Close the file
         fp.close()
 
-    def load_statistics(self, stname="teststats.json"):
+    def load(self, name="teststats.json"):
         """
         Load the statistics information from a JSON data file
 
         Parameters:
-            stname (str): The name of the JSON data file to read
+            name (str): The name of the JSON data file to read
         """
 
         # Check types
-        if isinstance(stname, str):
-            fp = open(stname, 'r')
+        if isinstance(name, str):
+            fp = open(name, 'r')
         else:
             err_msg = "Statistics filename must be a string"
             raise TypeError(err_msg)
@@ -525,3 +553,60 @@ class TestDB(object):
 
         # Close the file
         fp.close()
+
+
+#==============================================================================
+# TimeDB - Database for Timing Data
+#==============================================================================
+class TimeDB(object):
+
+    def __init__(self, name=None):
+        """
+        Initializer
+
+        Parameters:
+            name (str): The name of the timing database file.  Defaults
+                to 'timing.json'.
+
+        Raises:
+            ValueError: If the timing database file cannot be opened and/or
+                read.
+        """
+        # See if there is a user-defined testinfo file,
+        # otherwise look for default
+        abs_path = ''
+        if name:
+            abs_path = os.path.abspath(name)
+        else:
+            abs_path = os.path.join(os.getcwd(), 'testinfo.json')
+
+        # Try opening and reading the testinfo file
+        self._timings = {}
+        try:
+            dbfile = open(abs_path, 'r')
+            self._timings = dict(json.load(dbfile))
+            dbfile.close()
+        except:
+            err_msg = 'Problem reading and parsing timings file: {0!s}'.format(
+                abs_path)
+            raise ValueError(err_msg)
+
+    def getdb(self):
+        """
+        Return the testing database as a dictionary
+
+        Returns:
+            dict: The testing database
+        """
+        return self._timings
+
+    def display(self):
+        """
+        List the tests in the test database.
+        """
+        print
+        print 'Tests found in the Test Database are:'
+        print
+        for test_name in self._timings:
+            print '   {0!s}'.format(test_name)
+        return

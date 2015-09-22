@@ -72,7 +72,8 @@ class CPRNC(object):
 
         # Check that the executable works
         if call("type " + executable, shell=True, stdout=PIPE, stderr=PIPE) != 0:
-            err_msg = "CPRNC executable '{0!s}' does not appear to work".format(executable)
+            err_msg = "CPRNC executable '{0!s}' does not appear to work".format(
+                executable)
             raise ValueError(err_msg)
 
         # Save the executable location
@@ -141,7 +142,7 @@ if __name__ == '__main__':
     args = _PARSER_.parse_args()
 
     # Create/read the testing info and stats files
-    testdb = tt.TestDB(dbname=args.infofile).get_database()
+    testdb = tt.TestDB(name=args.infofile).getdb()
 
     # Get a list of valid rundir names to look for
     if len(args.rundir) > 0:
@@ -284,7 +285,8 @@ if __name__ == '__main__':
         outfile = os.path.join(cprncdir, filename + '.cprnc')
 
         # Compare the files with CPRNC
-        rslt = cprnc.compare(item_dict['new'], item_dict['old'], outfile=outfile)
+        rslt = cprnc.compare(
+            item_dict['new'], item_dict['old'], outfile=outfile)
 
         # Save the result in the result dictionary
         rslt_dict = {}
@@ -316,7 +318,8 @@ if __name__ == '__main__':
             for result in results:
                 if result['test'] == test_name:
                     str_rslt = '  GOOD:' if result['result'] else '   BAD:'
-                    summ = str_rslt + ' ' + result['file'] + ' ({0!s})'.format(rslt_dict['test'])
+                    summ = str_rslt + ' ' + \
+                        result['file'] + ' ({0!s})'.format(rslt_dict['test'])
                     sfile.write(summ + os.linesep)
             sfile.close()
 
