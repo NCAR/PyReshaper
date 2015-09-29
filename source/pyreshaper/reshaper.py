@@ -822,6 +822,8 @@ class Slice2SeriesReshaper(Reshaper):
                                              series_step_index + num_steps)
                     self._timer.start('Read Time-Series Variables')
                     tmp_data = in_var[tuple(in_slice)]
+                    print numpy.shape(tmp_data)
+                    print out_slice
                     self._timer.stop('Read Time-Series Variables')
                     self._timer.start('Write Time-Series Variables')
                     out_var[tuple(out_slice)] = tmp_data
