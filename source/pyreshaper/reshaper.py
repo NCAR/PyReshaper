@@ -818,7 +818,6 @@ class Slice2SeriesReshaper(Reshaper):
                             actual_nbytes = self.assumed_block_size \
                                 * numpy.ceil(requested_nbytes / self.assumed_block_size)
                             self._byte_counts['Actual Data'] += actual_nbytes
-                        self._timer.stop('Write Time-Variant Metadata')
 
                     # Write the time-series variables
                     if write_tser:
