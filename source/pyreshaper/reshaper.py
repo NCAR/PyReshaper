@@ -797,6 +797,8 @@ class Slice2SeriesReshaper(Reshaper):
                                                  series_step_index + num_steps)
                         self._timer.start('Read Time-Variant Metadata')
                         tmp_data = in_meta[tuple(in_slice)]
+                        print numpy.shape(tmp_data)
+                        print out_slice
                         self._timer.stop('Read Time-Variant Metadata')
                         self._timer.start('Write Time-Variant Metadata')
                         out_meta[tuple(out_slice)] = tmp_data
