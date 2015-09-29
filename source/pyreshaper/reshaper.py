@@ -645,6 +645,9 @@ class Slice2SeriesReshaper(Reshaper):
         self._timer.reset('Create Time-Invariant Metadata')
         self._timer.reset('Create Time-Variant Metadata')
         self._timer.reset('Create Time-Series Variables')
+        self._timer.reset('Read Time-Invariant Metadata')
+        self._timer.reset('Read Time-Variant Metadata')
+        self._timer.reset('Read Time-Series Variables')
         self._timer.reset('Write Time-Invariant Metadata')
         self._timer.reset('Write Time-Variant Metadata')
         self._timer.reset('Write Time-Series Variables')
@@ -705,7 +708,7 @@ class Slice2SeriesReshaper(Reshaper):
             self._timer.stop('Open Output Files')
 
             # Create the time-invariant metadata variables
-            if (write_meta):
+            if write_meta:
                 self._timer.start('Create Time-Invariant Metadata')
                 for name in self._time_invariant_metadata:
                     in_var = ref_infile.variables[name]
@@ -757,14 +760,20 @@ class Slice2SeriesReshaper(Reshaper):
 
             # Write the time-invariant metadata
             if write_meta:
-                self._timer.start('Write Time-Invariant Metadata')
                 for name in self._time_invariant_metadata:
                     in_meta = ref_infile.variables[name]
                     out_meta = out_file.variables[name]
+                    self._timer.start('Read Time-Invariant Metadata')
                     if in_meta.rank > 0:
-                        out_meta[:] = in_meta[:]
+                        tmp_data = in_meta[:]
                     else:
-                        out_meta.assign_value(in_meta.get_value())
+                        tmp_data = in_meta.get_value()
+                    self._timer.stop('Read Time-Invariant Metadata')
+                    self._timer.start('Write Time-Invariant Metadata')
+                    if in_meta.rank > 0:
+                        out_meta[:] = tmp_data
+                    else:
+                        out_meta.assign_value(tmp_data)
                 self._timer.stop('Write Time-Invariant Metadata')
 
             # Write each time-variant variable
@@ -774,55 +783,59 @@ class Slice2SeriesReshaper(Reshaper):
                 # Get the number of time steps in this slice file
                 num_steps = in_file.dimensions[self._unlimited_dim]
 
-                # Loop over the time steps in this slice file
-                for slice_step_index in range(num_steps):
-
-                    # Write the time-varient metadata
-                    if write_meta:
+                # Write the time-varient metadata
+                if write_meta:
+                    for name in self._time_variant_metadata:
+                        in_meta = in_file.variables[name]
+                        out_meta = out_file.variables[name]
+                        ndims = len(in_meta.dimensions)
+                        udidx = in_meta.dimensions.index(self._unlimited_dim)
+                        in_slice = [slice(None)] * ndims
+                        in_slice[udidx] = slice(0, num_steps)
+                        out_slice = [slice(None)] * ndims
+                        out_slice[udidx] = slice(series_step_index,
+                                                 series_step_index + num_steps)
+                        self._timer.start('Read Time-Variant Metadata')
+                        tmp_data = in_meta[tuple(in_slice)]
+                        self._timer.stop('Read Time-Variant Metadata')
                         self._timer.start('Write Time-Variant Metadata')
-                        for name in self._time_variant_metadata:
-                            in_meta = in_file.variables[name]
-                            out_meta = out_file.variables[name]
-                            ndims = len(in_meta.dimensions)
-                            udidx = in_meta.dimensions.index(
-                                self._unlimited_dim)
-                            in_slice = [slice(None)] * ndims
-                            in_slice[udidx] = slice_step_index
-                            out_slice = [slice(None)] * ndims
-                            out_slice[udidx] = series_step_index
-                            out_meta[tuple(out_slice)] = in_meta[
-                                tuple(in_slice)]
-
-                            requested_nbytes = in_meta[:].nbytes
-                            self._byte_counts[
-                                'Requested Data'] += requested_nbytes
-                            actual_nbytes = self.assumed_block_size \
-                                * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                            self._byte_counts['Actual Data'] += actual_nbytes
+                        out_meta[tuple(out_slice)] = tmp_data
                         self._timer.stop('Write Time-Variant Metadata')
 
-                    # Write the time-series variables
-                    if write_tser:
-                        self._timer.start('Write Time-Series Variables')
-                        in_var = in_file.variables[out_name]
-                        ndims = len(in_var.dimensions)
-                        udidx = in_var.dimensions.index(self._unlimited_dim)
-                        in_slice = [slice(None)] * ndims
-                        in_slice[udidx] = slice_step_index
-                        out_slice = [slice(None)] * ndims
-                        out_slice[udidx] = series_step_index
-                        out_var[tuple(out_slice)] = in_var[tuple(in_slice)]
-
-                        requested_nbytes = in_file.variables[
-                            out_name][:].nbytes
-                        self._byte_counts['Requested Data'] += requested_nbytes
+                        requested_nbytes = in_meta[:].nbytes
+                        self._byte_counts[
+                            'Requested Data'] += requested_nbytes
                         actual_nbytes = self.assumed_block_size \
                             * numpy.ceil(requested_nbytes / self.assumed_block_size)
                         self._byte_counts['Actual Data'] += actual_nbytes
-                        self._timer.stop('Write Time-Series Variables')
+                    self._timer.stop('Write Time-Variant Metadata')
 
-                    # Increment the time-series step index
-                    series_step_index += 1
+                # Write the time-series variables
+                if write_tser:
+                    in_var = in_file.variables[out_name]
+                    ndims = len(in_var.dimensions)
+                    udidx = in_var.dimensions.index(self._unlimited_dim)
+                    in_slice = [slice(None)] * ndims
+                    in_slice[udidx] = slice(0, num_steps)
+                    out_slice = [slice(None)] * ndims
+                    out_slice[udidx] = slice(series_step_index,
+                                             series_step_index + num_steps)
+                    self._timer.start('Read Time-Series Variables')
+                    tmp_data = in_var[tuple(in_slice)]
+                    self._timer.stop('Read Time-Series Variables')
+                    self._timer.start('Write Time-Series Variables')
+                    out_var[tuple(out_slice)] = tmp_data
+                    self._timer.stop('Write Time-Series Variables')
+
+                    requested_nbytes = in_file.variables[
+                        out_name][:].nbytes
+                    self._byte_counts['Requested Data'] += requested_nbytes
+                    actual_nbytes = self.assumed_block_size \
+                        * numpy.ceil(requested_nbytes / self.assumed_block_size)
+                    self._byte_counts['Actual Data'] += actual_nbytes
+
+                # Increment the time-series step index
+                series_step_index += 1
 
             # Close the output file
             self._timer.start('Close Output Files')
