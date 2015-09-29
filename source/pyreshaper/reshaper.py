@@ -839,7 +839,7 @@ class Slice2SeriesReshaper(Reshaper):
                     self._byte_counts['Actual Data'] += actual_nbytes
 
                 # Increment the time-series step index
-                series_step_index += 1
+                series_step_index += num_steps
 
             # Close the output file
             self._timer.start('Close Output Files')
