@@ -1,36 +1,29 @@
 This directory contains the tests that should be run on NCAR's Yellowstone
 compute system.  The general order of operations is described below:
 
+0) Analyze Test Input:
+
+   mkstats.py: Generate statistics describing the test input files.  This
+                writes the test statistics to the 'teststats.json' file.
+                
 1) Run Tests
 
-   runtests-ind.py: Run any number of selected tests as individual jobs
-                    submitted to the queue.  This uses a single Specifier
-                    for each PyReshaper job, and each job runs in parallel
-                    with all of the other jobs.
-                    
-   runtests-mul.py: Run any number of selected tests as a single job submitted
-                    to the queue.  This uses a list of Specifiers for a single
-                    MultiSpecReshaper job.
+   runtests.py: Run any number of selected tests in serial or in parallel,
+                submitted to a queue.  This can use a single Specifier,
+                or multiple Specifiers, for each PyReshaper job.
                     
 2) Check Test Results
 
-   checkresults.py: Compare output from each test that has been run with
+   checkresults.py: Compare output from each test that has been run against
                     accepted results (found in /glade/u/tdd/asap/bakeoff)
                     
 3) Get Timing Data
 
-   gettimings.py: Read the PyReshaper output for each test that has been run
+   mktimings.py: Read the PyReshaper output for each test that has been run
                   and extract the timing data from the output logs.  Add this
                   timing data to the 'timings.json' database.
                   
-4) Additional
+4) Make Plots
 
-   Additional useful scripts can be found in the postproc/ directory,
-   including the following:
-   
-      getsizes.py: Reads the test input data and computes test information
-                   such as variable sizes and numbers.  The information is
-                   printed to STDOUT.
-                   
-      mkplots.py: Creates typical timing and throughput plots from information
-                  found in the 'timings.json' database.
+   mkplots.py: Creates typical timing and throughput plots from information
+               found in the 'timings.json' database.

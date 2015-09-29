@@ -71,7 +71,7 @@ class Specifier(object):
             metadata (list): List of variable names specifying the
                 variables that should be included in every
                 time-series output file
-            kwargs (dict): Optional arguments describing the 
+            kwargs (dict): Optional arguments describing the
                 Reshaper run
         """
 
