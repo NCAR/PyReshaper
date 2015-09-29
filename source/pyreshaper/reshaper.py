@@ -776,13 +776,6 @@ class Slice2SeriesReshaper(Reshaper):
                         out_meta.assign_value(tmp_data)
                     self._timer.stop('Write Time-Invariant Metadata')
 
-                    requested_nbytes = in_meta[:].nbytes
-                    self._byte_counts[
-                        'Requested Data'] += requested_nbytes
-                    actual_nbytes = self.assumed_block_size \
-                        * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                    self._byte_counts['Actual Data'] += actual_nbytes
-
             # Write each time-variant variable
             series_step_index = 0
             for in_file in self._input_files:
