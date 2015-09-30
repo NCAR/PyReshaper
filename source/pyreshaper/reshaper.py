@@ -11,12 +11,14 @@ See the LICENSE.rst file for details
 
 # Built-in imports
 import abc
-import os
-import itertools
+from os import linesep, remove
+from os.path import exists, isfile
+from itertools import chain
 
 # Third-party imports
-import Nio
 import numpy
+from Nio import open_file as nio_open_file
+from Nio import options as nio_options
 from asaptools.simplecomm import create_comm, SimpleComm
 from asaptools.timekeeper import TimeKeeper
 from asaptools.partition import WeightBalanced
@@ -141,8 +143,8 @@ def _pprint_dictionary(title, dictionary, order=None):
                 print_order.append(item)
 
     # Header line with Title
-    hline = '-' * 50 + os.linesep
-    ostr = hline + ' ' + title.upper() + ':' + os.linesep + hline
+    hline = '-' * 50 + linesep
+    ostr = hline + ' ' + title.upper() + ':' + linesep + hline
 
     # Determine the longest timer name
     # and thus computer the column to line up values
@@ -156,7 +158,7 @@ def _pprint_dictionary(title, dictionary, order=None):
     for name in print_order:
         spacer = ' ' * (valcol - len(str(name)))
         ostr += str(name) + ':' + spacer
-        ostr += str(dictionary[name]) + os.linesep
+        ostr += str(dictionary[name]) + linesep
     ostr += hline
 
     return ostr
@@ -287,7 +289,7 @@ class Slice2SeriesReshaper(Reshaper):
             self._vprint('Specifier validated', verbosity=1)
 
         # Setup PyNIO options (including disabling the default PreFill option)
-        opt = Nio.options()
+        opt = nio_options()
         opt.PreFill = False
 
         # Determine the Format and CompressionLevel options
@@ -308,7 +310,7 @@ class Slice2SeriesReshaper(Reshaper):
         self._timer.start('Open Input Files')
         self._input_files = []
         for filename in specifier.input_file_list:
-            self._input_files.append(Nio.open_file(filename, "r"))
+            self._input_files.append(nio_open_file(filename, "r"))
         self._timer.stop('Open Input Files')
         if self._simplecomm.is_manager():
             self._vprint('Input files opened', verbosity=2)
@@ -404,7 +406,7 @@ class Slice2SeriesReshaper(Reshaper):
             missing_vars.update(var_names - var_names_next)
         if len(missing_vars) != 0:
             warning = "WARNING: The first input file has variables that are " \
-                + "not in all input files:" + os.linesep + '   '
+                + "not in all input files:" + linesep + '   '
             for var in missing_vars:
                 warning += ' ' + str(var)
             self._vprint(warning, header=True, verbosity=1)
@@ -474,8 +476,7 @@ class Slice2SeriesReshaper(Reshaper):
         # Now that this is validated, let's string together the numpy array
         # of all times (using the new_values array)
         self._all_time_values = \
-            numpy.fromiter(itertools.chain.from_iterable(new_values),
-                           dtype='float')
+            numpy.fromiter(chain.from_iterable(new_values), dtype='float')
 
     def _sort_variables(self, specifier):
         """
@@ -566,7 +567,7 @@ class Slice2SeriesReshaper(Reshaper):
         # Find which files already exist
         existing = []
         for variable, filename in self._time_series_filenames.items():
-            if os.path.isfile(filename):
+            if isfile(filename):
                 existing.append(variable)
 
         # If overwrite is enabled, delete all existing files first
@@ -576,7 +577,7 @@ class Slice2SeriesReshaper(Reshaper):
                              'time-series variables: ' + str(existing),
                              verbosity=1)
             for variable in existing:
-                os.remove(self._time_series_filenames[variable])
+                remove(self._time_series_filenames[variable])
 
         # Or, if skip_existing is set, remove the existing time-series
         # variables from the list of time-series variables to convert
@@ -669,6 +670,14 @@ class Slice2SeriesReshaper(Reshaper):
                 write_tser = not is_once_file
             return is_once_file, write_meta, write_tser
 
+        # Defining a simple helper function to determine the bytes size of
+        # a variable given to it, whether an NDArray or not
+        def _get_bytesize(data):
+            if hasattr(data, 'nbytes'):
+                return data.nbytes
+            else:
+                return 0
+
         # NOTE: In the prototype, we check for the existance of the output
         # directory at this point.  If it does not exist, we create it (but
         # only from the master rank).  This requires synchronization with
@@ -693,10 +702,10 @@ class Slice2SeriesReshaper(Reshaper):
             # Open each output file and create the dimensions and attributes
             # NOTE: If the output file already exists, abort!
             self._timer.start('Open Output Files')
-            if os.path.exists(out_filename):
+            if exists(out_filename):
                 err_msg = 'Found existing output file: ' + out_filename
                 raise OSError(err_msg)
-            out_file = Nio.open_file(out_filename, 'w',
+            out_file = nio_open_file(out_filename, 'w',
                                      options=self._nio_options)
             for att_name, att_val in common_atts.iteritems():
                 setattr(out_file, att_name, att_val)
@@ -776,6 +785,13 @@ class Slice2SeriesReshaper(Reshaper):
                         out_meta.assign_value(tmp_data)
                     self._timer.stop('Write Time-Invariant Metadata')
 
+                    requested_nbytes = _get_bytesize(tmp_data)
+                    self._byte_counts[
+                        'Requested Data'] += requested_nbytes
+                    actual_nbytes = self.assumed_block_size \
+                        * numpy.ceil(requested_nbytes / self.assumed_block_size)
+                    self._byte_counts['Actual Data'] += actual_nbytes
+
             # Write each time-variant variable
             series_step_index = 0
             for in_file in self._input_files:
@@ -805,7 +821,7 @@ class Slice2SeriesReshaper(Reshaper):
                             out_meta[tuple(out_slice)] = tmp_data
                             self._timer.stop('Write Time-Variant Metadata')
 
-                            requested_nbytes = in_meta[tuple(in_slice)].nbytes
+                            requested_nbytes = _get_bytesize(tmp_data)
                             self._byte_counts[
                                 'Requested Data'] += requested_nbytes
                             actual_nbytes = self.assumed_block_size \
@@ -828,7 +844,7 @@ class Slice2SeriesReshaper(Reshaper):
                         out_var[tuple(out_slice)] = tmp_data
                         self._timer.stop('Write Time-Series Variables')
 
-                        requested_nbytes = in_var[tuple(in_slice)].nbytes
+                        requested_nbytes = _get_bytesize(tmp_data)
                         self._byte_counts['Requested Data'] += requested_nbytes
                         actual_nbytes = self.assumed_block_size \
                             * numpy.ceil(requested_nbytes / self.assumed_block_size)
@@ -1032,7 +1048,7 @@ class MultiSpecReshaper(Reshaper):
 
             if self._simplecomm.is_manager():
                 self._vprint('--- Finished converting Specifier: ' +
-                             str(spec_name) + os.linesep, verbosity=0)
+                             str(spec_name) + linesep, verbosity=0)
             self._simplecomm.sync()
 
     def print_diagnostics(self):
