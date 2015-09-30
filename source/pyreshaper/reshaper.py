@@ -11,6 +11,7 @@ See the LICENSE.rst file for details
 
 # Built-in imports
 import abc
+import time
 from os import linesep, remove
 from os.path import exists, isfile
 from itertools import chain
@@ -688,7 +689,6 @@ class Slice2SeriesReshaper(Reshaper):
         # For each time-series variable, create the corresponding output file
         # (Also defines the header info for each output file)
         out_files = {}
-        out_tvm_vars = {}
         for out_name in tsv_names_loc:
             is_once_file, write_meta, write_tser = _get_once_info(out_name)
 
@@ -721,9 +721,8 @@ class Slice2SeriesReshaper(Reshaper):
                 self._timer.start('Create Time-Invariant Metadata')
                 for name in self._time_invariant_metadata:
                     in_var = ref_infile.variables[name]
-                    out_var = out_file.create_variable(name,
-                                                       in_var.typecode(),
-                                                       in_var.dimensions)
+                    out_var = out_file.create_variable(
+                        name, in_var.typecode(), in_var.dimensions)
                     for att_name, att_val in in_var.attributes.iteritems():
                         setattr(out_var, att_name, att_val)
                 self._timer.stop('Create Time-Invariant Metadata')
@@ -733,18 +732,18 @@ class Slice2SeriesReshaper(Reshaper):
                 self._timer.start('Create Time-Variant Metadata')
                 for name in self._time_variant_metadata:
                     in_var = ref_infile.variables[name]
-                    out_tvm_vars[name] = out_file.create_variable(name,
-                                                                  in_var.typecode(), in_var.dimensions)
+                    out_var = out_file.create_variable(
+                        name, in_var.typecode(), in_var.dimensions)
                     for att_name, att_val in in_var.attributes.iteritems():
-                        setattr(out_tvm_vars[name], att_name, att_val)
+                        setattr(out_var, att_name, att_val)
                 self._timer.stop('Create Time-Variant Metadata')
 
             # Create the time-series variable itself
             if write_tser:
                 self._timer.start('Create Time-Series Variables')
                 in_var = ref_infile.variables[out_name]
-                out_var = out_file.create_variable(out_name,
-                                                   in_var.typecode(), in_var.dimensions)
+                out_var = out_file.create_variable(
+                    out_name, in_var.typecode(), in_var.dimensions)
                 self._timer.stop('Create Time-Series Variables')
 
             # Append the output file to list
