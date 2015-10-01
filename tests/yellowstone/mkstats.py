@@ -73,4 +73,4 @@ if __name__ == '__main__':
     statdb.analyze(testdb, tests=test_list, force=args.overwrite)
 
     # Save to the stats file
-    statdb.save_statistics(name=args.statsfile)
+    statdb.save(name=args.statsfile)
