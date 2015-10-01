@@ -85,3 +85,8 @@ VERSION 0.9.4
 
 29 June 2015:
  - Newly automated versioning information
+ 
+1 October 2015:
+ - Bugfixes, performance improvements
+ - New yellowstone testing code
+ 
