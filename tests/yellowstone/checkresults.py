@@ -320,7 +320,7 @@ if __name__ == '__main__':
     if comm.is_manager():
         results = local_results
         for i in range(comm.get_size() - 1):
-            results.extend(comm.collect())
+            results.extend(comm.collect()[1])
 
         print results
 
