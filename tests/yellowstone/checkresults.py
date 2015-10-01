@@ -207,16 +207,6 @@ if __name__ == '__main__':
                 tests_to_check[test_name]['old'] = olddir
                 tests_to_check[test_name]['cpr'] = cprncdir
 
-    # List and quit, if just listing
-    if args.list_tests:
-        print
-        print "Tests for checking:"
-        print
-        for test_name in tests_to_check:
-            print "   {}".format(test_name)
-        print
-        sys.exit(0)
-
     # Expand the test directories into individual file-test dictionaries
     items_to_check = []
     unchecked_new_items = []
@@ -245,7 +235,7 @@ if __name__ == '__main__':
             unchecked_old_items.append(item_dict)
 
     # Get a basic MPI comm
-    comm = create_comm(serial=args.serial)
+    comm = create_comm(serial=(args.serial or args.list_tests))
 
     # Print tests that will be checked
     if comm.is_manager():
