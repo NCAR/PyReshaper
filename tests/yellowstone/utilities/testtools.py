@@ -516,7 +516,8 @@ class StatDB(object):
 
         # Dump JSON data to file
         try:
-            json.dump(self._statistics, fp)
+            json.dump(self._statistics, fp, sort_keys=True,
+                      indent=3, separators=(',', ': '))
         except:
             err_msg = "Failed to write statistics file"
             raise RuntimeError(err_msg)
@@ -750,7 +751,8 @@ class TimeDB(object):
 
         # Dump JSON data to file
         try:
-            json.dump(self._timings, fp)
+            json.dump(self._timings, fp, sort_keys=True,
+                      indent=3, separators=(',', ': '))
         except:
             err_msg = "Failed to write statistics file"
             raise RuntimeError(err_msg)
