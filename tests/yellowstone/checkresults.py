@@ -322,6 +322,8 @@ if __name__ == '__main__':
         for i in range(comm.get_size() - 1):
             results.extend(comm.collect())
 
+        print results
+
         for test_name, test_info in tests_to_check.items():
             summfile = os.path.join(test_info['run'], test_name + '.cprnc')
             sfile = open(summfile, 'w')
