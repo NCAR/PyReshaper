@@ -163,12 +163,12 @@
          "time_written"
       ]
    },
-   "camhf—monthly-1deg":{
-      "common_name":"CAMHF-MONTHLY-1.0”,
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-monthly-1.0”,
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf—monthly-1.0”,
+   "camhf-monthly-1deg":{
+      "common_name":"CAMHF-MONTHLY-1.0",
+      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-monthly-1.0",
+      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf-monthly-1.0",
       "input_globs":[
-         “b.e11.BDP.f09_g16.1958-11.002.cam.h0.19*.nc”
+         "b.e11.BDP.f09_g16.1958-11.002.cam.h0.19*.nc"
       ],
       "output_prefix":"b.e11.BDP.f09_g16.1958-11.002.cam.h0.",
       "output_suffix":".195811-196810.nc",
@@ -190,14 +190,14 @@
          "time"
       ]
    },
-   "camhf—daily-1deg":{
-      "common_name":"CAMHF-DAILY-1.0”,
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-daily-1.0”,
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf—daily-1.0”,
+   "camhf-daily-1deg":{
+      "common_name":"CAMHF-DAILY-1.0",
+      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-daily-1.0",
+      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf-daily-1.0",
       "input_globs":[
-         “b.e11.BDP.f09_g16.1958-11.002.cam.h1.19*.nc”
+         "b.e11.BDP.f09_g16.1958-11.002.cam.h1.19*.nc"
       ],
-      "output_prefix":"b.e11.BDP.f09_g16.1958-11.002.cam.h1.”,
+      "output_prefix":"b.e11.BDP.f09_g16.1958-11.002.cam.h1.",
       "output_suffix":".195811-196810.nc",
       "metadata":[
          "ch4vmr",
@@ -217,14 +217,14 @@
          "time"
       ]
    },
-   "camhf—6hourly-1deg":{
-      "common_name":"CAMHF-6HOURLY-1.0”,
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-6hourly-1.0”,
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf—6hourly-1.0”,
+   "camhf-6hourly-1deg":{
+      "common_name":"CAMHF-6HOURLY-1.0",
+      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-6hourly-1.0",
+      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf-6hourly-1.0",
       "input_globs":[
-         “b.e11.BDP.f09_g16.1958-11.002.cam.h2.19*.nc”
+         "b.e11.BDP.f09_g16.1958-11.002.cam.h2.19*.nc"
       ],
-      "output_prefix":"b.e11.BDP.f09_g16.1958-11.002.cam.h2.”,
+      "output_prefix":"b.e11.BDP.f09_g16.1958-11.002.cam.h2.",
       "output_suffix":".195811-196810.nc",
       "metadata":[
          "ch4vmr",
