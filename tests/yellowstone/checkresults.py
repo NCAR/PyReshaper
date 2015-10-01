@@ -28,9 +28,9 @@ _PARSER_.add_argument('-c', '--code', default='STDD0002', type=str,
                       help='The name of the project code for charging in '
                            'parallel runs (ignored if running in serial) '
                            '[Default: STDD0002]')
-_PARSER_.add_argument('-i', '--infofile', default=None,
+_PARSER_.add_argument('-i', '--infofile', default='testinfo.json',
                       help='Location of the testinfo.json file '
-                           '[Default: None]')
+                           '[Default: testinfo.json]')
 _PARSER_.add_argument('-l', '--list', default=False,
                       action='store_true', dest='list_tests',
                       help='True or False, indicating whether to list all '
