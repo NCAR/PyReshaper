@@ -148,7 +148,7 @@ if __name__ == '__main__':
     if len(args.rundir) > 0:
         rundirs = args.rundir
     else:
-        rundirs = glob.glob(os.path.join('results.d', '*', '[ser,par]*', '*'))
+        rundirs = glob.glob(os.path.join('results', '*', '[ser,par]*', '*'))
 
     # Get the list of valid run names and the output directory pattern
     if args.multispec:

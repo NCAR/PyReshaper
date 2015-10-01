@@ -57,7 +57,7 @@ if __name__ == '__main__':
     cwd = os.getcwd()
 
     # Extract each possible test
-    for rundir in glob.iglob(os.path.join('results.d', '*', '[ser,par]*', '*')):
+    for rundir in glob.iglob(os.path.join('results', '*', '[ser,par]*', '*')):
         print
         print 'Extracting times from test dir:', rundir
         print
