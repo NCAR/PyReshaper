@@ -92,4 +92,6 @@ VERSION 0.9.4
 
 2 October 2015:
  - Now measures read/write times separately in diagnostic data
- 
+ - Performance improvement (no explicit loop over time-steps in a time-slice
+   file needed)
+   
