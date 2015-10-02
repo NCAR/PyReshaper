@@ -11,7 +11,7 @@ Corporation for Atmospheric Research ("UCAR").
 
 1. **License Grant to Technology.** UCAR grants to Licensee a restricted, royalty-free, perpetual, nonexclusive, 
    nontransferable, noncommercial license to copy, modify, enhance, improve and use the NCAR PyReshaper code set for 
-   transforming NetCDF time-slice datasets into NetCDF time-series format provided in source code format (“Technology”) 
+   transforming NetCDF time-slice datasets into NetCDF time-series format provided in source code format (**Technology**) 
    for research purposes and for collaborating with UCAR only; provided, however, that Licensee does not commercialize, 
    sell, license, distribute, or transfer the Technology, or any work that contains the Technology. Licensee may freely 
    use the data and results from the Technology. Licensee shall note in all publications of data or results that this 
@@ -30,7 +30,7 @@ Corporation for Atmospheric Research ("UCAR").
    Technology, sublicense, display, and distribute your Contributions. You represent that you are legally entitled to grant the 
    above license. If your employer(s) has rights to intellectual property that you create that includes your Contributions, you
    acknowledge that you are allowed to make Contributions on behalf of that employer.
-5. **Disclaimer of Warranty/Noninfringement.** THE TECHNOLOGY IS SUPPLIED “AS IS” WITHOUT WARRANTY OF ANY KIND. UCAR DISCLAIMS
+5. **Disclaimer of Warranty/Noninfringement.** THE TECHNOLOGY IS SUPPLIED **AS IS** WITHOUT WARRANTY OF ANY KIND. UCAR DISCLAIMS
    ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF NONINFRINGEMENT, ORIGINALITY, 
    MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE WITH REGARD TO THE TECHNOLOGY PROVIDED HEREUNDER. UCAR MAKES NO 
    REPRESENTATIONS THAT THE USE, OPERATION, SALE, PERFORMANCE, MODIFICATION, REPRODUCTION, DISPLAY OF THE TECHNOLOGY WILL 
@@ -45,7 +45,7 @@ Corporation for Atmospheric Research ("UCAR").
    intended for use in any operational activities including activities or hazardous environments requiring fail-safe 
    performance, such as in aircraft navigation or communication systems, air traffic control, weapons systems, nuclear 
    power plants or critical 24/7 operations, in which the failure of the Technology could lead directly to death, personal 
-   injury, or severe physical or environmental damage (“High Risk Activities”). Accordingly, UCAR specifically disclaims 
+   injury, or severe physical or environmental damage (**High Risk Activities**). Accordingly, UCAR specifically disclaims 
    any express or implied warranties of fitness for High Risk Activities. You agree that UCAR shall not be liable for any 
    claims or damages arising from High Risk Activities.
 8. **Controlling Law.** This Agreement shall be governed by the laws of the State of Colorado and of the United States.
