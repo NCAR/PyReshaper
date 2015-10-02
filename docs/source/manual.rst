@@ -30,17 +30,21 @@ How can I get it?
 =================
 
 The best way to obtain the PyReshaper code is to check it out from the
-UCAR subversion site, as shown below.
+GitHub site, as shown below.
 
 ::
 
     $  git clone https://github.com/NCAR-CISL-ASAP/PyReshaper
     $  cd PyReshaper
-    $  git checkout v0.9.2
 
-This is the most recent stable version of the source code. The trunk is
-also available for download, if you choose to have the most up-to-date
-version.
+This will download the most recent stable version of the source code.  If
+the most recent version of the non-stable source is desired, you may switch
+to the development branch.
+
+::
+
+    $  git checkout devel
+
 
 How do I set it up?
 ===================
@@ -74,12 +78,11 @@ shown below.
 
     $  git clone https://github.com/NCAR-CISL-ASAP/PyReshaper
 
-Enter into the newly created directory and check out the stable tag.
+Enter into the newly created directory.
 
 ::
 
     $  cd PyReshaper
-    $  git checkout [latest release]
 
 The contents of the repository will look like the following.
 
@@ -89,7 +92,7 @@ The contents of the repository will look like the following.
     CHANGES.rst README.rst  docs/       setup.py    tests/
     LICENSE.rst bin/        setup.cfg   source/
 
-To install in package, type the following command from this directory.
+To install the package, type the following command from this directory.
 
 ::
 
@@ -253,7 +256,8 @@ format.
     specifier.time_variant_metadata = ["time", "time_bounds", ...]
 
     # Create the Reshaper object
-    rshpr = reshaper.create_reshaper(specifier, serial=False, verbosity=1)
+    rshpr = reshaper.create_reshaper(specifier, serial=False, verbosity=1,
+                                     skip_existing=True, overwrite=False)
 
     # Run the conversion (slice-to-series) process
     rshpr.convert()
