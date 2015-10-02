@@ -800,12 +800,10 @@ class Slice2SeriesReshaper(Reshaper):
                         ndims = len(in_meta.dimensions)
                         udidx = in_meta.dimensions.index(
                             self._unlimited_dim)
-                        in_slice = [slice(None)] * ndims
-                        in_slice[udidx] = slice(0, num_steps)
                         out_slice = [slice(None)] * ndims
                         out_slice[udidx] = slice(series_start_index, None)
                         self._timer.start('Read Time-Variant Metadata')
-                        tmp_data = in_meta[tuple(in_slice)]
+                        tmp_data = in_meta[:]
                         self._timer.stop('Read Time-Variant Metadata')
                         self._timer.start('Write Time-Variant Metadata')
                         out_meta[tuple(out_slice)] = tmp_data
@@ -824,12 +822,10 @@ class Slice2SeriesReshaper(Reshaper):
                     out_var = out_file.variables[out_name]
                     ndims = len(in_var.dimensions)
                     udidx = in_var.dimensions.index(self._unlimited_dim)
-                    in_slice = [slice(None)] * ndims
-                    in_slice[udidx] = slice(0, num_steps)
                     out_slice = [slice(None)] * ndims
                     out_slice[udidx] = slice(series_start_index, None)
                     self._timer.start('Read Time-Series Variables')
-                    tmp_data = in_var[tuple(in_slice)]
+                    tmp_data = in_var[:]
                     self._timer.stop('Read Time-Series Variables')
                     self._timer.start('Write Time-Series Variables')
                     out_var[tuple(out_slice)] = tmp_data
