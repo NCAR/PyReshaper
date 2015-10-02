@@ -89,4 +89,7 @@ VERSION 0.9.4
 1 October 2015:
  - Bugfixes, performance improvements
  - New yellowstone testing code
+
+2 October 2015:
+ - Now measures read/write times separately in diagnostic data
  
