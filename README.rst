@@ -52,8 +52,8 @@ so problems might occur if an earlier versions of these packages have been
 installed.
 
 
-Easy Installation
------------------
+Easy Installation with PIP
+--------------------------
 
 The easiest way to install the ASAP Python Toolbox is from the Python
 Package Index (PyPI) with the pip package manager::
@@ -64,32 +64,37 @@ The optional '--user' argument can be used to install the package in the
 local user's directory, which is useful if the user doesn't have root
 privileges.
 
+One should be careful, however, as the PyPI packages may not always be up
+to date.  We recommend obtaining the most recent versions of the PyReshaper
+from the GitHub site shown in the section below.
+
 
 Obtaining the Source Code
 -------------------------
 
-Currently, the most up-to-date development source code is available via git from the site::
+Currently, the most up-to-date development source code is available
+via git from the site::
 
     https://github.com/NCAR-CISL-ASAP/PyReshaper
 
-Check out the most recent stable tag.  The source is available in read-only mode to 
-everyone, but special permissions can be given to those to make changes to the source.
+Check out the most recent stable tag.  The source is available in
+read-only mode to everyone.  Developers are welcome to update the source
+and submit Pull Requests via GitHub.
 
 
-Building & Installation
------------------------
+Building & Installing from Source
+---------------------------------
 
 Installation of the PyReshaper is very simple.  After checking out the source
 from the above svn link, via::
 
     $ git clone https://github.com/NCAR-CISL-ASAP/PyReshaper
     
-Enter the newly cloned directory and check out the most recent stable tag::
+Enter the newly cloned directory::
 
     $ cd PyReshaper
-    $ git checkout [latest tag]
 
-Then, run the Python distutils setup.  On unix, this involves::
+Then, run the Python setuptools setup script.  On unix, this involves::
 
     $  python setup.py install [--prefix=/path/to/install/location]
     
@@ -97,7 +102,7 @@ The prefix is optional, as the default prefix is typically /usr/local on
 linux machines.  However, you must have permissions to write to the prefix
 location, so you may want to choose a prefix location where you have write
 permissions.  Like most distutils installations, you can alternatively
-install the pyReshaper with the --user option, which will automatically
+install the PyReshaper with the '--user' option, which will automatically
 select (and create if it does not exist) the $HOME/.local directory in which
 to install.  To do this, type (on unix machines)::
 
@@ -150,6 +155,6 @@ Instructions & Use
 ------------------
 
 Please see the more detailed instructions found in the docs/ directory for
-usage and examples.  See the 'Building & Installation' section for how to
-build the documentation with Sphinx. 
+usage and examples.  See the 'Building & Installing from Source' section 
+for how to build the documentation with Sphinx. 
 

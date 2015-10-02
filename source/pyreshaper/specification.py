@@ -45,7 +45,8 @@ class Specifier(object):
 
     def __init__(self,
                  infiles=[],
-                 ncfmt='netcdf4c',
+                 ncfmt='netcdf4',
+                 compression=0,
                  prefix='tseries.',
                  suffix='.nc',
                  metadata=[],
@@ -64,6 +65,8 @@ class Specifier(object):
             infiles (list): List of full-path input filenames
             ncfmt (str): String specifying the NetCDF
                 data format ('netcdf','netcdf4','netcdf4c')
+            compression (int): Compression level to use for NetCDF4
+                formatted data (overridden by the 'netcdf4c' format)
             prefix (str): String specifying the full-path prefix common
                 to all time-series output files
             suffix (str): String specifying the suffix common
@@ -80,6 +83,9 @@ class Specifier(object):
 
         # The string specifying the NetCDF file format for output
         self.netcdf_format = ncfmt
+
+        # The string specifying the NetCDF file format for output
+        self.compression_level = compression
 
         # The common prefix to all output files (following the rule:
         #  prefix + variable_name + suffix)
@@ -128,6 +134,11 @@ class Specifier(object):
         # Validate the netcdf format string
         if not isinstance(self.netcdf_format, str):
             err_msg = "NetCDF format must be given as a string"
+            raise TypeError(err_msg)
+
+        # Validate the netcdf compression level
+        if not isinstance(self.compression_level, int):
+            err_msg = "NetCDF compression level must be given as an int"
             raise TypeError(err_msg)
 
         # Validate the output file prefix
@@ -185,6 +196,17 @@ class Specifier(object):
             err_msg = "Output NetCDF file format " \
                 + str(self.netcdf_format) \
                 + " is not valid"
+            raise ValueError(err_msg)
+
+        # Forcefully set the compression level if 'netcdf4c' format
+        if self.netcdf_format == 'netcdf4c':
+            self.compression_level = 1
+
+        # Validate the value of the compression level integer
+        if self.compression_level < 0 or self.compression_level > 9:
+            err_msg = "Output NetCDF compression level " \
+                + str(self.compression_level) \
+                + " is not in the valid range (0-9)"
             raise ValueError(err_msg)
 
         # Validate the output file directory
