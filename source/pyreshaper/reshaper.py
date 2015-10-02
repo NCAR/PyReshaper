@@ -64,6 +64,9 @@ def create_reshaper(specifier, serial=False, verbosity=1,
             write all metadata to a 'once' file (separately).
         simplecomm (SimpleComm): A SimpleComm object to handle the parallel
             communication, if necessary
+        compressionlevel (int): An integer specifying the level of
+            compression to be used for the output files, if compression
+            is allowed by the NetCDF format
 
     Returns:
         Reshaper: An instance of the Reshaper object requested
@@ -296,12 +299,9 @@ class Slice2SeriesReshaper(Reshaper):
         # from the NetCDF format string in the Specifier
         if specifier.netcdf_format == 'netcdf':
             opt.Format = 'Classic'
-        elif specifier.netcdf_format == 'netcdf4':
+        elif specifier.netcdf_format in ['netcdf4', 'netcdf4c']:
             opt.Format = 'NetCDF4Classic'
-            opt.CompressionLevel = 0
-        elif specifier.netcdf_format == 'netcdf4c':
-            opt.Format = 'NetCDF4Classic'
-            opt.CompressionLevel = 1
+            opt.CompressionLevel = specifier.compression_level
         self._nio_options = opt
         if self._simplecomm.is_manager():
             self._vprint('PyNIO options set', verbosity=2)

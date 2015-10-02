@@ -291,8 +291,14 @@ In the above example, NetCDF4 with level-1 compression is requested.
 Acceptable Options are:
 
 -  ``"netcdf"``: NetCDF3
--  ``"netcdf4"``: NetCDF4 uncompressed
--  ``"netcdf4c"``: NetCDF4 compressed (level 1)
+-  ``"netcdf4"``: NetCDF4
+-  ``"netcdf4c"``: NetCDF4 with level 1 compression
+
+-  ``compression_level``: This is an integer specifying the level of 
+   compression to use when writing the output files.  This can be a number
+   from 0 to 9, where 0 means no compression (default) and 9 mean the
+   highest level of compression.  This is overridden when the ``"netcdf4c"``
+   format is used.
 
 -  ``output_file_prefix``: This is a string specifying the common output
    (time-series) filename prefix. It is assumed that each time-series
