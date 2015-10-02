@@ -503,10 +503,88 @@
                "real": 329.733877182,
                "request": 28449.3301392,
                "sys": "yellowstone"
+            },
+            "151002-091959": {
+               "TS": 60.2626390457,
+               "actual": 968848.0,
+               "cores": 16,
+               "metaTI": 0.261739492416,
+               "metaTV": 10.9838540554,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 5.89429616928,
+               "openo": 0.257526159286,
+               "real": 190.701400042,
+               "request": 28450.9692535,
+               "sys": "yellowstone"
             }
          }
       },
       "startYear": "1850"
+   },
+   "CAMHF-6HOURLY-1.0": {
+      "results": {
+         "pyreshaper4c": {
+            "151002-105208": {
+               "TS": 3164.16029859,
+               "actual": 16880504.0,
+               "cores": 16,
+               "metaTI": 0.070193529129,
+               "metaTV": 302.568546534,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 224.951442003,
+               "openo": 0.540024995804,
+               "real": 4717.14768195,
+               "request": 412733.208378,
+               "sys": "yellowstone"
+            }
+         }
+      }
+   },
+   "CAMHF-DAILY-1.0": {
+      "results": {
+         "pyreshaper4c": {
+            "151002-094928": {
+               "TS": 106.482156515,
+               "actual": 11395904.0,
+               "cores": 16,
+               "metaTI": 0.0740783214569,
+               "metaTV": 146.638347387,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 45.2218770981,
+               "openo": 0.418075799942,
+               "real": 1020.13037086,
+               "request": 39295.5901566,
+               "sys": "yellowstone"
+            }
+         }
+      }
+   },
+   "CAMHF-MONTHLY-1.0": {
+      "results": {
+         "pyreshaper4c": {
+            "151002-093524": {
+               "TS": 84.0484206676,
+               "actual": 1023964.0,
+               "cores": 16,
+               "metaTI": 0.197278022766,
+               "metaTV": 8.23391604424,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 19.332545042,
+               "openo": 0.158255577087,
+               "real": 325.792993069,
+               "request": 41617.1186371,
+               "sys": "yellowstone"
+            }
+         }
+      }
    },
    "CAMSE-0.25": {
       "baseline": "/glade/u/tdd/asap/bakeoff/tseries/camse-0.25",
@@ -1017,6 +1095,21 @@
                "real": 2787.62379503,
                "request": 1074995.44647,
                "sys": "yellowstone"
+            },
+            "151002-100638": {
+               "TS": 1835.60106206,
+               "actual": 2561592.0,
+               "cores": 16,
+               "metaTI": 6.68212819099,
+               "metaTV": 10.6226089001,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 10.9332418442,
+               "openo": 0.649513483047,
+               "real": 2207.67511892,
+               "request": 1078519.71414,
+               "sys": "yellowstone"
             }
          }
       },
@@ -1525,6 +1618,21 @@
                "real": 377.197709084,
                "request": 30681.9406128,
                "sys": "yellowstone"
+            },
+            "151002-091617": {
+               "TS": 65.0861947536,
+               "actual": 1043904.0,
+               "cores": 16,
+               "metaTI": 0.534062385559,
+               "metaTV": 15.8530282974,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 7.89265394211,
+               "openo": 0.417589902878,
+               "real": 198.518553019,
+               "request": 30828.9682617,
+               "sys": "yellowstone"
             }
          }
       },
@@ -2032,6 +2140,21 @@
                "real": 1004.08923078,
                "request": 442968.903809,
                "sys": "yellowstone"
+            },
+            "151002-092925": {
+               "TS": 376.300118208,
+               "actual": 715008.0,
+               "cores": 16,
+               "metaTI": 70.3662366867,
+               "metaTV": 0.59819149971,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 11.5092349052,
+               "openo": 0.235598564148,
+               "real": 785.061555147,
+               "request": 561093.903809,
+               "sys": "yellowstone"
             }
          }
       },
@@ -2467,6 +2590,21 @@
                "openo": 0.190922498703,
                "real": 125.465778112,
                "request": 6581.41067505,
+               "sys": "yellowstone"
+            },
+            "151002-093114": {
+               "TS": 7.29186058044,
+               "actual": 177840.0,
+               "cores": 16,
+               "metaTI": 1.62267613411,
+               "metaTV": 0.319401979446,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 9.7917881012,
+               "openo": 0.256956577301,
+               "real": 85.7960050106,
+               "request": 8336.41067505,
                "sys": "yellowstone"
             }
          }
@@ -2922,6 +3060,21 @@
                "openo": 0.319357633591,
                "real": 307.761037111,
                "request": 81515.3311157,
+               "sys": "yellowstone"
+            },
+            "151002-093416": {
+               "TS": 64.9041206837,
+               "actual": 798360.0,
+               "cores": 16,
+               "metaTI": 42.5193638802,
+               "metaTV": 3.18136024475,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 10.3529610634,
+               "openo": 0.151391983032,
+               "real": 261.155253887,
+               "request": 124675.246468,
                "sys": "yellowstone"
             }
          }
@@ -3403,6 +3556,21 @@
                "openo": 1.01668596268,
                "real": 264.768231869,
                "request": 8678.71307373,
+               "sys": "yellowstone"
+            },
+            "151002-093313": {
+               "TS": 10.7341187,
+               "actual": 1443420.0,
+               "cores": 16,
+               "metaTI": 5.90268445015,
+               "metaTV": 10.5968191624,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 9.87163710594,
+               "openo": 0.614326238632,
+               "real": 204.401623964,
+               "request": 14019.9852104,
                "sys": "yellowstone"
             }
          }
@@ -4252,6 +4420,21 @@
                "real": 1052.35365105,
                "request": 192163.858337,
                "sys": "yellowstone"
+            },
+            "151002-094524": {
+               "TS": 341.83474493,
+               "actual": 381048.0,
+               "cores": 16,
+               "metaTI": 4.18152046204,
+               "metaTV": 1.73612046242,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 14.1330201626,
+               "openo": 0.300295114517,
+               "real": 908.396248817,
+               "request": 194248.586632,
+               "sys": "yellowstone"
             }
          }
       },
@@ -4375,6 +4558,21 @@
                "openo": 0.451182126999,
                "real": 484.280472994,
                "request": 187507.280182,
+               "sys": "yellowstone"
+            },
+            "151002-094206": {
+               "TS": 44.544624567,
+               "actual": 158608.0,
+               "cores": 16,
+               "metaTI": 0.416500329971,
+               "metaTV": 4.26540613174,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 125.451020956,
+               "openo": 0.415581941605,
+               "real": 293.116672993,
+               "request": 6232.80738831,
                "sys": "yellowstone"
             }
          }
