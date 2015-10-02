@@ -117,7 +117,7 @@ if __name__ == '__main__':
             # Look for the successful completion message
             success_str, success_loc = find_shortest_str(
                 log_str, 'Successfully completed.', loc=0)
-            if success_str < 0:
+            if success_loc <= 0:
                 print '    Unsuccessful job.  Skipping.'
                 continue
 
