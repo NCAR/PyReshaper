@@ -744,6 +744,8 @@ class Slice2SeriesReshaper(Reshaper):
                 in_var = ref_infile.variables[out_name]
                 out_var = out_file.create_variable(
                     out_name, in_var.typecode(), in_var.dimensions)
+                for att_name, att_val in in_var.attributes.iteritems():
+                    setattr(out_var, att_name, att_val)
                 self._timer.stop('Create Time-Series Variables')
 
             # Append the output file to list
@@ -758,13 +760,6 @@ class Slice2SeriesReshaper(Reshaper):
             if is_once_file:
                 dbg_msg = 'Writing "once" file.'
             self._vprint(dbg_msg, header=True, verbosity=1)
-
-            # Create the attributes of the time-series variable
-            if write_tser:
-                in_var = ref_infile.variables[out_name]
-                out_var = out_file.variables[out_name]
-                for att_name, att_val in in_var.attributes.iteritems():
-                    setattr(out_var, att_name, att_val)
 
             # Write the time-invariant metadata
             if write_meta:
