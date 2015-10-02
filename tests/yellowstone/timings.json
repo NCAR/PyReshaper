@@ -4002,6 +4002,24 @@
                "real": 7504.10058808,
                "request": 3029589.93713,
                "sys": "yellowstone"
+            },
+            "151002-111249": {
+               "TSr": 1027.95776629,
+               "TSw": 5291.65748668,
+               "actual": 3121360.0,
+               "cores": 16,
+               "metaTIr": 104.953143358,
+               "metaTIw": 87.6997177601,
+               "metaTVr": 12.7391045094,
+               "metaTVw": 1.22518730164,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 16.252808094,
+               "openo": 0.1517329216,
+               "real": 6153.10157013,
+               "request": 3073293.60839,
+               "sys": "yellowstone"
             }
          }
       },
