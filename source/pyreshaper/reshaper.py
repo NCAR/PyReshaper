@@ -786,7 +786,7 @@ class Slice2SeriesReshaper(Reshaper):
                     self._byte_counts['Actual Data'] += actual_nbytes
 
             # Write each time-variant variable
-            series_start_index = 0
+            series_step_index = 0
             for in_file in self._input_files:
 
                 # Get the number of time steps in this slice file
@@ -801,7 +801,10 @@ class Slice2SeriesReshaper(Reshaper):
                         udidx = in_meta.dimensions.index(
                             self._unlimited_dim)
                         out_slice = [slice(None)] * ndims
-                        out_slice[udidx] = slice(series_start_index, None)
+                        if num_steps > 1:
+                            out_slice[udidx] = slice(series_step_index, None)
+                        else:
+                            out_slice[udidx] = series_step_index
                         self._timer.start('Read Time-Variant Metadata')
                         tmp_data = in_meta[:]
                         self._timer.stop('Read Time-Variant Metadata')
@@ -823,7 +826,10 @@ class Slice2SeriesReshaper(Reshaper):
                     ndims = len(in_var.dimensions)
                     udidx = in_var.dimensions.index(self._unlimited_dim)
                     out_slice = [slice(None)] * ndims
-                    out_slice[udidx] = slice(series_start_index, None)
+                    if num_steps > 1:
+                        out_slice[udidx] = slice(series_step_index, None)
+                    else:
+                        out_slice[udidx] = series_step_index
                     self._timer.start('Read Time-Series Variables')
                     tmp_data = in_var[:]
                     self._timer.stop('Read Time-Series Variables')
@@ -839,7 +845,7 @@ class Slice2SeriesReshaper(Reshaper):
                     self._byte_counts['Actual Data'] += actual_nbytes
 
                 # Increment the time-series step index
-                series_start_index += num_steps
+                series_step_index += num_steps
 
             # Close the output file
             self._timer.start('Close Output Files')
