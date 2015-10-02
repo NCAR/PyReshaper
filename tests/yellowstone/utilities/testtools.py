@@ -625,7 +625,8 @@ class TimeDB(object):
         method_set = set()
         for test in tests_to_search:
             if 'results' in self._timings[test]:
-                method_set.update(set(str(t) for t in self._timings[test]['results'].keys()))
+                method_set.update(
+                    set(str(t) for t in self._timings[test]['results'].keys()))
         return list(method_set)
 
     def display_tests(self, methods=None):
@@ -667,6 +668,7 @@ class TimeDB(object):
             print '   {0!s}'.format(method)
 
     def add_result(self, test, method, job,
+                   tser_read=0.0, tim_read=0.0, tvm_read=0.0,
                    tser_write=0.0, tim_write=0.0, tvm_write=0.0,
                    metadata=True, once=False, cores=1, nodes=0,
                    input_open=0.0, output_open=0.0, total=0.0,
@@ -680,6 +682,9 @@ class TimeDB(object):
             test (str): Name of the test associated with the result
             method (str): Name of the method used by the test result
             job (str): Individual job ID string to associate with the result
+            tser_read (float): Time to read Time-Series data
+            tim_read (float): Time to read Time-Invariant Metadata (TIM)
+            tvm_read (float): Time to read Time-Variant Metadata (TVM)
             tser_write (float): Time to write Time-Series data
             tim_write (float): Time to write Time-Invariant Metadata (TIM)
             tvm_write (float): Time to write Time-Variant Metadata (TVM)
@@ -710,12 +715,16 @@ class TimeDB(object):
             self._timings[test]['results'][method][job]['metadata'] = metadata
             self._timings[test]['results'][method][job]['once'] = once
             self._timings[test]['results'][method][job]['actual'] = actual_mb
-            self._timings[test]['results'][method][job]['request'] = requested_mb
+            self._timings[test]['results'][method][
+                job]['request'] = requested_mb
             self._timings[test]['results'][method][job]['openi'] = input_open
             self._timings[test]['results'][method][job]['openo'] = output_open
-            self._timings[test]['results'][method][job]['metaTI'] = tim_write
-            self._timings[test]['results'][method][job]['metaTV'] = tvm_write
-            self._timings[test]['results'][method][job]['TS'] = tser_write
+            self._timings[test]['results'][method][job]['metaTIr'] = tim_read
+            self._timings[test]['results'][method][job]['metaTVr'] = tvm_read
+            self._timings[test]['results'][method][job]['TSr'] = tser_read
+            self._timings[test]['results'][method][job]['metaTIw'] = tim_write
+            self._timings[test]['results'][method][job]['metaTVw'] = tvm_write
+            self._timings[test]['results'][method][job]['TSw'] = tser_write
 
     def get_results(self, test, method):
         """
@@ -731,7 +740,8 @@ class TimeDB(object):
         if self.test_has_method(test, method):
             return self._timings[test]['results'][method]
         else:
-            err_msg = "Method {0!s} not in test {1!s} database".format(method, test)
+            err_msg = "Method {0!s} not in test {1!s} database".format(
+                method, test)
             raise KeyError(err_msg)
 
     def save(self, name="timings.json"):

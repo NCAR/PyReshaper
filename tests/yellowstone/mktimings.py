@@ -114,11 +114,18 @@ if __name__ == '__main__':
             # order so that you only need to search through it once...
             loc = 0
 
+            # Look for the successful completion message
+            success_str, success_loc = find_shortest_str(
+                log_str, 'Successfully completed.', loc=0)
+            if success_loc < 0:
+                print '    Unsuccessful job.  Skipping.'
+                continue
+
             # Look for the use of a metadata "once" file...
             once_file_str, once_loc = find_shortest_str(
                 log_str, 'Closed "once" ', loc=0)
             used_once_file = False
-            if (once_loc > 0):
+            if once_loc > 0:
                 used_once_file = True
 
             # Find the internal timing data from the run output:
@@ -128,11 +135,17 @@ if __name__ == '__main__':
                 log_str, 'Complete Conversion Process: ', loc=loc)
             openo_str, loc = find_shortest_str(
                 log_str, 'Open Output Files: ', loc=loc)
-            metaTI_str, loc = find_shortest_str(
+            rmetaTI_str, loc = find_shortest_str(
+                log_str, 'Read Time-Invariant Metadata: ', loc=loc)
+            rmetaTV_str, loc = find_shortest_str(
+                log_str, 'Read Time-Variant Metadata: ', loc=loc)
+            rTS_str, loc = find_shortest_str(
+                log_str, 'Read Time-Series Variables: ', loc=loc)
+            wmetaTI_str, loc = find_shortest_str(
                 log_str, 'Write Time-Invariant Metadata: ', loc=loc)
-            metaTV_str, loc = find_shortest_str(
+            wmetaTV_str, loc = find_shortest_str(
                 log_str, 'Write Time-Variant Metadata: ', loc=loc)
-            TS_str, loc = find_shortest_str(
+            wTS_str, loc = find_shortest_str(
                 log_str, 'Write Time-Series Variables: ', loc=loc)
 
             # Get read/write size amounts
@@ -155,9 +168,12 @@ if __name__ == '__main__':
             # Write the JSON data
             print '    Adding job result to timings database.'
             timedb.add_result(common_name, method_name, job_num,
-                              tser_write=float(TS_str),
-                              tim_write=float(metaTI_str),
-                              tvm_write=float(metaTV_str),
+                              tser_read=float(rTS_str),
+                              tim_read=float(rmetaTI_str),
+                              tvm_read=float(rmetaTV_str),
+                              tser_write=float(wTS_str),
+                              tim_write=float(wmetaTI_str),
+                              tvm_write=float(wmetaTV_str),
                               metadata=True, once=used_once_file,
                               cores=num_cores, nodes=num_nodes,
                               input_open=float(openi_str),
