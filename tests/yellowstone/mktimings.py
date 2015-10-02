@@ -118,7 +118,7 @@ if __name__ == '__main__':
             success_str, success_loc = find_shortest_str(
                 log_str, 'Successfully completed.', loc=0)
             if success_loc <= 0:
-                print '    Unsuccessful job.  Skipping.'
+                print '    Unsuccessful or incomplete job.  Skipping.'
                 continue
 
             # Look for the use of a metadata "once" file...
