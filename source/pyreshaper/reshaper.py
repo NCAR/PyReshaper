@@ -11,7 +11,6 @@ See the LICENSE.rst file for details
 
 # Built-in imports
 import abc
-import time
 from os import linesep, remove
 from os.path import exists, isfile
 from itertools import chain
