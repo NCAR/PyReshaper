@@ -825,6 +825,7 @@ class Slice2SeriesReshaper(Reshaper):
                     # Write the time-series variables
                     if write_tser:
                         in_var = in_file.variables[out_name]
+                        out_var = out_file.variables[out_name]
                         ndims = len(in_var.dimensions)
                         udidx = in_var.dimensions.index(self._unlimited_dim)
                         in_slice = [slice(None)] * ndims
