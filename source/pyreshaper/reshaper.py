@@ -556,28 +556,23 @@ class Slice2SeriesReshaper(Reshaper):
         if self._simplecomm.is_manager():
             self._vprint('Converting time-slices to time-series', verbosity=1)
 
-        # For data common to all input files, we reference only the first
-        ref_infile = self._input_filenames[0]
-
-        # Store the common dimensions and attributes for each file
-        # (taken from the first input file in the list)
-        common_dims = ref_infile.dimensions
-        common_atts = ref_infile.attributes
-
         # Partition the time-series variables across all processors
-        tsv_names_loc = self._simplecomm.partition(self._time_series_variables.items(),
-                                                   func=WeightBalanced(),
-                                                   involved=True)
+        tsv_names_loc = self._simplecomm.partition(
+            self._time_series_variables.items(), func=WeightBalanced(),
+            involved=True)
         if output_limit > 0:
             tsv_names_loc = tsv_names_loc[0:output_limit]
 
         # Print partitions for all ranks
-        dbg_msg = 'Local time-series variables are ' + str(tsv_names_loc)
+        dbg_msg = 'Local time-series variables are {}'.format(tsv_names_loc)
         self._vprint(dbg_msg, header=True, verbosity=2)
 
         # Reset all of the timer values (as it is possible that there are no
         # time-series variables in the local list procuded above)
         self._timer.reset('Open Output Files')
+        self._timer.reset('Close Output Files')
+        self._timer.reset('Open Input Files')
+        self._timer.reset('Close Input Files')
         self._timer.reset('Create Time-Invariant Metadata')
         self._timer.reset('Create Time-Variant Metadata')
         self._timer.reset('Create Time-Series Variables')
@@ -587,23 +582,10 @@ class Slice2SeriesReshaper(Reshaper):
         self._timer.reset('Write Time-Invariant Metadata')
         self._timer.reset('Write Time-Variant Metadata')
         self._timer.reset('Write Time-Series Variables')
-        self._timer.reset('Close Output Files')
 
         # Initialize the byte count dictionary
         self._byte_counts['Requested Data'] = 0
         self._byte_counts['Actual Data'] = 0
-
-        # Defining a simple helper function to determine whether to
-        # write time-series data and/or write metadata.  This is useful
-        # for adding the ability to write a "once" file
-        def _get_once_info(vname):
-            is_once_file = (vname == 'once')
-            write_meta = True
-            write_tser = True
-            if self._use_once_file:
-                write_meta = is_once_file
-                write_tser = not is_once_file
-            return is_once_file, write_meta, write_tser
 
         # Defining a simple helper function to determine the bytes size of
         # a variable given to it, whether an NDArray or not
@@ -613,127 +595,121 @@ class Slice2SeriesReshaper(Reshaper):
             else:
                 return 0
 
-        # NOTE: In the prototype, we check for the existance of the output
-        # directory at this point.  If it does not exist, we create it (but
-        # only from the master rank).  This requires synchronization with
-        # the decomp utility.  Instead, we assume the output directory
-        # already exists (and is checked by the Specifier's validation).  No
-        # synchronization is needed.
+        #===== LOOP OVER TIME_SERIES VARIABLES =====
 
-        # For each time-series variable, create the corresponding output file
-        # (Also defines the header info for each output file)
-        out_files = {}
+        # Loop over all time-series variables
         for out_name in tsv_names_loc:
-            is_once_file, write_meta, write_tser = _get_once_info(out_name)
 
             # Determine the output file name for this variable
             out_filename = self._time_series_filenames[out_name]
-            dbg_msg = 'Creating output file for variable: ' + out_name
-            if is_once_file:
+            dbg_msg = 'Creating output file for variable: {}'.format(out_name)
+            if out_name == 'once':
                 dbg_msg = 'Creating "once" file.'
             self._vprint(dbg_msg, header=True, verbosity=1)
 
-            # Open each output file and create the dimensions and attributes
+            # Open the output file
             # NOTE: If the output file already exists, abort!
             self._timer.start('Open Output Files')
             if exists(out_filename):
-                err_msg = 'Found existing output file: ' + out_filename
+                err_msg = 'Found existing output file: {}'.format(out_filename)
                 raise OSError(err_msg)
             out_file = nio_open_file(out_filename, 'w',
                                      options=self._nio_options)
-            for att_name, att_val in common_atts.iteritems():
-                setattr(out_file, att_name, att_val)
-            for dim_name, dim_val in common_dims.iteritems():
-                if dim_name == self._unlimited_dim:
-                    out_file.create_dimension(dim_name, None)
-                else:
-                    out_file.create_dimension(dim_name, dim_val)
             self._timer.stop('Open Output Files')
 
-            # Create the time-invariant metadata variables
-            if write_meta:
-                self._timer.start('Create Time-Invariant Metadata')
-                for name in self._time_invariant_metadata:
-                    in_var = ref_infile.variables[name]
-                    out_var = out_file.create_variable(
-                        name, in_var.typecode(), in_var.dimensions)
-                    for att_name, att_val in in_var.attributes.iteritems():
-                        setattr(out_var, att_name, att_val)
-                self._timer.stop('Create Time-Invariant Metadata')
-
-            # Create the time-variant metadata variables
-            if write_meta:
-                self._timer.start('Create Time-Variant Metadata')
-                for name in self._time_variant_metadata:
-                    in_var = ref_infile.variables[name]
-                    out_var = out_file.create_variable(
-                        name, in_var.typecode(), in_var.dimensions)
-                    for att_name, att_val in in_var.attributes.iteritems():
-                        setattr(out_var, att_name, att_val)
-                self._timer.stop('Create Time-Variant Metadata')
-
-            # Create the time-series variable itself
-            if write_tser:
-                self._timer.start('Create Time-Series Variables')
-                in_var = ref_infile.variables[out_name]
-                out_var = out_file.create_variable(
-                    out_name, in_var.typecode(), in_var.dimensions)
-                for att_name, att_val in in_var.attributes.iteritems():
-                    setattr(out_var, att_name, att_val)
-                self._timer.stop('Create Time-Series Variables')
-
-            # Append the output file to list
-            out_files[out_name] = out_file
-
-        # Now that each output file has been created, start writing the data
-        # (Looping over output file index, which is common in name lists)
-        for out_name, out_file in out_files.iteritems():
-            is_once_file, write_meta, write_tser = _get_once_info(out_name)
-
-            dbg_msg = 'Writing output file for variable: ' + out_name
-            if is_once_file:
-                dbg_msg = 'Writing "once" file.'
-            self._vprint(dbg_msg, header=True, verbosity=1)
-
-            # Write the time-invariant metadata
-            if write_meta:
-                for name in self._time_invariant_metadata:
-                    in_meta = ref_infile.variables[name]
-                    out_meta = out_file.variables[name]
-                    self._timer.start('Read Time-Invariant Metadata')
-                    if in_meta.rank > 0:
-                        tmp_data = in_meta[:]
-                    else:
-                        tmp_data = in_meta.get_value()
-                    self._timer.stop('Read Time-Invariant Metadata')
-                    self._timer.start('Write Time-Invariant Metadata')
-                    if in_meta.rank > 0:
-                        out_meta[:] = tmp_data
-                    else:
-                        out_meta.assign_value(tmp_data)
-                    self._timer.stop('Write Time-Invariant Metadata')
-
-                    requested_nbytes = _get_bytesize(tmp_data)
-                    self._byte_counts[
-                        'Requested Data'] += requested_nbytes
-                    actual_nbytes = self.assumed_block_size \
-                        * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                    self._byte_counts['Actual Data'] += actual_nbytes
-
-            # Write each time-variant variable
+            # Start the loop over input files (i.e., time-steps)
             series_step_index = 0
-            for in_file in self._input_filenames:
+            for in_filename in self._input_filenames:
+
+                # Open the input file
+                self._timer.start('Open Input Files')
+                in_file = nio_open_file(in_filename, 'r')
+                self._timer.stop('Open Input Files')
+
+                # Create header info, if this is the first input file
+                if in_filename == self._input_filenames[0]:
+
+                    # Copy file attributes and dimensions to output file
+                    for name, val in in_file.attributes.iteritems():
+                        setattr(out_file, name, val)
+                    for name, val in in_file.dimensions.iteritems():
+                        if name == self._unlimited_dim:
+                            out_file.create_dimension(name, None)
+                        else:
+                            out_file.create_dimension(name, val)
+
+                    # Create the metadata variables
+                    if not (self._use_once_file and out_name != 'once'):
+
+                        # Time-invariant metadata variables
+                        self._timer.start('Create Time-Invariant Metadata')
+                        for name in self._time_invariant_metadata:
+                            in_var = in_file.variables[name]
+                            out_var = out_file.create_variable(
+                                name, in_var.typecode(), in_var.dimensions)
+                            for att_name, att_val in in_var.attributes.iteritems():
+                                setattr(out_var, att_name, att_val)
+                        self._timer.stop('Create Time-Invariant Metadata')
+
+                        # Time-variant metadata variables
+                        self._timer.start('Create Time-Variant Metadata')
+                        for name in self._time_variant_metadata:
+                            in_var = in_file.variables[name]
+                            out_var = out_file.create_variable(
+                                name, in_var.typecode(), in_var.dimensions)
+                            for att_name, att_val in in_var.attributes.iteritems():
+                                setattr(out_var, att_name, att_val)
+                        self._timer.stop('Create Time-Variant Metadata')
+
+                    # Create the time-series variable
+                    if not (self._use_once_file and out_name == 'once'):
+
+                        # Time-series variable
+                        self._timer.start('Create Time-Series Variables')
+                        in_var = in_file.variables[out_name]
+                        out_var = out_file.create_variable(
+                            out_name, in_var.typecode(), in_var.dimensions)
+                        for att_name, att_val in in_var.attributes.iteritems():
+                            setattr(out_var, att_name, att_val)
+                        self._timer.stop('Create Time-Series Variables')
+
+                    dbg_msg = ('Writing output file for variable: '
+                               '{}').format(out_name)
+                    if out_name == 'once':
+                        dbg_msg = 'Writing "once" file.'
+                    self._vprint(dbg_msg, header=True, verbosity=1)
+
+                    # Copy the time-invariant metadata
+                    if not (self._use_once_file and out_name != 'once'):
+
+                        for name in self._time_invariant_metadata:
+                            in_var = in_file.variables[name]
+                            out_var = out_file.variables[name]
+                            self._timer.start('Read Time-Invariant Metadata')
+                            tmp_data = in_var.get_value()
+                            self._timer.stop('Read Time-Invariant Metadata')
+                            self._timer.start('Write Time-Invariant Metadata')
+                            out_var.assign_value(tmp_data)
+                            self._timer.stop('Write Time-Invariant Metadata')
+
+                            requested_nbytes = _get_bytesize(tmp_data)
+                            self._byte_counts[
+                                'Requested Data'] += requested_nbytes
+                            actual_nbytes = self.assumed_block_size \
+                                * numpy.ceil(requested_nbytes / self.assumed_block_size)
+                            self._byte_counts['Actual Data'] += actual_nbytes
 
                 # Get the number of time steps in this slice file
                 num_steps = in_file.dimensions[self._unlimited_dim]
 
-                # Write the time-varient metadata
-                if write_meta:
+                # Copy the time-varient metadata
+                if not (self._use_once_file and out_name != 'once'):
+
                     for name in self._time_variant_metadata:
-                        in_meta = in_file.variables[name]
-                        out_meta = out_file.variables[name]
-                        ndims = len(in_meta.dimensions)
-                        udidx = in_meta.dimensions.index(
+                        in_var = in_file.variables[name]
+                        out_var = out_file.variables[name]
+                        ndims = len(in_var.dimensions)
+                        udidx = in_var.dimensions.index(
                             self._unlimited_dim)
                         out_slice = [slice(None)] * ndims
                         if num_steps > 1:
@@ -741,10 +717,10 @@ class Slice2SeriesReshaper(Reshaper):
                         else:
                             out_slice[udidx] = series_step_index
                         self._timer.start('Read Time-Variant Metadata')
-                        tmp_data = in_meta[:]
+                        tmp_data = in_var[:]
                         self._timer.stop('Read Time-Variant Metadata')
                         self._timer.start('Write Time-Variant Metadata')
-                        out_meta[tuple(out_slice)] = tmp_data
+                        out_var[tuple(out_slice)] = tmp_data
                         self._timer.stop('Write Time-Variant Metadata')
 
                         requested_nbytes = _get_bytesize(tmp_data)
@@ -754,8 +730,9 @@ class Slice2SeriesReshaper(Reshaper):
                             * numpy.ceil(requested_nbytes / self.assumed_block_size)
                         self._byte_counts['Actual Data'] += actual_nbytes
 
-                # Write the time-series variables
-                if write_tser:
+                # Copy the time-series variables
+                if not (self._use_once_file and out_name == 'once'):
+
                     in_var = in_file.variables[out_name]
                     out_var = out_file.variables[out_name]
                     ndims = len(in_var.dimensions)
@@ -781,20 +758,27 @@ class Slice2SeriesReshaper(Reshaper):
                 # Increment the time-series step index
                 series_step_index += num_steps
 
+                # Close the input file
+                self._timer.start('Close Input Files')
+                in_file.close()
+                self._timer.stop('Close Input Files')
+
             # Close the output file
             self._timer.start('Close Output Files')
             out_file.close()
             self._timer.stop('Close Output Files')
-            dbg_msg = 'Closed output file for variable: ' + out_name
-            if is_once_file:
+
+            # Output message to user
+            dbg_msg = 'Closed output file for variable: {}'.format(out_name)
+            if out_name == 'once':
                 dbg_msg = 'Closed "once" file.'
             self._vprint(dbg_msg, header=True, verbosity=1)
 
         # Information
         self._simplecomm.sync()
         if self._simplecomm.is_manager():
-            self._vprint(
-                'Finished converting time-slices to time-series.', verbosity=1)
+            self._vprint(('Finished converting time-slices '
+                          'to time-series.'), verbosity=1)
 
         # Finish clocking the entire convert procedure
         self._timer.stop('Complete Conversion Process')
