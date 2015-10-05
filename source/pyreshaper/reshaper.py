@@ -434,7 +434,7 @@ class Slice2SeriesReshaper(Reshaper):
         new_order = sorted(old_order, key=lambda i: time_values[i][0])
 
         # Re-order the list of input filenames and time values
-        new_filenames = [self._input_file_list[i] for i in new_order]
+        new_filenames = [self._input_filenames[i] for i in new_order]
         new_values = [time_values[i] for i in new_order]
 
         # Now, check that the largest time in each file is less than the
