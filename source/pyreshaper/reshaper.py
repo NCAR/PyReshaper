@@ -13,7 +13,6 @@ See the LICENSE.rst file for details
 import abc
 from os import linesep, remove
 from os.path import exists, isfile
-from itertools import chain
 
 # Third-party imports
 import numpy
