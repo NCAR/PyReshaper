@@ -295,8 +295,7 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Initialize the dictionary of variable names for each category
         # (Keys are variable names, Values are variable sizes)
-        self._time_variant_metadata = dict(
-            [(v, 0) for v in specifier.time_variant_metadata])
+        self._time_variant_metadata = {}
         self._time_invariant_metadata = {}
         self._time_series_variables = {}
 
@@ -319,7 +318,7 @@ class Slice2SeriesReshaper(Reshaper):
         if self._simplecomm.is_manager():
             self._vprint('Inspecting input files...', verbosity=1)
         self._timer.start('Inspect Input Files')
-        self._inspect_input_files()
+        self._inspect_input_files(specifier.time_variant_metadata)
         self._timer.stop('Inspect Input Files')
         if self._simplecomm.is_manager():
             self._vprint('Input files inspected.', verbosity=1)
@@ -340,11 +339,15 @@ class Slice2SeriesReshaper(Reshaper):
         # Sync before continuing..
         self._simplecomm.sync()
 
-    def _inspect_input_files(self):
+    def _inspect_input_files(self, metadata_names=[]):
         """
         Inspect the input data files themselves.
 
         We check the file contents here.
+
+        Parameters:
+            metadata_names (list): List of string names.  If a variable with
+                one of these names is found, assume it is metadata.
         """
 
         #===== INSPECT FIRST INPUT FILE =====
@@ -373,7 +376,7 @@ class Slice2SeriesReshaper(Reshaper):
             size = size * numpy.prod(var.shape)
             if self._unlimited_dim not in var.dimensions:
                 self._time_invariant_metadata[var_name] = size
-            elif var_name in self._time_variant_metadata:
+            elif var_name in metadata_names:
                 self._time_variant_metadata[var_name] = size
             else:
                 self._time_series_variables[var_name] = size
