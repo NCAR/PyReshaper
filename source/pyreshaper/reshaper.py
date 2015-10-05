@@ -291,6 +291,16 @@ class Slice2SeriesReshaper(Reshaper):
         if self._simplecomm.is_manager():
             self._vprint('Specifier validated', verbosity=1)
 
+        # Store the input file names
+        self._input_filenames = specifier.input_file_list
+
+        # Initialize the dictionary of variable names for each category
+        # (Keys are variable names, Values are variable sizes)
+        self._time_variant_metadata = dict(
+            [(v, 0) for v in specifier.time_variant_metadata])
+        self._time_invariant_metadata = {}
+        self._time_series_variables = {}
+
         # Setup PyNIO options (including disabling the default PreFill option)
         opt = nio_options()
         opt.PreFill = False
@@ -306,44 +316,23 @@ class Slice2SeriesReshaper(Reshaper):
         if self._simplecomm.is_manager():
             self._vprint('PyNIO options set', verbosity=2)
 
-        # Open all of the input files
-        self._timer.start('Open Input Files')
-        self._input_files = []
-        for filename in specifier.input_file_list:
-            self._input_files.append(nio_open_file(filename, "r"))
-        self._timer.stop('Open Input Files')
-        if self._simplecomm.is_manager():
-            self._vprint('Input files opened', verbosity=2)
-
         # Validate the input files themselves
-        self._timer.start('Input File Validation')
-        self._validate_input_files(specifier)
-        self._timer.stop('Input File Validation')
         if self._simplecomm.is_manager():
-            self._vprint('Input files validated', verbosity=2)
-
-        # Sort the input files by time
-        self._timer.start('Sort Input Files')
-        self._sort_input_files_by_time(specifier)
-        self._timer.stop('Sort Input Files')
+            self._vprint('Inspecting input files...', verbosity=1)
+        self._timer.start('Inspect Input Files')
+        self._inspect_input_files()
+        self._timer.stop('Inspect Input Files')
         if self._simplecomm.is_manager():
-            self._vprint('Input files sorted', verbosity=2)
-
-        # Retrieve and sort the variables in each time-slice file
-        # (To determine if it is time-invariant metadata, time-variant
-        # metadata, or if it is a time-series variable)
-        self._timer.start('Sort Variables')
-        self._sort_variables(specifier)
-        self._timer.stop('Sort Variables')
-        if self._simplecomm.is_manager():
-            self._vprint('Variables sorted', verbosity=2)
+            self._vprint('Input files inspected.', verbosity=1)
 
         # Validate the output files
-        self._timer.start('Output File Validation')
-        self._validate_output_files(specifier, skip_existing, overwrite)
-        self._timer.stop('Output File Validation')
         if self._simplecomm.is_manager():
-            self._vprint('Output files validated', verbosity=2)
+            self._vprint('Checking output file status...', verbosity=1)
+        self._timer.start('Check Output File Status')
+        self._check_output_file_status(specifier, skip_existing, overwrite)
+        self._timer.stop('Check Output File Status')
+        if self._simplecomm.is_manager():
+            self._vprint('Output file status checked.', verbosity=1)
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
@@ -352,171 +341,118 @@ class Slice2SeriesReshaper(Reshaper):
         # Sync before continuing..
         self._simplecomm.sync()
 
-    def _validate_input_files(self, specifier):
+    def _inspect_input_files(self):
         """
-        Perform validation of input data files themselves.
+        Inspect the input data files themselves.
 
-        We check the file contents here, assuming that the files are already
-        open.
-
-        Parameters:
-            specifier (Specifier): The reshaper specifier object
+        We check the file contents here.
         """
 
-        # Helpful debugging message
-        if self._simplecomm.is_manager():
-            self._vprint('Validating input files', verbosity=1)
+        #===== INSPECT FIRST INPUT FILE =====
 
-        # In the first file, look for the 'unlimited' dimension
-        ifile = self._input_files[0]
-        self._unlimited_dim = None
-        for dim in ifile.dimensions:
-            if ifile.unlimited(dim):
-                self._unlimited_dim = dim
-                continue  # There can only be 1!
-        if self._unlimited_dim is None:
-            err_msg = 'Unlimited dimension not identified.'
+        # Open first file
+        ifile = nio_open_file(self._input_filenames[0])
+
+        # Look for the 'unlimited' dimension
+        try:
+            self._unlimited_dim = next(dim for dim in ifile.dimensions
+                                       if ifile.unlimited(dim))
+        except StopIteration:
+            err_msg = 'Unlimited dimension not found.'
             raise LookupError(err_msg)
 
-        # Make a pass through each file and:
-        # (1) Make sure it has the 'unlimited' dimension
-        # (2) Make sure this dimension is truely 'unlimited'
-        # (3) Check that this dimension has a corresponding variable
-        for i in range(len(self._input_files)):
-            ifile = self._input_files[i]
-            if self._unlimited_dim not in ifile.dimensions:
-                err_msg = 'Unlimited dimension not found in file (' \
-                    + specifier.input_file_list[i] + ')'
-                raise LookupError(err_msg)
-            if not ifile.unlimited(self._unlimited_dim):
-                err_msg = 'Unlimited dimension not unlimited in file (' \
-                    + specifier.input_file_list[i] + ')'
-                raise LookupError(err_msg)
-            if self._unlimited_dim not in ifile.variables:
-                err_msg = 'Unlimited dimension variable not found in file (' \
-                    + specifier.input_file_list[i] + ')'
-                raise LookupError(err_msg)
+        # Get the time values
+        time_values = [ifile.variables[self._unlimited_dim].get_value()]
 
-        # Make sure that the list of variables in each file is the same
-        variables = self._input_files[0].variables
-        var_names = set(variables.keys())
+        # Get the list of variable names and missing variables
+        var_names = set(ifile.variables.keys())
         missing_vars = set()
-        for ifile in self._input_files[1:]:
-            var_names_next = set(ifile.variables.keys())
-            missing_vars.update(var_names - var_names_next)
-        if len(missing_vars) != 0:
-            warning = "WARNING: The first input file has variables that are " \
-                + "not in all input files:" + linesep + '   '
-            for var in missing_vars:
-                warning += ' ' + str(var)
-            self._vprint(warning, header=True, verbosity=1)
-
-    def _sort_input_files_by_time(self, specifier):
-        """
-        Internal method for sorting the input files by time
-
-        This assumes that 'time' is the unlimited dimension, and it checks
-        to make sure that all of the times spanning across each file do not
-        overlap with each other (i.e., that the times across all files are
-        monotonicly increasing).
-
-        Currently, this method assumes that all of the input files
-        have the same 'time:units' attribute, such that all time variable
-        values are measured from the same date-time.  When this is true,
-        we do not need to consider the value of the 'time:units'
-        attribute itself.  If this assumption is not true, then we need
-        to consider the 'time:units" attribute of each file, together
-        with that file's time variable values.  To do that properly,
-        however, one should use UDUNITS to do the comparisons.
-
-        Parameters:
-            specifier (Specifier): The reshaper specifier object
-        """
-
-        # Helpful debugging message
-        if self._simplecomm.is_manager():
-            self._vprint('Sorting input files', verbosity=1)
-
-        # Get the time attributes (for convenience) and, for each file,
-        # add the times to a list.  (Each file will have an array of times
-        # associated with it.  Each array will be added to a list, such
-        # that the outer-most list contains an array for each input file)
-        time_values = []
-        for ifile in self._input_files:
-            time_values.append(
-                ifile.variables[self._unlimited_dim].get_value())
-
-        # Determine the sort order based on the first time in the time values
-        order = range(len(self._input_files))
-        new_order = sorted(order, key=lambda i: time_values[i][0])
-
-        # Re-order the list of input files and filenames
-        new_file_list = [None] * len(new_order)
-        new_filenames = [None] * len(new_order)
-        new_values = [None] * len(new_order)
-        for i in order:
-            new_file_list[i] = self._input_files[new_order[i]]
-            new_filenames[i] = specifier.input_file_list[new_order[i]]
-            new_values[i] = time_values[new_order[i]]
-
-        # Save this data in the new orders
-        self._input_files = new_file_list
-        self._input_filenames = new_filenames
-
-        # Now, check that the largest time in each file is less than the
-        # smallest time in the next file (so that the time spans of each file
-        # do not overlap)
-        for i in order[:-1]:
-            if new_values[i][-1] >= new_values[i + 1][0]:
-                err_msg = 'Times in input files ' + str(new_filenames[i]) \
-                    + ' and ' + str(new_filenames[i + 1]) + ' appear to ' \
-                    + 'overlap.'
-                raise ValueError(err_msg)
-
-        # Now that this is validated, let's string together the numpy array
-        # of all times (using the new_values array)
-        self._all_time_values = \
-            numpy.fromiter(chain.from_iterable(new_values), dtype='float')
-
-    def _sort_variables(self, specifier):
-        """
-        Internal method for sorting the variables in each time-slice file
-
-        This method determines if each variable is to be treated as
-        time-invariant metadata, time-variant metadata (user defined), or
-        time-series variables.  All metadata is written to every time-series
-        file, and any time-series variable is written to its own file.
-        The time-variant metadata variables are determined by user input,
-        and are contained in the Specifier data member:
-
-            Specifier.time_variant_metadata.
-
-        Parameters:
-            specifier (Specifier): The reshaper specifier object
-        """
-
-        # Helpful debugging message
-        if self._simplecomm.is_manager():
-            self._vprint('Sorting variables', verbosity=1)
-
-        # Initialize the dictionary of variable names for each category
-        # (Keys are variable names, Values are variable sizes)
-        self._time_variant_metadata = {}
-        self._time_invariant_metadata = {}
-        self._time_series_variables = {}
 
         # Categorize each variable (only looking at first file)
-        variables = self._input_files[0].variables
-        for var_name in variables.keys():
-            var = variables[var_name]
+        for var_name, var in ifile.variables.iteritems():
             size = numpy.dtype(var.typecode()).itemsize
             size = size * numpy.prod(var.shape)
             if self._unlimited_dim not in var.dimensions:
                 self._time_invariant_metadata[var_name] = size
-            elif var_name in specifier.time_variant_metadata:
+            elif var_name in self._time_variant_metadata:
                 self._time_variant_metadata[var_name] = size
             else:
                 self._time_series_variables[var_name] = size
+
+        # Close the first file
+        ifile.close()
+
+        #===== INSPECT REMAINING INPUT FILES =====
+
+        # Make a pass through remaining files and:
+        # (1) Make sure it has the 'unlimited' dimension
+        # (2) Make sure this dimension is truely 'unlimited'
+        # (3) Check that this dimension has a corresponding variable
+        # (4) Check if there are any missing variables
+        # (5) Get the time values from the files
+        for ifilename in self._input_filenames[1:]:
+            ifile = nio_open_file(ifilename)
+
+            # Determine the unlimited dimension
+            if self._unlimited_dim not in ifile.dimensions:
+                err_msg = ('Unlimited dimension not found '
+                           'in file "{}"').format(ifilename)
+                raise LookupError(err_msg)
+            if not ifile.unlimited(self._unlimited_dim):
+                err_msg = ('Dimension "{}" not unlimited in file '
+                           '"{}"').format(self._unlimited_dim, ifilename)
+                raise LookupError(err_msg)
+            if self._unlimited_dim not in ifile.variables:
+                err_msg = ('Unlimited dimension variable not found in file '
+                           '"{}"').format(ifilename)
+                raise LookupError(err_msg)
+
+            # Get the time values (list of NDArrays)
+            time_values.append(
+                ifile.variables[self._unlimited_dim].get_value())
+
+            # Get the missing variables
+            var_names_next = set(ifile.variables.keys())
+            missing_vars.update(var_names - var_names_next)
+
+            # Close the file
+            ifile.close()
+
+        #===== CHECK FOR MISSING VARIABLES =====
+
+        # Make sure that the list of variables in each file is the same
+        if len(missing_vars) != 0:
+            warning = ("WARNING: The first input file has variables that are "
+                       "not in all input files:{}{}").format(linesep, '   ')
+            for var in missing_vars:
+                warning += ' {}'.format(var)
+            self._vprint(warning, header=True, verbosity=1)
+
+        #===== SORT INPUT FILES BY TIME =====
+
+        # Determine the sort order based on the first time in the time values
+        old_order = range(len(self._input_filenames))
+        new_order = sorted(old_order, key=lambda i: time_values[i][0])
+
+        # Re-order the list of input filenames and time values
+        new_filenames = [self._input_file_list[i] for i in new_order]
+        new_values = [time_values[i] for i in new_order]
+
+        # Now, check that the largest time in each file is less than the
+        # smallest time in the next file (so that the time spans of each file
+        # do not overlap)
+        for i in xrange(1, len(new_values)):
+            if new_values[i - 1][-1] >= new_values[i][0]:
+                err_msg = ('Times in input files {} and {} appear '
+                           'to overlap').format(new_filenames[i - 1],
+                                                new_filenames[i])
+                raise ValueError(err_msg)
+
+        # Now that this is validated, save the time values and filename in
+        # the new order
+        self._input_filenames = new_filenames
+
+        #===== FINALIZING OUTPUT =====
 
         # Debug output
         if self._simplecomm.is_manager():
@@ -533,8 +469,8 @@ class Slice2SeriesReshaper(Reshaper):
         if self._use_once_file:
             self._time_series_variables['once'] = 1
 
-    def _validate_output_files(self, specifier,
-                               skip_existing=False, overwrite=False):
+    def _check_output_file_status(self, specifier,
+                                  skip_existing=False, overwrite=False):
         """
         Perform validation of output data files themselves.
 
@@ -574,7 +510,7 @@ class Slice2SeriesReshaper(Reshaper):
         if overwrite:
             if self._simplecomm.is_manager():
                 self._vprint('WARNING: Deleting existing output files for '
-                             'time-series variables: ' + str(existing),
+                             'time-series variables: {}'.format(existing),
                              verbosity=1)
             for variable in existing:
                 remove(self._time_series_filenames[variable])
@@ -584,15 +520,15 @@ class Slice2SeriesReshaper(Reshaper):
         elif skip_existing:
             if self._simplecomm.is_manager():
                 self._vprint('WARNING: Skipping time-series variables with '
-                             'existing output files: ' + str(existing),
+                             'existing output files: {}'.format(existing),
                              verbosity=1)
             for variable in existing:
                 self._time_series_variables.pop(variable)
 
         # Otherwise, throw an exception if any existing output files are found
         elif len(existing) > 0:
-            err_msg = "Found existing output files for time-series " + \
-                "variables:" + str(existing)
+            err_msg = ("Found existing output files for time-series "
+                       "variables: {}").format(existing)
             raise RuntimeError(err_msg)
 
     def convert(self, output_limit=0):
@@ -622,7 +558,7 @@ class Slice2SeriesReshaper(Reshaper):
             self._vprint('Converting time-slices to time-series', verbosity=1)
 
         # For data common to all input files, we reference only the first
-        ref_infile = self._input_files[0]
+        ref_infile = self._input_filenames[0]
 
         # Store the common dimensions and attributes for each file
         # (taken from the first input file in the list)
@@ -787,7 +723,7 @@ class Slice2SeriesReshaper(Reshaper):
 
             # Write each time-variant variable
             series_step_index = 0
-            for in_file in self._input_files:
+            for in_file in self._input_filenames:
 
                 # Get the number of time steps in this slice file
                 num_steps = in_file.dimensions[self._unlimited_dim]
