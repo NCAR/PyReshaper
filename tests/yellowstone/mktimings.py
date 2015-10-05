@@ -129,12 +129,16 @@ if __name__ == '__main__':
                 used_once_file = True
 
             # Find the internal timing data from the run output:
-            openi_str, loc = find_shortest_str(
-                log_str, 'Open Input Files: ', loc=loc)
             tot_timing_str, loc = find_shortest_str(
                 log_str, 'Complete Conversion Process: ', loc=loc)
             openo_str, loc = find_shortest_str(
                 log_str, 'Open Output Files: ', loc=loc)
+            closeo_str, loc = find_shortest_str(
+                log_str, 'Close Output Files: ', loc=loc)
+            openi_str, loc = find_shortest_str(
+                log_str, 'Open Input Files: ', loc=loc)
+            closei_str, loc = find_shortest_str(
+                log_str, 'Close Input Files: ', loc=loc)
             rmetaTI_str, loc = find_shortest_str(
                 log_str, 'Read Time-Invariant Metadata: ', loc=loc)
             rmetaTV_str, loc = find_shortest_str(
