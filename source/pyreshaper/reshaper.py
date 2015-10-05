@@ -488,10 +488,6 @@ class Slice2SeriesReshaper(Reshaper):
                 output files if they already exist.  Default is False.
         """
 
-        # Helpful debugging message
-        if self._simplecomm.is_manager():
-            self._vprint('Validating output files', verbosity=1)
-
         # Loop through the time-series variables and generate output filenames
         prefix = specifier.output_file_prefix
         suffix = specifier.output_file_suffix
@@ -504,6 +500,10 @@ class Slice2SeriesReshaper(Reshaper):
         for variable, filename in self._time_series_filenames.items():
             if isfile(filename):
                 existing.append(variable)
+
+        # Return if no existing files found
+        if len(existing) == 0:
+            return
 
         # If overwrite is enabled, delete all existing files first
         if overwrite:
@@ -525,7 +525,7 @@ class Slice2SeriesReshaper(Reshaper):
                 self._time_series_variables.pop(variable)
 
         # Otherwise, throw an exception if any existing output files are found
-        elif len(existing) > 0:
+        else:
             err_msg = ("Found existing output files for time-series "
                        "variables: {}").format(existing)
             raise RuntimeError(err_msg)
