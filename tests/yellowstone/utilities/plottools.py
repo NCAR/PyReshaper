@@ -80,7 +80,6 @@ def read_json_data(file_name='../timings.json'):
 #==============================================================================
 # Return the list of datasets in the dictionary
 #==============================================================================
-
 def list_datasets(input_dict):
     return input_dict.keys()
 
@@ -88,7 +87,6 @@ def list_datasets(input_dict):
 #==============================================================================
 # Return the dictionary of methods found for each given dataset
 #==============================================================================
-
 def list_methods(input_dict, datasets=None):
     if not datasets:
         datasets = list_datasets(input_dict)
@@ -107,7 +105,6 @@ def list_methods(input_dict, datasets=None):
 #==============================================================================
 # Get the 'results' section (as a dictionary) for given dataset(s)
 #==============================================================================
-
 def get_results(input_dict, datasets=None):
     if not datasets:
         datasets = list_datasets(input_dict)
@@ -126,7 +123,6 @@ def get_results(input_dict, datasets=None):
 #==============================================================================
 # Get everything but the 'results' section (as a dictionary) for given dataset(s)
 #==============================================================================
-
 def get_nonresults(input_dict, datasets=None):
     if not datasets:
         datasets = list_datasets(input_dict)
@@ -148,7 +144,6 @@ def get_nonresults(input_dict, datasets=None):
 # Return the subset of the input dictionary that contains only the listed
 # datasets.
 #==============================================================================
-
 def subselect_datasets(input_dict, datasets):
     if (type(datasets) is not list):
         raise TypeError('List of datasets must be of list type.')
@@ -171,7 +166,6 @@ def subselect_datasets(input_dict, datasets):
 # When True, the exclusive option will include a dataset only if it contains
 # ALL of the listed methods.
 #==============================================================================
-
 def subselect_methods(input_dict, methods, exclusive=False):
     if (type(methods) is not list):
         raise TypeError('List of methods must be of list type.')
@@ -216,7 +210,6 @@ def subselect_methods(input_dict, methods, exclusive=False):
 #                EITHER (False) before or after conditions must be met for the
 #                job to be kept.
 #==============================================================================
-
 def subselect_jobs_by_time(input_dict, before=__MAXTIME__, after=__MINTIME__, exclusive=True):
     subset_dict = {}
     for dataset in input_dict:
@@ -268,7 +261,6 @@ def subselect_jobs_by_time(input_dict, before=__MAXTIME__, after=__MINTIME__, ex
 #               If ANY of the dictionaries' criteria return a valid result,
 #               then the job is considered valid.
 #==============================================================================
-
 def subselect_jobs_by_data(input_dict, criteria_list):
     if type(criteria_list) is not list:
         raise TypeError('Data criteria list must be of type list.')
@@ -288,7 +280,7 @@ def subselect_jobs_by_data(input_dict, criteria_list):
                     for ic in range(len(criteria_list)):
                         for ckey, cval in criteria_list[ic].items():
                             if ckey in job_data:
-                                if cval != None:
+                                if cval is not None:
                                     if type(cval) is list:
                                         if job_data[ckey] not in cval:
                                             good_jobs[ic] = False
@@ -313,7 +305,6 @@ def subselect_jobs_by_data(input_dict, criteria_list):
 #==============================================================================
 # Create a union of 2 nested dictionaries
 #==============================================================================
-
 def union(dict1, dict2):
     if type(dict1) is dict and type(dict2) is dict:
         udict = dict1.copy()
@@ -330,14 +321,13 @@ def union(dict1, dict2):
 #==============================================================================
 # Create the intersection of 2 nested dictionaries
 #==============================================================================
-
 def intersect(dict1, dict2):
     if type(dict1) is dict and type(dict2) is dict:
         udict = {}
         for key in dict2:
             if key in dict1:
                 kintersection = intersect(dict1[key], dict2[key])
-                if kintersection != None:
+                if kintersection is not None:
                     udict[key] = kintersection
         return udict
     else:
@@ -350,7 +340,6 @@ def intersect(dict1, dict2):
 #==============================================================================
 # Gather duration data from a data dictionary and return a plot dictionary
 #==============================================================================
-
 def get_duration_pdata(data_dict):
     plot_dict = {}
     for dataset in data_dict:
@@ -367,7 +356,6 @@ def get_duration_pdata(data_dict):
 #==============================================================================
 # Gather throughput data from a data dictionary and return a plot dictionary
 #==============================================================================
-
 def get_throughput_pdata(data_dict):
     plot_dict = {}
     for dataset in data_dict:
@@ -385,7 +373,6 @@ def get_throughput_pdata(data_dict):
 #==============================================================================
 # Compute the reduction of data for multiple jobs in a plot dicitonary
 #==============================================================================
-
 def reduce_pdata(plot_dict, func=numpy.average):
     for dataset in plot_dict:
         for method in plot_dict[dataset]:
@@ -397,7 +384,6 @@ def reduce_pdata(plot_dict, func=numpy.average):
 #==============================================================================
 # Make a bar plot from a REDUCED plot dictionary
 #==============================================================================
-
 def make_bar_plot(pdata, filename,
                   dataset_order, method_order, method_colors,
                   dataset_labels, method_labels,
@@ -477,12 +463,12 @@ def make_bar_plot(pdata, filename,
         if dataset in dataset_names:
             xlabels.append(dataset_labels[str(dataset)])
 
-    if title != None:
+    if title is not None:
         plt.title(title, fontsize=titlefontsize, ha='center', va='bottom')
-    if ylabel != None:
+    if ylabel is not None:
         plt.ylabel(ylabel, fontsize=labelfontsize, ha='center', va='bottom')
     plt.yticks(fontsize=tickfontsize)
-    if xlabel != None:
+    if xlabel is not None:
         plt.xlabel(xlabel, fontsize=labelfontsize, ha='center', va='top')
     plt.xticks(xbase, xlabels, rotation=labelrotation,
                ha='right', fontsize=tickfontsize)
