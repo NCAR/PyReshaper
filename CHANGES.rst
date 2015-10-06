@@ -95,4 +95,11 @@ VERSION 0.9.4
  - Performance improvement (no explicit loop over time-steps in a time-slice
    file needed)
  - Enabling user-defined compression level for NetCDF4 output
+ 
+VERSION 0.9.5
+-------------
+
+6 October 2015:
+ - Fix bug in the 'slice2series' script
+ - Adds a write to file option for the Specifiers
    
