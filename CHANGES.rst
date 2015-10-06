@@ -104,3 +104,5 @@ VERSION 0.9.5
  - Adds a write to file option for the Specifiers
  - Modifying output message verbosity settings
    
+VERSION 0.9.6
+-------------
