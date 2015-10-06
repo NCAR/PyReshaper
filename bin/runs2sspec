@@ -1,0 +1,137 @@
+#!/usr/bin/env python
+"""
+This script provides the command-line interface (CLI) to the PyReshaper
+
+This script uses the optparse module, which has been deprecated since
+Python version 2.7 with the introduction of the argparse module, which is
+more flexible and capable.  However, since the PyReshaper module needs to
+work on systems with only Python 2.6 available, we use the optparse module.
+
+Copyright 2015, University Corporation for Atmospheric Research
+See the LICENSE.rst file for details
+"""
+
+# Builtin Modules
+import optparse
+import glob
+import cPickle as pickle
+
+# Package Modules
+from pyreshaper import specification
+from pyreshaper import reshaper
+
+
+#==============================================================================
+# Command-line Interface
+#==============================================================================
+def cli():
+    parser = optparse.OptionParser()
+    parser.add_option('-f', '--netcdf_format', default='netcdf4c',
+                      choices=['netcdf', 'netcdf4', 'netcdf4c'],
+                      help='NetCDF file format to be used for all output files. '
+                           '[Default: "netcdf4c"]')
+    parser.add_option('-p', '--output_prefix', default='tseries.',
+                      help='String prefix for all output files.  The output file '
+                           'will be named according to the rule: '
+                           'output_prefix + variable_name + output_suffix '
+                           '[Default: "tseries."]')
+    parser.add_option('-s', '--output_suffix', default='.nc',
+                      help='String suffix for all output files.  The output file '
+                           'will be named according to the rule: '
+                           'output_prefix + variable_name + output_suffix '
+                           '[Default: ".nc"]')
+    parser.add_option('-m', '--metadata', action='append', default=[],
+                      help='Names of a variable to be included in all output '
+                           'files.  There may be more than one --metadata (-m) '
+                           'option given, and each one is appended to a list.  '
+                           '[Default: none]')
+    parser.add_option('--serial', default=False,
+                      action='store_true', dest='serial',
+                      help='Whether to run in serial (True) or parallel (False). '
+                           '[Default: False]')
+    parser.add_option('--once', default=False,
+                      action='store_true', dest='once',
+                      help='Whether to write a "once" file with all metadata. '
+                           '[Default: False]')
+    parser.add_option('--skip_existing', default=False,
+                      action='store_true', dest='skip_existing',
+                      help='Whether to skip time-series generation for '
+                           'variables with existing output files. '
+                           '[Default: False]')
+    parser.add_option('--overwrite', default=False,
+                      action='store_true', dest='overwrite',
+                      help='Whether to overwrite existing output files. '
+                           '[Default: False]')
+    parser.add_option('--specfile', default=None,
+                      help='Allows the user to use a Pickled Specifier (file) '
+                           'as input to the script, instead of the command-'
+                           'line options and arguments.'
+                           '[Default: None]')
+    parser.add_option('-v', '--verbosity', default=1, type='int',
+                      help='Verbosity level for level of output.  A value of 0 '
+                           'means no output, and a value greater than 0 means '
+                           'more output detail. [Default: 1]')
+    parser.add_option('-l', '--limit', default=0, type='int',
+                      help='The limit on the number of time-series files per '
+                           'processor to write.  Useful when debugging.  A '
+                           'limit of 0 means write all output files.'
+                           '[Default: 0]')
+
+    # Parse the CLI options and assemble the Reshaper inputs
+    return parser.parse_args()
+
+
+#==============================================================================
+# Main script
+#==============================================================================
+def main(options, input_file_list):
+
+    # Check for a Specifier file
+    if options.specfile:
+
+        # Try importing the file
+        try:
+            spec = pickle.load(open(options.specfile, 'rb'))
+        except:
+            err_msg = "Specifier File '" + str(options.specfile) + "' " + \
+                      "could not be opened and read"
+            raise RuntimeError(err_msg)
+
+    else:
+
+        # Create the input object for the Reshaper
+        spec = specification.create_specifier()
+
+        # Generate the input file list from (potentially) globs/wildcards
+        full_input_file_list = []
+        for arg in input_file_list:
+            full_input_file_list.extend(glob.glob(arg))
+
+        # Add input to the specifier
+        spec.input_file_list = full_input_file_list
+        spec.netcdf_format = options.netcdf_format
+        spec.output_file_prefix = options.output_prefix
+        spec.output_file_suffix = options.output_suffix
+        spec.time_variant_metadata = options.metadata
+
+    # Create the PyReshaper object
+    reshpr = reshaper.create_reshaper(spec,
+                                      serial=options.serial,
+                                      verbosity=options.verbosity,
+                                      skip_existing=options.skip_existing,
+                                      overwrite=options.overwrite,
+                                      once=options.once)
+
+    # Run the conversion (slice-to-series) process
+    reshpr.convert(output_limit=options.limit)
+
+    # Print timing diagnostics
+    reshpr.print_diagnostics()
+
+
+#==============================================================================
+# Command-line Opeartion
+#==============================================================================
+if __name__ == '__main__':
+    options, input_file_list = cli()
+    main(options, input_file_list)
