@@ -281,7 +281,7 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Debug output starting
         if self._simplecomm.is_manager():
-            self._vprint('Initializing Reshaper', verbosity=1)
+            self._vprint('Initializing Reshaper...', verbosity=0)
 
         # Validate the user input data
         self._timer.start('Specifier Validation')
@@ -312,29 +312,29 @@ class Slice2SeriesReshaper(Reshaper):
             opt.CompressionLevel = specifier.compression_level
         self._nio_options = opt
         if self._simplecomm.is_manager():
-            self._vprint('PyNIO options set', verbosity=2)
+            self._vprint('PyNIO options set', verbosity=1)
 
         # Validate the input files themselves
         if self._simplecomm.is_manager():
-            self._vprint('Inspecting input files...', verbosity=1)
+            self._vprint('Inspecting input files...', verbosity=0)
         self._timer.start('Inspect Input Files')
         self._inspect_input_files(specifier.time_variant_metadata)
         self._timer.stop('Inspect Input Files')
         if self._simplecomm.is_manager():
-            self._vprint('Input files inspected.', verbosity=1)
+            self._vprint('Input files inspected.', verbosity=0)
 
         # Validate the output files
         if self._simplecomm.is_manager():
-            self._vprint('Checking output file status...', verbosity=1)
+            self._vprint('Checking output file status...', verbosity=0)
         self._timer.start('Check Output File Status')
         self._check_output_file_status(specifier, skip_existing, overwrite)
         self._timer.stop('Check Output File Status')
         if self._simplecomm.is_manager():
-            self._vprint('Output file status checked.', verbosity=1)
+            self._vprint('Output file status checked.', verbosity=0)
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
-            self._vprint('Reshaper initialized.', verbosity=1)
+            self._vprint('Reshaper initialized.', verbosity=0)
 
         # Sync before continuing..
         self._simplecomm.sync()
@@ -428,7 +428,7 @@ class Slice2SeriesReshaper(Reshaper):
                        "not in all input files:{}{}").format(linesep, '   ')
             for var in missing_vars:
                 warning += ' {}'.format(var)
-            self._vprint(warning, header=True, verbosity=1)
+            self._vprint(warning, header=True, verbosity=0)
 
         #===== SORT INPUT FILES BY TIME =====
 
@@ -459,11 +459,11 @@ class Slice2SeriesReshaper(Reshaper):
         # Debug output
         if self._simplecomm.is_manager():
             self._vprint('Time-Invariant Metadata: ' +
-                         str(self._time_invariant_metadata.keys()), verbosity=2)
+                         str(self._time_invariant_metadata.keys()), verbosity=1)
             self._vprint('Time-Variant Metadata: ' +
-                         str(self._time_variant_metadata.keys()), verbosity=2)
+                         str(self._time_variant_metadata.keys()), verbosity=1)
             self._vprint('Time-Series Variables: ' +
-                         str(self._time_series_variables.keys()), verbosity=2)
+                         str(self._time_series_variables.keys()), verbosity=1)
 
         # Add 'once' variable if writing to a once file
         # NOTE: This is a "cheat"!  There is no 'once' variable.  It's just
@@ -513,7 +513,7 @@ class Slice2SeriesReshaper(Reshaper):
             if self._simplecomm.is_manager():
                 self._vprint('WARNING: Deleting existing output files for '
                              'time-series variables: {}'.format(existing),
-                             verbosity=1)
+                             verbosity=0)
             for variable in existing:
                 remove(self._time_series_filenames[variable])
 
@@ -523,7 +523,7 @@ class Slice2SeriesReshaper(Reshaper):
             if self._simplecomm.is_manager():
                 self._vprint('WARNING: Skipping time-series variables with '
                              'existing output files: {}'.format(existing),
-                             verbosity=1)
+                             verbosity=0)
             for variable in existing:
                 self._time_series_variables.pop(variable)
 
@@ -557,7 +557,7 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Debugging output
         if self._simplecomm.is_manager():
-            self._vprint('Converting time-slices to time-series', verbosity=1)
+            self._vprint('Converting time-slices to time-series...', verbosity=0)
 
         # Partition the time-series variables across all processors
         tsv_names_loc = self._simplecomm.partition(
@@ -568,7 +568,7 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Print partitions for all ranks
         dbg_msg = 'Local time-series variables are {}'.format(tsv_names_loc)
-        self._vprint(dbg_msg, header=True, verbosity=2)
+        self._vprint(dbg_msg, header=True, verbosity=1)
 
         # Reset all of the timer values (as it is possible that there are no
         # time-series variables in the local list procuded above)
@@ -781,7 +781,7 @@ class Slice2SeriesReshaper(Reshaper):
         self._simplecomm.sync()
         if self._simplecomm.is_manager():
             self._vprint(('Finished converting time-slices '
-                          'to time-series.'), verbosity=1)
+                          'to time-series.'), verbosity=0)
 
         # Finish clocking the entire convert procedure
         self._timer.stop('Complete Conversion Process')

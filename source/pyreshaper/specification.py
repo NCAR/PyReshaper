@@ -11,6 +11,7 @@ See the LICENSE.rst file for details
 """
 
 # Built-in imports
+import cPickle as pickle
 from os import path as ospath
 
 
@@ -21,7 +22,7 @@ def create_specifier(**kwargs):
     """
     Factory function for Specifier class objects.  Defined for convenience.
 
-    Keyword Arguments:
+    Parameters:
         kwargs (dict): Optional arguments to be passed to the newly created
             Specifier object's constructor.
 
@@ -61,7 +62,7 @@ class Specifier(object):
 
         The output_file_name should be a full-path filename.
 
-        Keyword Arguments:
+        Parameters:
             infiles (list): List of full-path input filenames
             ncfmt (str): String specifying the NetCDF
                 data format ('netcdf','netcdf4','netcdf4c')
@@ -222,6 +223,21 @@ class Specifier(object):
         # Validate the output file suffix string (should end in .nc)
         if (self.output_file_suffix[-3:] != '.nc'):
             self.output_file_suffix += '.nc'
+
+    def write(self, fname):
+        """
+        Write the specifier to a file
+
+        Parameters:
+            fname (str): Name of file to write
+        """
+        try:
+            fobj = open(fname, 'w')
+            pickle.dump(self, fobj)
+            fobj.close()
+        except:
+            err_msg = "Failed to write Specifier to file '{}'".format(fname)
+            raise OSError(err_msg)
 
 
 #==============================================================================
