@@ -519,7 +519,7 @@ Similarly, the parallel operation is simply preceded with the ``mpirun``
 command.
 
 Additional Arguments to the ``slice2series`` Script
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 While the basic options shown in the previous examples above are
 sufficient for most purposes, two additional options are available. The

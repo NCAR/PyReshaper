@@ -17,7 +17,7 @@ import os
 import shlex
 
 # Read the PyReshaper version info
-exec(open('../source/pyreshaper/version.py').read())
+exec(open('../../source/pyreshaper/version.py').read())
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
