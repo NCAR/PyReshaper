@@ -102,4 +102,5 @@ VERSION 0.9.5
 6 October 2015:
  - Fix bug in the 'slice2series' script
  - Adds a write to file option for the Specifiers
+ - Modifying output message verbosity settings
    
