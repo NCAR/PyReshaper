@@ -52,10 +52,11 @@ class S2SReshaperTests(unittest.TestCase):
         self.suffix = '.nc'
         self.metadata = [v for v in self.tvmvars]
         self.metadata.append('time')
+        self.serial = self.size == 1
         self.spec = Specifier(
             infiles=self.infiles, ncfmt=self.ncfmt, compression=self.compression,
             prefix=self.prefix, suffix=self.suffix, metadata=self.metadata)
-        self.rshpr = create_reshaper(self.spec, serial=(self.size == 1),
+        self.rshpr = create_reshaper(self.spec, serial=self.serial,
                                      verbosity=3, wmode='w')
         self.outfiles = ['{}{}{}'.format(self.prefix, v, self.suffix)
                          for v in self.tsvars]
@@ -71,7 +72,10 @@ class S2SReshaperTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def _info_msg(self, name, data, actual, expected, show=True):
-        rknm = '[{}/{}] {}'.format(self.rank, self.size, name)
+        if self.serial:
+            rknm = name
+        else:
+            rknm = '[{}/{}] {}'.format(self.rank, self.size, name)
         spcr = ' ' * len(rknm)
         msg = ''.join([eol,
                        rknm, ' - Input: ', str(data), eol,
