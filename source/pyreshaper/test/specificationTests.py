@@ -2,7 +2,9 @@
 Unit tests for the Specifier class
 """
 
+import os
 import unittest
+import cPickle as pickle
 
 from pyreshaper import specification
 
@@ -201,6 +203,35 @@ class SpecifierTests(unittest.TestCase):
         spec.validate_values()
         self.assertEqual(spec.output_file_suffix, suffix + '.nc',
                          'Suffix was not changed to .nc extension')
+
+    def test_write(self):
+        in_list = ['specificationTests.py']
+        fmt = 'netcdf4'
+        cl = 8
+        prefix = 'pre.'
+        suffix = '.suf.nc'
+        metadata = ['time']
+        spec = specification.Specifier(
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
+            suffix=suffix, metadata=metadata)
+        fname = 'test_write.s2s'
+        spec.write(fname)
+        self.assertTrue(os.path.exists(fname), 'Specfile failed to write')
+        spec2 = pickle.load(open(fname, 'r'))
+        self.assertListEqual(spec2.input_file_list, in_list,
+                             'Input file list not initialized properly')
+        self.assertEqual(spec2.netcdf_format, fmt,
+                         'NetCDF format not initialized properly')
+        self.assertEqual(spec2.compression_level, cl,
+                         'NetCDF compression level not initialized properly')
+        self.assertEqual(spec2.output_file_prefix, prefix,
+                         'Output file prefix not initialized properly')
+        self.assertEqual(spec2.output_file_suffix, suffix,
+                         'Output file prefix not initialized properly')
+        self.assertListEqual(spec2.time_variant_metadata, metadata,
+                             'Time variant metadata list not initialized properly')
+        os.remove(fname)
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
