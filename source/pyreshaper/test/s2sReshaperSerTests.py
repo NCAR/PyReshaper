@@ -57,8 +57,8 @@ class S2SReshaperSerTests(unittest.TestCase):
             if exists(infile):
                 remove(infile)
         for outfile in self.outfiles:
-           if exists(outfile):
-               remove(outfile)
+            if exists(outfile):
+                remove(outfile)
 
     def _info_msg(self, name, data, actual, expected):
         spcr = ' ' * len(name)
