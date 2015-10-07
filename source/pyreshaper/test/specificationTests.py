@@ -1,5 +1,8 @@
 """
 Unit tests for the Specifier class
+
+Copyright 2015, University Corporation for Atmospheric Research
+See the LICENSE.rst file for details
 """
 
 import os
