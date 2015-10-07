@@ -60,12 +60,14 @@ class S2SReshaperSerTests(unittest.TestCase):
             if exists(outfile):
                 remove(outfile)
 
-    def _info_msg(self, name, data, actual, expected):
+    def _info_msg(self, name, data, actual, expected, show=True):
         spcr = ' ' * len(name)
         msg = ''.join([eol,
                        name, ' - Input: ', str(data), eol,
                        spcr, ' - Actual:   ', str(actual), eol,
                        spcr, ' - Expected: ', str(expected)])
+        if show:
+            print msg
         return msg
 
     def testCreateReshaperType(self):
