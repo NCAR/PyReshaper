@@ -208,6 +208,8 @@ class S2SReshaperParTests(unittest.TestCase):
 
                 ncout.close()
 
+        MPI_COMM_WORLD.Barrier()
+
 
 if __name__ == "__main__":
     hline = '=' * 70
