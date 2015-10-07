@@ -11,7 +11,7 @@ See the LICENSE.rst file for details
 
 # Built-in imports
 import abc
-from os import linesep, remove
+from os import linesep, remove, rename
 from os.path import exists, isfile
 
 # Third-party imports
@@ -604,7 +604,8 @@ class Slice2SeriesReshaper(Reshaper):
             if exists(out_filename):
                 err_msg = 'Found existing output file: {}'.format(out_filename)
                 raise OSError(err_msg)
-            out_file = nio_open_file(out_filename, 'w',
+            temp_filename = out_filename + '.temp'
+            out_file = nio_open_file(temp_filename, 'w',
                                      options=self._nio_options)
             self._timer.stop('Open Output Files')
 
@@ -757,6 +758,7 @@ class Slice2SeriesReshaper(Reshaper):
             # Close the output file
             self._timer.start('Close Output Files')
             out_file.close()
+            rename(temp_filename, out_filename)
             self._timer.stop('Close Output Files')
 
             # Output message to user
