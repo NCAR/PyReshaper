@@ -298,7 +298,7 @@ Acceptable Options are:
    compression to use when writing the output files.  This can be a number
    from 0 to 9, where 0 means no compression (default) and 9 mean the
    highest level of compression.  This is overridden when the ``"netcdf4c"``
-   format is used.
+   format is used, where it is forced to be 1.
 
 -  ``output_file_prefix``: This is a string specifying the common output
    (time-series) filename prefix. It is assumed that each time-series
@@ -441,65 +441,80 @@ Using the PyReshaper from the Unix Command-Line
 While the most flexible way of using the PyReshaper is from within
 Python, as described above, it is also possible to run the PyReshaper
 from the command-line. In this section, we describe how to use the
-Python script ``slice2series``, which provides a command-line interface
-(CLI) to the PyReshaper. (This script will be installed in the
+Python scripts ``s2smake`` and ``s2srun``, which provide command-line
+interfaces (CLI) to the PyReshaper. (These scripts will be installed in the
 ``$PREFIX/bin`` directory, where ``PREFIX`` is the installation root
 directory.)
 
-Below is an example of how to use the PyReshaper CLI, ``slice2series``,
-for a serial run, with all options and parameters specified on the
-command line.
+The ``s2smake`` utility is designed to generate a Specifier object file
+(*specfile*) for a specifier to be used in a PyReshaper run.  The ``s2srun``
+utility is then used to run the PyReshaper with the newly generated Specifier.
+The *specfile* is a convenient way of saving specifier information for future
+use or reference.
+
+Below is an example of how to use the PyReshaper's ``s2smake`` utility, 
+with all options and parameters specified on the command line.
 
 ::
 
-    $ slice2series --serial \
-      --netcdf_format="netcdf4c" \
+    $ s2smake \
+      --netcdf_format="netcdf4" \
+      --compression_level=1 \
       --output_prefix="/path/to/outfile_prefix." \
-      --output_suffix="000101-001012.nc" \
+      --output_suffix=".000101-001012.nc" \
       -m "time" -m "time_bounds" \
+      --specfile=example.s2s \
       /path/to/infiles/*.nc
 
 In this example, you will note that we have specified each
 time-dependent metadata variable name with its own ``-m`` option. (In
 this case, there are only 2, ``time`` and ``time_bounds``.) We have also
 specified the list of input (time-slice) files using a wildcard, which
-the Unix shell fills in with a list of all filenames that match this
+the Unix shell fills in with a list of all filenames that match this *glob*
 pattern. (In this case, it is all files with the ``.nc`` file extension
 in the directory ``/path/to/infiles``.) These command-line options and
 arguments specify all of the same input passed to the Specifier objects
-in the examples of the previous section.
+in the examples of the previous section.  This script will create a 
+Specifier object with the options passed via the command line, and it will
+save this Specifier object in *specfile* called ``example.s2s``.
 
-For parallel operation, one must launch the ``slice2series`` script from
+With the Specifier created and saved to file using the ``s2smake`` utility,
+we can run the PyReshaper with this Specifier using the ``s2srun`` utility,
+with all options and parameters specified on the command line.
+
+::
+
+    $ s2srun --serial --verbosity=3 example.s2s
+
+The example above shows the execution, in serial, of the PyReshaper job 
+specified by the ``example.s2s`` Specifier object file with a verbosity 
+level of 3.
+
+For parallel operation, one must launch the ``s2srun`` script from
 the appropriate MPI launcher. On the Yellowstone system
 (``yellowstone.ucar.edu``), this is done with the following command.
 
 ::
 
-    $ mpirun.lsf slice2series \
-      --netcdf_format="netcdf4c" \
-      --output_prefix="/path/to/outfile_prefix." \
-      --output_suffix="000101-001012.nc" \
-      -m "time" -m "time_bounds" \
-      /path/to/infiles/*.nc
+    $ mpirun.lsf s2srun --verbosity=3 example.s2s
 
-In the above example, this will launch the ``slice2series`` script into
+In the above example, this will launch the ``s2srun`` script into
 the MPI environment already created by either a request for an
 interactive session or from an LSF submission script.
 
-It is also possible to run the ``slice2series` script with an existing
-*specification* (or ``Specifier`` class instance).  In this case, the existing
-``Specifier`` instance must be saved to a *serialized* file (``pickle``),
-such as with the following Python code.
+The Specifier object files, or *specfiles*, described above can be generated
+from within Python, too.  These files are serialized instances of Specifier
+objects, saved to a file.  The serializing tool assumed is Python's ``pickle``
+library.  To generate your own *specfile* from within Python, do the following.
 
 .. code:: py
 
     import pickle
     
     # Assume "spec" is an existing Specifier instance
-    pickle.dump(spec, open("specfile.p", "wb") )
-    
-Similarly, a serialized (*pickled*) ``Specifier`` instance can be read from
-such a file with the following Python code.
+    pickle.dump(spec, open("specfile.s2s", "wb") )
+
+Similarly, a *specfile* can be read with the following Python code.
 
 .. code:: py
 
@@ -507,28 +522,14 @@ such a file with the following Python code.
     
     spec = pickle.load( open("specfile.p", "rb") )
     
-This is what the ``slice2series`` code actually does under the hood.  To
-use such a serialized ``Specifier`` instance from the command-line interface,
-use the ``--specfile`` option, as shown below.
-
-::
-
-    $  slice2series --serial --specfile=specfile.p
-
-Similarly, the parallel operation is simply preceded with the ``mpirun``
-command.
-
-Additional Arguments to the ``slice2series`` Script
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Additional Arguments to the ``s2srun`` Script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 While the basic options shown in the previous examples above are
-sufficient for most purposes, two additional options are available. The
-``--verbosity`` option can be used to set the verbosity level, just like
-the ``verbosity`` argument to the ``create_reshaper()`` function
-described in the previous sections. The ``--limit``
-command-line option can be used to set the ``output_limit`` argument of
-the Reshaper ``convert()`` function, also described in the previous
-sections.
+sufficient for most purposes, two additional options are available. 
+The ``--limit`` command-line option can be used to set the 
+``output_limit`` argument of the Reshaper ``convert()`` function, 
+described in the previous sections.
 
 Additionally, the ``--skip_existing`` command-line option, if present, will
 set the ``skip_existing`` parameter of the ``create_reshaper()`` function

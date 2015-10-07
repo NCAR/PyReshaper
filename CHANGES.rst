@@ -106,3 +106,9 @@ VERSION 0.9.5
    
 VERSION 0.9.6
 -------------
+
+7 October 2015:
+ - Split 'slice2series' script into 2 separate scripts: 's2smake' to generate
+   specifier object files (specfiles), and 's2srun' to run a reshaper job
+   with a given specifier object file
+   
