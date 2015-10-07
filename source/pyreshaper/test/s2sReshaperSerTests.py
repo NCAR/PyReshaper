@@ -12,9 +12,9 @@ from os import remove
 from os.path import exists
 
 import Nio
+
 from pyreshaper.reshaper import Slice2SeriesReshaper, create_reshaper
 from pyreshaper.specification import Specifier
-
 import makeTestData
 
 
