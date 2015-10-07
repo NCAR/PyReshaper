@@ -111,4 +111,5 @@ VERSION 0.9.6
  - Split 'slice2series' script into 2 separate scripts: 's2smake' to generate
    specifier object files (specfiles), and 's2srun' to run a reshaper job
    with a given specifier object file
-   
+ - Now uses 'write mode' to determing if overwriting output files or skipping
+   existing output files
