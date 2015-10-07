@@ -604,7 +604,7 @@ class Slice2SeriesReshaper(Reshaper):
             if exists(out_filename):
                 err_msg = 'Found existing output file: {}'.format(out_filename)
                 raise OSError(err_msg)
-            temp_filename = out_filename + '.temp'
+            temp_filename = out_filename + '_temp_.nc'
             out_file = nio_open_file(temp_filename, 'w',
                                      options=self._nio_options)
             self._timer.stop('Open Output Files')
