@@ -19,8 +19,10 @@ class SpecifierTests(unittest.TestCase):
         spec = specification.Specifier()
         self.assertListEqual(spec.input_file_list, [],
                              'Input file list not initialized to empty')
-        self.assertEqual(spec.netcdf_format, 'netcdf4c',
-                         'NetCDF format not initialized to netcdf4c')
+        self.assertEqual(spec.netcdf_format, 'netcdf4',
+                         'NetCDF format not initialized to netcdf4')
+        self.assertEqual(spec.compression_level, 0,
+                         'NetCDF compression level not initialized to 0')
         self.assertEqual(spec.output_file_prefix, 'tseries.',
                          'Output file prefix not initialized to tseries.')
         self.assertEqual(spec.output_file_suffix, '.nc',
@@ -30,17 +32,20 @@ class SpecifierTests(unittest.TestCase):
 
     def test_init_full(self):
         in_list = ['a', 'b', 'c']
-        fmt = 'netcdf'
+        fmt = 'netcdf4c'
+        cl = 4
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertListEqual(spec.input_file_list, in_list,
                              'Input file list not initialized properly')
         self.assertEqual(spec.netcdf_format, fmt,
                          'NetCDF format not initialized properly')
+        self.assertEqual(spec.compression_level, cl,
+                         'NetCDF compression level not initialized properly')
         self.assertEqual(spec.output_file_prefix, prefix,
                          'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_suffix, suffix,
@@ -51,94 +56,127 @@ class SpecifierTests(unittest.TestCase):
     def test_validate_types(self):
         in_list = ['a', 'b', 'c']
         fmt = 'netcdf'
+        cl = 3
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         spec.validate_types()
 
-    def test_validate_types_fail_1(self):
+    def test_validate_types_fail_input(self):
         in_list = ['a', 2, 'c']
         fmt = 'netcdf'
+        cl = 5
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
 
-    def test_validate_types_fail_2(self):
+    def test_validate_types_fail_format(self):
         in_list = ['a', 'b', 'c']
         fmt = 2342
+        cl = 5
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
 
-    def test_validate_types_fail_3(self):
+    def test_validate_types_fail_cl(self):
         in_list = ['a', 'b', 'c']
         fmt = 'netcdf'
+        cl = '6'
+        prefix = 'pre.'
+        suffix = '.suf.nc'
+        metadata = ['x', 'y', 'z']
+        spec = specification.Specifier(
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
+            suffix=suffix, metadata=metadata)
+        self.assertRaises(TypeError, spec.validate_types)
+
+    def test_validate_types_fail_prefix(self):
+        in_list = ['a', 'b', 'c']
+        fmt = 'netcdf'
+        cl = 5
         prefix = dict()
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
 
-    def test_validate_types_fail_4(self):
+    def test_validate_types_fail_suffix(self):
         in_list = ['a', 'b', 'c']
         fmt = 'netcdf'
+        cl = 5
         prefix = 'pre.'
         suffix = list()
         metadata = ['x', 'y', 'z']
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
 
-    def test_validate_types_fail_5(self):
+    def test_validate_types_fail_metadata(self):
         in_list = ['a', 'b', 'c']
         fmt = 'netcdf'
+        cl = 5
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 2]
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
 
-    def test_validate_values_fail_1(self):
+    def test_validate_values_fail_input(self):
         in_list = ['a', 'b', 'c']
         fmt = 'netcdf'
+        cl = 5
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = []
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         spec.validate_types()
         self.assertRaises(ValueError, spec.validate_values)
 
-    def test_validate_values_fail_2(self):
+    def test_validate_values_fail_format(self):
         in_list = ['timekeeperTests.py', 'messengerTests.py']
         fmt = 'netcdf9'
+        cl = 5
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = []
         spec = specification.Specifier(
-            infiles=in_list, ncfmt=fmt, prefix=prefix,
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
         spec.validate_types()
         self.assertRaises(ValueError, spec.validate_values)
 
-    def test_validate_values_fail_3(self):
+    def test_validate_values_fail_cl(self):
+        in_list = ['timekeeperTests.py', 'messengerTests.py']
+        fmt = 'netcdf4'
+        cl = 111
+        prefix = 'pre.'
+        suffix = '.suf.nc'
+        metadata = []
+        spec = specification.Specifier(
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
+            suffix=suffix, metadata=metadata)
+        spec.validate_types()
+        self.assertRaises(ValueError, spec.validate_values)
+
+    def test_validate_values_fail_prefix(self):
         in_list = ['timekeeperTests.py', 'messengerTests.py']
         fmt = 'netcdf4'
         prefix = '/sfcsrytsdfv/pre.'
@@ -150,7 +188,7 @@ class SpecifierTests(unittest.TestCase):
         spec.validate_types()
         self.assertRaises(ValueError, spec.validate_values)
 
-    def test_validate_values_mod(self):
+    def test_validate_values_suffix(self):
         in_list = ['specificationTests.py']
         fmt = 'netcdf4'
         prefix = 'pre.'
@@ -165,5 +203,5 @@ class SpecifierTests(unittest.TestCase):
                          'Suffix was not changed to .nc extension')
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
