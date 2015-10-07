@@ -21,7 +21,7 @@ import makeTestData
 MPI_COMM_WORLD = MPI.COMM_WORLD
 
 
-class S2SReshaperParTests(unittest.TestCase):
+class S2SReshaperTests(unittest.TestCase):
 
     def setUp(self):
         self.rank = MPI_COMM_WORLD.Get_rank()
@@ -55,8 +55,8 @@ class S2SReshaperParTests(unittest.TestCase):
         self.spec = Specifier(
             infiles=self.infiles, ncfmt=self.ncfmt, compression=self.compression,
             prefix=self.prefix, suffix=self.suffix, metadata=self.metadata)
-        self.rshpr = create_reshaper(self.spec, serial=False, verbosity=3,
-                                     wmode='w')
+        self.rshpr = create_reshaper(self.spec, serial=(self.size == 1),
+                                     verbosity=3, wmode='w')
         self.outfiles = ['{}{}{}'.format(self.prefix, v, self.suffix)
                          for v in self.tsvars]
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
     from cStringIO import StringIO
     mystream = StringIO()
-    tests = unittest.TestLoader().loadTestsFromTestCase(S2SReshaperParTests)
+    tests = unittest.TestLoader().loadTestsFromTestCase(S2SReshaperTests)
     unittest.TextTestRunner(stream=mystream).run(tests)
     MPI_COMM_WORLD.Barrier()
 
