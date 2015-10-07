@@ -106,43 +106,26 @@ class S2SReshaperTests(unittest.TestCase):
 
                 ncout = Nio.open_file(outfile, 'r')
 
-                actual = 'lat' in ncout.dimensions
-                expected = True
-                msg = self._info_msg("{}: lat in dimensions".format(outfile),
+                actual = ncout.attributes
+                expected = self.fattrs
+                msg = self._info_msg("{}: attributes".format(outfile),
                                      None, actual, expected)
-                self.assertEqual(actual, expected, msg)
-
-                actual = 'lon' in ncout.dimensions
-                expected = True
-                msg = self._info_msg("{}: lon in dimensions".format(outfile),
-                                     None, actual, expected)
-                self.assertEqual(actual, expected, msg)
-
-                actual = 'time' in ncout.dimensions
-                expected = True
-                msg = self._info_msg("{}: time in dimensions".format(outfile),
-                                     None, actual, expected)
-                self.assertEqual(actual, expected, msg)
-
-                actual = ncout.dimensions['lat']
-                expected = self.nlat
-                msg = self._info_msg("{}: dimensions[lat]".format(outfile),
-                                     None, actual, expected)
-                self.assertEqual(actual, expected, msg)
-
-                actual = ncout.dimensions['lon']
-                expected = self.nlon
-                msg = self._info_msg("{}: dimensions[lon]".format(outfile),
-                                     None, actual, expected)
-                self.assertEqual(actual, expected, msg)
+                self.assertDictEqual(actual, expected, msg)
 
                 nsteps = len(self.infiles) * self.ntime
+                dims = {'lat': self.nlat, 'lon': self.nlon, 'time': nsteps}
+                for d, v in dims.iteritems():
+                    actual = d in ncout.dimensions
+                    expected = True
+                    msg = self._info_msg("{}: {} in dimensions".format(outfile, d),
+                                         None, actual, expected)
+                    self.assertEqual(actual, expected, msg)
 
-                actual = ncout.dimensions['time']
-                expected = nsteps
-                msg = self._info_msg("{}: dimensions[time]".format(outfile),
-                                     None, actual, expected)
-                self.assertEqual(actual, expected, msg)
+                    actual = ncout.dimensions[d]
+                    expected = v
+                    msg = self._info_msg("{}: dimensions[{}]".format(outfile, d),
+                                         None, actual, expected)
+                    self.assertEqual(actual, expected, msg)
 
                 actual = ncout.unlimited('time')
                 expected = True
@@ -150,65 +133,37 @@ class S2SReshaperTests(unittest.TestCase):
                                      None, actual, expected)
                 self.assertEqual(actual, expected, msg)
 
-                for v in self.scalars:
-                    actual = v in ncout.variables
-                    expected = True
-                    msg = self._info_msg("{}: var: {}".format(outfile, v),
-                                         None, actual, expected)
-                    self.assertEqual(actual, expected, msg)
-
-                    actual = ncout.variables[v].dimensions
-                    expected = ()
-                    msg = self._info_msg("{}: dim: {}".format(outfile, v),
-                                         None, actual, expected)
-                    self.assertTupleEqual(actual, expected, msg)
-
-                for v in self.timvars:
-                    actual = v in ncout.variables
-                    expected = True
-                    msg = self._info_msg("{}: var: {}".format(outfile, v),
-                                         None, actual, expected)
-                    self.assertEqual(actual, expected, msg)
-
-                    actual = ncout.variables[v].dimensions
-                    expected = ('lat', 'lon')
-                    msg = self._info_msg("{}: dim: {}".format(outfile, v),
-                                         None, actual, expected)
-                    self.assertTupleEqual(actual, expected, msg)
-
-                for v in self.tvmvars:
-                    actual = v in ncout.variables
-                    expected = True
-                    msg = self._info_msg("{}: var: {}".format(outfile, v),
-                                         None, actual, expected)
-                    self.assertEqual(actual, expected, msg)
-
-                    actual = ncout.variables[v].dimensions
-                    expected = ('time', 'lat', 'lon')
-                    msg = self._info_msg("{}: dim: {}".format(outfile, v),
-                                         None, actual, expected)
-                    self.assertTupleEqual(actual, expected, msg)
-
-                actual = tsvar in ncout.variables
-                expected = True
-                msg = self._info_msg("{}: var: {}".format(outfile, tsvar),
-                                     None, actual, expected)
-                self.assertEqual(actual, expected, msg)
-
-                actual = ncout.variables[tsvar].dimensions
-                expected = ('time', 'lat', 'lon')
-                msg = self._info_msg("{}: dim: {}".format(outfile, tsvar),
-                                     None, actual, expected)
-                self.assertTupleEqual(actual, expected, msg)
+                all_vars = [tsvar]
+                all_vars.extend(dims.keys())
+                all_vars.extend(self.scalars)
+                all_vars.extend(self.timvars)
+                all_vars.extend(self.tvmvars)
 
                 actual = set(ncout.variables.keys())
-                expected = set(['lat', 'lon', 'time', tsvar])
-                expected.update(self.scalars)
-                expected.update(self.timvars)
-                expected.update(self.tvmvars)
+                expected = set(all_vars)
                 msg = self._info_msg("{}: variable list".format(outfile),
                                      None, actual, expected)
                 self.assertSetEqual(actual, expected, msg)
+
+                for v in all_vars:
+                    actual = v in ncout.variables
+                    expected = True
+                    msg = self._info_msg("{}: {} in variables".format(outfile, v),
+                                         None, actual, expected)
+                    self.assertEqual(actual, expected, msg)
+
+                    actual = ncout.variables[v].dimensions
+                    if v in self.scalars:
+                        expected = ()
+                    elif v in dims:
+                        expected = (v,)
+                    elif v in self.timvars:
+                        expected = ('lat', 'lon')
+                    else:
+                        expected = ('time', 'lat', 'lon')
+                    msg = self._info_msg("{}: dims: {}".format(outfile, v),
+                                         None, actual, expected)
+                    self.assertTupleEqual(actual, expected, msg)
 
                 ncout.close()
 
