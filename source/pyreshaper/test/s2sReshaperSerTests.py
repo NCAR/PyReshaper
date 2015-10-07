@@ -39,8 +39,8 @@ class S2SReshaperSerTests(unittest.TestCase):
                                tvmvars=self.tvmvars,
                                tsvars=self.tsvars,
                                fattrs=self.fattrs)
-        self.ncfmt = 'netcdf4'
-        self.compression = 2
+        self.ncfmt = 'netcdf'
+        self.compression = 3
         self.prefix = 'output.'
         self.suffix = '.nc'
         self.metadata = [v for v in self.tvmvars]
@@ -56,9 +56,9 @@ class S2SReshaperSerTests(unittest.TestCase):
         for infile in self.infiles:
             if exists(infile):
                 remove(infile)
-        for outfile in self.outfiles:
-            if exists(outfile):
-                remove(outfile)
+        # for outfile in self.outfiles:
+        #    if exists(outfile):
+        #        remove(outfile)
 
     def _info_msg(self, name, data, actual, expected):
         spcr = ' ' * len(name)
@@ -77,6 +77,7 @@ class S2SReshaperSerTests(unittest.TestCase):
 
     def testReshaperConvert(self):
         self.rshpr.convert()
+        self.rshpr.print_diagnostics()
         for outfile, tsvar in zip(self.outfiles, self.tsvars):
 
             actual = exists(outfile)
