@@ -257,7 +257,7 @@ format.
 
     # Create the Reshaper object
     rshpr = reshaper.create_reshaper(specifier, serial=False, verbosity=1,
-                                     skip_existing=True, overwrite=False)
+                                     wmode='s')
 
     # Run the conversion (slice-to-series) process
     rshpr.convert()
@@ -412,17 +412,19 @@ output.
 By default, the PyReshaper will not overwrite existing output files, if they
 exist.  In normal operation, this means the PyReshaper will error (and stop
 execution) if output files are already present.  This behavior can be 
-controlled with 2 other parameters: ``skip_existing`` and ``overwrite``.
-Both parameters can be ``True`` or ``False``, and they both default to
-``False``.  When the ``overwrite`` parameter is set to ``True``, the 
+controlled with the ``wmode`` parameter.  The ``wmode`` parameter can be
+set to ``'w'``, ``'s'``, or ``'o'``.  When ``wmode='w'``, normal operation
+is expected (i.e., Operation will stop if output files are already present.).
+When ``wmode='s'``, the PyReshaper will skip generating time-series files 
+for the variables with existing files present.  When ``wmode='o'``, the 
 PyReshaper will delete existing files before running the reshaper operation.
-When the ``skip_existing`` parameter is set to ``True``, the PyReshaper will
-skip generating time-series files for the variables with existing files
-present.  Both decisions are done *before* the time-slice to time-series
-convertion takes place, and in the case of the ``skip_existing`` parameter,
-this means the remaining variables for which existing output files were not
-found will be parallelized over during parallel operation.  If both parameters
-are used, then the ``overwrite`` parameter takes precedence.  
+
+The output file write mode is analyzed before operation begins, meaning that
+when ``wmode='s'`` (skip mode), existing output files will be detected, and
+their corresponding time-series variable removed from the list to be extracted,
+*before* the job is parallelized across MPI processes.  Similarly, when 
+``wmode='o'``, the existing output files will be removed before the time-series
+generation begins.
 
 Arguments to the ``convert()`` Function
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -531,7 +533,8 @@ The ``--limit`` command-line option can be used to set the
 ``output_limit`` argument of the Reshaper ``convert()`` function, 
 described in the previous sections.
 
-Additionally, the ``--skip_existing`` command-line option, if present, will
-set the ``skip_existing`` parameter of the ``create_reshaper()`` function
-to ``True``.  Similarly, the ``--overwrite`` command-line option, if present,
-will set the ``overwrite`` parameter to ``True``.
+Additionally, the ``--write_mode`` command-line option can be used to set
+the ``wmode`` output file write mode parameter of the ``create_reshaper()``
+function.  This option can be set to ``'w'`` for normal operation (default),
+``'s'`` to skip existing time-series files, and ``'o'`` to overwrite existing
+time-series files.

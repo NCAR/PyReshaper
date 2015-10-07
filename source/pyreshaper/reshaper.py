@@ -30,8 +30,7 @@ from specification import Specifier
 #==============================================================================
 # create_reshaper factory function
 #==============================================================================
-def create_reshaper(specifier, serial=False, verbosity=1,
-                    skip_existing=False, overwrite=False,
+def create_reshaper(specifier, serial=False, verbosity=1, wmode='w',
                     once=False, simplecomm=None):
     """
     Factory function for Reshaper class instantiations.
@@ -54,18 +53,14 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         verbosity (int): Level of printed output (stdout).  A value of 0 means
             no output, and a higher value means more output.  The
             default value is 1.
-        skip_existing (bool): Flag specifying whether to skip the generation
-            of time-series for variables with time-series files that already
-            exist.  Default is False.
-        overwrite (bool): Flag specifying whether to forcefully overwrite
-            output files if they already exist.  Default is False.
+        wmode (str): The mode to use for writing output.  Can be 'w' for
+            normal write operation, 's' to skip the output generation for
+            existing time-series files, 'o' to overwrite existing time-series
+            files.
         once (bool): True or False, indicating whether the Reshaper should
             write all metadata to a 'once' file (separately).
         simplecomm (SimpleComm): A SimpleComm object to handle the parallel
             communication, if necessary
-        compressionlevel (int): An integer specifying the level of
-            compression to be used for the output files, if compression
-            is allowed by the NetCDF format
 
     Returns:
         Reshaper: An instance of the Reshaper object requested
@@ -75,8 +70,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         return Slice2SeriesReshaper(specifier,
                                     serial=serial,
                                     verbosity=verbosity,
-                                    skip_existing=skip_existing,
-                                    overwrite=overwrite,
+                                    wmode=wmode,
                                     once=once,
                                     simplecomm=simplecomm)
     elif isinstance(specifier, (list, tuple)):
@@ -84,8 +78,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         return create_reshaper(spec_dict,
                                serial=serial,
                                verbosity=verbosity,
-                               skip_existing=skip_existing,
-                               overwrite=overwrite,
+                               wmode=wmode,
                                once=once,
                                simplecomm=simplecomm)
     elif isinstance(specifier, dict):
@@ -95,8 +88,7 @@ def create_reshaper(specifier, serial=False, verbosity=1,
         return MultiSpecReshaper(specifier,
                                  serial=serial,
                                  verbosity=verbosity,
-                                 skip_existing=skip_existing,
-                                 overwrite=overwrite,
+                                 wmode=wmode,
                                  once=once,
                                  simplecomm=simplecomm)
     else:
@@ -204,8 +196,7 @@ class Slice2SeriesReshaper(Reshaper):
     reshaping operation is to be performed.
     """
 
-    def __init__(self, specifier, serial=False, verbosity=1,
-                 skip_existing=False, overwrite=False,
+    def __init__(self, specifier, serial=False, verbosity=1, wmode='w',
                  once=False, simplecomm=None):
         """
         Constructor
@@ -223,11 +214,10 @@ class Slice2SeriesReshaper(Reshaper):
             verbosity(int): Level of printed output (stdout).  A value of 0
                 means no output, and a higher value means more output.  The
                 default value is 1.
-            skip_existing (bool): Flag specifying whether to skip the generation
-                of time-series for variables with time-series files that already
-                exist.  Default is False.
-            overwrite (bool): Flag specifying whether to forcefully overwrite
-                output files if they already exist.  Default is False.
+            wmode (str): The mode to use for writing output.  Can be 'w' for
+                normal write operation, 's' to skip the output generation for
+                existing time-series files, 'o' to overwrite existing
+                time-series files.
             once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
             simplecomm (SimpleComm): A SimpleComm object to handle the parallel
@@ -244,8 +234,8 @@ class Slice2SeriesReshaper(Reshaper):
         if type(verbosity) is not int:
             err_msg = "Verbosity level must be an integer."
             raise TypeError(err_msg)
-        if type(skip_existing) is not bool:
-            err_msg = "Skip_existing flag must be True or False."
+        if type(wmode) is not str:
+            err_msg = "Write mode flag must be a str."
             raise TypeError(err_msg)
         if type(once) is not bool:
             err_msg = "Once-file indicator must be True or False."
@@ -254,9 +244,15 @@ class Slice2SeriesReshaper(Reshaper):
             if not isinstance(simplecomm, SimpleComm):
                 err_msg = "Simple communicator object is not a SimpleComm"
                 raise TypeError(err_msg)
+        if wmode not in ['w', 's', 'o']:
+            err_msg = "Write mode '{}' not recognized".format(wmode)
+            raise ValueError(err_msg)
 
         # Whether to write a once file
         self._use_once_file = once
+
+        # The output write mode to use
+        self._write_mode = wmode
 
         # Internal timer data
         self._timer = TimeKeeper()
@@ -327,7 +323,8 @@ class Slice2SeriesReshaper(Reshaper):
         if self._simplecomm.is_manager():
             self._vprint('Checking output file status...', verbosity=0)
         self._timer.start('Check Output File Status')
-        self._check_output_file_status(specifier, skip_existing, overwrite)
+        self._check_output_file_status(prefix=specifier.output_file_prefix,
+                                       suffix=specifier.output_file_suffix)
         self._timer.stop('Check Output File Status')
         if self._simplecomm.is_manager():
             self._vprint('Output file status checked.', verbosity=0)
@@ -471,8 +468,7 @@ class Slice2SeriesReshaper(Reshaper):
         if self._use_once_file:
             self._time_series_variables['once'] = 1
 
-    def _check_output_file_status(self, specifier,
-                                  skip_existing=False, overwrite=False):
+    def _check_output_file_status(self, prefix='tseries.', suffix='.nc'):
         """
         Perform validation of output data files themselves.
 
@@ -481,19 +477,11 @@ class Slice2SeriesReshaper(Reshaper):
         file
 
         Parameters:
-            specifier (Specifier): The reshaper specifier object
-
-        Keyword Arguments:
-            skip_existing (bool): Flag specifying whether to skip the generation
-                of time-series for variables with time-series files that already
-                exist.  Default is False.
-            overwrite (bool): Flag specifying whether to forcefully overwrite
-                output files if they already exist.  Default is False.
+            prefix (str): The output filename prefix
+            suffix (str): The output filename suffix
         """
 
         # Loop through the time-series variables and generate output filenames
-        prefix = specifier.output_file_prefix
-        suffix = specifier.output_file_suffix
         self._time_series_filenames = \
             dict([(variable, prefix + variable + suffix)
                   for variable in self._time_series_variables])
@@ -509,7 +497,7 @@ class Slice2SeriesReshaper(Reshaper):
             return
 
         # If overwrite is enabled, delete all existing files first
-        if overwrite:
+        if self._write_mode == 'o':
             if self._simplecomm.is_manager():
                 self._vprint('WARNING: Deleting existing output files for '
                              'time-series variables: {}'.format(existing),
@@ -517,9 +505,9 @@ class Slice2SeriesReshaper(Reshaper):
             for variable in existing:
                 remove(self._time_series_filenames[variable])
 
-        # Or, if skip_existing is set, remove the existing time-series
+        # Or, if skip existing is set, remove the existing time-series
         # variables from the list of time-series variables to convert
-        elif skip_existing:
+        elif self._write_mode == 's':
             if self._simplecomm.is_manager():
                 self._vprint('WARNING: Skipping time-series variables with '
                              'existing output files: {}'.format(existing),
@@ -804,7 +792,7 @@ class Slice2SeriesReshaper(Reshaper):
         o = self._timer.get_names()
         time_table_str = _pprint_dictionary('TIMING DATA', max_times, order=o)
         if self._simplecomm.is_manager():
-            self._vprint(time_table_str, verbosity=0)
+            self._vprint(time_table_str, verbosity=-1)
 
         # Convert byte count to MB
         for name in total_bytes:
@@ -813,7 +801,7 @@ class Slice2SeriesReshaper(Reshaper):
         # Print byte count totals
         byte_count_str = _pprint_dictionary('BYTE COUNTS (MB)', total_bytes)
         if self._simplecomm.is_manager():
-            self._vprint(byte_count_str, verbosity=0)
+            self._vprint(byte_count_str, verbosity=-1)
 
 
 #==============================================================================
@@ -830,8 +818,7 @@ class MultiSpecReshaper(Reshaper):
     it takes a dictionary of Slice2SeriesSpecifier objects.
     """
 
-    def __init__(self, specifiers, serial=False, verbosity=1,
-                 skip_existing=False, overwrite=False,
+    def __init__(self, specifiers, serial=False, verbosity=1, wmode='w',
                  once=False, simplecomm=None):
         """
         Constructor
@@ -849,11 +836,10 @@ class MultiSpecReshaper(Reshaper):
             verbosity(int): Level of printed output (stdout).  A value of 0
                 means no output, and a higher value means more output.  The
                 default value is 1.
-            skip_existing (bool): Flag specifying whether to skip the generation
-                of time-series for variables with time-series files that already
-                exist.  Default is False.
-            overwrite (bool): Flag specifying whether to forcefully overwrite
-                output files if they already exist.  Default is False.
+            wmode (str): The mode to use for writing output.  Can be 'w' for
+                normal write operation, 's' to skip the output generation for
+                existing time-series files, 'o' to overwrite existing
+                time-series files.
             once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
             simplecomm (SimpleComm): A SimpleComm object to handle the parallel
@@ -870,8 +856,8 @@ class MultiSpecReshaper(Reshaper):
         if type(verbosity) is not int:
             err_msg = "Verbosity level must be an integer."
             raise TypeError(err_msg)
-        if type(skip_existing) is not bool:
-            err_msg = "Skip_existing flag must be True or False."
+        if type(wmode) is not str:
+            err_msg = "Write mode flag must be a str."
             raise TypeError(err_msg)
         if type(once) is not bool:
             err_msg = "Once-file indicator must be True or False."
@@ -880,15 +866,15 @@ class MultiSpecReshaper(Reshaper):
             if not isinstance(simplecomm, SimpleComm):
                 err_msg = "Simple communicator object is not a SimpleComm"
                 raise TypeError(err_msg)
+        if wmode not in ['w', 's', 'o']:
+            err_msg = "Write mode '{}' not recognized".format(wmode)
+            raise ValueError(err_msg)
 
         # Whether to write to a once file
         self._use_once_file = once
 
-        # Whether to write to a once file
-        self._skip_existing = skip_existing
-
-        # Whether to write to overwrite output files
-        self._overwrite = overwrite
+        # Output file write mode
+        self._write_mode = wmode
 
         # Store the list of specifiers
         self._specifiers = specifiers
@@ -947,8 +933,7 @@ class MultiSpecReshaper(Reshaper):
             rshpr = create_reshaper(self._specifiers[spec_name],
                                     serial=self._serial,
                                     verbosity=self._verbosity,
-                                    skip_existing=self._skip_existing,
-                                    overwrite=self._overwrite,
+                                    wmode=self._write_mode,
                                     once=self._use_once_file,
                                     simplecomm=self._simplecomm)
             rshpr.convert(output_limit=output_limit)
