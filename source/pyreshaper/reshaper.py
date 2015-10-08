@@ -56,7 +56,7 @@ def create_reshaper(specifier, serial=False, verbosity=1, wmode='w',
         wmode (str): The mode to use for writing output.  Can be 'w' for
             normal write operation, 's' to skip the output generation for
             existing time-series files, 'o' to overwrite existing time-series
-            files.
+            files, 'a' to append to existing time-series files.
         once (bool): True or False, indicating whether the Reshaper should
             write all metadata to a 'once' file (separately).
         simplecomm (SimpleComm): A SimpleComm object to handle the parallel
@@ -217,7 +217,7 @@ class Slice2SeriesReshaper(Reshaper):
             wmode (str): The mode to use for writing output.  Can be 'w' for
                 normal write operation, 's' to skip the output generation for
                 existing time-series files, 'o' to overwrite existing
-                time-series files.
+                time-series files, 'a' to append to existing time-series files.
             once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
             simplecomm (SimpleComm): A SimpleComm object to handle the parallel
@@ -244,7 +244,7 @@ class Slice2SeriesReshaper(Reshaper):
             if not isinstance(simplecomm, SimpleComm):
                 err_msg = "Simple communicator object is not a SimpleComm"
                 raise TypeError(err_msg)
-        if wmode not in ['w', 's', 'o']:
+        if wmode not in ['w', 's', 'o', 'a']:
             err_msg = "Write mode '{}' not recognized".format(wmode)
             raise ValueError(err_msg)
 
@@ -321,13 +321,13 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Validate the output files
         if self._simplecomm.is_manager():
-            self._vprint('Checking output file status...', verbosity=0)
-        self._timer.start('Check Output File Status')
-        self._check_output_file_status(prefix=specifier.output_file_prefix,
-                                       suffix=specifier.output_file_suffix)
-        self._timer.stop('Check Output File Status')
+            self._vprint('Inspecting output files, if present...', verbosity=0)
+        self._timer.start('Inspect Output Files')
+        self._inspect_output_files(prefix=specifier.output_file_prefix,
+                                   suffix=specifier.output_file_suffix)
+        self._timer.stop('Inspect Output Files')
         if self._simplecomm.is_manager():
-            self._vprint('Output file status checked.', verbosity=0)
+            self._vprint('Output files inspected.', verbosity=0)
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
@@ -468,7 +468,7 @@ class Slice2SeriesReshaper(Reshaper):
         if self._use_once_file:
             self._time_series_variables['once'] = 1
 
-    def _check_output_file_status(self, prefix='tseries.', suffix='.nc'):
+    def _inspect_output_files(self, prefix='tseries.', suffix='.nc'):
         """
         Perform validation of output data files themselves.
 
@@ -488,13 +488,17 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Find which files already exist
         existing = []
-        for variable, filename in self._time_series_filenames.items():
+        for variable, filename in self._time_series_filenames.iteritems():
             if isfile(filename):
                 existing.append(variable)
 
-        # Return if no existing files found
+        # Return if no existing files found and not appending
         if len(existing) == 0:
-            return
+            if self._write_mode == 'a':
+                err_msg = 'No files found for appending data'
+                raise RuntimeError(err_msg)
+            else:
+                return
 
         # If overwrite is enabled, delete all existing files first
         if self._write_mode == 'o':
@@ -514,6 +518,46 @@ class Slice2SeriesReshaper(Reshaper):
                              verbosity=0)
             for variable in existing:
                 self._time_series_variables.pop(variable)
+
+        # Or, if appending, check that the existing output files conform
+        # to the expected pattern
+        elif self._write_mode == 'a':
+
+            # Check that all of the needed time-series files exist
+            if set(existing) != set(self._time_series_filenames.keys()):
+                missing = set(self._time_series_filenames.keys()) - set(existing)
+                err_msg = ("Some time-series files not found and needed "
+                           "for appending: {}").format(missing)
+                raise RuntimeError(err_msg)
+
+            # Check each existing time-series file
+            analysis_dict = {}
+            for tsvar, filename in self._time_series_filenames.iteritems():
+
+                # Open the time-series file for inspection
+                tsfile = nio_open_file(filename, 'r')
+
+                # Check that the file has the unlimited dimension and variable
+                has_udim = tsfile.unlimited(self._unlimited_dim)
+                analysis_dict['has_udim'] = has_udim
+
+                # Get the number of time-steps in the time-series file
+                numsteps.add(tsfile.dimensions[self._unlimited_dim]
+                             if has_udim else 0)
+
+                # Check that the time-series variable is in the file
+                if tsvar not in tsfile.variables:
+                    tsfile.close()
+                    err_msg = ("Time series variable {}")
+                # Close the time-series file
+                tsfile.close()
+
+            # Check that the number of time-steps in
+            # each time-series file is the same
+            if len(set(numsteps)) > 1:
+                err_msg = ("Number of time steps in each existing time-series "
+                           "file are not all the same.  Cannot append.")
+                raise RuntimeError(err_msg)
 
         # Otherwise, throw an exception if any existing output files are found
         else:
@@ -593,9 +637,9 @@ class Slice2SeriesReshaper(Reshaper):
 
             # Determine the output file name for this variable
             out_filename = self._time_series_filenames[out_name]
-            dbg_msg = 'Creating output file for variable: {}'.format(out_name)
+            dbg_msg = 'Opening output file for variable: {}'.format(out_name)
             if out_name == 'once':
-                dbg_msg = 'Creating "once" file.'
+                dbg_msg = 'Opening "once" file.'
             self._vprint(dbg_msg, header=True, verbosity=1)
 
             # Open the output file
@@ -841,7 +885,7 @@ class MultiSpecReshaper(Reshaper):
             wmode (str): The mode to use for writing output.  Can be 'w' for
                 normal write operation, 's' to skip the output generation for
                 existing time-series files, 'o' to overwrite existing
-                time-series files.
+                time-series files, 'a' to append to existing time-series files.
             once (bool): True or False, indicating whether the Reshaper should
                 write all metadata to a 'once' file (separately).
             simplecomm (SimpleComm): A SimpleComm object to handle the parallel
@@ -868,7 +912,7 @@ class MultiSpecReshaper(Reshaper):
             if not isinstance(simplecomm, SimpleComm):
                 err_msg = "Simple communicator object is not a SimpleComm"
                 raise TypeError(err_msg)
-        if wmode not in ['w', 's', 'o']:
+        if wmode not in ['w', 's', 'o', 'a']:
             err_msg = "Write mode '{}' not recognized".format(wmode)
             raise ValueError(err_msg)
 
