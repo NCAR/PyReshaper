@@ -7,16 +7,19 @@ See the LICENSE.rst file for details
 
 import unittest
 
+import sys
+from glob import glob
+from cStringIO import StringIO
 from os import linesep as eol
 from os import remove
 from os.path import exists
 from mpi4py import MPI
 
 import Nio
+import numpy as np
 
 from pyreshaper.reshaper import Slice2SeriesReshaper, create_reshaper
 from pyreshaper.specification import Specifier
-import makeTestData
 
 MPI_COMM_WORLD = MPI.COMM_WORLD
 
@@ -24,150 +27,289 @@ MPI_COMM_WORLD = MPI.COMM_WORLD
 class S2SReshaperTests(unittest.TestCase):
 
     def setUp(self):
+
+        # Parallel Management - Just for Tests
         self.rank = MPI_COMM_WORLD.Get_rank()
         self.size = MPI_COMM_WORLD.Get_size()
+
+        # Test Data Generation
+        self._clean_directory()
         self.nlat = 19
         self.nlon = 36
         self.ntime = 10
-        self.infiles = ['input{}.nc'.format(i) for i in xrange(5)]
+        self.slices = ['input{}.nc'.format(i) for i in xrange(5)]
         self.scalars = ['scalar{}'.format(i) for i in xrange(2)]
         self.timvars = ['tim{}'.format(i) for i in xrange(2)]
         self.tvmvars = ['tvm{}'.format(i) for i in xrange(2)]
         self.tsvars = ['tsvar{}'.format(i) for i in xrange(4)]
-        self.fattrs = {'attr1': 'attribute one', 'attr2': 'attribute two'}
+        self.fattrs = {'attr1': 'attribute one',
+                       'attr2': 'attribute two'}
         if self.rank == 0:
-            makeTestData.make_data(nlat=self.nlat,
-                                   nlon=self.nlon,
-                                   ntime=self.ntime,
-                                   slices=self.infiles,
-                                   scalars=self.scalars,
-                                   timvars=self.timvars,
-                                   tvmvars=self.tvmvars,
-                                   tsvars=self.tsvars,
-                                   fattrs=self.fattrs)
+            for i in xrange(len(self.slices)):
+
+                # Open the file for writing
+                fname = self.slices[i]
+                fobj = Nio.open_file(fname, 'w')
+
+                # Write attributes to file
+                for name, value in self.fattrs.iteritems():
+                    setattr(fobj, name, value)
+
+                # Create the dimensions in the file
+                fobj.create_dimension('lat', self.nlat)
+                fobj.create_dimension('lon', self.nlon)
+                fobj.create_dimension('time', None)
+
+                # Create the coordinate variables & add attributes
+                lat = fobj.create_variable('lat', 'f', ('lat',))
+                lon = fobj.create_variable('lon', 'f', ('lon',))
+                time = fobj.create_variable('time', 'f', ('time',))
+
+                # Set the coordinate variable attributes
+                setattr(lat, 'long_name', 'latitude')
+                setattr(lon, 'long_name', 'longitude')
+                setattr(time, 'long_name', 'time')
+                setattr(lat, 'units', 'degrees north')
+                setattr(lon, 'units', 'degrees east')
+                setattr(time, 'units', 'days from 01-01-0001')
+
+                # Set the values of the coordinate variables
+                lat[:] = np.linspace(-90, 90, self.nlat, dtype=np.float32)
+                lon[:] = np.linspace(-180, 180, self.nlon, endpoint=False, dtype=np.float32)
+                time[:] = np.arange(i * self.ntime, (i + 1) * self.ntime, dtype=np.float32)
+
+                # Create the scalar variables
+                for n in xrange(len(self.scalars)):
+                    vname = self.scalars[n]
+                    v = fobj.create_variable(vname, 'd', ())
+                    setattr(v, 'long_name', 'scalar{}'.format(n))
+                    setattr(v, 'units', '[{}]'.format(vname))
+                    v.assign_value(np.float64(n * 10))
+
+                # Create the time-invariant metadata variables
+                for n in xrange(len(self.timvars)):
+                    vname = self.timvars[n]
+                    v = fobj.create_variable(vname, 'd', ('lat', 'lon'))
+                    setattr(v, 'long_name', 'time-invariant metadata {}'.format(n))
+                    setattr(v, 'units', '[{}]'.format(vname))
+                    v[:] = np.ones((self.nlat, self.nlon), dtype=np.float64)
+
+                # Create the time-variant metadata variables
+                for n in xrange(len(self.tvmvars)):
+                    vname = self.tvmvars[n]
+                    v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
+                    setattr(v, 'long_name', 'time-variant metadata {}'.format(n))
+                    setattr(v, 'units', '[{}]'.format(vname))
+                    v[:] = np.ones((self.ntime, self.nlat, self.nlon), dtype=np.float64)
+
+                # Create the time-series variables
+                for n in xrange(len(self.tsvars)):
+                    vname = self.tsvars[n]
+                    v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
+                    setattr(v, 'long_name', 'time-series variable {}'.format(n))
+                    setattr(v, 'units', '[{}]'.format(vname))
+                    v[:] = np.ones((self.ntime, self.nlat, self.nlon), dtype=np.float64)
+
         MPI_COMM_WORLD.Barrier()
-        self.ncfmt = 'netcdf'
-        self.compression = 0
-        self.prefix = 'output.'
-        self.suffix = '.nc'
-        self.metadata = [v for v in self.tvmvars]
-        self.metadata.append('time')
-        self.serial = self.size == 1
-        self.spec = Specifier(
-            infiles=self.infiles, ncfmt=self.ncfmt, compression=self.compression,
-            prefix=self.prefix, suffix=self.suffix, metadata=self.metadata)
-        self.rshpr = create_reshaper(self.spec, serial=self.serial,
-                                     verbosity=3, wmode='w')
-        self.outfiles = ['{}{}{}'.format(self.prefix, v, self.suffix)
-                         for v in self.tsvars]
 
     def tearDown(self):
+        self._clean_directory()
+
+    def _clean_directory(self):
         if self.rank == 0:
-            for infile in self.infiles:
-                if exists(infile):
-                    remove(infile)
-            for outfile in self.outfiles:
-                if exists(outfile):
-                    remove(outfile)
+            for ncfile in glob('*.nc'):
+                remove(ncfile)
         MPI_COMM_WORLD.Barrier()
 
-    def _info_msg(self, name, data, actual, expected, show=True):
-        if self.serial:
-            rknm = name
-        else:
-            rknm = '[{}/{}] {}'.format(self.rank, self.size, name)
+    def _test_header(self, testname):
+        if self.rank == 0:
+            hline = '-' * 70
+            print hline
+            print testname
+            print hline
+
+    def _assertion(self, name, actual, expected,
+                   data=None, show=True, assertion=None):
+        rknm = '[{}/{}] {}'.format(self.rank, self.size, name)
         spcr = ' ' * len(rknm)
-        msg = ''.join([eol,
-                       rknm, ' - Input: ', str(data), eol,
-                       spcr, ' - Actual:   ', str(actual), eol,
-                       spcr, ' - Expected: ', str(expected)])
+        msg = eol + rknm
+        if data:
+            msg += ' - Input:    {}'.format(data) + eol + spcr
+        msg += ' - Actual:   {}'.format(actual) + eol + spcr
+        msg += ' - Expected: {}'.format(expected)
         if show:
             print msg
-        return msg
+        if assertion:
+            assertion(actual, expected, msg)
+        else:
+            self.assertEqual(actual, expected, msg)
 
-    def testCreateReshaperType(self):
-        actual = type(self.rshpr)
-        expected = Slice2SeriesReshaper
-        msg = self._info_msg("type(reshaper)",
-                             None, actual, expected)
-        self.assertEqual(actual, expected, msg)
+    def _test_create_reshaper(self, serial, verbosity, wmode):
+        self._test_header(("create_reshaper(serial={}, verbosity={}, "
+                           "wmode={!r})").format(serial, verbosity, wmode))
+        if not (serial and self.rank > 0):
+            spec = Specifier(infiles=self.slices, ncfmt='netcdf',
+                             compression=0, prefix='output.', suffix='.nc',
+                             metadata=[])
+            rshpr = create_reshaper(spec, serial=serial, verbosity=verbosity,
+                                    wmode=wmode)
+            self._assertion("type(reshaper)", type(rshpr),
+                            Slice2SeriesReshaper)
 
-    def testReshaperConvert(self):
-        self.rshpr.convert()
-        self.rshpr.print_diagnostics()
+    def test_create_reshaper_serial_V0_W(self):
+        self._test_create_reshaper(serial=True, verbosity=0, wmode='w')
+
+    def test_create_reshaper_serial_V1_W(self):
+        self._test_create_reshaper(serial=True, verbosity=1, wmode='w')
+
+    def test_create_reshaper_serial_V2_W(self):
+        self._test_create_reshaper(serial=True, verbosity=2, wmode='w')
+
+    def test_create_reshaper_serial_V1_O(self):
+        self._test_create_reshaper(serial=True, verbosity=1, wmode='o')
+
+    def test_create_reshaper_serial_V1_S(self):
+        self._test_create_reshaper(serial=True, verbosity=1, wmode='s')
+
+    def test_create_reshaper_parallel_V1_W(self):
+        self._test_create_reshaper(serial=False, verbosity=1, wmode='w')
+
+    def _check_outfiles(self, infiles, prefix, suffix, metadata):
         if self.rank == 0:
-            for outfile, tsvar in zip(self.outfiles, self.tsvars):
 
-                actual = exists(outfile)
-                expected = True
-                msg = self._info_msg("exists({})".format(outfile),
-                                     None, actual, expected)
-                self.assertEqual(actual, expected, msg)
+            nsteps = 0
+            for infile in infiles:
+                ncinp = Nio.open_file(infile, 'r')
+                nsteps += ncinp.dimensions['time']
+                ncinp.close()
+
+            ncinp = Nio.open_file(infiles[0], 'r')
+
+            scalars = [v for v in ncinp.variables
+                       if ncinp.variables[v].dimensions == ()]
+            tivars = [v for v in ncinp.variables
+                      if 'time' not in ncinp.variables[v].dimensions]
+            tsvars = [v for v in ncinp.variables
+                      if 'time' in ncinp.variables[v].dimensions and v not in metadata]
+
+            outfiles = ['{}{}{}'.format(prefix, v, suffix) for v in tsvars]
+
+            outdims = {'time': nsteps,
+                       'lat': ncinp.dimensions['lat'],
+                       'lon': ncinp.dimensions['lon']}
+
+            outmeta = [v for v in ncinp.variables if v not in tsvars]
+
+            for tsvar, outfile in zip(tsvars, outfiles):
+
+                self._assertion("exists({})".format(outfile),
+                                exists(outfile), True)
 
                 ncout = Nio.open_file(outfile, 'r')
 
-                actual = ncout.attributes
-                expected = self.fattrs
-                msg = self._info_msg("{}: attributes".format(outfile),
-                                     None, actual, expected)
-                self.assertDictEqual(actual, expected, msg)
+                self._assertion("{}: attributes equal".format(outfile),
+                                ncout.attributes, ncinp.attributes,
+                                assertion=self.assertDictEqual)
 
-                nsteps = len(self.infiles) * self.ntime
-                dims = {'lat': self.nlat, 'lon': self.nlon, 'time': nsteps}
-                for d, v in dims.iteritems():
-                    actual = d in ncout.dimensions
-                    expected = True
-                    msg = self._info_msg("{}: {} in dimensions".format(outfile, d),
-                                         None, actual, expected)
-                    self.assertEqual(actual, expected, msg)
+                for d, v in outdims.iteritems():
+                    self._assertion("{}: {} in dimensions".format(outfile, d),
+                                    d in ncout.dimensions, True)
 
-                    actual = ncout.dimensions[d]
-                    expected = v
-                    msg = self._info_msg("{}: dimensions[{}]".format(outfile, d),
-                                         None, actual, expected)
-                    self.assertEqual(actual, expected, msg)
+                    self._assertion("{}: dimensions[{}]".format(outfile, d),
+                                    ncout.dimensions[d], v)
 
-                actual = ncout.unlimited('time')
-                expected = True
-                msg = self._info_msg("{}: time unlimited".format(outfile),
-                                     None, actual, expected)
-                self.assertEqual(actual, expected, msg)
+                self._assertion("{}: time unlimited".format(outfile),
+                                ncout.unlimited('time'), True)
 
-                all_vars = [tsvar]
-                all_vars.extend(dims.keys())
-                all_vars.extend(self.scalars)
-                all_vars.extend(self.timvars)
-                all_vars.extend(self.tvmvars)
+                all_vars = [tsvar] + outmeta
 
-                actual = set(ncout.variables.keys())
-                expected = set(all_vars)
-                msg = self._info_msg("{}: variable list".format(outfile),
-                                     None, actual, expected)
-                self.assertSetEqual(actual, expected, msg)
+                self._assertion("{}: variable list".format(outfile),
+                                set(ncout.variables.keys()), set(all_vars),
+                                assertion=self.assertSetEqual)
 
                 for v in all_vars:
-                    actual = v in ncout.variables
-                    expected = True
-                    msg = self._info_msg("{}: {} in variables".format(outfile, v),
-                                         None, actual, expected)
-                    self.assertEqual(actual, expected, msg)
+                    self._assertion("{}: {} in variables".format(outfile, v),
+                                    v in ncout.variables, True)
 
-                    actual = ncout.variables[v].dimensions
-                    if v in self.scalars:
+                    if v in scalars:
                         expected = ()
-                    elif v in dims:
+                    elif v in ncinp.dimensions:
                         expected = (v,)
-                    elif v in self.timvars:
+                    elif v in tivars:
                         expected = ('lat', 'lon')
                     else:
                         expected = ('time', 'lat', 'lon')
-                    msg = self._info_msg("{}: dims: {}".format(outfile, v),
-                                         None, actual, expected)
-                    self.assertTupleEqual(actual, expected, msg)
+                    self._assertion("{}: {}.dimemsions equal".format(outfile, v),
+                                    ncout.variables[v].dimensions, expected)
 
                 ncout.close()
 
+            ncinp.close()
+
         MPI_COMM_WORLD.Barrier()
+
+    def _test_convert(self, infiles, prefix, suffix, metadata,
+                      ncfmt, clevel, serial, verbosity, wmode, once,
+                      print_diags=False):
+        nfiles = len(infiles)
+        ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c' else '4')
+        self._test_header(("convert() - {} infile(s), NC{}-CL{}, serial={},{}"
+                           "            verbosity={}, wmode={!r}, once={}"
+                           "").format(nfiles, ncvers, clevel, serial, eol,
+                                      verbosity, wmode, once))
+        if not (serial and self.rank > 0):
+            spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
+                             prefix=prefix, suffix=suffix, metadata=metadata)
+            oldout = sys.stdout
+            newout = StringIO()
+            sys.stdout = newout
+            rshpr = create_reshaper(spec, serial=serial,
+                                    verbosity=verbosity,
+                                    wmode=wmode, once=once)
+            rshpr.convert()
+            actual = newout.getvalue()
+            if verbosity == 0:
+                self._assertion("stdout empty", actual, '')
+            sys.stdout = oldout
+            if len(actual) > 0 and self.rank == 0:
+                print actual
+            if print_diags:
+                rshpr.print_diagnostics()
+        MPI_COMM_WORLD.Barrier()
+        self._check_outfiles(infiles, prefix, suffix, metadata)
+
+    def testReshaperConvert_All_NC3_CL0_SER_V0_W(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        self._test_convert(infiles=infiles, prefix='out.', suffix='.nc',
+                           metadata=mdata, ncfmt='netcdf', clevel=0,
+                           serial=True, verbosity=0, wmode='w', once=False)
+
+    def testReshaperConvert_1_NC3_CL0_SER_V0_W(self):
+        infiles = self.slices[0:1]
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        self._test_convert(infiles=infiles, prefix='out.', suffix='.nc',
+                           metadata=mdata, ncfmt='netcdf', clevel=0,
+                           serial=True, verbosity=0, wmode='w', once=False)
+
+    def testReshaperConvert_All_NC4_CL1_SER_V0_W(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        self._test_convert(infiles=infiles, prefix='out.', suffix='.nc',
+                           metadata=mdata, ncfmt='netcdf4', clevel=1,
+                           serial=True, verbosity=0, wmode='w', once=False)
+
+    def testReshaperConvert_All_NC3_CL0_PAR_V1_W(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        self._test_convert(infiles=infiles, prefix='out.', suffix='.nc',
+                           metadata=mdata, ncfmt='netcdf', clevel=0,
+                           serial=False, verbosity=1, wmode='w', once=False,
+                           print_diags=True)
 
 
 if __name__ == "__main__":
@@ -178,7 +320,6 @@ if __name__ == "__main__":
         print hline
     MPI_COMM_WORLD.Barrier()
 
-    from cStringIO import StringIO
     mystream = StringIO()
     tests = unittest.TestLoader().loadTestsFromTestCase(S2SReshaperTests)
     unittest.TextTestRunner(stream=mystream).run(tests)
