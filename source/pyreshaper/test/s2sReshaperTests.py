@@ -171,6 +171,9 @@ class S2SReshaperTests(unittest.TestCase):
     def test_create_reshaper_serial_V1_S(self):
         self._test_create_reshaper(serial=True, verbosity=1, wmode='s')
 
+    def test_create_reshaper_serial_V1_A(self):
+        self._test_create_reshaper(serial=True, verbosity=1, wmode='a')
+
     def test_create_reshaper_parallel_V1_W(self):
         self._test_create_reshaper(serial=False, verbosity=1, wmode='w')
 
