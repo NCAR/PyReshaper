@@ -670,9 +670,11 @@ class Slice2SeriesReshaper(Reshaper):
                 rename(out_filename, temp_filename)
                 out_file = nio_open_file(temp_filename, 'a',
                                          options=self._nio_options)
+                appending = True
             else:
                 out_file = nio_open_file(temp_filename, 'w',
                                          options=self._nio_options)
+                appending = False
             self._timer.stop('Open Output Files')
 
             # Start the loop over input files (i.e., time-steps)
@@ -685,7 +687,7 @@ class Slice2SeriesReshaper(Reshaper):
                 self._timer.stop('Open Input Files')
 
                 # Create header info, if this is the first input file
-                if in_filename == self._input_filenames[0] and self._write_mode != 'a':
+                if in_filename == self._input_filenames[0] and not appending:
 
                     # Copy file attributes and dimensions to output file
                     for name, val in in_file.attributes.iteritems():
