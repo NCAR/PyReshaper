@@ -174,7 +174,7 @@ class S2SReshaperTests(unittest.TestCase):
     def test_create_reshaper_parallel_V1_W(self):
         self._test_create_reshaper(serial=False, verbosity=1, wmode='w')
 
-    def _check_outfiles(self, infiles, prefix, suffix, metadata):
+    def _check_outfiles(self, infiles, prefix, suffix, metadata, once):
         if self.rank == 0:
 
             nsteps = 0
@@ -191,6 +191,9 @@ class S2SReshaperTests(unittest.TestCase):
                       if 'time' not in ncinp.variables[v].dimensions]
             tsvars = [v for v in ncinp.variables
                       if 'time' in ncinp.variables[v].dimensions and v not in metadata]
+
+            if once:
+                tsvars.append('once')
 
             outfiles = ['{}{}{}'.format(prefix, v, suffix) for v in tsvars]
 
@@ -221,7 +224,10 @@ class S2SReshaperTests(unittest.TestCase):
                 self._assertion("{}: time unlimited".format(outfile),
                                 ncout.unlimited('time'), True)
 
-                all_vars = [tsvar] + outmeta
+                if once:
+                    all_vars = outmeta if tsvar == 'once' else [tsvar]
+                else:
+                    all_vars = [tsvar] + outmeta
 
                 self._assertion("{}: variable list".format(outfile),
                                 set(ncout.variables.keys()), set(all_vars),
@@ -276,7 +282,7 @@ class S2SReshaperTests(unittest.TestCase):
             if print_diags:
                 rshpr.print_diagnostics()
         MPI_COMM_WORLD.Barrier()
-        self._check_outfiles(infiles, prefix, suffix, metadata)
+        self._check_outfiles(infiles, prefix, suffix, metadata, once)
 
     def testReshaperConvert_All_NC3_CL0_SER_V0_W(self):
         infiles = self.slices
@@ -311,6 +317,14 @@ class S2SReshaperTests(unittest.TestCase):
                            serial=False, verbosity=1, wmode='w', once=False,
                            print_diags=True)
 
+    def testReshaperConvert_All_NC3_CL0_PAR_V1_W_ONCE(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        self._test_convert(infiles=infiles, prefix='out.', suffix='.nc',
+                           metadata=mdata, ncfmt='netcdf', clevel=0,
+                           serial=False, verbosity=1, wmode='w', once=True,
+                           print_diags=True)
 
 if __name__ == "__main__":
     hline = '=' * 70
