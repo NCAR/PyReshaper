@@ -174,7 +174,7 @@ class S2SReshaperTests(unittest.TestCase):
     def test_create_reshaper_parallel_V1_W(self):
         self._test_create_reshaper(serial=False, verbosity=1, wmode='w')
 
-    def _check_outfiles(self, infiles, prefix, suffix, metadata, once):
+    def _check_outfiles(self, infiles, prefix, suffix, metadata, once, numfact=1):
         if self.rank == 0:
 
             nsteps = 0
@@ -182,6 +182,7 @@ class S2SReshaperTests(unittest.TestCase):
                 ncinp = Nio.open_file(infile, 'r')
                 nsteps += ncinp.dimensions['time']
                 ncinp.close()
+            nsteps *= numfact
 
             ncinp = Nio.open_file(infiles[0], 'r')
 
@@ -254,59 +255,68 @@ class S2SReshaperTests(unittest.TestCase):
 
         MPI_COMM_WORLD.Barrier()
 
+    def _run_convert(self, infiles, prefix, suffix, metadata,
+                     ncfmt, clevel, serial, verbosity, wmode, once,
+                     print_diags=False):
+        if not (serial and self.rank > 0):
+            spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
+                             prefix=prefix, suffix=suffix, metadata=metadata)
+            rshpr = create_reshaper(spec, serial=serial,
+                                    verbosity=verbosity,
+                                    wmode=wmode, once=once)
+            rshpr.convert()
+            if print_diags:
+                rshpr.print_diagnostics()
+        MPI_COMM_WORLD.Barrier()
+
     def _test_convert(self, infiles, prefix, suffix, metadata,
                       ncfmt, clevel, serial, verbosity, wmode, once,
-                      print_diags=False):
+                      print_diags=False, numfact=1):
         nfiles = len(infiles)
         ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c' else '4')
         self._test_header(("convert() - {} infile(s), NC{}-CL{}, serial={},{}"
                            "            verbosity={}, wmode={!r}, once={}"
                            "").format(nfiles, ncvers, clevel, serial, eol,
                                       verbosity, wmode, once))
-        if not (serial and self.rank > 0):
-            spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
-                             prefix=prefix, suffix=suffix, metadata=metadata)
-            oldout = sys.stdout
-            newout = StringIO()
-            sys.stdout = newout
-            rshpr = create_reshaper(spec, serial=serial,
-                                    verbosity=verbosity,
-                                    wmode=wmode, once=once)
-            rshpr.convert()
-            actual = newout.getvalue()
-            if verbosity == 0:
-                self._assertion("stdout empty", actual, '')
-            sys.stdout = oldout
-            if len(actual) > 0 and self.rank == 0:
-                print actual
-            if print_diags:
-                rshpr.print_diagnostics()
-        MPI_COMM_WORLD.Barrier()
-        self._check_outfiles(infiles, prefix, suffix, metadata, once)
+        self._run_convert(infiles, prefix, suffix, metadata, ncfmt, clevel,
+                          serial, verbosity, wmode, once, print_diags)
+        self._check_outfiles(infiles, prefix, suffix, metadata, once, numfact)
+
+    def _test_convert_no_output(self, infiles, prefix, suffix, metadata,
+                                ncfmt, clevel, serial, wmode, once, numfact=1):
+        oldout = sys.stdout
+        newout = StringIO()
+        sys.stdout = newout
+        self._run_convert(infiles, prefix, suffix, metadata, ncfmt, clevel,
+                          serial, 0, wmode, once, print_diags=False)
+        actual = newout.getvalue()
+        self._assertion("stdout empty", actual, '')
+        sys.stdout = oldout
+        self._check_outfiles(infiles, prefix, suffix, metadata, once, numfact)
 
     def testReshaperConvert_All_NC3_CL0_SER_V0_W(self):
         infiles = self.slices
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
-        self._test_convert(infiles=infiles, prefix='out.', suffix='.nc',
-                           metadata=mdata, ncfmt='netcdf', clevel=0,
-                           serial=True, verbosity=0, wmode='w', once=False)
+        self._test_convert_no_output(infiles=infiles, prefix='out.', suffix='.nc',
+                                     metadata=mdata, ncfmt='netcdf', clevel=0,
+                                     serial=True, wmode='w', once=False)
 
     def testReshaperConvert_1_NC3_CL0_SER_V0_W(self):
         infiles = self.slices[0:1]
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
-        self._test_convert(infiles=infiles, prefix='out.', suffix='.nc',
-                           metadata=mdata, ncfmt='netcdf', clevel=0,
-                           serial=True, verbosity=0, wmode='w', once=False)
+        self._test_convert_no_output(infiles=infiles, prefix='out.', suffix='.nc',
+                                     metadata=mdata, ncfmt='netcdf', clevel=0,
+                                     serial=True, wmode='w', once=False)
 
     def testReshaperConvert_All_NC4_CL1_SER_V0_W(self):
         infiles = self.slices
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
-        self._test_convert(infiles=infiles, prefix='out.', suffix='.nc',
-                           metadata=mdata, ncfmt='netcdf4', clevel=1,
-                           serial=True, verbosity=0, wmode='w', once=False)
+        self._test_convert_no_output(infiles=infiles, prefix='out.', suffix='.nc',
+                                     metadata=mdata, ncfmt='netcdf4', clevel=1,
+                                     serial=True, wmode='w', once=False)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V1_W(self):
         infiles = self.slices
@@ -325,6 +335,66 @@ class S2SReshaperTests(unittest.TestCase):
                            metadata=mdata, ncfmt='netcdf', clevel=0,
                            serial=False, verbosity=1, wmode='w', once=True,
                            print_diags=True)
+
+    def testReshaperConvert_All_NC3_CL0_PAR_V1_O(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        convert_args = {'infiles': infiles, 'prefix': 'out.', 'suffix': '.nc',
+                        'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                        'serial': False, 'verbosity': 1, 'once': False}
+        self._run_convert(wmode='w', print_diags=False, **convert_args)
+        self._test_convert(wmode='o', print_diags=True, **convert_args)
+
+    def testReshaperConvert_All_NC3_CL0_PAR_V1_O_ONCE(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        convert_args = {'infiles': infiles, 'prefix': 'out.', 'suffix': '.nc',
+                        'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                        'serial': False, 'verbosity': 1, 'once': True}
+        self._run_convert(wmode='w', print_diags=False, **convert_args)
+        self._test_convert(wmode='o', print_diags=True, **convert_args)
+
+    def testReshaperConvert_All_NC3_CL0_PAR_V1_S(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        convert_args = {'infiles': infiles, 'prefix': 'out.', 'suffix': '.nc',
+                        'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                        'serial': False, 'verbosity': 1, 'once': False}
+        self._run_convert(wmode='w', print_diags=False, **convert_args)
+        self._test_convert(wmode='s', print_diags=True, **convert_args)
+
+    def testReshaperConvert_All_NC3_CL0_PAR_V1_S_ONCE(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        convert_args = {'infiles': infiles, 'prefix': 'out.', 'suffix': '.nc',
+                        'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                        'serial': False, 'verbosity': 1, 'once': True}
+        self._run_convert(wmode='w', print_diags=False, **convert_args)
+        self._test_convert(wmode='s', print_diags=True, **convert_args)
+
+    def testReshaperConvert_All_NC3_CL0_PAR_V3_A(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        convert_args = {'infiles': infiles, 'prefix': 'out.', 'suffix': '.nc',
+                        'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                        'serial': False, 'verbosity': 3, 'once': False}
+        self._run_convert(wmode='w', print_diags=False, **convert_args)
+        self._test_convert(wmode='a', print_diags=True, numfact=2, **convert_args)
+
+    def testReshaperConvert_All_NC3_CL0_PAR_V3_A_ONCE(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        convert_args = {'infiles': infiles, 'prefix': 'out.', 'suffix': '.nc',
+                        'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                        'serial': False, 'verbosity': 3, 'once': True}
+        self._run_convert(wmode='w', print_diags=False, **convert_args)
+        self._test_convert(wmode='a', print_diags=True, numfact=2, **convert_args)
 
 if __name__ == "__main__":
     hline = '=' * 70
