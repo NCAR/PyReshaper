@@ -284,7 +284,7 @@ class Slice2SeriesReshaper(Reshaper):
         specifier.validate()
         self._timer.stop('Specifier Validation')
         if self._simplecomm.is_manager():
-            self._vprint('Specifier validated', verbosity=1)
+            self._vprint('  Specifier validated', verbosity=1)
 
         # Store the input file names
         self._input_filenames = specifier.input_file_list
@@ -309,7 +309,7 @@ class Slice2SeriesReshaper(Reshaper):
             opt.CompressionLevel = specifier.compression_level
         self._nio_options = opt
         if self._simplecomm.is_manager():
-            self._vprint('PyNIO options set', verbosity=1)
+            self._vprint('  PyNIO options set', verbosity=1)
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
