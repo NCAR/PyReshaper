@@ -381,6 +381,9 @@ class Slice2SeriesReshaper(Reshaper):
         # Close the first file
         ifile.close()
 
+        if self._simplecomm.is_manager():
+            self._vprint('First input file inspected.', verbosity=2)
+
         #===== INSPECT REMAINING INPUT FILES =====
 
         # Make a pass through remaining files and:
@@ -417,6 +420,9 @@ class Slice2SeriesReshaper(Reshaper):
             # Close the file
             ifile.close()
 
+        if self._simplecomm.is_manager():
+            self._vprint('Remaining input files inspected.', verbosity=2)
+
         #===== CHECK FOR MISSING VARIABLES =====
 
         # Make sure that the list of variables in each file is the same
@@ -426,6 +432,9 @@ class Slice2SeriesReshaper(Reshaper):
             for var in missing_vars:
                 warning += ' {}'.format(var)
             self._vprint(warning, header=True, verbosity=0)
+
+        if self._simplecomm.is_manager():
+            self._vprint('Checked for missing variables.', verbosity=2)
 
         #===== SORT INPUT FILES BY TIME =====
 
@@ -451,6 +460,9 @@ class Slice2SeriesReshaper(Reshaper):
         # the new order
         self._input_filenames = new_filenames
 
+        if self._simplecomm.is_manager():
+            self._vprint('Input files sorted by time.', verbosity=2)
+
         #===== FINALIZING OUTPUT =====
 
         # Debug output
@@ -470,7 +482,7 @@ class Slice2SeriesReshaper(Reshaper):
 
     def _inspect_output_files(self, prefix='tseries.', suffix='.nc'):
         """
-        Perform validation of output data files themselves.
+        Perform inspection of the output data files themselves.
 
         We compute the output file name from the prefix and suffix, and then
         we check whether the output files exist.  By default, if the output
@@ -525,36 +537,43 @@ class Slice2SeriesReshaper(Reshaper):
 
             # Check that all of the needed time-series files exist
             if set(existing) != set(self._time_series_filenames.keys()):
-                missing = set(self._time_series_filenames.keys()) - set(existing)
+                missing = set(
+                    self._time_series_filenames.keys()) - set(existing)
                 err_msg = ("Some time-series files not found and needed "
                            "for appending: {}").format(missing)
                 raise RuntimeError(err_msg)
 
             # Check each existing time-series file
-            analysis_dict = {}
+            analysis = {}
             for tsvar, filename in self._time_series_filenames.iteritems():
 
                 # Open the time-series file for inspection
                 tsfile = nio_open_file(filename, 'r')
 
+                # Add the file/variable to the analysis dictionary
+                varanal = {'filename': filename}
+
                 # Check that the file has the unlimited dimension and variable
                 has_udim = tsfile.unlimited(self._unlimited_dim)
-                analysis_dict['has_udim'] = has_udim
+                varanal['has udim'] = has_udim
 
                 # Get the number of time-steps in the time-series file
-                numsteps.add(tsfile.dimensions[self._unlimited_dim]
-                             if has_udim else 0)
+                varanal['num steps'] = (tsfile.dimensions[self._unlimited_dim]
+                                        if has_udim else -1)
 
                 # Check that the time-series variable is in the file
-                if tsvar not in tsfile.variables:
-                    tsfile.close()
-                    err_msg = ("Time series variable {}")
+                varanal['has var'] = tsvar in tsfile.variables
+
                 # Close the time-series file
                 tsfile.close()
 
+                # Add the variable analysis to the analysis dictionary
+                analysis[tsvar] = varanal
+
             # Check that the number of time-steps in
             # each time-series file is the same
-            if len(set(numsteps)) > 1:
+            nsteps_same = len(set([va['num steps'] for va in analysis])) == 1
+            if nsteps_same:
                 err_msg = ("Number of time steps in each existing time-series "
                            "file are not all the same.  Cannot append.")
                 raise RuntimeError(err_msg)
@@ -564,6 +583,14 @@ class Slice2SeriesReshaper(Reshaper):
             err_msg = ("Found existing output files for time-series "
                        "variables: {}").format(existing)
             raise RuntimeError(err_msg)
+
+    def _prepare_for_writing(self):
+        """
+        Helper method to prepare for writing output files
+
+        This function's operation depends upon the write mode (wmode)
+        """
+        pass
 
     def convert(self, output_limit=0):
         """
@@ -589,7 +616,8 @@ class Slice2SeriesReshaper(Reshaper):
 
         # Debugging output
         if self._simplecomm.is_manager():
-            self._vprint('Converting time-slices to time-series...', verbosity=0)
+            self._vprint(
+                'Converting time-slices to time-series...', verbosity=0)
 
         # Partition the time-series variables across all processors
         tsv_names_loc = self._simplecomm.partition(
@@ -748,7 +776,8 @@ class Slice2SeriesReshaper(Reshaper):
                             in_var = in_file.variables[name]
                             out_var = out_file.variables[name]
                             ndims = len(in_var.dimensions)
-                            udidx = in_var.dimensions.index(self._unlimited_dim)
+                            udidx = in_var.dimensions.index(
+                                self._unlimited_dim)
                             in_slice = [slice(None)] * ndims
                             in_slice[udidx] = slice_step_index
                             out_slice = [slice(None)] * ndims
