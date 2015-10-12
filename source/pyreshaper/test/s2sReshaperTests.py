@@ -399,6 +399,19 @@ class S2SReshaperTests(unittest.TestCase):
         self._run_convert(wmode='w', print_diags=False, **convert_args)
         self._test_convert(wmode='a', print_diags=True, numfact=2, **convert_args)
 
+    def testReshaperConvert_All_NC3_CL0_PAR_V3_A_MISSING(self):
+        infiles = self.slices
+        mdata = [v for v in self.tvmvars]
+        mdata.append('time')
+        convert_args = {'infiles': infiles, 'prefix': 'out.', 'suffix': '.nc',
+                        'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                        'serial': False, 'verbosity': 3, 'once': False}
+        self._run_convert(wmode='w', print_diags=False, **convert_args)
+        for tsvar in self.tsvars:
+            remove(convert_args['prefix'] + tsvar + convert_args['suffix'])
+        self._test_convert(wmode='a', print_diags=True, **convert_args)
+
+
 if __name__ == "__main__":
     hline = '=' * 70
     if MPI_COMM_WORLD.Get_rank() == 0:
