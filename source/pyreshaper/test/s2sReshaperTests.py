@@ -416,8 +416,9 @@ class S2SReshaperTests(unittest.TestCase):
                 'serial': False, 'verbosity': 1, 'once': False,
                 'print_diags': False}
         self._convert_header(infiles=self.slices, wmode='a', **args)
-        self._run_convert(infiles=self.slices[0:2], wmode='w', **args)
-        self._run_convert(infiles=self.slices[2:], wmode='a', **args)
+        self._run_convert(infiles=[self.slices[0]], wmode='w', **args)
+        for infile in self.slices[1:]:
+            self._run_convert(infiles=[infile], wmode='a', **args)
         for tsvar in self.tsvars:
             self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
 
@@ -429,8 +430,9 @@ class S2SReshaperTests(unittest.TestCase):
                 'serial': False, 'verbosity': 1, 'once': True,
                 'print_diags': False}
         self._convert_header(infiles=self.slices, wmode='a', **args)
-        self._run_convert(infiles=self.slices[0:2], wmode='w', **args)
-        self._run_convert(infiles=self.slices[2:], wmode='a', **args)
+        self._run_convert(infiles=[self.slices[0]], wmode='w', **args)
+        for infile in self.slices[1:]:
+            self._run_convert(infiles=[infile], wmode='a', **args)
         self._check_outfile(infiles=self.slices, tsvar='once', **args)
         for tsvar in self.tsvars:
             self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
@@ -442,10 +444,18 @@ class S2SReshaperTests(unittest.TestCase):
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'once': False,
                 'print_diags': False}
+        missingvar = self.tsvars[2]
         self._convert_header(infiles=self.slices, wmode='a', **args)
-        self._run_convert(infiles=self.slices[2:], wmode='a', **args)
+        self._run_convert(infiles=[self.slices[0]], wmode='w', **args)
+        self._run_convert(infiles=[self.slices[1]], wmode='a', **args)
+        remove(args['prefix'] + missingvar + args['suffix'])
+        for infile in self.slices[2:]:
+            self._run_convert(infiles=[infile], wmode='a', **args)
         for tsvar in self.tsvars:
-            self._check_outfile(infiles=self.slices[2:], tsvar=tsvar, **args)
+            if tsvar == missingvar:
+                self._check_outfile(infiles=self.slices[2:], tsvar=tsvar, **args)
+            else:
+                self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
 
 
 if __name__ == "__main__":
