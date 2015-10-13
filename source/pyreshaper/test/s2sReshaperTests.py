@@ -177,7 +177,8 @@ class S2SReshaperTests(unittest.TestCase):
     def test_create_reshaper_parallel_V1_W(self):
         self._test_create_reshaper(serial=False, verbosity=1, wmode='w')
 
-    def _check_outfiles(self, infiles, prefix, suffix, metadata, once, **kwds):
+    def _check_outfile(self, infiles, prefix, tsvar, suffix,
+                       metadata, once, **kwds):
         if self.rank == 0:
 
             nsteps = 0
@@ -198,60 +199,62 @@ class S2SReshaperTests(unittest.TestCase):
             if once:
                 tsvars.append('once')
 
-            outfiles = ['{}{}{}'.format(prefix, v, suffix) for v in tsvars]
-
             outdims = {'time': nsteps,
                        'lat': ncinp.dimensions['lat'],
                        'lon': ncinp.dimensions['lon']}
 
             outmeta = [v for v in ncinp.variables if v not in tsvars]
 
-            for tsvar, outfile in zip(tsvars, outfiles):
+            outfile = '{}{}{}'.format(prefix, tsvar, suffix)
 
-                self._assertion("exists({})".format(outfile),
-                                exists(outfile), True)
+            self._assertion(("{}: variable "
+                             "{!r} in input").format(outfile, tsvar),
+                            tsvar in tsvars, True)
 
-                ncout = Nio.open_file(outfile, 'r')
+            self._assertion("exists({})".format(outfile),
+                            exists(outfile), True)
 
-                self._assertion("{}: attributes equal".format(outfile),
-                                ncout.attributes, ncinp.attributes,
-                                assertion=self.assertDictEqual)
+            ncout = Nio.open_file(outfile, 'r')
 
-                for d, v in outdims.iteritems():
-                    self._assertion("{}: {} in dimensions".format(outfile, d),
-                                    d in ncout.dimensions, True)
+            self._assertion("{}: attributes equal".format(outfile),
+                            ncout.attributes, ncinp.attributes,
+                            assertion=self.assertDictEqual)
 
-                    self._assertion("{}: dimensions[{}]".format(outfile, d),
-                                    ncout.dimensions[d], v)
+            for d, v in outdims.iteritems():
+                self._assertion("{}: {} in dimensions".format(outfile, d),
+                                d in ncout.dimensions, True)
 
-                self._assertion("{}: time unlimited".format(outfile),
-                                ncout.unlimited('time'), True)
+                self._assertion("{}: dimensions[{}]".format(outfile, d),
+                                ncout.dimensions[d], v)
 
-                if once:
-                    all_vars = outmeta if tsvar == 'once' else [tsvar]
+            self._assertion("{}: time unlimited".format(outfile),
+                            ncout.unlimited('time'), True)
+
+            if once:
+                all_vars = outmeta if tsvar == 'once' else [tsvar]
+            else:
+                all_vars = [tsvar] + outmeta
+
+            self._assertion("{}: variable list".format(outfile),
+                            set(ncout.variables.keys()), set(all_vars),
+                            assertion=self.assertSetEqual)
+
+            for v in all_vars:
+                self._assertion("{}: {} in variables".format(outfile, v),
+                                v in ncout.variables, True)
+
+                if v in scalars:
+                    expected = ()
+                elif v in ncinp.dimensions:
+                    expected = (v,)
+                elif v in tivars:
+                    expected = ('lat', 'lon')
                 else:
-                    all_vars = [tsvar] + outmeta
+                    expected = ('time', 'lat', 'lon')
+                self._assertion("{}: {}.dimemsions equal".format(outfile, v),
+                                ncout.variables[v].dimensions, expected)
 
-                self._assertion("{}: variable list".format(outfile),
-                                set(ncout.variables.keys()), set(all_vars),
-                                assertion=self.assertSetEqual)
-
-                for v in all_vars:
-                    self._assertion("{}: {} in variables".format(outfile, v),
-                                    v in ncout.variables, True)
-
-                    if v in scalars:
-                        expected = ()
-                    elif v in ncinp.dimensions:
-                        expected = (v,)
-                    elif v in tivars:
-                        expected = ('lat', 'lon')
-                    else:
-                        expected = ('time', 'lat', 'lon')
-                    self._assertion("{}: {}.dimemsions equal".format(outfile, v),
-                                    ncout.variables[v].dimensions, expected)
-
-                ncout.close()
+            ncout.close()
 
             ncinp.close()
 
@@ -303,7 +306,8 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        self._check_outfiles(**args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_1_NC3_CL0_SER_V0_W(self):
         mdata = [v for v in self.tvmvars]
@@ -314,7 +318,8 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        self._check_outfiles(**args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC4_CL1_SER_V0_W(self):
         mdata = [v for v in self.tvmvars]
@@ -325,7 +330,8 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        self._check_outfiles(**args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V1_W(self):
         mdata = [v for v in self.tvmvars]
@@ -336,7 +342,8 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfiles(**args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V1_W_ONCE(self):
         mdata = [v for v in self.tvmvars]
@@ -347,7 +354,9 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfiles(**args)
+        self._check_outfile(tsvar='once', **args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V1_O(self):
         mdata = [v for v in self.tvmvars]
@@ -358,7 +367,8 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfiles(**args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V1_O_ONCE(self):
         mdata = [v for v in self.tvmvars]
@@ -369,7 +379,9 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfiles(**args)
+        self._check_outfile(tsvar='once', **args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V1_S(self):
         mdata = [v for v in self.tvmvars]
@@ -380,7 +392,8 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfiles(**args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V1_S_ONCE(self):
         mdata = [v for v in self.tvmvars]
@@ -391,7 +404,9 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfiles(**args)
+        self._check_outfile(tsvar='once', **args)
+        for tsvar in self.tsvars:
+            self._check_outfile(tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V3_A(self):
         mdata = [v for v in self.tvmvars]
@@ -403,7 +418,8 @@ class S2SReshaperTests(unittest.TestCase):
         self._convert_header(infiles=self.slices, wmode='a', **args)
         self._run_convert(infiles=self.slices[0:2], wmode='w', **args)
         self._run_convert(infiles=self.slices[2:], wmode='a', **args)
-        self._check_outfiles(infiles=self.slices, **args)
+        for tsvar in self.tsvars:
+            self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V3_A_ONCE(self):
         mdata = [v for v in self.tvmvars]
@@ -415,7 +431,9 @@ class S2SReshaperTests(unittest.TestCase):
         self._convert_header(infiles=self.slices, wmode='a', **args)
         self._run_convert(infiles=self.slices[0:2], wmode='w', **args)
         self._run_convert(infiles=self.slices[2:], wmode='a', **args)
-        self._check_outfiles(infiles=self.slices, **args)
+        self._check_outfile(infiles=self.slices, tsvar='once', **args)
+        for tsvar in self.tsvars:
+            self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
 
     def testReshaperConvert_All_NC3_CL0_PAR_V3_A_MISSING(self):
         mdata = [v for v in self.tvmvars]
@@ -426,7 +444,8 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(infiles=self.slices, wmode='a', **args)
         self._run_convert(infiles=self.slices[2:], wmode='a', **args)
-        self._check_outfiles(infiles=self.slices[2:], **args)
+        for tsvar in self.tsvars:
+            self._check_outfile(infiles=self.slices[2:], tsvar=tsvar, **args)
 
 
 if __name__ == "__main__":
