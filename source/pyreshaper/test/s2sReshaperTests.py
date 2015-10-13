@@ -92,7 +92,7 @@ class S2SReshaperTests(unittest.TestCase):
                     v = fobj.create_variable(vname, 'd', ('lat', 'lon'))
                     setattr(v, 'long_name', 'time-invariant metadata {}'.format(n))
                     setattr(v, 'units', '[{}]'.format(vname))
-                    v[:] = np.ones((self.nlat, self.nlon), dtype=np.float64)
+                    v[:] = np.ones((self.nlat, self.nlon), dtype=np.float64) * n
 
                 # Create the time-variant metadata variables
                 for n in xrange(len(self.tvmvars)):
@@ -100,7 +100,7 @@ class S2SReshaperTests(unittest.TestCase):
                     v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
                     setattr(v, 'long_name', 'time-variant metadata {}'.format(n))
                     setattr(v, 'units', '[{}]'.format(vname))
-                    v[:] = np.ones((self.ntime, self.nlat, self.nlon), dtype=np.float64)
+                    v[:] = np.ones((self.ntime, self.nlat, self.nlon), dtype=np.float64) * n
 
                 # Create the time-series variables
                 for n in xrange(len(self.tsvars)):
@@ -108,7 +108,7 @@ class S2SReshaperTests(unittest.TestCase):
                     v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
                     setattr(v, 'long_name', 'time-series variable {}'.format(n))
                     setattr(v, 'units', '[{}]'.format(vname))
-                    v[:] = np.ones((self.ntime, self.nlat, self.nlon), dtype=np.float64)
+                    v[:] = np.ones((self.ntime, self.nlat, self.nlon), dtype=np.float64) * n
 
         MPI_COMM_WORLD.Barrier()
 
@@ -128,6 +128,17 @@ class S2SReshaperTests(unittest.TestCase):
             print testname
             print hline
 
+    def _convert_header(self, infiles, prefix, suffix, metadata,
+                        ncfmt, clevel, serial, verbosity, wmode, once,
+                        print_diags=False):
+        nfiles = len(infiles)
+        ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c'
+                                                else '4')
+        self._test_header(("convert() - {} infile(s), NC{}-CL{}, serial={},{}"
+                           "            verbosity={}, wmode={!r}, once={}"
+                           "").format(nfiles, ncvers, clevel, serial, eol,
+                                      verbosity, wmode, once))
+
     def _assertion(self, name, actual, expected,
                    data=None, show=True, assertion=None):
         rknm = '[{}/{}] {}'.format(self.rank, self.size, name)
@@ -143,6 +154,115 @@ class S2SReshaperTests(unittest.TestCase):
             assertion(actual, expected, msg)
         else:
             self.assertEqual(actual, expected, msg)
+
+    def _check_outfile(self, infiles, prefix, tsvar, suffix,
+                       metadata, once, **kwds):
+        if self.rank == 0:
+
+            outfile = '{}{}{}'.format(prefix, tsvar, suffix)
+            ncout = Nio.open_file(outfile, 'r')
+
+            series_step = 0
+            for infile in infiles:
+                ncinp = Nio.open_file(infile, 'r')
+                nsteps = ncinp.dimensions['time']
+                if infile == infiles[0]:
+                    scalars = [v for v in ncinp.variables
+                               if ncinp.variables[v].dimensions == ()]
+                    tivars = [v for v in ncinp.variables
+                              if 'time' not in ncinp.variables[v].dimensions]
+                    tsvars = [v for v in ncinp.variables
+                              if 'time' in ncinp.variables[v].dimensions and
+                              v not in metadata]
+                    if once:
+                        tsvars.append('once')
+
+                    outdims = {'lat': ncinp.dimensions['lat'],
+                               'lon': ncinp.dimensions['lon']}
+
+                    outmeta = [v for v in ncinp.variables if v not in tsvars]
+
+                    self._assertion(("{}: variable "
+                                     "{!r} exists").format(outfile, tsvar),
+                                    tsvar in tsvars, True)
+                    self._assertion("exists({!r})".format(outfile),
+                                    exists(outfile), True)
+                    self._assertion("{}: attributes equal".format(outfile),
+                                    ncout.attributes, ncinp.attributes,
+                                    assertion=self.assertDictEqual)
+                    for d, v in outdims.iteritems():
+                        self._assertion("{}: {!r} in dimensions".format(outfile, d),
+                                        d in ncout.dimensions, True)
+                        self._assertion("{}: dimensions[{!r}]".format(outfile, d),
+                                        ncout.dimensions[d], v)
+                    self._assertion("{}: 'time' in dimensions".format(outfile),
+                                    'time' in ncout.dimensions, True)
+                    self._assertion("{}: 'time' unlimited".format(outfile),
+                                    ncout.unlimited('time'), True)
+                    if once:
+                        all_vars = outmeta if tsvar == 'once' else [tsvar]
+                    else:
+                        all_vars = [tsvar] + outmeta
+                    self._assertion("{}: variable set".format(outfile),
+                                    set(ncout.variables.keys()), set(all_vars),
+                                    assertion=self.assertSetEqual)
+                    for v in all_vars:
+                        if v in scalars:
+                            expected = ()
+                        elif v in ncinp.dimensions:
+                            expected = (v,)
+                        elif v in tivars:
+                            expected = ('lat', 'lon')
+                        else:
+                            expected = ('time', 'lat', 'lon')
+                        self._assertion("{}: {}.dimemsions equal".format(outfile, v),
+                                        ncout.variables[v].dimensions, expected)
+
+                for v in all_vars:
+                    expected = ncinp.variables[v].get_value()
+                    if v == 'time':
+                        oslice = slice(series_step, series_step + nsteps)
+                        actual = ncout.variables[v][oslice]
+                    elif 'time' in ncout.variables[v].dimensions:
+                        oslice = [slice(None)] * 3
+                        oslice[0] = slice(series_step, series_step + nsteps)
+                        actual = ncout.variables[v][tuple(oslice)]
+                    else:
+                        actual = ncout.variables[v].get_value()
+                    self._assertion(("{}: {!r} values "
+                                     "equal").format(outfile, v),
+                                    np.all(actual == expected), True)
+
+                series_step += nsteps
+                ncinp.close()
+            ncout.close()
+        MPI_COMM_WORLD.Barrier()
+
+    def _run_convert(self, infiles, prefix, suffix, metadata,
+                     ncfmt, clevel, serial, verbosity, wmode, once,
+                     print_diags=False):
+        if not (serial and self.rank > 0):
+            spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
+                             prefix=prefix, suffix=suffix, metadata=metadata)
+            rshpr = create_reshaper(spec, serial=serial,
+                                    verbosity=verbosity,
+                                    wmode=wmode, once=once)
+            rshpr.convert()
+            if print_diags:
+                rshpr.print_diagnostics()
+        MPI_COMM_WORLD.Barrier()
+
+    def _run_convert_assert_no_output(self, infiles, prefix, suffix, metadata,
+                                      ncfmt, clevel, serial, verbosity, wmode,
+                                      once, print_diags=False):
+        oldout = sys.stdout
+        newout = StringIO()
+        sys.stdout = newout
+        self._run_convert(infiles, prefix, suffix, metadata, ncfmt, clevel,
+                          serial, 0, wmode, once, print_diags=False)
+        actual = newout.getvalue()
+        self._assertion("stdout empty", actual, '')
+        sys.stdout = oldout
 
     def _test_create_reshaper(self, serial, verbosity, wmode):
         self._test_header(("create_reshaper(serial={}, verbosity={}, "
@@ -177,127 +297,7 @@ class S2SReshaperTests(unittest.TestCase):
     def test_create_reshaper_parallel_V1_W(self):
         self._test_create_reshaper(serial=False, verbosity=1, wmode='w')
 
-    def _check_outfile(self, infiles, prefix, tsvar, suffix,
-                       metadata, once, **kwds):
-        if self.rank == 0:
-
-            nsteps = 0
-            for infile in infiles:
-                ncinp = Nio.open_file(infile, 'r')
-                nsteps += ncinp.dimensions['time']
-                ncinp.close()
-
-            ncinp = Nio.open_file(infiles[0], 'r')
-
-            scalars = [v for v in ncinp.variables
-                       if ncinp.variables[v].dimensions == ()]
-            tivars = [v for v in ncinp.variables
-                      if 'time' not in ncinp.variables[v].dimensions]
-            tsvars = [v for v in ncinp.variables
-                      if 'time' in ncinp.variables[v].dimensions and v not in metadata]
-
-            if once:
-                tsvars.append('once')
-
-            outdims = {'time': nsteps,
-                       'lat': ncinp.dimensions['lat'],
-                       'lon': ncinp.dimensions['lon']}
-
-            outmeta = [v for v in ncinp.variables if v not in tsvars]
-
-            outfile = '{}{}{}'.format(prefix, tsvar, suffix)
-
-            self._assertion(("{}: variable "
-                             "{!r} in input").format(outfile, tsvar),
-                            tsvar in tsvars, True)
-
-            self._assertion("exists({})".format(outfile),
-                            exists(outfile), True)
-
-            ncout = Nio.open_file(outfile, 'r')
-
-            self._assertion("{}: attributes equal".format(outfile),
-                            ncout.attributes, ncinp.attributes,
-                            assertion=self.assertDictEqual)
-
-            for d, v in outdims.iteritems():
-                self._assertion("{}: {} in dimensions".format(outfile, d),
-                                d in ncout.dimensions, True)
-
-                self._assertion("{}: dimensions[{}]".format(outfile, d),
-                                ncout.dimensions[d], v)
-
-            self._assertion("{}: time unlimited".format(outfile),
-                            ncout.unlimited('time'), True)
-
-            if once:
-                all_vars = outmeta if tsvar == 'once' else [tsvar]
-            else:
-                all_vars = [tsvar] + outmeta
-
-            self._assertion("{}: variable list".format(outfile),
-                            set(ncout.variables.keys()), set(all_vars),
-                            assertion=self.assertSetEqual)
-
-            for v in all_vars:
-                self._assertion("{}: {} in variables".format(outfile, v),
-                                v in ncout.variables, True)
-
-                if v in scalars:
-                    expected = ()
-                elif v in ncinp.dimensions:
-                    expected = (v,)
-                elif v in tivars:
-                    expected = ('lat', 'lon')
-                else:
-                    expected = ('time', 'lat', 'lon')
-                self._assertion("{}: {}.dimemsions equal".format(outfile, v),
-                                ncout.variables[v].dimensions, expected)
-
-            ncout.close()
-
-            ncinp.close()
-
-        MPI_COMM_WORLD.Barrier()
-
-    def _run_convert(self, infiles, prefix, suffix, metadata,
-                     ncfmt, clevel, serial, verbosity, wmode, once,
-                     print_diags=False):
-        if not (serial and self.rank > 0):
-            spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
-                             prefix=prefix, suffix=suffix, metadata=metadata)
-            rshpr = create_reshaper(spec, serial=serial,
-                                    verbosity=verbosity,
-                                    wmode=wmode, once=once)
-            rshpr.convert()
-            if print_diags:
-                rshpr.print_diagnostics()
-        MPI_COMM_WORLD.Barrier()
-
-    def _run_convert_assert_no_output(self, infiles, prefix, suffix, metadata,
-                                      ncfmt, clevel, serial, verbosity, wmode,
-                                      once, print_diags=False):
-        oldout = sys.stdout
-        newout = StringIO()
-        sys.stdout = newout
-        self._run_convert(infiles, prefix, suffix, metadata, ncfmt, clevel,
-                          serial, 0, wmode, once, print_diags=False)
-        actual = newout.getvalue()
-        self._assertion("stdout empty", actual, '')
-        sys.stdout = oldout
-
-    def _convert_header(self, infiles, prefix, suffix, metadata,
-                        ncfmt, clevel, serial, verbosity, wmode, once,
-                        print_diags=False):
-        nfiles = len(infiles)
-        ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c'
-                                                else '4')
-        self._test_header(("convert() - {} infile(s), NC{}-CL{}, serial={},{}"
-                           "            verbosity={}, wmode={!r}, once={}"
-                           "").format(nfiles, ncvers, clevel, serial, eol,
-                                      verbosity, wmode, once))
-
-    def testReshaperConvert_All_NC3_CL0_SER_V0_W(self):
+    def test_convert_All_NC3_CL0_SER_V0_W(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
@@ -309,7 +309,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_1_NC3_CL0_SER_V0_W(self):
+    def test_convert_1_NC3_CL0_SER_V0_W(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices[0:1], 'prefix': 'out.', 'suffix': '.nc',
@@ -321,7 +321,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC4_CL1_SER_V0_W(self):
+    def test_convert_All_NC4_CL1_SER_V0_W(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
@@ -333,7 +333,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V1_W(self):
+    def test_convert_All_NC3_CL0_PAR_V1_W(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
@@ -345,7 +345,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V1_W_ONCE(self):
+    def test_convert_All_NC3_CL0_PAR_V1_W_ONCE(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
@@ -358,7 +358,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V1_O(self):
+    def test_convert_All_NC3_CL0_PAR_V1_O(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
@@ -370,7 +370,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V1_O_ONCE(self):
+    def test_convert_All_NC3_CL0_PAR_V1_O_ONCE(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
@@ -383,7 +383,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V1_S(self):
+    def test_convert_All_NC3_CL0_PAR_V1_S(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
@@ -395,7 +395,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V1_S_ONCE(self):
+    def test_convert_All_NC3_CL0_PAR_V1_S_ONCE(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
@@ -408,7 +408,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V3_A(self):
+    def test_convert_All_NC3_CL0_PAR_V3_A(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
@@ -422,7 +422,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V3_A_ONCE(self):
+    def test_convert_All_NC3_CL0_PAR_V3_A_ONCE(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
@@ -437,7 +437,7 @@ class S2SReshaperTests(unittest.TestCase):
         for tsvar in self.tsvars:
             self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
 
-    def testReshaperConvert_All_NC3_CL0_PAR_V3_A_MISSING(self):
+    def test_convert_All_NC3_CL0_PAR_V3_A_MISSING(self):
         mdata = [v for v in self.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
