@@ -113,3 +113,6 @@ VERSION 0.9.6
    with a given specifier object file
  - Now uses 'write mode' to determing if overwriting output files or skipping
    existing output files
+   
+12 October 2015:
+ - Added capability to append to existing output files
