@@ -574,7 +574,7 @@ Additional Arguments to the ``s2srun`` Script
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 While the basic options shown in the previous examples above are
-sufficient for most purposes, two additional options are available.
+sufficient for most purposes, two a options are available.
 
 -  ``--limit``:  This command-line option can be used to set the 
    ``output_limit`` argument of the PyReshaper ``convert()`` function, 
@@ -620,9 +620,10 @@ largest time-series variable in the input dataset.  This can usually be found
 by multiplying the size of each dimension upon which the time-series variable
 depends, and then multiplying by the byte-size of the variable's data type.
 For example, a ``double`` time-series variable with the dimensions 
-``('time', 'lat', 'lon')``, would have a byte-size of
+``('time', 'lat', 'lon')``, would have a byte-size of the following.
 
 ::
+
     S_B('var') = S('time') * S('lat') * S('lon') * S_B('double')
 
 where ``S(d)`` represents the numeric size of dimension ``d``, and ``S_B(v)``
