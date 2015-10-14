@@ -1,0 +1,84 @@
+#!/usr/bin/env python
+"""
+This script provides the command-line interface (CLI) to the PyReshaper
+
+This script is used to generate Specifier object files ("specfiles") that
+can then be run directly from the command-line with the corresponding
+"runs2sspec" tool.
+
+Copyright 2015, University Corporation for Atmospheric Research
+See the LICENSE.rst file for details
+"""
+
+# Builtin Modules
+import argparse
+import glob
+import cPickle as pickle
+
+# Package Modules
+from pyreshaper import specification
+
+#==============================================================================
+# Command-Line Interface
+#==============================================================================
+__DESC__ = """Create a PyReshaper Specifier object from command-line
+              options and write the Specifier to a named file."""
+
+__PARSER__ = argparse.ArgumentParser(description=__DESC__)
+__PARSER__.add_argument('-c', '--compression_level', type=int,
+                        default=1, choices=range(0, 10),
+                        help='NetCDF compression level, when using the '
+                             'netcdf4 format. [Default: 1]')
+__PARSER__.add_argument('-f', '--netcdf_format', default='netcdf4', type=str,
+                        choices=['netcdf', 'netcdf4', 'netcdf4c'],
+                        help='NetCDF file format to be used for all output '
+                             'files. [Default: "netcdf4"]')
+__PARSER__.add_argument('-m', '--metadata', action='append', default=[],
+                        help='Names of a variable to be included in all '
+                             'output files.  There may be more than one '
+                             '--metadata (-m) option given, and each one is '
+                             'appended to a list.  [Default: []]')
+__PARSER__.add_argument('-o', '--specfile', default='input.spec', type=str,
+                        help='The name of the Pickled Specifier (specfile) '
+                             'to be output [Default: "input.spec"]')
+__PARSER__.add_argument('-p', '--output_prefix', default='tseries.', type=str,
+                        help='String prefix for all output files.  The output '
+                             'file will be named according to the rule: '
+                             'output_prefix + variable_name + output_suffix '
+                             '[Default: "tseries."]')
+__PARSER__.add_argument('-s', '--output_suffix', default='.nc', type=str,
+                        help='String suffix for all output files.  The output '
+                             'file will be named according to the rule: '
+                             'output_prefix + variable_name + output_suffix '
+                             '[Default: ".nc"]')
+__PARSER__.add_argument('infiles', type=str, nargs='+', metavar='INFILE',
+                        help='The input file (or a glob pattern) to be '
+                             'transformed by the PyReshaper')
+
+
+#==============================================================================
+# Command-line Opeartion
+#==============================================================================
+if __name__ == '__main__':
+    args = __PARSER__.parse_args()
+
+    # Create the input object for the Reshaper
+    spec = specification.create_specifier()
+
+    # Generate the input file list from (potentially) globs/wildcards
+    full_input_file_list = []
+    for infile in args.infiles:
+        full_input_file_list.extend(glob.glob(infile))
+
+    # Add input to the specifier
+    spec.input_file_list = full_input_file_list
+    spec.netcdf_format = args.netcdf_format
+    spec.output_file_prefix = args.output_prefix
+    spec.output_file_suffix = args.output_suffix
+    spec.time_variant_metadata = args.metadata
+
+    # Validate before saving
+    spec.validate()
+
+    # Write the specfile
+    spec.write(args.specfile)
