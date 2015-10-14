@@ -45,8 +45,6 @@ def create_reshaper(specifier, serial=False, verbosity=1, wmode='w',
             In this case, a reshaper will be created for each
             specifier in the list, and each reshaper will be
             created and run in sequence.
-
-    Keyword Arguments:
         serial (bool): True or False, indicating whether the Reshaper object
             should perform its operation in serial (True) or
             parallel (False).
@@ -108,8 +106,6 @@ def _pprint_dictionary(title, dictionary, order=None):
     Parameters:
         title (str): The title to give to the printed table
         dictionary (dict): A dictionary of numeric values
-
-    Keyword Arguments:
         order (list): The print order for the keys in the dictionary (only
             items that are in both the order list and the dictionary will be
             printed)
@@ -204,8 +200,6 @@ class Slice2SeriesReshaper(Reshaper):
         Parameters:
             specifier (Specifier): An instance of the Specifier class,
                 defining the input specification for this reshaper operation.
-
-        Keyword Arguments:
             serial (bool): True or False, indicating whether the operation
                 should be performed in serial (True) or parallel
                 (False).  The default is to assume parallel operation
@@ -572,7 +566,7 @@ class Slice2SeriesReshaper(Reshaper):
 
         In this case, convert a list of time-slice files to time-series files.
 
-        Keyword Arguments:
+        Parameters:
             output_limit (int): Limit on the number of output (time-series)
                 files to write during the convert() operation.  If set
                 to 0, no limit is placed.  This limits the number
@@ -897,8 +891,6 @@ class MultiSpecReshaper(Reshaper):
         Parameters:
             specifiers (dict): A dict of named Specifier instances, each
                 defining an input specification for this reshaper operation.
-
-        Keyword Arguments:
             serial (bool): True or False, indicating whether the operation
                 should be performed in serial (True) or parallel
                 (False).  The default is to assume parallel operation
@@ -983,7 +975,7 @@ class MultiSpecReshaper(Reshaper):
         convert() method, and pulls the timing data out for each convert
         operation.
 
-        Keyword Arguments:
+        Parameters:
             output_limit (int): Limit on the number of output (time-series)
                 files to write during the convert() operation.  If set
                 to 0, no limit is placed.  This limits the number
