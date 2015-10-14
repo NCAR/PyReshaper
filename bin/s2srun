@@ -77,8 +77,7 @@ if __name__ == '__main__':
     reshpr = reshaper.create_reshaper(spec,
                                       serial=args.serial,
                                       verbosity=args.verbosity,
-                                      skip_existing=args.skip_existing,
-                                      overwrite=args.overwrite,
+                                      wmode=args.write_mode,
                                       once=args.once)
 
     # Run the conversion (slice-to-series) process
