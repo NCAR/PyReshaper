@@ -40,7 +40,7 @@ def cli(argv=None):
                              'output files.  There may be more than one '
                              '--metadata (-m) option given, and each one is '
                              'appended to a list.  [Default: []]')
-    parser.add_argument('-o', '--specfile', default='input.spec', type=str,
+    parser.add_argument('-o', '--specfile', default='input.s2s', type=str,
                         help='The name of the Pickled Specifier (specfile) '
                              'to be output [Default: "input.spec"]')
     parser.add_argument('-p', '--output_prefix', default='tseries.', type=str,
