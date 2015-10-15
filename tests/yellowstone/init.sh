@@ -7,7 +7,7 @@ function abspath {
 }
 
 # Add the PyReshaper executable scripts to the path
-BIN_DIR=`abspath ../../bin`
+BIN_DIR=`abspath ../../scripts`
 export PATH=$PATH:$BIN_DIR
 
 # Add this (local) PyReshaper module path to the python path
