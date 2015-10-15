@@ -61,8 +61,6 @@ __PARSER__.add_argument('specfile', default=None, metavar='SPECFILE', type=str,
 if __name__ == '__main__':
     args = __PARSER__.parse_args()
 
-    print args
-
     # Try importing the file
     try:
         spec = pickle.load(open(args.specfile, 'rb'))
@@ -70,8 +68,6 @@ if __name__ == '__main__':
         err_msg = ("Specifier File '{}' could not be "
                    "opened and read").format(args.specfile)
         raise RuntimeError(err_msg)
-
-    print spec
 
     # Create the PyReshaper object
     reshpr = reshaper.create_reshaper(spec,
