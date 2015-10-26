@@ -5,7 +5,6 @@ See LICENSE.txt for details
 
 import os
 import imp
-import sys
 import unittest
 import cPickle as pickle
 
