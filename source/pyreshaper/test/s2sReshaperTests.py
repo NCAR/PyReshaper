@@ -12,11 +12,7 @@ from glob import glob
 from cStringIO import StringIO
 from os import linesep as eol
 from os import remove
-from os.path import exists
 from mpi4py import MPI
-
-import Nio
-import numpy as np
 
 from pyreshaper.reshaper import Slice2SeriesReshaper, create_reshaper
 from pyreshaper.specification import Specifier
@@ -82,89 +78,6 @@ class S2SReshaperTests(unittest.TestCase):
             assertion(actual, expected, msg)
         else:
             self.assertEqual(actual, expected, msg)
-
-    def _check_outfile(self, infiles, prefix, tsvar, suffix,
-                       metadata, once, **kwds):
-        if self.rank == 0:
-
-            outfile = '{}{}{}'.format(prefix, tsvar, suffix)
-            ncout = Nio.open_file(outfile, 'r')
-
-            series_step = 0
-            for infile in infiles:
-                ncinp = Nio.open_file(infile, 'r')
-                nsteps = ncinp.dimensions['time']
-                if infile == infiles[0]:
-                    scalars = [v for v in ncinp.variables
-                               if ncinp.variables[v].dimensions == ()]
-                    tivars = [v for v in ncinp.variables
-                              if 'time' not in ncinp.variables[v].dimensions]
-                    tsvars = [v for v in ncinp.variables
-                              if 'time' in ncinp.variables[v].dimensions and
-                              v not in metadata]
-                    if once:
-                        tsvars.append('once')
-
-                    outdims = {'lat': ncinp.dimensions['lat'],
-                               'lon': ncinp.dimensions['lon']}
-
-                    outmeta = [v for v in ncinp.variables if v not in tsvars]
-
-                    self._assertion(("{}: variable "
-                                     "{!r} exists").format(outfile, tsvar),
-                                    tsvar in tsvars, True)
-                    self._assertion("exists({!r})".format(outfile),
-                                    exists(outfile), True)
-                    self._assertion("{}: attributes equal".format(outfile),
-                                    ncout.attributes, ncinp.attributes,
-                                    assertion=self.assertDictEqual)
-                    for d, v in outdims.iteritems():
-                        self._assertion("{}: {!r} in dimensions".format(outfile, d),
-                                        d in ncout.dimensions, True)
-                        self._assertion("{}: dimensions[{!r}]".format(outfile, d),
-                                        ncout.dimensions[d], v)
-                    self._assertion("{}: 'time' in dimensions".format(outfile),
-                                    'time' in ncout.dimensions, True)
-                    self._assertion("{}: 'time' unlimited".format(outfile),
-                                    ncout.unlimited('time'), True)
-                    if once:
-                        all_vars = outmeta if tsvar == 'once' else [tsvar]
-                    else:
-                        all_vars = [tsvar] + outmeta
-                    self._assertion("{}: variable set".format(outfile),
-                                    set(ncout.variables.keys()), set(all_vars),
-                                    assertion=self.assertSetEqual)
-                    for v in all_vars:
-                        if v in scalars:
-                            expected = ()
-                        elif v in ncinp.dimensions:
-                            expected = (v,)
-                        elif v in tivars:
-                            expected = ('lat', 'lon')
-                        else:
-                            expected = ('time', 'lat', 'lon')
-                        self._assertion("{}: {}.dimemsions equal".format(outfile, v),
-                                        ncout.variables[v].dimensions, expected)
-
-                for v in all_vars:
-                    expected = ncinp.variables[v].get_value()
-                    if v == 'time':
-                        oslice = slice(series_step, series_step + nsteps)
-                        actual = ncout.variables[v][oslice]
-                    elif 'time' in ncout.variables[v].dimensions:
-                        oslice = [slice(None)] * 3
-                        oslice[0] = slice(series_step, series_step + nsteps)
-                        actual = ncout.variables[v][tuple(oslice)]
-                    else:
-                        actual = ncout.variables[v].get_value()
-                    self._assertion(("{}: {!r} values "
-                                     "equal").format(outfile, v),
-                                    np.all(actual == expected), True)
-
-                series_step += nsteps
-                ncinp.close()
-            ncout.close()
-        MPI_COMM_WORLD.Barrier()
 
     def _run_convert(self, infiles, prefix, suffix, metadata,
                      ncfmt, clevel, serial, verbosity, wmode, once,
@@ -234,8 +147,10 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_1_NC3_CL0_SER_V0_W(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -246,8 +161,10 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC4_CL1_SER_V0_W(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -258,8 +175,10 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_W(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -270,8 +189,10 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_W_ONCE(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -282,9 +203,11 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfile(tsvar='once', **args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            mkTestData.check_outfile(tsvar='once', **args)
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_O(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -295,8 +218,10 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_O_ONCE(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -307,9 +232,11 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfile(tsvar='once', **args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            mkTestData.check_outfile(tsvar='once', **args)
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_S(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -320,8 +247,10 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_S_ONCE(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -332,9 +261,11 @@ class S2SReshaperTests(unittest.TestCase):
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        self._check_outfile(tsvar='once', **args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(tsvar=tsvar, **args)
+        if self.rank == 0:
+            mkTestData.check_outfile(tsvar='once', **args)
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V3_A(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -347,8 +278,10 @@ class S2SReshaperTests(unittest.TestCase):
         self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
         for infile in mkTestData.slices[1:]:
             self._run_convert(infiles=[infile], wmode='a', **args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V3_A_ONCE(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -361,9 +294,11 @@ class S2SReshaperTests(unittest.TestCase):
         self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
         for infile in mkTestData.slices[1:]:
             self._run_convert(infiles=[infile], wmode='a', **args)
-        self._check_outfile(infiles=mkTestData.slices, tsvar='once', **args)
-        for tsvar in mkTestData.tsvars:
-            self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+        if self.rank == 0:
+            mkTestData.check_outfile(infiles=mkTestData.slices, tsvar='once', **args)
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V3_A_MISSING(self):
         mdata = [v for v in mkTestData.tvmvars]
@@ -379,11 +314,13 @@ class S2SReshaperTests(unittest.TestCase):
         remove(args['prefix'] + missingvar + args['suffix'])
         for infile in mkTestData.slices[2:]:
             self._run_convert(infiles=[infile], wmode='a', **args)
-        for tsvar in mkTestData.tsvars:
-            if tsvar == missingvar:
-                self._check_outfile(infiles=mkTestData.slices[2:], tsvar=tsvar, **args)
-            else:
-                self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                if tsvar == missingvar:
+                    mkTestData.check_outfile(infiles=mkTestData.slices[2:], tsvar=tsvar, **args)
+                else:
+                    mkTestData.check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
 
 
 if __name__ == "__main__":
