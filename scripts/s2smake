@@ -74,6 +74,7 @@ def main(argv=None):
 
     # Add input to the specifier
     spec.input_file_list = full_input_file_list
+    spec.compression_level = args.compression_level
     spec.netcdf_format = args.netcdf_format
     spec.output_file_prefix = args.output_prefix
     spec.output_file_suffix = args.output_suffix
