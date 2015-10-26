@@ -21,6 +21,8 @@ import numpy as np
 from pyreshaper.reshaper import Slice2SeriesReshaper, create_reshaper
 from pyreshaper.specification import Specifier
 
+import mkTestData
+
 MPI_COMM_WORLD = MPI.COMM_WORLD
 
 
@@ -34,82 +36,8 @@ class S2SReshaperTests(unittest.TestCase):
 
         # Test Data Generation
         self._clean_directory()
-        self.nlat = 19
-        self.nlon = 36
-        self.ntime = 10
-        self.slices = ['input{}.nc'.format(i) for i in xrange(5)]
-        self.scalars = ['scalar{}'.format(i) for i in xrange(2)]
-        self.timvars = ['tim{}'.format(i) for i in xrange(2)]
-        self.tvmvars = ['tvm{}'.format(i) for i in xrange(2)]
-        self.tsvars = ['tsvar{}'.format(i) for i in xrange(4)]
-        self.fattrs = {'attr1': 'attribute one',
-                       'attr2': 'attribute two'}
         if self.rank == 0:
-            for i in xrange(len(self.slices)):
-
-                # Open the file for writing
-                fname = self.slices[i]
-                fobj = Nio.open_file(fname, 'w')
-
-                # Write attributes to file
-                for name, value in self.fattrs.iteritems():
-                    setattr(fobj, name, value)
-
-                # Create the dimensions in the file
-                fobj.create_dimension('lat', self.nlat)
-                fobj.create_dimension('lon', self.nlon)
-                fobj.create_dimension('time', None)
-
-                # Create the coordinate variables & add attributes
-                lat = fobj.create_variable('lat', 'f', ('lat',))
-                lon = fobj.create_variable('lon', 'f', ('lon',))
-                time = fobj.create_variable('time', 'f', ('time',))
-
-                # Set the coordinate variable attributes
-                setattr(lat, 'long_name', 'latitude')
-                setattr(lon, 'long_name', 'longitude')
-                setattr(time, 'long_name', 'time')
-                setattr(lat, 'units', 'degrees north')
-                setattr(lon, 'units', 'degrees east')
-                setattr(time, 'units', 'days from 01-01-0001')
-
-                # Set the values of the coordinate variables
-                lat[:] = np.linspace(-90, 90, self.nlat, dtype=np.float32)
-                lon[:] = np.linspace(-180, 180, self.nlon, endpoint=False, dtype=np.float32)
-                time[:] = np.arange(i * self.ntime, (i + 1) * self.ntime, dtype=np.float32)
-
-                # Create the scalar variables
-                for n in xrange(len(self.scalars)):
-                    vname = self.scalars[n]
-                    v = fobj.create_variable(vname, 'd', ())
-                    setattr(v, 'long_name', 'scalar{}'.format(n))
-                    setattr(v, 'units', '[{}]'.format(vname))
-                    v.assign_value(np.float64(n * 10))
-
-                # Create the time-invariant metadata variables
-                for n in xrange(len(self.timvars)):
-                    vname = self.timvars[n]
-                    v = fobj.create_variable(vname, 'd', ('lat', 'lon'))
-                    setattr(v, 'long_name', 'time-invariant metadata {}'.format(n))
-                    setattr(v, 'units', '[{}]'.format(vname))
-                    v[:] = np.ones((self.nlat, self.nlon), dtype=np.float64) * n
-
-                # Create the time-variant metadata variables
-                for n in xrange(len(self.tvmvars)):
-                    vname = self.tvmvars[n]
-                    v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
-                    setattr(v, 'long_name', 'time-variant metadata {}'.format(n))
-                    setattr(v, 'units', '[{}]'.format(vname))
-                    v[:] = np.ones((self.ntime, self.nlat, self.nlon), dtype=np.float64) * n
-
-                # Create the time-series variables
-                for n in xrange(len(self.tsvars)):
-                    vname = self.tsvars[n]
-                    v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
-                    setattr(v, 'long_name', 'time-series variable {}'.format(n))
-                    setattr(v, 'units', '[{}]'.format(vname))
-                    v[:] = np.ones((self.ntime, self.nlat, self.nlon), dtype=np.float64) * n
-
+            mkTestData.generate_data()
         MPI_COMM_WORLD.Barrier()
 
     def tearDown(self):
@@ -268,7 +196,7 @@ class S2SReshaperTests(unittest.TestCase):
         self._test_header(("create_reshaper(serial={}, verbosity={}, "
                            "wmode={!r})").format(serial, verbosity, wmode))
         if not (serial and self.rank > 0):
-            spec = Specifier(infiles=self.slices, ncfmt='netcdf',
+            spec = Specifier(infiles=mkTestData.slices, ncfmt='netcdf',
                              compression=0, prefix='output.', suffix='.nc',
                              metadata=[])
             rshpr = create_reshaper(spec, serial=serial, verbosity=verbosity,
@@ -298,164 +226,164 @@ class S2SReshaperTests(unittest.TestCase):
         self._test_create_reshaper(serial=False, verbosity=1, wmode='w')
 
     def test_convert_All_NC3_CL0_SER_V0_W(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_1_NC3_CL0_SER_V0_W(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices[0:1], 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices[0:1], 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_All_NC4_CL1_SER_V0_W(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf4', 'clevel': 1,
                 'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert_assert_no_output(**args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V1_W(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'wmode': 'w', 'once': False,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V1_W_ONCE(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'wmode': 'w', 'once': True,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
         self._check_outfile(tsvar='once', **args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V1_O(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'wmode': 'o', 'once': False,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V1_O_ONCE(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'wmode': 'o', 'once': True,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
         self._check_outfile(tsvar='once', **args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V1_S(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'wmode': 's', 'once': False,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V1_S_ONCE(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
-        args = {'infiles': self.slices, 'prefix': 'out.', 'suffix': '.nc',
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'wmode': 's', 'once': True,
                 'print_diags': False}
         self._convert_header(**args)
         self._run_convert(**args)
         self._check_outfile(tsvar='once', **args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             self._check_outfile(tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V3_A(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'once': False,
                 'print_diags': False}
-        self._convert_header(infiles=self.slices, wmode='a', **args)
-        self._run_convert(infiles=[self.slices[0]], wmode='w', **args)
-        for infile in self.slices[1:]:
+        self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
+        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
+        for infile in mkTestData.slices[1:]:
             self._run_convert(infiles=[infile], wmode='a', **args)
-        for tsvar in self.tsvars:
-            self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
+        for tsvar in mkTestData.tsvars:
+            self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V3_A_ONCE(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'once': True,
                 'print_diags': False}
-        self._convert_header(infiles=self.slices, wmode='a', **args)
-        self._run_convert(infiles=[self.slices[0]], wmode='w', **args)
-        for infile in self.slices[1:]:
+        self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
+        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
+        for infile in mkTestData.slices[1:]:
             self._run_convert(infiles=[infile], wmode='a', **args)
-        self._check_outfile(infiles=self.slices, tsvar='once', **args)
-        for tsvar in self.tsvars:
-            self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
+        self._check_outfile(infiles=mkTestData.slices, tsvar='once', **args)
+        for tsvar in mkTestData.tsvars:
+            self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
 
     def test_convert_All_NC3_CL0_PAR_V3_A_MISSING(self):
-        mdata = [v for v in self.tvmvars]
+        mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': False, 'verbosity': 1, 'once': False,
                 'print_diags': False}
-        missingvar = self.tsvars[2]
-        self._convert_header(infiles=self.slices, wmode='a', **args)
-        self._run_convert(infiles=[self.slices[0]], wmode='w', **args)
-        self._run_convert(infiles=[self.slices[1]], wmode='a', **args)
+        missingvar = mkTestData.tsvars[2]
+        self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
+        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
+        self._run_convert(infiles=[mkTestData.slices[1]], wmode='a', **args)
         remove(args['prefix'] + missingvar + args['suffix'])
-        for infile in self.slices[2:]:
+        for infile in mkTestData.slices[2:]:
             self._run_convert(infiles=[infile], wmode='a', **args)
-        for tsvar in self.tsvars:
+        for tsvar in mkTestData.tsvars:
             if tsvar == missingvar:
-                self._check_outfile(infiles=self.slices[2:], tsvar=tsvar, **args)
+                self._check_outfile(infiles=mkTestData.slices[2:], tsvar=tsvar, **args)
             else:
-                self._check_outfile(infiles=self.slices, tsvar=tsvar, **args)
+                self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
 
 
 if __name__ == "__main__":
