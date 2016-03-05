@@ -11,11 +11,11 @@ import Nio
 nlat = 19
 nlon = 36
 ntime = 10
-slices = ['input{}.nc'.format(i) for i in xrange(5)]
-scalars = ['scalar{}'.format(i) for i in xrange(2)]
-timvars = ['tim{}'.format(i) for i in xrange(2)]
-tvmvars = ['tvm{}'.format(i) for i in xrange(2)]
-tsvars = ['tsvar{}'.format(i) for i in xrange(4)]
+slices = ['input{0}.nc'.format(i) for i in xrange(5)]
+scalars = ['scalar{0}'.format(i) for i in xrange(2)]
+timvars = ['tim{0}'.format(i) for i in xrange(2)]
+tvmvars = ['tvm{0}'.format(i) for i in xrange(2)]
+tsvars = ['tsvar{0}'.format(i) for i in xrange(4)]
 fattrs = {'attr1': 'attribute one',
           'attr2': 'attribute two'}
 
@@ -63,32 +63,32 @@ def generate_data():
         for n in xrange(len(scalars)):
             vname = scalars[n]
             v = fobj.create_variable(vname, 'd', ())
-            setattr(v, 'long_name', 'scalar{}'.format(n))
-            setattr(v, 'units', '[{}]'.format(vname))
+            setattr(v, 'long_name', 'scalar{0}'.format(n))
+            setattr(v, 'units', '[{0}]'.format(vname))
             v.assign_value(np.float64(n * 10))
 
         # Create the time-invariant metadata variables
         for n in xrange(len(timvars)):
             vname = timvars[n]
             v = fobj.create_variable(vname, 'd', ('lat', 'lon'))
-            setattr(v, 'long_name', 'time-invariant metadata {}'.format(n))
-            setattr(v, 'units', '[{}]'.format(vname))
+            setattr(v, 'long_name', 'time-invariant metadata {0}'.format(n))
+            setattr(v, 'units', '[{0}]'.format(vname))
             v[:] = np.ones((nlat, nlon), dtype=np.float64) * n
 
         # Create the time-variant metadata variables
         for n in xrange(len(tvmvars)):
             vname = tvmvars[n]
             v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
-            setattr(v, 'long_name', 'time-variant metadata {}'.format(n))
-            setattr(v, 'units', '[{}]'.format(vname))
+            setattr(v, 'long_name', 'time-variant metadata {0}'.format(n))
+            setattr(v, 'units', '[{0}]'.format(vname))
             v[:] = np.ones((ntime, nlat, nlon), dtype=np.float64) * n
 
         # Create the time-series variables
         for n in xrange(len(tsvars)):
             vname = tsvars[n]
             v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
-            setattr(v, 'long_name', 'time-series variable {}'.format(n))
-            setattr(v, 'units', '[{}]'.format(vname))
+            setattr(v, 'long_name', 'time-series variable {0}'.format(n))
+            setattr(v, 'units', '[{0}]'.format(vname))
             v[:] = np.ones((ntime, nlat, nlon), dtype=np.float64) * n
 
 
@@ -102,15 +102,15 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
     def _assert(key, value):
         assertions[key] = value
 
-    outfile = '{}{}{}'.format(prefix, tsvar, suffix)
-    _assert('{!r} exists'.format(outfile), os.path.exists(outfile))
+    outfile = '{0}{1}{2}'.format(prefix, tsvar, suffix)
+    _assert('{0!r} exists'.format(outfile), os.path.exists(outfile))
     if not os.path.exists(outfile):
         return assertions
     ncout = Nio.open_file(outfile, 'r')
 
     series_step = 0
     for infile in infiles:
-        _assert('{!r} exists'.format(infile), os.path.exists(infile))
+        _assert('{0!r} exists'.format(infile), os.path.exists(infile))
         if not os.path.exists(infile):
             return assertions
         ncinp = Nio.open_file(infile, 'r')
@@ -131,24 +131,24 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
 
             outmeta = [v for v in ncinp.variables if v not in tsvars]
 
-            _assert('{}: variable {!r} exists'.format(outfile, tsvar),
+            _assert('{0}: variable {1!r} exists'.format(outfile, tsvar),
                     tsvar in tsvars)
-            _assert('{}: attributes equal'.format(outfile),
+            _assert('{0}: attributes equal'.format(outfile),
                     ncout.attributes == ncinp.attributes)
             for d, v in outdims.iteritems():
-                _assert("{}: {!r} in dimensions".format(outfile, d),
+                _assert("{0}: {1!r} in dimensions".format(outfile, d),
                         d in ncout.dimensions)
-                _assert("{}: dimensions[{!r}]".format(outfile, d),
+                _assert("{0}: dimensions[{1!r}]".format(outfile, d),
                         ncout.dimensions[d] == v)
-            _assert("{}: 'time' in dimensions".format(outfile),
+            _assert("{0}: 'time' in dimensions".format(outfile),
                     'time' in ncout.dimensions)
-            _assert("{}: 'time' unlimited".format(outfile),
+            _assert("{0}: 'time' unlimited".format(outfile),
                     ncout.unlimited('time'))
             if once:
                 all_vars = outmeta if tsvar == 'once' else [tsvar]
             else:
                 all_vars = [tsvar] + outmeta
-            _assert("{}: variable set".format(outfile),
+            _assert("{0}: variable set".format(outfile),
                     set(ncout.variables.keys()) == set(all_vars))
             for v in all_vars:
                 if v in scalars:
@@ -159,7 +159,7 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                     expected = ('lat', 'lon')
                 else:
                     expected = ('time', 'lat', 'lon')
-                _assert("{}: {}.dimemsions equal".format(outfile, v),
+                _assert("{0}: {1}.dimemsions equal".format(outfile, v),
                         ncout.variables[v].dimensions == expected)
 
         for v in all_vars:
@@ -173,7 +173,7 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                 actual = ncout.variables[v][tuple(oslice)]
             else:
                 actual = ncout.variables[v].get_value()
-            _assert(("{}: {!r} values equal").format(outfile, v),
+            _assert(("{0}: {1!r} values equal").format(outfile, v),
                     np.all(actual == expected))
 
         series_step += nsteps

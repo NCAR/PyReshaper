@@ -5,7 +5,6 @@ See LICENSE.txt for details
 
 import imp
 import unittest
-import sys
 import cPickle as pickle
 from glob import glob
 from cStringIO import StringIO
@@ -58,20 +57,20 @@ class s2srunTest(unittest.TestCase):
         nfiles = len(infiles)
         ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c'
                                                 else '4')
-        self._test_header(("convert() - {} infile(s), NC{}-CL{}, serial={},{}"
-                           "            verbosity={}, wmode={!r}, once={}"
+        self._test_header(("convert() - {0} infile(s), NC{1}-CL{2}, serial={3},{4}"
+                           "            verbosity={5}, wmode={6!r}, once={7}"
                            "").format(nfiles, ncvers, clevel, serial, eol,
                                       verbosity, wmode, once))
 
     def _assertion(self, name, actual, expected,
                    data=None, show=True, assertion=None):
-        rknm = '[{}/{}] {}'.format(self.rank, self.size, name)
+        rknm = '[{0}/{1}] {2}'.format(self.rank, self.size, name)
         spcr = ' ' * len(rknm)
         msg = eol + rknm
         if data:
-            msg += ' - Input:    {}'.format(data) + eol + spcr
-        msg += ' - Actual:   {}'.format(actual) + eol + spcr
-        msg += ' - Expected: {}'.format(expected)
+            msg += ' - Input:    {0}'.format(data) + eol + spcr
+        msg += ' - Actual:   {0}'.format(actual) + eol + spcr
+        msg += ' - Expected: {0}'.format(expected)
         if show:
             print msg
         if assertion:
@@ -138,17 +137,17 @@ class s2srunTest(unittest.TestCase):
         args = s2srun.cli(argv)
 
         self.assertEqual(args.once, once,
-                         'Once-file is not {!r}'.format(once))
+                         'Once-file is not {0!r}'.format(once))
         self.assertEqual(args.limit, limit,
-                         'Output limit is not {!r}'.format(limit))
+                         'Output limit is not {0!r}'.format(limit))
         self.assertEqual(args.write_mode, write_mode,
-                         'Write mode is not {!r}'.format(write_mode))
+                         'Write mode is not {0!r}'.format(write_mode))
         self.assertEqual(args.serial, serial,
-                         'Serial mode is not {!r}'.format(serial))
+                         'Serial mode is not {0!r}'.format(serial))
         self.assertEqual(args.verbosity, verbosity,
-                         'Verbosity is not {!r}'.format(verbosity))
+                         'Verbosity is not {0!r}'.format(verbosity))
         self.assertEqual(args.specfile, specfile,
-                         'Specfile name is not {!r}'.format(specfile))
+                         'Specfile name is not {0!r}'.format(specfile))
 
     def test_CLI_set_all_long(self):
         once = True
@@ -170,17 +169,17 @@ class s2srunTest(unittest.TestCase):
         args = s2srun.cli(argv)
 
         self.assertEqual(args.once, once,
-                         'Once-file is not {!r}'.format(once))
+                         'Once-file is not {0!r}'.format(once))
         self.assertEqual(args.limit, limit,
-                         'Output limit is not {!r}'.format(limit))
+                         'Output limit is not {0!r}'.format(limit))
         self.assertEqual(args.write_mode, write_mode,
-                         'Write mode is not {!r}'.format(write_mode))
+                         'Write mode is not {0!r}'.format(write_mode))
         self.assertEqual(args.serial, serial,
-                         'Serial mode is not {!r}'.format(serial))
+                         'Serial mode is not {0!r}'.format(serial))
         self.assertEqual(args.verbosity, verbosity,
-                         'Verbosity is not {!r}'.format(verbosity))
+                         'Verbosity is not {0!r}'.format(verbosity))
         self.assertEqual(args.specfile, specfile,
-                         'Specfile name is not {!r}'.format(specfile))
+                         'Specfile name is not {0!r}'.format(specfile))
 
     def test_main_All_NC3_CL0_SER_V0_W(self):
         mdata = [v for v in mkTestData.tvmvars]

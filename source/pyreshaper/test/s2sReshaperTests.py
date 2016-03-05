@@ -58,20 +58,20 @@ class S2SReshaperTests(unittest.TestCase):
         nfiles = len(infiles)
         ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c'
                                                 else '4')
-        self._test_header(("convert() - {} infile(s), NC{}-CL{}, serial={},{}"
-                           "            verbosity={}, wmode={!r}, once={}"
+        self._test_header(("convert() - {0} infile(s), NC{1}-CL{2}, serial={3},{4}"
+                           "            verbosity={5}, wmode={6!r}, once={7}"
                            "").format(nfiles, ncvers, clevel, serial, eol,
                                       verbosity, wmode, once))
 
     def _assertion(self, name, actual, expected,
                    data=None, show=True, assertion=None):
-        rknm = '[{}/{}] {}'.format(self.rank, self.size, name)
+        rknm = '[{0}/{1}] {2}'.format(self.rank, self.size, name)
         spcr = ' ' * len(rknm)
         msg = eol + rknm
         if data:
-            msg += ' - Input:    {}'.format(data) + eol + spcr
-        msg += ' - Actual:   {}'.format(actual) + eol + spcr
-        msg += ' - Expected: {}'.format(expected)
+            msg += ' - Input:    {0}'.format(data) + eol + spcr
+        msg += ' - Actual:   {0}'.format(actual) + eol + spcr
+        msg += ' - Expected: {0}'.format(expected)
         if show:
             print msg
         if assertion:
@@ -106,8 +106,8 @@ class S2SReshaperTests(unittest.TestCase):
         sys.stdout = oldout
 
     def _test_create_reshaper(self, serial, verbosity, wmode):
-        self._test_header(("create_reshaper(serial={}, verbosity={}, "
-                           "wmode={!r})").format(serial, verbosity, wmode))
+        self._test_header(("create_reshaper(serial={0}, verbosity={1}, "
+                           "wmode={2!r})").format(serial, verbosity, wmode))
         if not (serial and self.rank > 0):
             spec = Specifier(infiles=mkTestData.slices, ncfmt='netcdf',
                              compression=0, prefix='output.', suffix='.nc',

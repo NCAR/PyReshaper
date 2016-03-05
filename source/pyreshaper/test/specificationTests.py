@@ -22,7 +22,7 @@ class SpecifierTests(unittest.TestCase):
 
     def test_init(self):
         spec = specification.Specifier()
-        self.assertListEqual(spec.input_file_list, [],
+        self.assertEqual(len(spec.input_file_list), 0,
                              'Input file list not initialized to empty')
         self.assertEqual(spec.netcdf_format, 'netcdf4',
                          'NetCDF format not initialized to netcdf4')
@@ -32,7 +32,7 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized to tseries.')
         self.assertEqual(spec.output_file_suffix, '.nc',
                          'Output file prefix not initialized to .nc')
-        self.assertListEqual(spec.time_variant_metadata, [],
+        self.assertEqual(len(spec.time_variant_metadata), 0,
                              'Time variant metadata list not initialized to empty')
 
     def test_init_full(self):
@@ -45,7 +45,8 @@ class SpecifierTests(unittest.TestCase):
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
-        self.assertListEqual(spec.input_file_list, in_list,
+        for i1, i2 in zip(spec.input_file_list, in_list):
+            self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
         self.assertEqual(spec.netcdf_format, fmt,
                          'NetCDF format not initialized properly')
@@ -55,7 +56,8 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_suffix, suffix,
                          'Output file prefix not initialized properly')
-        self.assertListEqual(spec.time_variant_metadata, metadata,
+        for i1,i2 in zip(spec.time_variant_metadata, metadata):
+            self.assertEqual(i1, i2,
                              'Time variant metadata list not initialized properly')
 
     def test_validate_types(self):
@@ -221,7 +223,8 @@ class SpecifierTests(unittest.TestCase):
         spec.write(fname)
         self.assertTrue(os.path.exists(fname), 'Specfile failed to write')
         spec2 = pickle.load(open(fname, 'r'))
-        self.assertListEqual(spec2.input_file_list, in_list,
+        for i1,i2 in zip(spec2.input_file_list, in_list):
+            self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
         self.assertEqual(spec2.netcdf_format, fmt,
                          'NetCDF format not initialized properly')
@@ -231,7 +234,8 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized properly')
         self.assertEqual(spec2.output_file_suffix, suffix,
                          'Output file prefix not initialized properly')
-        self.assertListEqual(spec2.time_variant_metadata, metadata,
+        for i1,i2 in zip(spec2.time_variant_metadata, metadata):
+            self.assertEqual(i1, i2,
                              'Time variant metadata list not initialized properly')
         os.remove(fname)
 
