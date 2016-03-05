@@ -95,7 +95,7 @@ class s2srunTest(unittest.TestCase):
 
     def test_CLI_empty(self):
         argv = []
-        self.assertRaises(SystemExit, s2srun.cli, argv)
+        self.assertRaises(ValueError, s2srun.cli, argv)
 
     def test_CLI_help(self):
         argv = ['-h']
@@ -103,18 +103,18 @@ class s2srunTest(unittest.TestCase):
 
     def test_CLI_defaults(self):
         argv = ['s2srunTests.py']
-        args = s2srun.cli(argv)
-        self.assertFalse(args.once,
+        opts, opts_specfile = s2srun.cli(argv)
+        self.assertFalse(opts.once,
                          'Once-file is set')
-        self.assertEqual(args.limit, 0,
+        self.assertEqual(opts.limit, 0,
                          'Output limit is set')
-        self.assertEqual(args.write_mode, 'w',
+        self.assertEqual(opts.write_mode, 'w',
                          'Write mode is not "w"')
-        self.assertFalse(args.serial,
+        self.assertFalse(opts.serial,
                          'Serial mode is set')
-        self.assertEqual(args.verbosity, 1,
+        self.assertEqual(opts.verbosity, 1,
                          'Verbosity is not 1')
-        self.assertEqual(args.specfile, argv[0],
+        self.assertEqual(opts_specfile, argv[0],
                          'Specfile name is not set')
 
     def test_CLI_set_all_short(self):
@@ -134,19 +134,19 @@ class s2srunTest(unittest.TestCase):
             argv.append('-s')
         argv.extend(['-v', str(verbosity)])
         argv.append(specfile)
-        args = s2srun.cli(argv)
+        opts, opts_specfile = s2srun.cli(argv)
 
-        self.assertEqual(args.once, once,
+        self.assertEqual(opts.once, once,
                          'Once-file is not {0!r}'.format(once))
-        self.assertEqual(args.limit, limit,
+        self.assertEqual(opts.limit, limit,
                          'Output limit is not {0!r}'.format(limit))
-        self.assertEqual(args.write_mode, write_mode,
+        self.assertEqual(opts.write_mode, write_mode,
                          'Write mode is not {0!r}'.format(write_mode))
-        self.assertEqual(args.serial, serial,
+        self.assertEqual(opts.serial, serial,
                          'Serial mode is not {0!r}'.format(serial))
-        self.assertEqual(args.verbosity, verbosity,
+        self.assertEqual(opts.verbosity, verbosity,
                          'Verbosity is not {0!r}'.format(verbosity))
-        self.assertEqual(args.specfile, specfile,
+        self.assertEqual(opts_specfile, specfile,
                          'Specfile name is not {0!r}'.format(specfile))
 
     def test_CLI_set_all_long(self):
@@ -166,19 +166,19 @@ class s2srunTest(unittest.TestCase):
             argv.append('--serial')
         argv.extend(['--verbosity', str(verbosity)])
         argv.append(specfile)
-        args = s2srun.cli(argv)
+        opts, opts_specfile = s2srun.cli(argv)
 
-        self.assertEqual(args.once, once,
+        self.assertEqual(opts.once, once,
                          'Once-file is not {0!r}'.format(once))
-        self.assertEqual(args.limit, limit,
+        self.assertEqual(opts.limit, limit,
                          'Output limit is not {0!r}'.format(limit))
-        self.assertEqual(args.write_mode, write_mode,
+        self.assertEqual(opts.write_mode, write_mode,
                          'Write mode is not {0!r}'.format(write_mode))
-        self.assertEqual(args.serial, serial,
+        self.assertEqual(opts.serial, serial,
                          'Serial mode is not {0!r}'.format(serial))
-        self.assertEqual(args.verbosity, verbosity,
+        self.assertEqual(opts.verbosity, verbosity,
                          'Verbosity is not {0!r}'.format(verbosity))
-        self.assertEqual(args.specfile, specfile,
+        self.assertEqual(opts_specfile, specfile,
                          'Specfile name is not {0!r}'.format(specfile))
 
     def test_main_All_NC3_CL0_SER_V0_W(self):

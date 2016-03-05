@@ -32,12 +32,12 @@ def cli(argv=None):
                       action='store_true', dest='once',
                       help=('Whether to write a "once" file with all '
                             'metadata. [Default: False]'))
-    parser.add_option('-l', '--limit', default=0, type=int,
+    parser.add_option('-l', '--limit', default=0, type='int',
                       help=('The limit on the number of time-series files per '
                             'processor to write.  Useful when debugging.  A '
                             'limit of 0 means write all output files.'
                             '[Default: 0]'))
-    parser.add_option('-m', '--write_mode', default='w', type=str,
+    parser.add_option('-m', '--write_mode', default='w', type='str',
                       help=("Determine the write mode to use for writing "
                             "output files.  Can be 'w' for normal operation, "
                             "'s' to skip generation of time-series files if "
@@ -48,25 +48,27 @@ def cli(argv=None):
                       action='store_true', dest='serial',
                       help=('Whether to run in serial (True) or parallel '
                             '(False). [Default: False]'))
-    parser.add_option('-v', '--verbosity', default=1, type=int,
+    parser.add_option('-v', '--verbosity', default=1, type='int',
                       help=('Verbosity level for level of output.  A value '
                             'of 0 means no output, and a value greater than '
                             '0 means more output detail. [Default: 1]'))
-    parser.add_option('specfile', default=None, metavar='SPECFILE', type=str,
-                      help=('The Pickled Specifier (specfile) to be used as '
-                            'to the PyReshaper.  [Default: None]'))
 
-    return parser.parse_args(argv)
+    opts, args = parser.parse_args(argv)
+    
+    if len(args) == 0:
+        raise ValueError('Must supply a specfile as input')
+    else:
+        specfile = args[0]
+    
+    return opts, specfile
 
 
 #==============================================================================
 # Main Script Function
 #==============================================================================
 def main(argv=None):
-    opts, args = cli(argv)
+    opts, specfile = cli(argv)
 
-    specfile = args[0]
-    
     # Try importing the file
     try:
         spec = pickle.load(open(specfile, 'rb'))
