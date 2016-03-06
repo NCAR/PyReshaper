@@ -447,11 +447,11 @@ class Slice2SeriesReshaper(Reshaper):
         # Debug output
         if self._simplecomm.is_manager():
             self._vprint('  Time-Invariant Metadata: '
-                         '{}'.format(self._time_invariant_metadata), verbosity=1)
+                         '{0}'.format(self._time_invariant_metadata), verbosity=1)
             self._vprint('  Time-Variant Metadata: '
-                         '{}'.format(self._time_variant_metadata), verbosity=1)
+                         '{0}'.format(self._time_variant_metadata), verbosity=1)
             self._vprint('  Time-Series Variables: '
-                         '{}'.format(all_tsvars.keys()), verbosity=1)
+                         '{0}'.format(all_tsvars.keys()), verbosity=1)
 
         # Add 'once' variable if writing to a once file
         # NOTE: This is a "cheat"!  There is no 'once' variable.  It's just
@@ -610,7 +610,7 @@ class Slice2SeriesReshaper(Reshaper):
             tsv_names_loc = tsv_names_loc[0:output_limit]
 
         # Print partitions for all ranks
-        dbg_msg = 'Converting time-series variables: {}'.format(tsv_names_loc)
+        dbg_msg = 'Converting time-series variables: {0}'.format(tsv_names_loc)
         self._vprint(dbg_msg, header=True, verbosity=1)
 
         # Reset all of the timer values (as it is possible that there are no
@@ -650,7 +650,7 @@ class Slice2SeriesReshaper(Reshaper):
 
             # Determine the output file name for this variable
             out_filename = self._time_series_filenames[out_name]
-            dbg_msg = 'Opening output file for variable: {}'.format(out_name)
+            dbg_msg = 'Opening output file for variable: {0}'.format(out_name)
             if out_name == 'once':
                 dbg_msg = 'Opening "once" file.'
             self._vprint(dbg_msg, header=True, verbosity=1)
@@ -728,7 +728,7 @@ class Slice2SeriesReshaper(Reshaper):
                         self._timer.stop('Create Time-Series Variables')
 
                     dbg_msg = ('Writing output file for variable: '
-                               '{}').format(out_name)
+                               '{0}').format(out_name)
                     if out_name == 'once':
                         dbg_msg = 'Writing "once" file.'
                     self._vprint(dbg_msg, header=True, verbosity=1)
@@ -825,7 +825,7 @@ class Slice2SeriesReshaper(Reshaper):
             self._timer.stop('Close Output Files')
 
             # Output message to user
-            dbg_msg = 'Closed output file for variable: {}'.format(out_name)
+            dbg_msg = 'Closed output file for variable: {0}'.format(out_name)
             if out_name == 'once':
                 dbg_msg = 'Closed "once" file.'
             self._vprint(dbg_msg, header=True, verbosity=1)

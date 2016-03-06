@@ -5,7 +5,7 @@ A package for converting NetCDF files from time-slice (history) format
 to time-series (single-variable) format.
 
 :AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-:COPYRIGHT: 2015, University Corporation for Atmospheric Research
+:COPYRIGHT: 2016, University Corporation for Atmospheric Research
 :LICENSE: See the LICENSE.rst file for details
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
@@ -75,7 +75,7 @@ Obtaining the Source Code
 Currently, the most up-to-date development source code is available
 via git from the site::
 
-    https://github.com/NCAR-CISL-ASAP/PyReshaper
+    https://github.com/NCAR/PyReshaper
 
 Check out the most recent stable tag.  The source is available in
 read-only mode to everyone.  Developers are welcome to update the source
@@ -88,7 +88,7 @@ Building & Installing from Source
 Installation of the PyReshaper is very simple.  After checking out the source
 from the above svn link, via::
 
-    $ git clone https://github.com/NCAR-CISL-ASAP/PyReshaper
+    $ git clone https://github.com/NCAR/PyReshaper
     
 Enter the newly cloned directory::
 
@@ -140,7 +140,7 @@ path will be::
 where X will be 6 or 7 (or other) depending on the version of Python that you
 are using to install the package.
 
-To use the PyReshaper scripts (e.g., 'slice2series'), you must add the
+To use the PyReshaper scripts (e.g., 's2smake' and 's2srun'), you must add the
 script binary directory to your PATH.  Depending on the PREFIX used during
 installation, this path will be::
 

@@ -116,3 +116,10 @@ VERSION 0.9.6
    
 12 October 2015:
  - Added capability to append to existing output files
+ 
+VERSION 0.9.8
+-------------
+
+5 March 2016:
+ - Added back-compatibility with Python 2.6
+ 

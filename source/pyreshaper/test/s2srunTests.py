@@ -1,28 +1,27 @@
 """
-Parallel Tests for the Reshaper class
-
 Copyright 2015, University Corporation for Atmospheric Research
-See the LICENSE.rst file for details
+See LICENSE.txt for details
 """
 
+import imp
 import unittest
-
-import sys
+import cPickle as pickle
 from glob import glob
 from cStringIO import StringIO
 from os import linesep as eol
 from os import remove
 from mpi4py import MPI
 
-from pyreshaper.reshaper import Slice2SeriesReshaper, create_reshaper
 from pyreshaper.specification import Specifier
 
 import mkTestData
 
+s2srun = imp.load_source('s2srun', '../../../scripts/s2srun')
+
 MPI_COMM_WORLD = MPI.COMM_WORLD
 
 
-class S2SReshaperTests(unittest.TestCase):
+class s2srunTest(unittest.TestCase):
 
     def setUp(self):
 
@@ -79,241 +78,273 @@ class S2SReshaperTests(unittest.TestCase):
         else:
             self.assertEqual(actual, expected, msg)
 
-    def _run_convert(self, infiles, prefix, suffix, metadata,
-                     ncfmt, clevel, serial, verbosity, wmode, once,
-                     print_diags=False):
+    def _run_main(self, infiles, prefix, suffix, metadata,
+                  ncfmt, clevel, serial, verbosity, wmode, once):
         if not (serial and self.rank > 0):
             spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
                              prefix=prefix, suffix=suffix, metadata=metadata)
-            rshpr = create_reshaper(spec, serial=serial,
-                                    verbosity=verbosity,
-                                    wmode=wmode, once=once)
-            rshpr.convert()
-            if print_diags:
-                rshpr.print_diagnostics()
+            specfile = 'input.s2s'
+            pickle.dump(spec, open(specfile, 'wb'))
+            argv = ['-v', str(verbosity), '-m', wmode]
+            if once:
+                argv.append('-s')
+            argv.append(specfile)
+            s2srun.main(argv)
+            remove(specfile)
         MPI_COMM_WORLD.Barrier()
 
-    def _run_convert_assert_no_output(self, infiles, prefix, suffix, metadata,
-                                      ncfmt, clevel, serial, verbosity, wmode,
-                                      once, print_diags=False):
-        oldout = sys.stdout
-        newout = StringIO()
-        sys.stdout = newout
-        self._run_convert(infiles, prefix, suffix, metadata, ncfmt, clevel,
-                          serial, 0, wmode, once, print_diags=False)
-        actual = newout.getvalue()
-        self._assertion("stdout empty", actual, '')
-        sys.stdout = oldout
+    def test_CLI_empty(self):
+        argv = []
+        self.assertRaises(ValueError, s2srun.cli, argv)
 
-    def _test_create_reshaper(self, serial, verbosity, wmode):
-        self._test_header(("create_reshaper(serial={0}, verbosity={1}, "
-                           "wmode={2!r})").format(serial, verbosity, wmode))
-        if not (serial and self.rank > 0):
-            spec = Specifier(infiles=mkTestData.slices, ncfmt='netcdf',
-                             compression=0, prefix='output.', suffix='.nc',
-                             metadata=[])
-            rshpr = create_reshaper(spec, serial=serial, verbosity=verbosity,
-                                    wmode=wmode)
-            self._assertion("type(reshaper)", type(rshpr),
-                            Slice2SeriesReshaper)
+    def test_CLI_help(self):
+        argv = ['-h']
+        self.assertRaises(SystemExit, s2srun.cli, argv)
 
-    def test_create_reshaper_serial_V0_W(self):
-        self._test_create_reshaper(serial=True, verbosity=0, wmode='w')
+    def test_CLI_defaults(self):
+        argv = ['s2srunTests.py']
+        opts, opts_specfile = s2srun.cli(argv)
+        self.assertFalse(opts.once,
+                         'Once-file is set')
+        self.assertEqual(opts.limit, 0,
+                         'Output limit is set')
+        self.assertEqual(opts.write_mode, 'w',
+                         'Write mode is not "w"')
+        self.assertFalse(opts.serial,
+                         'Serial mode is set')
+        self.assertEqual(opts.verbosity, 1,
+                         'Verbosity is not 1')
+        self.assertEqual(opts_specfile, argv[0],
+                         'Specfile name is not set')
 
-    def test_create_reshaper_serial_V1_W(self):
-        self._test_create_reshaper(serial=True, verbosity=1, wmode='w')
+    def test_CLI_set_all_short(self):
+        once = True
+        limit = 3
+        write_mode = 'x'
+        serial = True
+        verbosity = 5
+        specfile = 'myspec.s2s'
 
-    def test_create_reshaper_serial_V2_W(self):
-        self._test_create_reshaper(serial=True, verbosity=2, wmode='w')
+        argv = []
+        if once:
+            argv.append('-1')
+        argv.extend(['-l', str(limit)])
+        argv.extend(['-m', str(write_mode)])
+        if serial:
+            argv.append('-s')
+        argv.extend(['-v', str(verbosity)])
+        argv.append(specfile)
+        opts, opts_specfile = s2srun.cli(argv)
 
-    def test_create_reshaper_serial_V1_O(self):
-        self._test_create_reshaper(serial=True, verbosity=1, wmode='o')
+        self.assertEqual(opts.once, once,
+                         'Once-file is not {0!r}'.format(once))
+        self.assertEqual(opts.limit, limit,
+                         'Output limit is not {0!r}'.format(limit))
+        self.assertEqual(opts.write_mode, write_mode,
+                         'Write mode is not {0!r}'.format(write_mode))
+        self.assertEqual(opts.serial, serial,
+                         'Serial mode is not {0!r}'.format(serial))
+        self.assertEqual(opts.verbosity, verbosity,
+                         'Verbosity is not {0!r}'.format(verbosity))
+        self.assertEqual(opts_specfile, specfile,
+                         'Specfile name is not {0!r}'.format(specfile))
 
-    def test_create_reshaper_serial_V1_S(self):
-        self._test_create_reshaper(serial=True, verbosity=1, wmode='s')
+    def test_CLI_set_all_long(self):
+        once = True
+        limit = 3
+        write_mode = 'x'
+        serial = True
+        verbosity = 5
+        specfile = 'myspec.s2s'
 
-    def test_create_reshaper_serial_V1_A(self):
-        self._test_create_reshaper(serial=True, verbosity=1, wmode='a')
+        argv = []
+        if once:
+            argv.append('--once')
+        argv.extend(['--limit', str(limit)])
+        argv.extend(['--write_mode', str(write_mode)])
+        if serial:
+            argv.append('--serial')
+        argv.extend(['--verbosity', str(verbosity)])
+        argv.append(specfile)
+        opts, opts_specfile = s2srun.cli(argv)
 
-    def test_create_reshaper_parallel_V1_W(self):
-        self._test_create_reshaper(serial=False, verbosity=1, wmode='w')
+        self.assertEqual(opts.once, once,
+                         'Once-file is not {0!r}'.format(once))
+        self.assertEqual(opts.limit, limit,
+                         'Output limit is not {0!r}'.format(limit))
+        self.assertEqual(opts.write_mode, write_mode,
+                         'Write mode is not {0!r}'.format(write_mode))
+        self.assertEqual(opts.serial, serial,
+                         'Serial mode is not {0!r}'.format(serial))
+        self.assertEqual(opts.verbosity, verbosity,
+                         'Verbosity is not {0!r}'.format(verbosity))
+        self.assertEqual(opts_specfile, specfile,
+                         'Specfile name is not {0!r}'.format(specfile))
 
-    def test_convert_All_NC3_CL0_SER_V0_W(self):
+    def test_main_All_NC3_CL0_SER_V0_W(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
-                'print_diags': False}
+                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False}
         self._convert_header(**args)
-        self._run_convert_assert_no_output(**args)
+        self._run_main(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_1_NC3_CL0_SER_V0_W(self):
+    def test_main_1_NC3_CL0_SER_V0_W(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices[0:1], 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
-                'print_diags': False}
+                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False}
         self._convert_header(**args)
-        self._run_convert_assert_no_output(**args)
+        self._run_main(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC4_CL1_SER_V0_W(self):
+    def test_main_All_NC4_CL1_SER_V0_W(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf4', 'clevel': 1,
-                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
-                'print_diags': False}
+                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False}
         self._convert_header(**args)
-        self._run_convert_assert_no_output(**args)
+        self._run_main(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V1_W(self):
+    def test_main_All_NC3_CL0_PAR_V1_W(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 'w', 'once': False,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'wmode': 'w', 'once': False}
         self._convert_header(**args)
-        self._run_convert(**args)
+        self._run_main(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V1_W_ONCE(self):
+    def test_main_All_NC3_CL0_PAR_V1_W_ONCE(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 'w', 'once': True,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'wmode': 'w', 'once': True}
         self._convert_header(**args)
-        self._run_convert(**args)
+        self._run_main(**args)
         if self.rank == 0:
             mkTestData.check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V1_O(self):
+    def test_main_All_NC3_CL0_PAR_V1_O(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 'o', 'once': False,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'wmode': 'o', 'once': False}
         self._convert_header(**args)
-        self._run_convert(**args)
+        self._run_main(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V1_O_ONCE(self):
+    def test_main_All_NC3_CL0_PAR_V1_O_ONCE(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 'o', 'once': True,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'wmode': 'o', 'once': True}
         self._convert_header(**args)
-        self._run_convert(**args)
+        self._run_main(**args)
         if self.rank == 0:
             mkTestData.check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V1_S(self):
+    def test_main_All_NC3_CL0_PAR_V1_S(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 's', 'once': False,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'wmode': 's', 'once': False}
         self._convert_header(**args)
-        self._run_convert(**args)
+        self._run_main(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V1_S_ONCE(self):
+    def test_main_All_NC3_CL0_PAR_V1_S_ONCE(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 's', 'once': True,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'wmode': 's', 'once': True}
         self._convert_header(**args)
-        self._run_convert(**args)
+        self._run_main(**args)
         if self.rank == 0:
             mkTestData.check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V3_A(self):
+    def test_main_All_NC3_CL0_PAR_V3_A(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'once': False,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'once': False}
         self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
-        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
+        self._run_main(infiles=[mkTestData.slices[0]], wmode='w', **args)
         for infile in mkTestData.slices[1:]:
-            self._run_convert(infiles=[infile], wmode='a', **args)
+            self._run_main(infiles=[infile], wmode='a', **args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V3_A_ONCE(self):
+    def test_main_All_NC3_CL0_PAR_V3_A_ONCE(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'once': True,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'once': True}
         self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
-        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
+        self._run_main(infiles=[mkTestData.slices[0]], wmode='w', **args)
         for infile in mkTestData.slices[1:]:
-            self._run_convert(infiles=[infile], wmode='a', **args)
+            self._run_main(infiles=[infile], wmode='a', **args)
         if self.rank == 0:
             mkTestData.check_outfile(infiles=mkTestData.slices, tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
                 mkTestData.check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_PAR_V3_A_MISSING(self):
+    def test_main_All_NC3_CL0_PAR_V3_A_MISSING(self):
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'once': False,
-                'print_diags': False}
+                'serial': False, 'verbosity': 1, 'once': False}
         missingvar = mkTestData.tsvars[2]
         self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
-        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
-        self._run_convert(infiles=[mkTestData.slices[1]], wmode='a', **args)
+        self._run_main(infiles=[mkTestData.slices[0]], wmode='w', **args)
+        self._run_main(infiles=[mkTestData.slices[1]], wmode='a', **args)
         remove(args['prefix'] + missingvar + args['suffix'])
         for infile in mkTestData.slices[2:]:
-            self._run_convert(infiles=[infile], wmode='a', **args)
+            self._run_main(infiles=[infile], wmode='a', **args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 if tsvar == missingvar:
@@ -332,7 +363,7 @@ if __name__ == "__main__":
     MPI_COMM_WORLD.Barrier()
 
     mystream = StringIO()
-    tests = unittest.TestLoader().loadTestsFromTestCase(S2SReshaperTests)
+    tests = unittest.TestLoader().loadTestsFromTestCase(s2srunTest)
     unittest.TextTestRunner(stream=mystream).run(tests)
     MPI_COMM_WORLD.Barrier()
 
