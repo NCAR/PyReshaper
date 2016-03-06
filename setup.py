@@ -31,5 +31,5 @@ setup(name='PyReshaper',
       package_dir={'pyreshaper': 'source/pyreshaper'},
       package_data={'pyreshaper': ['LICENSE.rst']},
       scripts=['scripts/s2smake', 'scripts/s2srun'],
-      install_requires=['mpi4py>=1.3', 'asaptools>=0.4']
+      install_requires=['mpi4py>=1.3', 'asaptools>=0.5.5']
       )
