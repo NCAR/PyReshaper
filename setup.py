@@ -2,7 +2,7 @@
 """
 PyReshaper -- Setup Script
 
-Copyright 2015, University Corporation for Atmospheric Research
+Copyright 2016, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
@@ -31,5 +31,5 @@ setup(name='PyReshaper',
       package_dir={'pyreshaper': 'source/pyreshaper'},
       package_data={'pyreshaper': ['LICENSE.rst']},
       scripts=['scripts/s2smake', 'scripts/s2srun'],
-      install_requires=['mpi4py>=1.3', 'asaptools>=0.5.5']
+      install_requires=['mpi4py', 'asaptools']
       )
