@@ -239,7 +239,7 @@ class Slice2SeriesReshaper(Reshaper):
                 err_msg = "Simple communicator object is not a SimpleComm"
                 raise TypeError(err_msg)
         if wmode not in ['w', 's', 'o', 'a']:
-            err_msg = "Write mode '{}' not recognized".format(wmode)
+            err_msg = "Write mode '{0}' not recognized".format(wmode)
             raise ValueError(err_msg)
 
         # Whether to write a once file
@@ -377,15 +377,15 @@ class Slice2SeriesReshaper(Reshaper):
             # Determine the unlimited dimension
             if self._unlimited_dim not in ifile.dimensions:
                 err_msg = ('Unlimited dimension not found '
-                           'in file "{}"').format(ifilename)
+                           'in file "{0}"').format(ifilename)
                 raise LookupError(err_msg)
             if not ifile.unlimited(self._unlimited_dim):
-                err_msg = ('Dimension "{}" not unlimited in file '
-                           '"{}"').format(self._unlimited_dim, ifilename)
+                err_msg = ('Dimension "{0}" not unlimited in file '
+                           '"{1}"').format(self._unlimited_dim, ifilename)
                 raise LookupError(err_msg)
             if self._unlimited_dim not in ifile.variables:
                 err_msg = ('Unlimited dimension variable not found in file '
-                           '"{}"').format(ifilename)
+                           '"{0}"').format(ifilename)
                 raise LookupError(err_msg)
 
             # Get the time values (list of NDArrays)
@@ -407,9 +407,9 @@ class Slice2SeriesReshaper(Reshaper):
         # Make sure that the list of variables in each file is the same
         if len(missing_vars) != 0:
             warning = ("WARNING: The first input file has variables that are "
-                       "not in all input files:{}{}").format(linesep, '   ')
+                       "not in all input files:{0}{1}").format(linesep, '   ')
             for var in missing_vars:
-                warning += ' {}'.format(var)
+                warning += ' {0}'.format(var)
             self._vprint(warning, header=True, verbosity=0)
 
         if self._simplecomm.is_manager():
@@ -430,7 +430,7 @@ class Slice2SeriesReshaper(Reshaper):
         # do not overlap)
         for i in xrange(1, len(new_values)):
             if new_values[i - 1][-1] >= new_values[i][0]:
-                err_msg = ('Times in input files {} and {} appear '
+                err_msg = ('Times in input files {0} and {1} appear '
                            'to overlap').format(new_filenames[i - 1],
                                                 new_filenames[i])
                 raise ValueError(err_msg)
@@ -489,7 +489,7 @@ class Slice2SeriesReshaper(Reshaper):
         if self._write_mode == 'o':
             if self._simplecomm.is_manager() and len(self._existing) > 0:
                 self._vprint('WARNING: Deleting existing output files for '
-                             'time-series variables: {}'.format(self._existing),
+                             'time-series variables: {0}'.format(self._existing),
                              verbosity=0)
             for variable in self._existing:
                 remove(self._time_series_filenames[variable])
@@ -499,7 +499,7 @@ class Slice2SeriesReshaper(Reshaper):
         elif self._write_mode == 's':
             if self._simplecomm.is_manager() and len(self._existing) > 0:
                 self._vprint('WARNING: Skipping time-series variables with '
-                             'existing output files: {}'.format(self._existing),
+                             'existing output files: {0}'.format(self._existing),
                              verbosity=0)
             for variable in self._existing:
                 self._time_series_variables.remove(variable)
@@ -521,7 +521,7 @@ class Slice2SeriesReshaper(Reshaper):
                 if not tsfile.unlimited(self._unlimited_dim):
                     err_msg = ("Cannot append to time-series file with "
                                "missing unlimited dimension "
-                               "'{}'").format(self._unlimited_dim)
+                               "'{0}'").format(self._unlimited_dim)
                     raise RuntimeError(err_msg)
 
                 # Check for once file
@@ -537,14 +537,14 @@ class Slice2SeriesReshaper(Reshaper):
                         if metavar not in tsfile.variables:
                             err_msg = ("Cannot append to time-series file "
                                        "with missing time-variant metadata "
-                                       "'{}'").format(metavar)
+                                       "'{0}'").format(metavar)
                             raise RuntimeError(err_msg)
 
                 # Check that the time-series variable is present
                 if needs_tser_data and variable not in tsfile.variables:
                     err_msg = ("Cannot append to time-series file with "
                                "missing time-series variable "
-                               "'{}'").format(variable)
+                               "'{0}'").format(variable)
                     raise RuntimeError(err_msg)
 
                 # Get the starting step index to start writing from
@@ -557,7 +557,7 @@ class Slice2SeriesReshaper(Reshaper):
         # Otherwise, throw an exception if any existing output files are found
         elif len(self._existing) > 0:
             err_msg = ("Found existing output files for time-series "
-                       "variables: {}").format(self._existing)
+                       "variables: {0}").format(self._existing)
             raise RuntimeError(err_msg)
 
     def convert(self, output_limit=0):
@@ -930,7 +930,7 @@ class MultiSpecReshaper(Reshaper):
                 err_msg = "Simple communicator object is not a SimpleComm"
                 raise TypeError(err_msg)
         if wmode not in ['w', 's', 'o', 'a']:
-            err_msg = "Write mode '{}' not recognized".format(wmode)
+            err_msg = "Write mode '{0}' not recognized".format(wmode)
             raise ValueError(err_msg)
 
         # Whether to write to a once file
