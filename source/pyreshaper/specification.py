@@ -236,7 +236,7 @@ class Specifier(object):
             pickle.dump(self, fobj)
             fobj.close()
         except:
-            err_msg = "Failed to write Specifier to file '{}'".format(fname)
+            err_msg = "Failed to write Specifier to file '{0}'".format(fname)
             raise OSError(err_msg)
 
 
