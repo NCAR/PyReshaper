@@ -71,24 +71,6 @@ def create_reshaper(specifier, serial=False, verbosity=1, wmode='w',
                                     wmode=wmode,
                                     once=once,
                                     simplecomm=simplecomm)
-    elif isinstance(specifier, (list, tuple)):
-        spec_dict = dict([(str(i), s) for (i, s) in enumerate(specifier)])
-        return create_reshaper(spec_dict,
-                               serial=serial,
-                               verbosity=verbosity,
-                               wmode=wmode,
-                               once=once,
-                               simplecomm=simplecomm)
-    elif isinstance(specifier, dict):
-        if not all([isinstance(s, Specifier) for s in specifier.values()]):
-            err_msg = 'Multiple specifiers must all be of Specifier type'
-            raise TypeError(err_msg)
-        return MultiSpecReshaper(specifier,
-                                 serial=serial,
-                                 verbosity=verbosity,
-                                 wmode=wmode,
-                                 once=once,
-                                 simplecomm=simplecomm)
     else:
         err_msg = 'Specifier of type ' + str(type(specifier)) + ' is not a ' \
             + 'valid Specifier object.'
