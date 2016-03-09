@@ -123,4 +123,8 @@ VERSION 0.9.10
 7 March 2016:
  - Python 2.6 back-porting
 
- 
+VERSION 1.0.0
+-------------
+
+9 March 2016:
+ - New memory management
