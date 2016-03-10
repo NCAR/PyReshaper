@@ -5,7 +5,7 @@ This is the main reshaper module.  This is where the specific operations
 are defined.  Currently, only one operation has been implemented (i.e.,
 the time-slice to time-series operation).
 
-Copyright 2015, University Corporation for Atmospheric Research
+Copyright 2016, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
@@ -336,7 +336,7 @@ class Slice2SeriesReshaper(Reshaper):
                 self._time_variant_metadata.append(var_name)
             else:
                 size = numpy.dtype(var.typecode()).itemsize
-                size = size * numpy.prod(var.shape)
+                size *= numpy.prod(var.shape)
                 all_tsvars[var_name] = size
 
         # Close the first file

@@ -6,13 +6,14 @@ the PyReshaper code is specified.  Currently all types of supported
 operations for the PyReshaper are specified with derived dypes of the
 Specification class.
 
-Copyright 2015, University Corporation for Atmospheric Research
+Copyright 2016, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
 # Built-in imports
 import cPickle as pickle
 from os import path as ospath
+import iobackend
 
 
 #==============================================================================
@@ -51,6 +52,7 @@ class Specifier(object):
                  prefix='tseries.',
                  suffix='.nc',
                  metadata=[],
+                 backend='netCDF4',
                  **kwargs):
         """
         Initializes the internal data with optional arguments.
@@ -100,6 +102,9 @@ class Specifier(object):
         #  output files.
         self.time_variant_metadata = metadata
 
+        # Store the netCDF I/O backend name
+        self.io_backend = backend
+        
         # Optional arguments associated with the reshaper operation
         self.options = kwargs
 
@@ -163,7 +168,12 @@ class Specifier(object):
                 err_msg = "Time-variant metadata variable names must be " + \
                           "given as strings"
                 raise TypeError(err_msg)
-
+        
+        # Validate the type of the backend
+        if not isinstance(self.io_backend, str):
+            err_msg = "I/O backend must be given as a string"
+            raise TypeError(err_msg)
+            
     def validate_values(self):
         """
         Method to validate the values of the Specifier data.
@@ -223,6 +233,12 @@ class Specifier(object):
         # Validate the output file suffix string (should end in .nc)
         if (self.output_file_suffix[-3:] != '.nc'):
             self.output_file_suffix += '.nc'
+        
+        # Validate the value of the backend
+        if not iobackend.is_available(self.io_backend):
+            err_msg = ("I/O Backend named {0} is not "
+                       "available").format(self.io_backend)
+            raise ImportError(err_msg)            
 
     def write(self, fname):
         """

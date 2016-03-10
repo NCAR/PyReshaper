@@ -1,5 +1,5 @@
 """
-Copyright 2015, University Corporation for Atmospheric Research
+Copyright 2016, University Corporation for Atmospheric Research
 See LICENSE.txt for details
 """
 
