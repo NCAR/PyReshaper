@@ -166,13 +166,18 @@ class NCFile(object):
             return self._obj.dimensions[name].isunlimited()
 
     @property
-    def attributes(self):
+    def ncattrs(self):
         if self._backend == 'Nio':
-            return self._obj.attributes
+            return self._obj.attributes.keys()
         elif self._backend == 'netCDF4':
-            return _dict_((a, self._obj.getncattr(a))
-                          for a in self._obj.ncattrs())
+            return self._obj.ncattrs()
 
+    def getncattr(self, name):
+        if self._backend == 'Nio':
+            return self._obj.attributes[name]
+        elif self._backend == 'netCDF4':
+            return self._obj.getncattr(name)
+    
     def setncattr(self, name, value):
         if self._backend == 'Nio':
             setattr(self._obj, name, value)
@@ -223,13 +228,18 @@ class NCVariable(object):
             self._iolib = None
     
     @property
-    def attributes(self):
+    def ncattrs(self):
         if self._backend == 'Nio':
-            return self._obj.attributes
+            return self._obj.attributes.keys()
         elif self._backend == 'netCDF4':
-            return _dict_((a, self._obj.getncattr(a))
-                          for a in self._obj.ncattrs())
+            return self._obj.ncattrs()
 
+    def getncattr(self, name):
+        if self._backend == 'Nio':
+            return self._obj.attributes[name]
+        elif self._backend == 'netCDF4':
+            return self._obj.getncattr(name)
+    
     def setncattr(self, name, value):
         if self._backend == 'Nio':
             setattr(self._obj, name, value)

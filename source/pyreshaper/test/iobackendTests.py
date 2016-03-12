@@ -181,30 +181,32 @@ class IOBackendReadTests(unittest.TestCase):
     def test_nio_NCFile_attributes(self):
         iobackend.set_backend('Nio')
         ncf = iobackend.NCFile(self.ncfname)
-        actual = ncf.attributes
-        expected = self.ncattrs
-        print_test_msg('NCFile.attributes', actual=actual, expected=expected)
+        actual = ncf.ncattrs
+        expected = self.ncattrs.keys()
+        print_test_msg('NCFile.ncattrs', actual=actual, expected=expected)
         self.assertEqual(len(actual), len(expected),
-                         'NCFile attributes not correct length')
-        for dn, dv in expected.iteritems():
+                         'NCFile ncattrs not correct length')
+        for dn in expected:
             self.assertTrue(dn in actual,
-                            'NCFile attributes {0!r} not present'.format(dn))
-            self.assertEqual(actual[dn], dv,
-                            'NCFile attributes {0!r} not correct'.format(dn))
+                            'NCFile ncattrs {0!r} not present'.format(dn))
+            self.assertEqual(ncf.getncattr(dn), self.ncattrs[dn],
+                            'NCFile ncattrs {0!r} not correct'.format(dn))
 
     def test_nc4_NCFile_attributes(self):
         iobackend.set_backend('netCDF4')
         ncf = iobackend.NCFile(self.ncfname)
-        actual = ncf.attributes
-        expected = self.ncattrs
-        print_test_msg('NCFile.attributes', actual=actual, expected=expected)
+        actual = ncf.ncattrs
+        expected = self.ncattrs.keys()
+        print_test_msg('NCFile.ncattrs', actual=actual, expected=expected)
         self.assertEqual(len(actual), len(expected),
-                         'NCFile attributes not correct length')
-        for dn, dv in expected.iteritems():
-            self.assertTrue(dn in actual,
-                            'NCFile attributes {0!r} not present'.format(dn))
-            self.assertEqual(actual[dn], dv,
-                            'NCFile attributes {0!r} not correct'.format(dn))
+                         'NCFile ncattrs not correct length')
+        for xname in expected:
+            self.assertTrue(xname in actual,
+                            'NCFile ncattrs {0!r} not present'.format(xname))
+            xval = self.ncattrs[xname]
+            aval = ncf.getncattr(xname) 
+            self.assertEqual(aval, xval,
+                            'NCFile ncattrs {0!r} not correct'.format(xname))
 
     def test_nio_NCFile_variables(self):
         iobackend.set_backend('Nio')
@@ -255,31 +257,31 @@ class IOBackendReadTests(unittest.TestCase):
     def test_nio_NCVariable_attributes(self):
         iobackend.set_backend('Nio')
         ncf = iobackend.NCFile(self.ncfname)
-        actual = ncf.variables['v'].attributes
-        expected = self.vattrs
-        print_test_msg('NCVariable.attributes',
+        actual = ncf.variables['v'].ncattrs
+        expected = self.vattrs.keys()
+        print_test_msg('NCVariable.ncattrs',
                        actual=actual, expected=expected)
         self.assertEqual(len(actual), len(expected),
-                         'NCVariable attributes not correct length')
-        for a,v in expected.iteritems():
+                         'NCVariable ncattrs not correct length')
+        for a in expected:
             self.assertTrue(a in actual,
                             'Attribute {0!r} not found in variable'.format(a))
-            self.assertEqual(v, actual[a],
+            self.assertEqual(ncf.variables['v'].getncattr(a), self.vattrs[a],
                             'Attribute {0!r} not correct'.format(a))
 
     def test_nc4_NCVariable_attributes(self):
         iobackend.set_backend('netCDF4')
         ncf = iobackend.NCFile(self.ncfname)
-        actual = ncf.variables['v'].attributes
-        expected = self.vattrs
-        print_test_msg('NCVariable.attributes',
+        actual = ncf.variables['v'].ncattrs
+        expected = self.vattrs.keys()
+        print_test_msg('NCVariable.ncattrs',
                        actual=actual, expected=expected)
         self.assertEqual(len(actual), len(expected),
-                         'NCVariable attributes not correct length')
-        for a,v in expected.iteritems():
+                         'NCVariable ncattrs not correct length')
+        for a in expected:
             self.assertTrue(a in actual,
                             'Attribute {0!r} not found in variable'.format(a))
-            self.assertEqual(v, actual[a],
+            self.assertEqual(ncf.variables['v'].getncattr(a), self.vattrs[a],
                             'Attribute {0!r} not correct'.format(a))
 
     def test_nio_NCVariable_dimensions(self):
