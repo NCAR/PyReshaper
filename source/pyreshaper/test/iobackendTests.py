@@ -346,6 +346,50 @@ class IOBackendReadTests(unittest.TestCase):
         self.assertEqual(actual, expected,
                          'NCVariable typecode not correct')
 
+    def test_nio_NCVariable_shape(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].shape
+        expected = (self.ncdims['t'], self.ncdims['x'])
+        ncf.close()
+        print_test_msg('NCVariable.typecode',
+                       actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCVariable typecode not correct')
+
+    def test_nc4_NCVariable_shape(self):
+        iobackend.set_backend('netCDF4')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].shape
+        expected = (self.ncdims['t'], self.ncdims['x'])
+        ncf.close()
+        print_test_msg('NCVariable.typecode',
+                       actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCVariable typecode not correct')
+
+    def test_nio_NCVariable_size(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].size
+        expected = self.ncdims['t'] * self.ncdims['x']
+        ncf.close()
+        print_test_msg('NCVariable.typecode',
+                       actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCVariable typecode not correct')
+
+    def test_nc4_NCVariable_size(self):
+        iobackend.set_backend('netCDF4')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].size
+        expected = self.ncdims['t'] * self.ncdims['x']
+        ncf.close()
+        print_test_msg('NCVariable.typecode',
+                       actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCVariable typecode not correct')
+
     def test_nio_NCVariable_getitem(self):
         iobackend.set_backend('Nio')
         ncf = iobackend.NCFile(self.ncfrname)

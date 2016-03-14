@@ -10,6 +10,8 @@ Copyright 2016, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
+import numpy
+
 try:
     _dict_ = __import__('collections', fromlist=['OrderedDict']).OrderedDict
 except:
@@ -32,6 +34,13 @@ except:
     _NC4_ = None
 if _NC4_ is not None:
     _AVAIL_['netCDF4'] = _NC4_
+
+
+#===============================================================================
+# is_available
+#===============================================================================
+def is_available(name):
+    return name in _AVAIL_
 
 
 #===============================================================================
@@ -259,7 +268,18 @@ class NCVariable(object):
     @property
     def dimensions(self):
         return self._obj.dimensions
-    
+
+    @property
+    def shape(self):
+        return self._obj.shape
+
+    @property
+    def size(self):
+        if self._backend == 'Nio':
+            return numpy.prod(self.shape)
+        elif self._backend == 'netCDF4':
+            return self._obj.size
+
     @property
     def typecode(self):
         if self._backend == 'Nio':
