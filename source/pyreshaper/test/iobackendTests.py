@@ -654,6 +654,223 @@ class IOBackendWriteTests(unittest.TestCase):
 
 
 #===============================================================================
+# IOBackendAppendTests
+#===============================================================================
+class IOBackendAppendTests(unittest.TestCase):
+
+    """
+    IOBackendAppendTests Class
+
+    This class defines all of the unit tests for the iobackend module.
+    """
+    
+    def setUp(self):
+        self.ncfaname = 'appendtest.nc'
+        self.ncattrs = {'a1': 'attribute 1',
+                        'a2': 'attribute 2'}
+        self.ncdims = {'t': 10, 'x': 5}
+        self.t = np.arange(self.ncdims['t'], dtype='d')
+        self.x = np.arange(self.ncdims['x'], dtype='d')
+        self.v = np.arange(self.ncdims['t']*self.ncdims['x'],
+                           dtype='f').reshape(self.ncdims['t'], self.ncdims['x'])
+        self.vattrs = {'long_name': 'variable',
+                       'units': 'meters'}
+        
+        self.fattrs2 = {'a3': 'attribute 3',
+                        'a4': 'attribute 4'}
+        self.t2 = np.arange(self.ncdims['t'], 2*self.ncdims['t'], dtype='d')
+        self.v2 = np.arange(self.ncdims['t']*self.ncdims['x'],
+                            dtype='f').reshape(self.ncdims['t'], self.ncdims['x'])
+        self.vattrs2 = {'standard_name': 'variable'}
+
+        ncfile = netCDF4.Dataset(self.ncfaname, 'w')
+        for a,v in self.ncattrs.iteritems():
+            setattr(ncfile, a, v)
+        ncfile.createDimension('t')
+        ncfile.createDimension('x', self.ncdims['x'])
+        t = ncfile.createVariable('t', 'd', ('t',))
+        t[:] = self.t
+        x = ncfile.createVariable('x', 'd', ('x',))
+        x[:] = self.x
+        v = ncfile.createVariable('v', 'f', ('t', 'x'))
+        for a,val in self.vattrs.iteritems():
+            v.setncattr(a, val)
+        v[:,:] = self.v
+        
+        ncfile.close()
+    
+    def tearDown(self):
+        if exists(self.ncfaname):
+            remove(self.ncfaname)
+
+    def test_nio_NCFile_init_append(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        actual = type(ncf)
+        ncf.close()
+        expected = iobackend.NCFile
+        print_test_msg('NCFile.__init__()', actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCFile not created with correct type')
+
+    def test_nc4_NCFile_init_append(self):
+        iobackend.set_backend('netCDF4')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        actual = type(ncf)
+        ncf.close()
+        expected = iobackend.NCFile
+        print_test_msg('NCFile.__init__()', actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCFile not created with correct type')
+
+    def test_nio_NCFile_setncattr(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        for a,v in self.fattrs2.iteritems():
+            ncf.setncattr(a, v)
+        ncf.close()
+        ncfr = Nio.open_file(self.ncfaname)
+        actual = ncfr.attributes
+        expected = self.ncattrs
+        expected.update(self.fattrs2)
+        ncfr.close()
+        print_test_msg('NCFile.setncattr()', actual=actual, expected=expected)
+        for a,v in expected.iteritems():
+            self.assertTrue(a in actual,
+                            'NCFile attribute {0!r} not found'.format(a))
+            self.assertEqual(actual[a], v,
+                             'NCFile attribute {0!r} incorrect'.format(a))
+
+    def test_nc4_NCFile_setncattr(self):
+        iobackend.set_backend('netCDF4')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        for a,v in self.fattrs2.iteritems():
+            ncf.setncattr(a, v)
+        ncf.close()
+        ncfr = Nio.open_file(self.ncfaname)
+        actual = ncfr.attributes
+        expected = self.ncattrs
+        expected.update(self.fattrs2)
+        ncfr.close()
+        print_test_msg('NCFile.setncattr()', actual=actual, expected=expected)
+        for a,v in expected.iteritems():
+            self.assertTrue(a in actual,
+                            'NCFile attribute {0!r} not found'.format(a))
+            self.assertEqual(actual[a], v,
+                             'NCFile attribute {0!r} incorrect'.format(a))
+
+    def test_nio_NCFile_create_variable_ndim(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        v2 = ncf.create_variable('v2', 'f', ('t', 'x'))
+        v2[:] = self.v2
+        ncf.close()
+        ncfr = Nio.open_file(self.ncfaname)
+        actual = ncfr.variables['v2'][:]
+        expected = self.v2
+        ncfr.close()
+        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected,
+                               'NCFile 2d-variable incorrect')
+
+    def test_nc4_NCFile_create_variable_ndim(self):
+        iobackend.set_backend('netCDF4')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        v2 = ncf.create_variable('v2', 'f', ('t', 'x'))
+        v2[:] = self.v2
+        ncf.close()
+        ncfr = Nio.open_file(self.ncfaname)
+        actual = ncfr.variables['v2'][:]
+        expected = self.v2
+        ncfr.close()
+        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected,
+                               'NCFile 2d-variable incorrect')
+
+    def test_nio_NCFile_variable_append(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        nt = self.ncdims['t']
+        t = ncf.variables['t']
+        t[nt:] = self.t2
+        v = ncf.variables['v']
+        v[nt:, :] = self.v2
+        ncf.close()
+        ncfr = Nio.open_file(self.ncfaname)
+        actual = ncfr.variables['t'][:]
+        expected = np.concatenate((self.t, self.t2))
+        print_test_msg('NCVariable append', actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected,
+                               'NCFile t-variable incorrect')
+        actual = ncfr.variables['v'][:]
+        expected = np.concatenate((self.v, self.v2))
+        print_test_msg('NCVariable append', actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected,
+                               'NCFile 2d-variable incorrect')
+        ncfr.close()
+
+    def test_nc4_NCFile_variable_append(self):
+        iobackend.set_backend('netCDF4')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        nt = self.ncdims['t']
+        t = ncf.variables['t']
+        t[nt:] = self.t2
+        v = ncf.variables['v']
+        v[nt:, :] = self.v2
+        ncf.close()
+        ncfr = Nio.open_file(self.ncfaname)
+        actual = ncfr.variables['t'][:]
+        expected = np.concatenate((self.t, self.t2))
+        print_test_msg('NCVariable append', actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected,
+                               'NCFile t-variable incorrect')
+        actual = ncfr.variables['v'][:]
+        expected = np.concatenate((self.v, self.v2))
+        print_test_msg('NCVariable append', actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected,
+                               'NCFile 2d-variable incorrect')
+        ncfr.close()
+
+    def test_nio_NCVariable_setncattr(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        v = ncf.variables['v']
+        for attr,value in self.vattrs2.iteritems():
+            v.setncattr(attr, value)
+        ncf.close()
+        ncfr = Nio.open_file(self.ncfaname)
+        actual = ncfr.variables['v'].attributes
+        expected = self.vattrs
+        expected.update(self.vattrs2)
+        ncfr.close()
+        print_test_msg('NCVariable.setncattr()', actual=actual, expected=expected)
+        for attr, value in expected.iteritems():
+            self.assertTrue(attr in actual,
+                            'Variable attribute {0!r} not found'.format(attr))
+            self.assertEqual(actual[attr], value,
+                             'Variable attribute {0!r} incorrect'.format(attr))
+
+    def test_nc4_NCVariable_setncattr(self):
+        iobackend.set_backend('netCDF4')
+        ncf = iobackend.NCFile(self.ncfaname, mode='a')
+        v = ncf.variables['v']
+        for attr,value in self.vattrs2.iteritems():
+            v.setncattr(attr, value)
+        ncf.close()
+        ncfr = Nio.open_file(self.ncfaname)
+        actual = ncfr.variables['v'].attributes
+        expected = self.vattrs
+        expected.update(self.vattrs2)
+        ncfr.close()
+        print_test_msg('NCVariable.setncattr()', actual=actual, expected=expected)
+        for attr, value in expected.iteritems():
+            self.assertTrue(attr in actual,
+                            'Variable attribute {0!r} not found'.format(attr))
+            self.assertEqual(actual[attr], value,
+                             'Variable attribute {0!r} incorrect'.format(attr))
+
+
+#===============================================================================
 # CLI
 #===============================================================================
 if __name__ == "__main__":

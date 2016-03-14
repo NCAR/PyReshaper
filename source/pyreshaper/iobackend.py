@@ -95,7 +95,8 @@ class NCFile(object):
             err_msg = ("Netcdf compression level {0} is not in range "
                        "0 to 9").format(compression)
             raise ValueError(err_msg)
-            
+        
+        self._mode = mode
         self._backend = _BACKEND_
         self._iolib = _IOLIB_
         
@@ -179,6 +180,8 @@ class NCFile(object):
             return self._obj.getncattr(name)
     
     def setncattr(self, name, value):
+        if self._mode == 'r':
+            raise RuntimeError('Cannot set attribute in read mode')
         if self._backend == 'Nio':
             setattr(self._obj, name, value)
         elif self._backend == 'netCDF4':
@@ -186,22 +189,26 @@ class NCFile(object):
     
     @property
     def variables(self):
-        return _dict_((n, NCVariable(v)) for n,v
+        return _dict_((n, NCVariable(v, self._mode)) for n,v
                       in self._obj.variables.iteritems())
 
     def create_dimension(self, name, value=None):
+        if self._mode == 'r':
+            raise RuntimeError('Cannot create dimension in read mode')
         if self._backend == 'Nio':
             self._obj.create_dimension(name, value)
         elif self._backend == 'netCDF4':
             self._obj.createDimension(name, value)
     
     def create_variable(self, name, typecode, dimensions):
+        if self._mode == 'r':
+            raise RuntimeError('Cannot create variable in read mode')
         if self._backend == 'Nio':
             var = self._obj.create_variable(name, typecode, dimensions)
         elif self._backend == 'netCDF4':
             var = self._obj.createVariable(name, typecode, dimensions,
                                            **self._var_opts)
-        return NCVariable(var)
+        return NCVariable(var, self._mode)
 
     def close(self):
         self._obj.close()
@@ -215,7 +222,8 @@ class NCVariable(object):
     Wrapper class for NetCDF variables
     """
     
-    def __init__(self, vobj):
+    def __init__(self, vobj, mode='r'):
+        self._mode = mode
         self._obj = vobj
         if _NC4_ is not None and isinstance(vobj, _NC4_._netCDF4.Variable):
             self._backend = 'netCDF4'
@@ -241,6 +249,8 @@ class NCVariable(object):
             return self._obj.getncattr(name)
     
     def setncattr(self, name, value):
+        if self._mode == 'r':
+            raise RuntimeError('Cannot set attribute in read mode')
         if self._backend == 'Nio':
             setattr(self._obj, name, value)
         elif self._backend == 'netCDF4':
@@ -261,4 +271,6 @@ class NCVariable(object):
         return self._obj[key]
 
     def __setitem__(self, key, value):
+        if self._mode == 'r':
+            raise RuntimeError('Cannot set variable in read mode')
         self._obj[key] = value
