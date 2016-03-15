@@ -281,12 +281,11 @@ class NCVariable(object):
             return self._obj.size
 
     @property
-    def typecode(self):
+    def datatype(self):
         if self._backend == 'Nio':
-            return self._obj.typecode()
+            return numpy.dtype(self._obj.typecode())
         elif self._backend == 'netCDF4':
-            print 'netCDF4: name={2}, dtype={0}, char={1}'.format(self._obj.dtype, self._obj.dtype.char, self._obj.name)
-            return self._obj.dtype.char
+            return self._obj.dtype
     
     def __getitem__(self, key):
         return self._obj[key]
