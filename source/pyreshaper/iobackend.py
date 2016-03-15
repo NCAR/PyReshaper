@@ -285,6 +285,7 @@ class NCVariable(object):
         if self._backend == 'Nio':
             return self._obj.typecode()
         elif self._backend == 'netCDF4':
+            print 'netCDF4: dtype={0}, char={1}'.format(self._obj.dtype, self._obj.dtype.char)
             return self._obj.dtype.char
     
     def __getitem__(self, key):
