@@ -766,7 +766,7 @@ class IOBackendWriteTests(unittest.TestCase):
         iobackend.set_backend('Nio')
         ncf = iobackend.NCFile(self.ncfwname, mode='w')
         ncf.create_dimension('x', self.ncdims['x'])
-        x = ncf.create_variable('x', 'd', ('x',))
+        x = ncf.create_variable('x', np.dtype('d'), ('x',))
         x[:] = self.x
         ncf.close()
         ncfr = Nio.open_file(self.ncfwname)
@@ -781,7 +781,7 @@ class IOBackendWriteTests(unittest.TestCase):
         iobackend.set_backend('netCDF4')
         ncf = iobackend.NCFile(self.ncfwname, mode='w')
         ncf.create_dimension('x', self.ncdims['x'])
-        x = ncf.create_variable('x', 'd', ('x',))
+        x = ncf.create_variable('x', np.dtype('d'), ('x',))
         x[:] = self.x
         ncf.close()
         ncfr = Nio.open_file(self.ncfwname)
@@ -796,7 +796,7 @@ class IOBackendWriteTests(unittest.TestCase):
         iobackend.set_backend('Nio')
         ncf = iobackend.NCFile(self.ncfwname, mode='w')
         ncf.create_dimension('t')
-        t = ncf.create_variable('t', 'd', ('t',))
+        t = ncf.create_variable('t', np.dtype('d'), ('t',))
         t[:] = self.t
         ncf.close()
         ncfr = Nio.open_file(self.ncfwname)
@@ -811,7 +811,7 @@ class IOBackendWriteTests(unittest.TestCase):
         iobackend.set_backend('netCDF4')
         ncf = iobackend.NCFile(self.ncfwname, mode='w')
         ncf.create_dimension('t')
-        t = ncf.create_variable('t', 'd', ('t',))
+        t = ncf.create_variable('t', np.dtype('d'), ('t',))
         t[:] = self.t
         ncf.close()
         ncfr = Nio.open_file(self.ncfwname)
@@ -827,7 +827,7 @@ class IOBackendWriteTests(unittest.TestCase):
         ncf = iobackend.NCFile(self.ncfwname, mode='w')
         ncf.create_dimension('t')
         ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', 'f', ('t', 'x'))
+        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'))
         v[:] = self.v
         ncf.close()
         ncfr = Nio.open_file(self.ncfwname)
@@ -843,7 +843,7 @@ class IOBackendWriteTests(unittest.TestCase):
         ncf = iobackend.NCFile(self.ncfwname, mode='w')
         ncf.create_dimension('t')
         ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', 'f', ('t', 'x'))
+        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'))
         v[:] = self.v
         ncf.close()
         ncfr = Nio.open_file(self.ncfwname)
@@ -859,7 +859,7 @@ class IOBackendWriteTests(unittest.TestCase):
         ncf = iobackend.NCFile(self.ncfwname, mode='w')
         ncf.create_dimension('t')
         ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', 'f', ('t', 'x'))
+        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'))
         for attr,value in self.vattrs.iteritems():
             v.setncattr(attr, value)
         ncf.close()
@@ -879,7 +879,7 @@ class IOBackendWriteTests(unittest.TestCase):
         ncf = iobackend.NCFile(self.ncfwname, mode='w')
         ncf.create_dimension('t')
         ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', 'f', ('t', 'x'))
+        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'))
         for attr,value in self.vattrs.iteritems():
             v.setncattr(attr, value)
         ncf.close()
@@ -1004,7 +1004,7 @@ class IOBackendAppendTests(unittest.TestCase):
     def test_nio_NCFile_create_variable_ndim(self):
         iobackend.set_backend('Nio')
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        v2 = ncf.create_variable('v2', 'f', ('t', 'x'))
+        v2 = ncf.create_variable('v2', np.dtype('f'), ('t', 'x'))
         v2[:] = self.v2
         ncf.close()
         ncfr = Nio.open_file(self.ncfaname)
@@ -1018,7 +1018,7 @@ class IOBackendAppendTests(unittest.TestCase):
     def test_nc4_NCFile_create_variable_ndim(self):
         iobackend.set_backend('netCDF4')
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        v2 = ncf.create_variable('v2', 'f', ('t', 'x'))
+        v2 = ncf.create_variable('v2', np.dtype('f'), ('t', 'x'))
         v2[:] = self.v2
         ncf.close()
         ncfr = Nio.open_file(self.ncfaname)

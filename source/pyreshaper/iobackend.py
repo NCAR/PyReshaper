@@ -291,6 +291,26 @@ class NCVariable(object):
         elif self._backend == 'netCDF4':
             return self._obj.dtype
     
+    def get_value(self):
+        if self._backend == 'Nio':
+            return self._obj.get_value()
+        elif self._backend == 'netCDF4':
+            if self._obj.shape == ():
+                return self._obj.getValue()
+            else:
+                return self._obj[...]
+    
+    def assign_value(self, value):
+        if self._mode == 'r':
+            raise RuntimeError('Cannot assign value in read mode')
+        if self._backend == 'Nio':
+            self._obj.assign_value(value)
+        elif self._backend == 'netCDF4':
+            if self._obj.shape == ():
+                self._obj.assignValue(value)
+            else:
+                self._obj[:] = value
+    
     def __getitem__(self, key):
         return self._obj[key]
 
