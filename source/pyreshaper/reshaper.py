@@ -65,12 +65,12 @@ def create_reshaper(specifier, serial=False, verbosity=1, wmode='w',
     """
     # Determine the type of Reshaper object to instantiate
     if isinstance(specifier, Specifier):
-        return Slice2SeriesReshaper(specifier,
-                                    serial=serial,
-                                    verbosity=verbosity,
-                                    wmode=wmode,
-                                    once=once,
-                                    simplecomm=simplecomm)
+        return Reshaper(specifier,
+                        serial=serial,
+                        verbosity=verbosity,
+                        wmode=wmode,
+                        once=once,
+                        simplecomm=simplecomm)
     else:
         err_msg = 'Specifier of type ' + str(type(specifier)) + ' is not a ' \
             + 'valid Specifier object.'
@@ -137,35 +137,9 @@ def _pprint_dictionary(title, dictionary, order=None):
 
 
 #==============================================================================
-# Reshaper Abstract Base Class
+# Reshaper Base Class
 #==============================================================================
 class Reshaper(object):
-
-    """
-    Abstract base class for Reshaper objects
-    """
-
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
-    def convert(self):
-        """
-        Method to perform the Reshaper's designated operation.
-        """
-        return
-
-    @abc.abstractmethod
-    def print_diagnostics(self):
-        """
-        Print out timing and I/O information collected up to this point
-        """
-        return
-
-
-#==============================================================================
-# Reshaper Class
-#==============================================================================
-class Slice2SeriesReshaper(Reshaper):
 
     """
     The time-slice to time-series Reshaper class
@@ -279,7 +253,7 @@ class Slice2SeriesReshaper(Reshaper):
         self._netcdf_format = specifier.netcdf_format
         self._netcdf_compression = specifier.compression_level
         if self._simplecomm.is_manager():
-            self._vprint('  PyNIO options set', verbosity=1)
+            self._vprint('  NetCDF options set', verbosity=1)
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
@@ -549,6 +523,9 @@ class Slice2SeriesReshaper(Reshaper):
                 parallel run.
         """
         iobackend.set_backend(self._backend)
+        if self._simplecomm.is_manager():
+            self._vprint('NetCDF I/O Backend set to {0!r}'.format(self._backend),
+                         verbosity=0)
 
         # Type checking input
         if type(output_limit) is not int:
