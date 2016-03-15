@@ -697,10 +697,10 @@ class Reshaper(object):
                             in_var = in_file.variables[name]
                             out_var = out_file.variables[name]
                             self._timer.start('Read Time-Invariant Metadata')
-                            tmp_data = in_var[:]
+                            tmp_data = in_var.get_value()
                             self._timer.stop('Read Time-Invariant Metadata')
                             self._timer.start('Write Time-Invariant Metadata')
-                            out_var[:] = tmp_data
+                            out_var.assign_value(tmp_data)
                             self._timer.stop('Write Time-Invariant Metadata')
 
                             requested_nbytes = _get_bytesize(tmp_data)
