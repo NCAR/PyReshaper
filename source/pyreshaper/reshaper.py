@@ -330,9 +330,7 @@ class Slice2SeriesReshaper(Reshaper):
             elif var_name in self._metadata_names:
                 self._time_variant_metadata.append(var_name)
             else:
-                size = numpy.dtype(var.typecode).itemsize
-                size *= numpy.prod(var.shape)
-                all_tsvars[var_name] = size
+                all_tsvars[var_name] = var.datatype.itemsize * var.size
 
         # Close the first file
         ifile.close()
@@ -679,7 +677,7 @@ class Slice2SeriesReshaper(Reshaper):
                         for name in self._time_invariant_metadata:
                             in_var = in_file.variables[name]
                             out_var = out_file.create_variable(
-                                name, in_var.typecode, in_var.dimensions)
+                                name, in_var.datatype, in_var.dimensions)
                             for att_name in in_var.ncattrs:
                                 att_value = in_var.getncattr(att_name)
                                 out_var.setncattr(att_name, att_value)
@@ -690,7 +688,7 @@ class Slice2SeriesReshaper(Reshaper):
                         for name in self._time_variant_metadata:
                             in_var = in_file.variables[name]
                             out_var = out_file.create_variable(
-                                name, in_var.typecode, in_var.dimensions)
+                                name, in_var.datatype, in_var.dimensions)
                             for att_name in in_var.ncattrs:
                                 att_value = in_var.getncattr(att_name)
                                 out_var.setncattr(att_name, att_value)
@@ -703,7 +701,7 @@ class Slice2SeriesReshaper(Reshaper):
                         self._timer.start('Create Time-Series Variables')
                         in_var = in_file.variables[out_name]
                         out_var = out_file.create_variable(
-                            out_name, in_var.typecode, in_var.dimensions)
+                            out_name, in_var.datatype, in_var.dimensions)
                         for att_name in in_var.ncattrs:
                             att_value = in_var.getncattr(att_name)
                             out_var.setncattr(att_name, att_value)
