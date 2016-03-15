@@ -14,7 +14,7 @@ from os import linesep as eol
 from os import remove
 from mpi4py import MPI
 
-from pyreshaper.reshaper import Slice2SeriesReshaper, create_reshaper
+from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
 
 import mkTestData
@@ -115,7 +115,7 @@ class S2SReshaperTests(unittest.TestCase):
             rshpr = create_reshaper(spec, serial=serial, verbosity=verbosity,
                                     wmode=wmode)
             self._assertion("type(reshaper)", type(rshpr),
-                            Slice2SeriesReshaper)
+                            Reshaper)
 
     def test_create_reshaper_serial_V0_W(self):
         self._test_create_reshaper(serial=True, verbosity=0, wmode='w')
