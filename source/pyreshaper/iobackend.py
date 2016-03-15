@@ -209,13 +209,14 @@ class NCFile(object):
         elif self._backend == 'netCDF4':
             self._obj.createDimension(name, value)
     
-    def create_variable(self, name, typecode, dimensions):
+    def create_variable(self, name, datatype, dimensions):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
         if self._backend == 'Nio':
+            typecode = str(datatype)
             var = self._obj.create_variable(name, typecode, dimensions)
         elif self._backend == 'netCDF4':
-            var = self._obj.createVariable(name, typecode, dimensions,
+            var = self._obj.createVariable(name, datatype, dimensions,
                                            **self._var_opts)
         return NCVariable(var, self._mode)
 
