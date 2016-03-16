@@ -10,7 +10,6 @@ See the LICENSE.rst file for details
 """
 
 # Built-in imports
-import abc
 from os import linesep, remove, rename
 from os.path import exists, isfile
 
