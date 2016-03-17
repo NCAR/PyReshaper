@@ -52,7 +52,7 @@ class Specifier(object):
                  prefix='tseries.',
                  suffix='.nc',
                  metadata=[],
-                 backend='netCDF4',
+                 backend='Nio',
                  **kwargs):
         """
         Initializes the internal data with optional arguments.
