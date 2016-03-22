@@ -15,7 +15,11 @@ import numpy
 try:
     _dict_ = __import__('collections', fromlist=['OrderedDict']).OrderedDict
 except:
-    _dict_ = dict
+    try:
+        _dict_ = __import__('ordereddict', fromlist=['OrderedDict']).OrderedDict
+    except:
+        _dict_ = dict
+
 
 _AVAIL_ = _dict_()
 _BACKEND_ = None
