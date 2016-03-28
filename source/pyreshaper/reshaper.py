@@ -252,7 +252,9 @@ class Reshaper(object):
         self._netcdf_format = specifier.netcdf_format
         self._netcdf_compression = specifier.compression_level
         if self._simplecomm.is_manager():
-            self._vprint('  NetCDF options set', verbosity=1)
+            self._vprint('  NetCDF I/O Backend: {0}'.format(self._backend), verbosity=1)
+            self._vprint('  NetCDF Output Format: {0}'.format(self._netcdf_format), verbosity=1)
+            self._vprint('  NetCDF Compression: {0}'.format(self._netcdf_compression), verbosity=1)
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
