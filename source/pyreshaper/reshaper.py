@@ -524,9 +524,6 @@ class Reshaper(object):
                 parallel run.
         """
         iobackend.set_backend(self._backend)
-        if self._simplecomm.is_manager():
-            self._vprint('NetCDF I/O Backend set to {0!r}'.format(self._backend),
-                         verbosity=0)
 
         # Type checking input
         if type(output_limit) is not int:
