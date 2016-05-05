@@ -126,5 +126,9 @@ VERSION 0.9.10
 VERSION 1.0.0
 -------------
 
-9 March 2016:
- - New memory management
+5 May 2016:
+ - New I/O backend manager.  Can work with netCDF4 or PyNIO.
+ - Removing hierarchy to Reshaper classes, as there is only 1 (similarly
+   removing hierarchy of matching Specifier classes)
+ - No longer requires PyNIO to install...but you need netCDF4 or PyNIO to
+   run the reshaper!
