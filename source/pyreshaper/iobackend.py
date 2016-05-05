@@ -21,47 +21,70 @@ except:
         _dict_ = dict
 
 
-_AVAIL_ = _dict_()
+_AVAILABLE_ = []
+_BACKEND_MAP_ = {}
+
 _BACKEND_ = None
 _IOLIB_ = None
 
-try:
-    _NIO_ = __import__('Nio')
-except:
-    _NIO_ = None
-if _NIO_ is not None:
-    _AVAIL_['Nio'] = _NIO_
-
+# FIRST PREFERENCE
 try:
     _NC4_ = __import__('netCDF4')
 except:
     _NC4_ = None
 if _NC4_ is not None:
-    _AVAIL_['netCDF4'] = _NC4_
+    _AVAILABLE_.append('netCDF4')
+    _BACKEND_MAP_['netCDF4'] = _NC4_
+
+# SECOND PREFERENCE
+try:
+    _NIO_ = __import__('Nio')
+except:
+    _NIO_ = None
+if _NIO_ is not None:
+    _AVAILABLE_.append('Nio')
+    _BACKEND_MAP_['Nio'] = _NIO_
 
 
 #===============================================================================
 # is_available
 #===============================================================================
-def is_available(name):
-    return name in _AVAIL_
+def is_available(name=None):
+    if name is None:
+        return len(_AVAILABLE_) > 0
+    else:
+        return name in _BACKEND_MAP_
 
 
 #===============================================================================
-# set_backend - Set the backend to the one named
+# set_backend - Set the backend to the one named or first preferred
 #===============================================================================
-def set_backend(name):
+def set_backend(name=None):
     global _BACKEND_
     global _IOLIB_
-    if name in _AVAIL_:
-        _BACKEND_ = name
-        _IOLIB_ = _AVAIL_[name]
+    if name is None:
+        if is_available():
+            _BACKEND_ = _AVAILABLE_[0]
+            _IOLIB_ = _BACKEND_MAP_[_BACKEND_]
+        else:
+            raise RuntimeError('No I/O Backends available')
     else:
-        raise KeyError('I/O Backend {0!r} not available'.format(name))
+        if is_available(name):
+            _BACKEND_ = name
+            _IOLIB_ = _BACKEND_MAP_[name]
+        else:
+            raise KeyError('I/O Backend {0!r} not available'.format(name))
 
 # Set Default backend
-if len(_AVAIL_) > 0:
-    _BACKEND_, _IOLIB_ = _AVAIL_.iteritems().next()
+set_backend()
+
+
+#===============================================================================
+# get_backend - Get the currently set backend name
+#===============================================================================
+def get_backend():
+    return _BACKEND_
+
 
 #===============================================================================
 # NCFile
@@ -110,7 +133,7 @@ class NCFile(object):
             raise ValueError(err_msg)
         
         self._mode = mode
-        self._backend = _BACKEND_
+        self._backend = get_backend()
         self._iolib = _IOLIB_
         
         self._file_opts = {}
@@ -322,3 +345,10 @@ class NCVariable(object):
         if self._mode == 'r':
             raise RuntimeError('Cannot set variable in read mode')
         self._obj[key] = value
+
+
+#===============================================================================
+# COMMAND-LINE OPERATION
+#===============================================================================
+if __name__ == '__main__':
+    pass

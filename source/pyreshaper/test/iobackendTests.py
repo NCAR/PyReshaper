@@ -77,11 +77,11 @@ class IOBackendReadTests(unittest.TestCase):
             remove(self.ncfrname)
 
     def test_avail(self):
-        actual = iobackend._AVAIL_
+        actual = iobackend._AVAILABLE_
         print_test_msg('_AVAIL_', actual=actual)
-        self.assertTrue('Nio' in iobackend._AVAIL_,
+        self.assertTrue('Nio' in iobackend._AVAILABLE_,
                         'Nio importable but not available')
-        self.assertTrue('netCDF4' in iobackend._AVAIL_,
+        self.assertTrue('netCDF4' in iobackend._AVAILABLE_,
                         'netCDF4 importable but not available')
 
     def test_set_backend_nio(self):

@@ -22,7 +22,7 @@ import mkTestData
 MPI_COMM_WORLD = MPI.COMM_WORLD
 
 
-class S2SReshaperTests(unittest.TestCase):
+class ReshaperTests(unittest.TestCase):
 
     def setUp(self):
 
@@ -332,7 +332,7 @@ if __name__ == "__main__":
     MPI_COMM_WORLD.Barrier()
 
     mystream = StringIO()
-    tests = unittest.TestLoader().loadTestsFromTestCase(S2SReshaperTests)
+    tests = unittest.TestLoader().loadTestsFromTestCase(ReshaperTests)
     unittest.TextTestRunner(stream=mystream).run(tests)
     MPI_COMM_WORLD.Barrier()
 

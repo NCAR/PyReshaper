@@ -13,7 +13,6 @@ See the LICENSE.rst file for details
 # Built-in imports
 import cPickle as pickle
 from os import path as ospath
-import iobackend
 
 
 #==============================================================================
@@ -52,7 +51,7 @@ class Specifier(object):
                  prefix='tseries.',
                  suffix='.nc',
                  metadata=[],
-                 backend='Nio',
+                 backend='netCDF4',
                  **kwargs):
         """
         Initializes the internal data with optional arguments.
@@ -234,11 +233,7 @@ class Specifier(object):
         if (self.output_file_suffix[-3:] != '.nc'):
             self.output_file_suffix += '.nc'
         
-        # Validate the value of the backend
-        if not iobackend.is_available(self.io_backend):
-            err_msg = ("I/O Backend named {0} is not "
-                       "available").format(self.io_backend)
-            raise ImportError(err_msg)            
+        # Backend validated when PyReshaper is run ONLY!
 
     def write(self, fname):
         """

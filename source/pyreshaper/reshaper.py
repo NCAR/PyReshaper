@@ -21,9 +21,8 @@ from asaptools.partition import WeightBalanced
 from asaptools.vprinter import VPrinter
 
 # PyReshaper imports
-from iobackend import NCFile
 from specification import Specifier
-from pyreshaper import iobackend
+import iobackend
 
 
 #==============================================================================
@@ -197,9 +196,6 @@ class Reshaper(object):
             err_msg = "Write mode '{0}' not recognized".format(wmode)
             raise ValueError(err_msg)
 
-        # The I/O backend to use
-        self._backend = specifier.io_backend
-
         # Whether to write a once file
         self._use_once_file = once
 
@@ -216,6 +212,7 @@ class Reshaper(object):
         self._timer.start('Initializing Simple Communicator')
         if simplecomm is None:
             simplecomm = create_comm(serial=serial)
+            
         # Reference to the simple communicator
         self._simplecomm = simplecomm
         self._timer.stop('Initializing Simple Communicator')
@@ -237,6 +234,15 @@ class Reshaper(object):
         self._timer.stop('Specifier Validation')
         if self._simplecomm.is_manager():
             self._vprint('  Specifier validated', verbosity=1)
+
+        # The I/O backend to use
+        self._backend = specifier.io_backend
+        if iobackend.is_available(specifier.io_backend):
+            self._backend = specifier.io_backend
+        else:
+            self._backend = iobackend.get_backend()
+            self._vprint(('  I/O Backend {0} not available.  Using {1} '
+                          'instead').format(specifier.io_backend, self._backend))
 
         # Store the input file names
         self._input_filenames = specifier.input_file_list
@@ -281,7 +287,7 @@ class Reshaper(object):
         #===== INSPECT FIRST INPUT FILE =====
 
         # Open first file
-        ifile = NCFile(self._input_filenames[0])
+        ifile = iobackend.NCFile(self._input_filenames[0])
 
         # Look for the 'unlimited' dimension
         try:
@@ -322,7 +328,7 @@ class Reshaper(object):
         # (4) Check if there are any missing variables
         # (5) Get the time values from the files
         for ifilename in self._input_filenames[1:]:
-            ifile = NCFile(ifilename)
+            ifile = iobackend.NCFile(ifilename)
 
             # Determine the unlimited dimension
             if self._unlimited_dim not in ifile.dimensions:
@@ -465,7 +471,7 @@ class Reshaper(object):
                 filename = self._time_series_filenames[variable]
 
                 # Open the time-series file for inspection
-                tsfile = NCFile(filename)
+                tsfile = iobackend.NCFile(filename)
 
                 # Check that the file has the unlimited dim and var
                 if not tsfile.unlimited(self._unlimited_dim):
@@ -614,12 +620,14 @@ class Reshaper(object):
                 remove(temp_filename)
             if self._write_mode == 'a' and out_name in self._existing:
                 rename(out_filename, temp_filename)
-                out_file = NCFile(temp_filename, 'a', self._netcdf_format,
-                                  self._netcdf_compression)
+                out_file = iobackend.NCFile(temp_filename, 'a', 
+                                            self._netcdf_format,
+                                            self._netcdf_compression)
                 appending = True
             else:
-                out_file = NCFile(temp_filename, 'w', self._netcdf_format,
-                                  self._netcdf_compression)
+                out_file = iobackend.NCFile(temp_filename, 'w',
+                                            self._netcdf_format,
+                                            self._netcdf_compression)
                 appending = False
             self._timer.stop('Open Output Files')
 
@@ -629,7 +637,7 @@ class Reshaper(object):
 
                 # Open the input file
                 self._timer.start('Open Input Files')
-                in_file = NCFile(in_filename)
+                in_file = iobackend.NCFile(in_filename)
                 self._timer.stop('Open Input Files')
 
                 # Create header info, if this is the first input file
