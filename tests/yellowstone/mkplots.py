@@ -27,6 +27,8 @@ from utilities import plottools as pt
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
+_USAGE_ = 'Usage:  %prog [options] [DATASET1 [DATASET2 [...]]]'
+
 _DESC_ = """Create throughput and duration plots of timing data"""
 
 _PARSER_ = optparse.OptionParser(description=_DESC_)

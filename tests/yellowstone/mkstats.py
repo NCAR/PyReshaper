@@ -17,6 +17,8 @@ from utilities import testtools as tt
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
+_USAGE_ = 'Usage:  %prog [options] [TEST1 [TEST2 [...]]]'
+
 _DESC_ = """This program is designed to gather statistics for tests and
 test input defined in the testing database file.
 """
@@ -58,7 +60,7 @@ if __name__ == '__main__':
     statdb = tt.StatDB(name=opts.statsfile)
 
     # List tests if only listing
-    if args.list_tests:
+    if opts.list_tests:
         testdb.display()
         sys.exit(1)
 

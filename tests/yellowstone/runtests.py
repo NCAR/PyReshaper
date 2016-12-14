@@ -23,6 +23,8 @@ from utilities import runtools as rt
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
+_USAGE_ = 'Usage:  %prog [options] [TEST1 [TEST2 [...]]]'
+
 _DESC_ = """This program is designed to run yellowstone-specific
 tests of the PyReshaper.  Each named test (or all tests if
 the -a or --all option is used) will be given a run
@@ -33,7 +35,7 @@ error file.  All output data files will be placed in the
 output subdirectory.
 """
 
-_PARSER_ = optparse.OptionParser(description=_DESC_)
+_PARSER_ = optparse.OptionParser(usage=_USAGE_, description=_DESC_)
 _PARSER_.add_option('-a', '--all', default=False,
                     action='store_true', dest='all_tests',
                     help=('True or False, indicating whether to run all '
