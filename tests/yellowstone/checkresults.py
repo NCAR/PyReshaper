@@ -139,8 +139,8 @@ if __name__ == '__main__':
     testdb = tt.TestDB(name=opts.infofile).getdb()
 
     # Get a list of valid rundir names to look for
-    if len(opts.rundir) > 0:
-        rundirs = opts.rundir
+    if len(args) > 0:
+        rundirs = args
     else:
         rundirs = glob.glob(os.path.join('results', '*', '[ser,par]*', '*'))
 
