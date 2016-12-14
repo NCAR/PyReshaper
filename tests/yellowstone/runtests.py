@@ -113,7 +113,7 @@ def write_pyscript(testnames, scriptname='runscript.py', verbosity=3,
         pyscript_list.append('specs = {}')
         for testname in testnames:
             pyscript_list.append(
-                'specs["{0!s}"] = pickle.load(open("{0!s}.spec", "rb"))'.format(testname))
+                'specs["{0!s}"] = pickle.load(open("{0!s}.s2s", "rb"))'.format(testname))
 
     # Define the rest of the python script
     pyscript_list.extend([
