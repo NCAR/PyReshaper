@@ -108,7 +108,7 @@ def write_pyscript(testnames, scriptname='runscript.py', verbosity=3,
     # Check for single or multiple specifiers
     if isinstance(testnames, (str, unicode)):
         pyscript_list.append(
-            'specs = pickle.load(open("{0!s}.spec", "rb"))'.format(testnames))
+            'specs = pickle.load(open("{0!s}.s2s", "rb"))'.format(testnames))
     elif isinstance(testnames, (list, tuple)):
         pyscript_list.append('specs = {}')
         for testname in testnames:
