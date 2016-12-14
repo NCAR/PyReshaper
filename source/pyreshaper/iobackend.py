@@ -35,6 +35,10 @@ except:
 if _NC4_ is not None:
     _AVAILABLE_.append('netCDF4')
     _BACKEND_MAP_['netCDF4'] = _NC4_
+    if hasattr(_NC4_, '._netCDF4'):
+        _NC4_VAR_ = _NC4_._netCDF4.Variable
+    else:
+        _NC4_VAR_ = _NC4_.Variable
 
 # SECOND PREFERENCE
 try:
@@ -265,13 +269,9 @@ class NCVariable(object):
     def __init__(self, vobj, mode='r'):
         self._mode = mode
         self._obj = vobj
-        if _NC4_ is not None:
-            if hasattr(_NC4_, '_netCDF4') and isinstance(vobj, _NC4_._netCDF4.Variable):
-                self._backend = 'netCDF4'
-                self._iolib = _NC4_
-            elif isinstance(vobj, _NC4_.Variable):
-                self._backend = 'netCDF4'
-                self._iolib = _NC4_
+        if _NC4_ is not None and isinstance(vobj, _NC4_VAR_):
+            self._backend = 'netCDF4'
+            self._iolib = _NC4_
         elif _NIO_ is not None:
             self._backend = 'Nio'
             self._iolib = _NIO_
