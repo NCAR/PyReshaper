@@ -53,14 +53,14 @@ class s2srunTest(unittest.TestCase):
 
     def _convert_header(self, infiles, prefix, suffix, metadata,
                         ncfmt, clevel, serial, verbosity, wmode, once,
-                        print_diags=False):
+                        print_diags=False, meta1d=False):
         nfiles = len(infiles)
         ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c'
                                                 else '4')
         self._test_header(("convert() - {0} infile(s), NC{1}-CL{2}, serial={3},{4}"
-                           "            verbosity={5}, wmode={6!r}, once={7}"
+                           "            verbosity={5}, wmode={6!r}, once={7}, meta1d={8}"
                            "").format(nfiles, ncvers, clevel, serial, eol,
-                                      verbosity, wmode, once))
+                                      verbosity, wmode, once, meta1d))
 
     def _assertion(self, name, actual, expected,
                    data=None, show=True, assertion=None):
@@ -79,10 +79,10 @@ class s2srunTest(unittest.TestCase):
             self.assertEqual(actual, expected, msg)
 
     def _run_main(self, infiles, prefix, suffix, metadata,
-                  ncfmt, clevel, serial, verbosity, wmode, once):
+                  ncfmt, clevel, serial, verbosity, wmode, once, meta1d=False):
         if not (serial and self.rank > 0):
             spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
-                             prefix=prefix, suffix=suffix, metadata=metadata)
+                             prefix=prefix, suffix=suffix, metadata=metadata, meta1d=meta1d)
             specfile = 'input.s2s'
             pickle.dump(spec, open(specfile, 'wb'))
             argv = ['-v', str(verbosity), '-m', wmode]
@@ -186,6 +186,18 @@ class s2srunTest(unittest.TestCase):
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False}
+        self._convert_header(**args)
+        self._run_main(**args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                mkTestData.check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
+
+    def test_main_All_NC3_CL0_SER_V0_W_M1D(self):
+        mdata = [v for v in mkTestData.tvmvars]
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
+                'metadata': mdata, 'meta1d': True, 'ncfmt': 'netcdf', 'clevel': 0,
                 'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False}
         self._convert_header(**args)
         self._run_main(**args)

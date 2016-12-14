@@ -27,6 +27,9 @@ def cli(argv=None):
               options and write the Specifier to a named file."""
 
     parser = optparse.OptionParser(prog='s2smake', description=desc)
+    parser.add_option('-1', '--meta1d', default=False, action='store_true',
+                      help=("Treat all 1D time-variant variables as metadata "
+                            "variables"))
     parser.add_option('-b', '--backend', default='netCDF4', type='string',
                       help=("I/O backend to be used when reading or writing "
                             "from NetCDF files ('Nio' or 'netCDF4')"))
@@ -69,7 +72,7 @@ def cli(argv=None):
     if opts.netcdf_format not in ['netcdf', 'netcdf4', 'netcdf4c']:
         raise ValueError(("Unacceptable NetCDF format "
                           "{0}".format(opts.netcdf_format)))
-    
+
     # Check the I/O backend name
     if opts.backend not in ['Nio', 'netCDF4']:
         raise ValueError(("Unacceptable NetCDF backend name "
@@ -99,6 +102,7 @@ def main(argv=None):
     spec.output_file_prefix = opts.output_prefix
     spec.output_file_suffix = opts.output_suffix
     spec.time_variant_metadata = opts.metadata
+    spec.assume_1d_time_variant_metadata = opts.meta1d
 
     # Validate before saving
     spec.validate()

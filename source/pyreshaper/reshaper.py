@@ -212,7 +212,7 @@ class Reshaper(object):
         self._timer.start('Initializing Simple Communicator')
         if simplecomm is None:
             simplecomm = create_comm(serial=serial)
-            
+
         # Reference to the simple communicator
         self._simplecomm = simplecomm
         self._timer.stop('Initializing Simple Communicator')
@@ -249,6 +249,9 @@ class Reshaper(object):
 
         # Store the list of metadata names
         self._metadata_names = specifier.time_variant_metadata
+
+        # Store whether to treat 1D time-variant variables as metadata
+        self._1d_metadata = specifier.assume_1d_time_variant_metadata
 
         # Store the output file prefix and suffix
         self._output_prefix = specifier.output_file_prefix
@@ -312,6 +315,8 @@ class Reshaper(object):
             if self._unlimited_dim not in var.dimensions:
                 self._time_invariant_metadata.append(var_name)
             elif var_name in self._metadata_names:
+                self._time_variant_metadata.append(var_name)
+            elif self._1d_metadata and len(var.dimensions) == 1:
                 self._time_variant_metadata.append(var_name)
             else:
                 all_tsvars[var_name] = var.datatype.itemsize * var.size
@@ -623,7 +628,7 @@ class Reshaper(object):
                 remove(temp_filename)
             if self._write_mode == 'a' and out_name in self._existing:
                 rename(out_filename, temp_filename)
-                out_file = iobackend.NCFile(temp_filename, 'a', 
+                out_file = iobackend.NCFile(temp_filename, 'a',
                                             self._netcdf_format,
                                             self._netcdf_compression)
                 appending = True
