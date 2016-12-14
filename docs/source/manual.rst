@@ -12,13 +12,13 @@ format.
 Requirements
 ------------
 
-The PyReshaper depends upon the following Python packages:
+The PyReshaper explicitly depends upon the following Python packages:
 
 -  PyNIO (v1.4.1+) or netCDF4-python (v1.2+)
--  mpi4py (v1.3+)
+-  ASAPPyTools (v0.4+)
 
-These packages imply a dependency on the NumPy (v1.4+) package, and the 
-libraries NetCDF and MPI/MPI-2.
+These packages imply a dependency on the NumPy (v1.4+) and mpi4py (v1.3+) 
+packages, and the  libraries NetCDF and MPI/MPI-2.
 
 If using Python version 2.6, you will need to install the ``ordereddict``
 package, too.
