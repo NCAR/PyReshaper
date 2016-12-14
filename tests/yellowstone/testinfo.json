@@ -1,8 +1,8 @@
 {
    "pop-1deg":{
       "common_name":"POP-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/pop-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/pop-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/pop-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/pop-1.0",
       "input_globs":[
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.pop.h.000*.nc",
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.pop.h.0010*.nc"
@@ -16,8 +16,8 @@
    },
    "pop-daily-1deg":{
       "common_name":"POP-DAILY-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/pop-daily-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/pop-daily-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/pop-daily-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/pop-daily-1.0",
       "input_globs":[
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.pop.h.nday1.0002-*.nc",
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.pop.h.nday1.0003-*.nc",
@@ -38,8 +38,8 @@
    },
    "pop-0.1deg":{
       "common_name":"POP-0.1",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/pop-0.1",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/pop-0.1",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/pop-0.1",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/pop-0.1",
       "input_globs":[
          "v5_rel04_BC5_ne120_t12_pop62.pop.h.*.nc"
       ],
@@ -52,8 +52,8 @@
    },
    "cice-1deg":{
       "common_name":"CICE-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/cice-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/cice-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/cice-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/cice-1.0",
       "input_globs":[
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.cice.h.000*.nc",
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.cice.h.0010*.nc"
@@ -67,8 +67,8 @@
    },
    "cice-0.1deg":{
       "common_name":"CICE-0.1",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/cice-0.1",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/cice-0.1",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/cice-0.1",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/cice-0.1",
       "input_globs":[
          "v5_rel04_BC5_ne120_t12_pop62.cice.h.000*.nc",
          "v5_rel04_BC5_ne120_t12_pop62.cice.h.0010*.nc"
@@ -82,8 +82,8 @@
    },
    "camse-1deg":{
       "common_name":"CAMSE-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camse-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camse-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/camse-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/camse-1.0",
       "input_globs":[
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.cam.h0.000*.nc",
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.cam.h0.0010*.nc"
@@ -110,8 +110,8 @@
    },
    "camse-0.25deg":{
       "common_name":"CAMSE-0.25",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camse-0.25",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camse-0.25",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/camse-0.25",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/camse-0.25",
       "input_globs":[
          "v5_rel04_BC5_ne120_t12_pop62.cam.h0.000*.nc",
          "v5_rel04_BC5_ne120_t12_pop62.cam.h0.0010*.nc"
@@ -138,8 +138,8 @@
    },
    "camfv-1deg":{
       "common_name":"CAMFV-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camfv-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camfv-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/camfv-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/camfv-1.0",
       "input_globs":[
          "b40.20th.track1.1deg.006.cam2.h0.185*.nc"
       ],
@@ -165,8 +165,8 @@
    },
    "camhf-monthly-1deg":{
       "common_name":"CAMHF-MONTHLY-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-monthly-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf-monthly-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/camhf-monthly-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/camhf-monthly-1.0",
       "input_globs":[
          "b.e11.BDP.f09_g16.1958-11.002.cam.h0.19*.nc"
       ],
@@ -215,8 +215,8 @@
    },
    "camhf-daily-1deg":{
       "common_name":"CAMHF-DAILY-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-daily-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf-daily-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/camhf-daily-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/camhf-daily-1.0",
       "input_globs":[
          "b.e11.BDP.f09_g16.1958-11.002.cam.h1.19*.nc"
       ],
@@ -265,8 +265,8 @@
    },
    "camhf-6hourly-1deg":{
       "common_name":"CAMHF-6HOURLY-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/camhf-6hourly-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/camhf-6hourly-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/camhf-6hourly-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/camhf-6hourly-1.0",
       "input_globs":[
          "b.e11.BDP.f09_g16.1958-11.002.cam.h2.19*.nc"
       ],
@@ -315,8 +315,8 @@
    },
    "clmse-1deg":{
       "common_name":"CLM-1.0",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/clmse-1.0",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/clmse-1.0",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/clmse-1.0",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/clmse-1.0",
       "input_globs":[
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.clm2.h0.000*.nc",
          "b.e12.B1850C5CN.ne30_g16.init.ch.027.clm2.h0.0010*.nc"
@@ -337,8 +337,8 @@
    },
    "clmse-0.25deg":{
       "common_name":"CLM-0.25",
-      "input_dir":"/glade/u/tdd/asap/bakeoff/hist/clmse-0.25",
-      "results_dir":"/glade/u/tdd/asap/bakeoff/tseries/clmse-0.25",
+      "input_dir":"/glade/p/tdd/asap/bakeoff/hist/clmse-0.25",
+      "results_dir":"/glade/p/tdd/asap/bakeoff/tseries/clmse-0.25",
       "input_globs":[
          "v5_rel04_BC5_ne120_t12_pop62.clm2.h0.000*.nc",
          "v5_rel04_BC5_ne120_t12_pop62.clm2.h0.0010*.nc"
