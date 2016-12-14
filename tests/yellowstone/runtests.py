@@ -118,7 +118,7 @@ def write_pyscript(testnames, scriptname='runscript.py', verbosity=3,
     # Define the rest of the python script
     pyscript_list.extend([
         ('rshpr = reshaper.create_reshaper(specs, serial={0!s}, '
-         'verbosity={1!s}, wmode={2!s})').format(serial, verbosity, wmode),
+         'verbosity={1!s}, wmode={2!r})').format(serial, verbosity, wmode),
         'rshpr.convert()',
         'rshpr.print_diagnostics()',
         ''])
