@@ -227,7 +227,7 @@ if __name__ == '__main__':
     testdb = tt.TestDB(name=opts.infofile)
 
     # List tests if only listing
-    if args.list_tests:
+    if opts.list_tests:
         testdb.display()
         sys.exit(1)
 
