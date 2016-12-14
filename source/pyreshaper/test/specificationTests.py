@@ -44,10 +44,11 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
+        meta1d = True
         backend = 'Nio'
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-            suffix=suffix, metadata=metadata, backend=backend)
+            suffix=suffix, metadata=metadata, meta1d=meta1d, backend=backend)
         for i1, i2 in zip(spec.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
@@ -61,9 +62,11 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_suffix, suffix,
                          'Output file prefix not initialized properly')
-        for i1,i2 in zip(spec.time_variant_metadata, metadata):
+        for i1, i2 in zip(spec.time_variant_metadata, metadata):
             self.assertEqual(i1, i2,
                              'Time variant metadata list not initialized properly')
+        self.assertEqual(spec.assume_1d_time_variant_metadata, meta1d,
+                         '1D metadata flag not initialized properly')
 
     def test_validate_types(self):
         in_list = ['a', 'b', 'c']
@@ -162,6 +165,19 @@ class SpecifierTests(unittest.TestCase):
             suffix=suffix, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
 
+    def test_validate_types_fail_meta1d(self):
+        in_list = ['a', 'b', 'c']
+        fmt = 'netcdf'
+        cl = 5
+        prefix = 'pre.'
+        suffix = '.suf.nc'
+        metadata = ['x', 'y', 'z']
+        meta1d = 't'
+        spec = specification.Specifier(
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
+            suffix=suffix, meta1d=meta1d, metadata=metadata)
+        self.assertRaises(TypeError, spec.validate_types)
+
     def test_validate_values_fail_input(self):
         in_list = ['a', 'b', 'c']
         fmt = 'netcdf'
@@ -255,7 +271,7 @@ class SpecifierTests(unittest.TestCase):
         spec.write(fname)
         self.assertTrue(os.path.exists(fname), 'Specfile failed to write')
         spec2 = pickle.load(open(fname, 'r'))
-        for i1,i2 in zip(spec2.input_file_list, in_list):
+        for i1, i2 in zip(spec2.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
         self.assertEqual(spec2.netcdf_format, fmt,
@@ -266,7 +282,7 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized properly')
         self.assertEqual(spec2.output_file_suffix, suffix,
                          'Output file prefix not initialized properly')
-        for i1,i2 in zip(spec2.time_variant_metadata, metadata):
+        for i1, i2 in zip(spec2.time_variant_metadata, metadata):
             self.assertEqual(i1, i2,
                              'Time variant metadata list not initialized properly')
         os.remove(fname)

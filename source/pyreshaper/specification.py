@@ -51,6 +51,7 @@ class Specifier(object):
                  prefix='tseries.',
                  suffix='.nc',
                  metadata=[],
+                 meta1d=False,
                  backend='netCDF4',
                  **kwargs):
         """
@@ -76,6 +77,10 @@ class Specifier(object):
             metadata (list): List of variable names specifying the
                 variables that should be included in every
                 time-series output file
+            meta1d (bool): True if 1D time-variant variables should
+                be treated as metadata variables, False otherwise.
+            backend (str): Which I/O backend to use ('Nio' for
+                PyNIO, 'netCDF4' for netCDF4-python)
             kwargs (dict): Optional arguments describing the
                 Reshaper run
         """
@@ -97,9 +102,11 @@ class Specifier(object):
         #  prefix + variable_name + suffix)
         self.output_file_suffix = suffix
 
-        # List of time-variant variables that should be included in all
-        #  output files.
+        # List of time-variant variables that should be included in all output files.
         self.time_variant_metadata = metadata
+
+        # Whether all 1D time-variant variables should be treated as metadata
+        self.assume_1d_time_variant_metadata = meta1d
 
         # Store the netCDF I/O backend name
         self.io_backend = backend
@@ -164,9 +171,14 @@ class Specifier(object):
         # Validate the type of each time-variant metadata variable name
         for var_name in self.time_variant_metadata:
             if not isinstance(var_name, str):
-                err_msg = "Time-variant metadata variable names must be " + \
-                          "given as strings"
+                err_msg = ("Time-variant metadata variable names must be "
+                           "given as strings")
                 raise TypeError(err_msg)
+
+        # Validate the type of assume_1d_time_variant_metadata
+        if not isinstance(self.assume_1d_time_variant_metadata, bool):
+            err_msg = "Flag to assume 1D time-variant metadata must be boolean"
+            raise TypeError(err_msg)
 
         # Validate the type of the backend
         if not isinstance(self.io_backend, str):

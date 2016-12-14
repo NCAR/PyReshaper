@@ -41,6 +41,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output suffix is not ".nc"')
         self.assertEqual(opts.specfile, 'input.s2s',
                          'Default output suffix is not ".nc"')
+        self.assertEqual(opts.meta1d, False,
+                         'Default 1D metadata flag is not False')
 
     def test_CLI_set_all_short(self):
         clevel = 3
@@ -51,7 +53,8 @@ class s2smakeTest(unittest.TestCase):
         suffix = '.suffix'
         infiles = ['s2smakeTests.py', 'specificationTests.py']
 
-        argv = ['-c', str(clevel), '-f', ncfmt]
+        argv = ['-1']
+        argv.extend(['-c', str(clevel), '-f', ncfmt])
         for md in metadata:
             argv.extend(['-m', md])
         argv.extend(['-o', specfile, '-p', prefix, '-s', suffix])
@@ -79,6 +82,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output suffix is not {0!r}'.format(suffix))
         self.assertEqual(opts.specfile, specfile,
                          'Default output suffix is not {0!r}'.format(specfile))
+        self.assertEqual(opts.meta1d, True,
+                         'Default 1D metadata flag is not False')
 
     def test_CLI_set_all_long(self):
         clevel = 3
@@ -89,7 +94,8 @@ class s2smakeTest(unittest.TestCase):
         suffix = '.suffix'
         infiles = ['s2smakeTests.py', 'specificationTests.py']
 
-        argv = ['--compression_level', str(clevel), '--netcdf_format', ncfmt]
+        argv = ['--meta1d']
+        argv.extend(['--compression_level', str(clevel), '--netcdf_format', ncfmt])
         for md in metadata:
             argv.extend(['--metadata', md])
         argv.extend(['--specfile', specfile, '--output_prefix', prefix,
@@ -115,6 +121,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output suffix is not {0!r}'.format(suffix))
         self.assertEqual(opts.specfile, specfile,
                          'Default output suffix is not {0!r}'.format(specfile))
+        self.assertEqual(opts.meta1d, True,
+                         'Default 1D metadata flag is not False')
 
     def test_main_defaults(self):
         argv = ['s2smakeTests.py']
@@ -142,6 +150,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not "tseries."')
         self.assertEqual(spec.output_file_suffix, '.nc',
                          'Default output suffix is not ".nc"')
+        self.assertEqual(spec.assume_1d_time_variant_metadata, False,
+                         'Default 1D time-variant metadata flag is not False')
 
     def test_main_set_all_short(self):
         clevel = 3
@@ -152,7 +162,7 @@ class s2smakeTest(unittest.TestCase):
         suffix = '.suffix'
         infiles = ['s2smakeTests.py', 'specificationTests.py']
 
-        argv = ['-c', str(clevel), '-f', ncfmt]
+        argv = ['-1', '-c', str(clevel), '-f', ncfmt]
         for md in metadata:
             argv.extend(['-m', md])
         argv.extend(['-o', specfile, '-p', prefix, '-s', suffix])
@@ -186,6 +196,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not {0!r}'.format(prefix))
         self.assertEqual(spec.output_file_suffix, suffix + '.nc',
                          'Default output suffix is not {0!r}'.format(suffix))
+        self.assertEqual(spec.assume_1d_time_variant_metadata, True,
+                         'Default 1D time-variant metadata flag is not True')
 
     def test_main_set_all_long(self):
         clevel = 3
@@ -196,7 +208,7 @@ class s2smakeTest(unittest.TestCase):
         suffix = '.suffix'
         infiles = ['s2smakeTests.py', 'specificationTests.py']
 
-        argv = ['--compression_level', str(clevel), '--netcdf_format', ncfmt]
+        argv = ['--meta1d', '--compression_level', str(clevel), '--netcdf_format', ncfmt]
         for md in metadata:
             argv.extend(['--metadata', md])
         argv.extend(['--specfile', specfile, '--output_prefix', prefix,
@@ -231,6 +243,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not {0!r}'.format(prefix))
         self.assertEqual(spec.output_file_suffix, suffix + '.nc',
                          'Default output suffix is not {0!r}'.format(suffix))
+        self.assertEqual(spec.assume_1d_time_variant_metadata, True,
+                         'Default 1D time-variant metadata flag is not True')
 
 if __name__ == "__main__":
     unittest.main()
