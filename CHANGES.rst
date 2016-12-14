@@ -1,7 +1,7 @@
 PyReshaper Change Log
 =====================
 
-Copyright 2015, University Corporation for Atmospheric Research
+Copyright 2016, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 
 VERSION 0.9.0
@@ -123,4 +123,13 @@ VERSION 0.9.10
 7 March 2016:
  - Python 2.6 back-porting
 
- 
+VERSION 1.0.0
+-------------
+
+13 Dec 2016:
+ - New I/O backend manager.  Can work with netCDF4 or PyNIO.
+ - Removing hierarchy to Reshaper classes, as there is only 1 (similarly
+   removing hierarchy of matching Specifier classes)
+ - No longer requires PyNIO to install...but you need netCDF4 or PyNIO to
+   run the reshaper!
+

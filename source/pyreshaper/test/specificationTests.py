@@ -1,7 +1,7 @@
 """
 Unit tests for the Specifier class
 
-Copyright 2015, University Corporation for Atmospheric Research
+Copyright 2016, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
@@ -34,6 +34,8 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized to .nc')
         self.assertEqual(len(spec.time_variant_metadata), 0,
                              'Time variant metadata list not initialized to empty')
+        self.assertEqual(spec.io_backend, 'netCDF4',
+                         'Time variant metadata list not initialized to empty')
 
     def test_init_full(self):
         in_list = ['a', 'b', 'c']
@@ -42,12 +44,15 @@ class SpecifierTests(unittest.TestCase):
         prefix = 'pre.'
         suffix = '.suf.nc'
         metadata = ['x', 'y', 'z']
+        backend = 'Nio'
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-            suffix=suffix, metadata=metadata)
+            suffix=suffix, metadata=metadata, backend=backend)
         for i1, i2 in zip(spec.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
+        self.assertEqual(spec.io_backend, backend,
+                         'NetCDF I/O backend not set properly')
         self.assertEqual(spec.netcdf_format, fmt,
                          'NetCDF format not initialized properly')
         self.assertEqual(spec.compression_level, cl,
@@ -82,6 +87,19 @@ class SpecifierTests(unittest.TestCase):
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
+        self.assertRaises(TypeError, spec.validate_types)
+
+    def test_validate_types_fail_backend(self):
+        in_list = ['a', 'b', 'c']
+        fmt = 2342
+        cl = 5
+        prefix = 'pre.'
+        suffix = '.suf.nc'
+        metadata = ['x', 'y', 'z']
+        backend = 1
+        spec = specification.Specifier(
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
+            suffix=suffix, metadata=metadata, backend=backend)
         self.assertRaises(TypeError, spec.validate_types)
 
     def test_validate_types_fail_format(self):
@@ -154,6 +172,20 @@ class SpecifierTests(unittest.TestCase):
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
+        spec.validate_types()
+        self.assertRaises(ValueError, spec.validate_values)
+
+    def test_validate_values_fail_backend(self):
+        in_list = ['timekeeperTests.py', 'messengerTests.py']
+        fmt = 'netcdf9'
+        cl = 5
+        prefix = 'pre.'
+        suffix = '.suf.nc'
+        metadata = []
+        backend = 'x'
+        spec = specification.Specifier(
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
+            suffix=suffix, metadata=metadata, backend=backend)
         spec.validate_types()
         self.assertRaises(ValueError, spec.validate_values)
 
