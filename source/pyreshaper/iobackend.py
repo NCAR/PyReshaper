@@ -93,7 +93,7 @@ class NCFile(object):
     """
     Wrapper class for netCDF files/datasets
     """
-    
+
     def __init__(self, filename, mode='r', ncfmt='netcdf4', compression=0):
         """
         Initializer
@@ -118,7 +118,7 @@ class NCFile(object):
         if not isinstance(compression, int):
             err_msg = "Netcdf file compression must be an integer"
             raise TypeError(err_msg)
-        
+
         if mode not in ['r', 'w', 'a']:
             err_msg = ("Netcdf write mode {0!r} is not one of "
                        "'r', 'w', or 'a'").format(mode)
@@ -131,13 +131,13 @@ class NCFile(object):
             err_msg = ("Netcdf compression level {0} is not in range "
                        "0 to 9").format(compression)
             raise ValueError(err_msg)
-        
+
         self._mode = mode
         self._backend = get_backend()
         self._iolib = _IOLIB_
-        
+
         self._file_opts = {}
-        self._var_opts  = {}
+        self._var_opts = {}
 
         if self._backend == 'Nio':
             file_options = _IOLIB_.options()
@@ -157,17 +157,17 @@ class NCFile(object):
             else:
                 self._obj = self._iolib.open_file(filename, mode,
                                                   **self._file_opts)
-            
+
         elif self._backend == 'netCDF4':
             if ncfmt == 'netcdf':
-                self._file_opts["format"]  = "NETCDF3_64BIT"
+                self._file_opts["format"] = "NETCDF3_64BIT"
             elif ncfmt == 'netcdf4':
-                self._file_opts["format"]  = "NETCDF4_CLASSIC"
+                self._file_opts["format"] = "NETCDF4_CLASSIC"
                 if compression > 0:
                     self._var_opts["zlib"] = True
                     self._var_opts["complevel"] = int(compression)
             elif ncfmt == 'netcdf4c':
-                self._file_opts["format"]  = "NETCDF4_CLASSIC"
+                self._file_opts["format"] = "NETCDF4_CLASSIC"
                 self._var_opts["zlib"] = True
                 self._var_opts["complevel"] = 1
 
@@ -176,7 +176,7 @@ class NCFile(object):
             else:
                 self._obj = self._iolib.Dataset(filename, mode,
                                                 **self._file_opts)
-    
+
     @property
     def dimensions(self):
         """
@@ -185,11 +185,11 @@ class NCFile(object):
         if self._backend == 'Nio':
             return self._obj.dimensions
         elif self._backend == 'netCDF4':
-            return _dict_((n, len(d)) for n,d
+            return _dict_((n, len(d)) for n, d
                           in self._obj.dimensions.iteritems())
         else:
             return _dict_()
-    
+
     def unlimited(self, name):
         """
         Return whether the dimension named is unlimited
@@ -214,7 +214,7 @@ class NCFile(object):
             return self._obj.attributes[name]
         elif self._backend == 'netCDF4':
             return self._obj.getncattr(name)
-    
+
     def setncattr(self, name, value):
         if self._mode == 'r':
             raise RuntimeError('Cannot set attribute in read mode')
@@ -222,10 +222,10 @@ class NCFile(object):
             setattr(self._obj, name, value)
         elif self._backend == 'netCDF4':
             self._obj.setncattr(name, value)
-    
+
     @property
     def variables(self):
-        return _dict_((n, NCVariable(v, self._mode)) for n,v
+        return _dict_((n, NCVariable(v, self._mode)) for n, v
                       in self._obj.variables.iteritems())
 
     def create_dimension(self, name, value=None):
@@ -235,7 +235,7 @@ class NCFile(object):
             self._obj.create_dimension(name, value)
         elif self._backend == 'netCDF4':
             self._obj.createDimension(name, value)
-    
+
     def create_variable(self, name, datatype, dimensions):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
@@ -261,20 +261,24 @@ class NCVariable(object):
     """
     Wrapper class for NetCDF variables
     """
-    
+
     def __init__(self, vobj, mode='r'):
         self._mode = mode
         self._obj = vobj
-        if _NC4_ is not None and isinstance(vobj, _NC4_._netCDF4.Variable):
-            self._backend = 'netCDF4'
-            self._iolib = _NC4_
+        if _NC4_ is not None:
+            if hasattr(_NC4_, '_netCDF4') and isinstance(vobj, _NC4_._netCDF4.Variable):
+                self._backend = 'netCDF4'
+                self._iolib = _NC4_
+            elif isinstance(vobj, _NC4_.Variable):
+                self._backend = 'netCDF4'
+                self._iolib = _NC4_
         elif _NIO_ is not None:
             self._backend = 'Nio'
             self._iolib = _NIO_
         else:
             self._backend = None
             self._iolib = None
-    
+
     @property
     def ncattrs(self):
         if self._backend == 'Nio':
@@ -287,7 +291,7 @@ class NCVariable(object):
             return self._obj.attributes[name]
         elif self._backend == 'netCDF4':
             return self._obj.getncattr(name)
-    
+
     def setncattr(self, name, value):
         if self._mode == 'r':
             raise RuntimeError('Cannot set attribute in read mode')
@@ -295,7 +299,7 @@ class NCVariable(object):
             setattr(self._obj, name, value)
         elif self._backend == 'netCDF4':
             self._obj.setncattr(name, value)
-    
+
     @property
     def dimensions(self):
         return self._obj.dimensions
@@ -317,7 +321,7 @@ class NCVariable(object):
             return numpy.dtype(self._obj.typecode())
         elif self._backend == 'netCDF4':
             return self._obj.dtype
-    
+
     def get_value(self):
         if self._backend == 'Nio':
             return self._obj.get_value()
@@ -326,7 +330,7 @@ class NCVariable(object):
                 return self._obj.getValue()
             else:
                 return self._obj[...]
-    
+
     def assign_value(self, value):
         if self._mode == 'r':
             raise RuntimeError('Cannot assign value in read mode')
@@ -337,7 +341,7 @@ class NCVariable(object):
                 self._obj.assignValue(value)
             else:
                 self._obj[:] = value
-    
+
     def __getitem__(self, key):
         return self._obj[key]
 
