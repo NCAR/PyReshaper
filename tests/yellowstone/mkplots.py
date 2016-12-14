@@ -20,7 +20,7 @@
 #
 #==============================================================================
 
-import argparse
+import optparse
 
 from utilities import plottools as pt
 
@@ -28,23 +28,20 @@ from utilities import plottools as pt
 # Command-Line Interface Definition
 #==============================================================================
 _DESC_ = 'Create throughput and duration plots of timing data'
-_PARSER_ = argparse.ArgumentParser(description=_DESC_)
-_PARSER_.add_argument('-t', '--timefile', type=str,
-                      default='timings.json',
-                      help='Path to the timings.json file '
-                           '[Default: "timings.json"]')
-_PARSER_.add_argument('-m', '--method', action='append', type=str,
-                      dest='methods', default=[],
-                      help='Include a method to plot, by name.  If no methods '
-                           'are listed, then include all methods found')
-_PARSER_.add_argument('-x', '--exclusive', action='store_true',
-                      dest='exclusive', default=False,
-                      help='Option indicating that datasets that do not '
-                           'include all of the desired methods should not '
-                           'be plotted [Default: False]')
-_PARSER_.add_argument('dataset', nargs='*', default=[],
-                      help='Dataset to be plotted.  If none are listed, '
-                           'assume all datasets found will be plotted.')
+_PARSER_ = optparse.OptionParser(description=_DESC_)
+_PARSER_.add_option('-t', '--timefile', type='string',
+                    default='timings.json',
+                    help=('Path to the timings.json file '
+                          '[Default: "timings.json"]'))
+_PARSER_.add_option('-m', '--method', action='append', type='string',
+                    dest='methods', default=[],
+                    help=('Include a method to plot, by name.  If no methods '
+                          'are listed, then include all methods found'))
+_PARSER_.add_option('-x', '--exclusive', action='store_true',
+                    dest='exclusive', default=False,
+                    help=('Option indicating that datasets that do not '
+                          'include all of the desired methods should not '
+                          'be plotted [Default: False]'))
 
 #==============================================================================
 # Some common data for plotting
@@ -97,10 +94,10 @@ method_order = ['ncl', 'nco', 'pagoda', 'cdo',
 # Command-line Operation
 #==============================================================================
 if __name__ == '__main__':
-    args = _PARSER_.parse_args()
+    opts, datasets = _PARSER_.parse_args()
 
     # Read the data file
-    jsondata = pt.read_json_data(args.timefile)
+    jsondata = pt.read_json_data(opts.timefile)
     if jsondata is None:
         raise ValueError('Could not find timings JSON data file.')
 
@@ -108,7 +105,6 @@ if __name__ == '__main__':
     data = jsondata
 
     # If datasets are listed, extract only them
-    datasets = args.dataset
     if (len(datasets) > 0):
         datasets_to_plot = []
         for dataset in datasets:
@@ -117,14 +113,14 @@ if __name__ == '__main__':
         data = pt.subselect_datasets(data, datasets=datasets_to_plot)
 
     # If methods are listed, extract only them
-    methods = args.methods
+    methods = opts.methods
     if (len(methods) > 0):
         methods_to_plot = []
         for method in methods:
             if method in method_order:
                 methods_to_plot.append(method)
         data = pt.subselect_methods(data, methods=methods_to_plot,
-                                    exclusive=args.exclusive)
+                                    exclusive=opts.exclusive)
 
     # THROUGHPUT PLOTS
     tdata = pt.get_throughput_pdata(data)

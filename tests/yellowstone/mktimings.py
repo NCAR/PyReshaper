@@ -11,7 +11,7 @@
 import os
 import glob
 import datetime
-import argparse
+import optparse
 
 # Package Modules
 from utilities import testtools as tt
@@ -22,13 +22,13 @@ from utilities import testtools as tt
 _DESC_ = """This program is designed to gather statistics for tests and
             test input defined in the testing database file."""
 
-_PARSER_ = argparse.ArgumentParser(description=_DESC_)
-_PARSER_.add_argument('-i', '--infofile', default='testinfo.json', type=str,
-                      help='Location of the testinfo.json database file '
-                           '[Default: testinfo.json]')
-_PARSER_.add_argument('-t', '--timefile', default='timings.json', type=str,
-                      help='Location of the timings.json database file '
-                           '[Default: timings.json]')
+_PARSER_ = optparse.OptionParser(description=_DESC_)
+_PARSER_.add_option('-i', '--infofile', default='testinfo.json', type="string",
+                    help=('Location of the testinfo.json database file '
+                          '[Default: testinfo.json]'))
+_PARSER_.add_option('-t', '--timefile', default='timings.json', type="string",
+                    help=('Location of the timings.json database file '
+                          '[Default: timings.json]'))
 
 
 #==============================================================================
@@ -47,11 +47,11 @@ def find_shortest_str(strng, left, right=os.linesep, loc=0):
 # Command-line Operation
 #==============================================================================
 if __name__ == '__main__':
-    args = _PARSER_.parse_args()
+    opts, args = _PARSER_.parse_args()
 
     # Create/read the testing info and stats files
-    testdb = tt.TestDB(name=args.infofile).getdb()
-    timedb = tt.TimeDB(name=args.timefile)
+    testdb = tt.TestDB(name=opts.infofile).getdb()
+    timedb = tt.TimeDB(name=opts.timefile)
 
     # Current working directory
     cwd = os.getcwd()
@@ -188,4 +188,4 @@ if __name__ == '__main__':
                               system='yellowstone')
 
     # Write the JSON data file
-    timedb.save(args.timefile)
+    timedb.save(opts.timefile)
