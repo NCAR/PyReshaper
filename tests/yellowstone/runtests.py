@@ -23,8 +23,7 @@ from utilities import runtools as rt
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
-_DESC_ = """
-This program is designed to run yellowstone-specific
+_DESC_ = """This program is designed to run yellowstone-specific
 tests of the PyReshaper.  Each named test (or all tests if
 the -a or --all option is used) will be given a run
 directory in the "rundirs" directory with the same
