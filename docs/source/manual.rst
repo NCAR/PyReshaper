@@ -297,6 +297,11 @@ The arguments to the ``s2smake`` utility are as follows.
 -  ``--metadata VNAME`` (``-m VNAME``):  Indicate that the variable ``VNAME`` should
    be treated as metadata, and written to all output files.  There may be more than
    one ``--metadata`` (or ``-m``) options given, each one being added to a list.
+
+-  ``--meta1d`` (``-1``):  This flag forces all 1D time-variant variables to be treated
+   as metadata.  These variables need not be added explicitly to the list of metadata
+   variables (i.e., with the ``--metadata`` or ``-m`` argument).  These variables will
+   be added to the list when the PyReshaper runs.
    
 -  ``--specfile SPECFILE`` (``-o SPECFILE``):  The name of the *specfile* to write,
    containing the specification of the PyReshaper job.  The default *specfile* name
@@ -449,6 +454,11 @@ can include the full, absolute path information for the output
    as time-series variables (i.e., treated as metadata), since all 
    time-invariant (time-independent) variables will be treat as metadata
    automatically.
+
+-  ``assume_1d_time_variant_metadata``: If set to ``True``, this indicates
+   that all 1D time-variant variables (i.e., variables that *only* depend
+   upon ``time``) should be added to the list of ``time_variant_metadata``
+   when the Reshaper runs.  The default for this option is ``False``.
 
 -  ``backend``: This specifies which I/O backend to use for reading
    and writing NetCDF files.  The default backend is ``'netCDF4'``, but
