@@ -27,7 +27,10 @@ from utilities import plottools as pt
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
-_DESC_ = 'Create throughput and duration plots of timing data'
+_DESC_ = """
+Create throughput and duration plots of timing data
+"""
+
 _PARSER_ = optparse.OptionParser(description=_DESC_)
 _PARSER_.add_option('-t', '--timefile', type='string',
                     default='timings.json',

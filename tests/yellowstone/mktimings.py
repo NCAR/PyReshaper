@@ -19,8 +19,10 @@ from utilities import testtools as tt
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
-_DESC_ = """This program is designed to gather statistics for tests and
-            test input defined in the testing database file."""
+_DESC_ = """
+This program is designed to gather statistics for tests and
+test input defined in the testing database file.
+"""
 
 _PARSER_ = optparse.OptionParser(description=_DESC_)
 _PARSER_.add_option('-i', '--infofile', default='testinfo.json', type="string",

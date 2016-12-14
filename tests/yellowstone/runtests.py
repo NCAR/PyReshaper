@@ -23,14 +23,16 @@ from utilities import runtools as rt
 #==============================================================================
 # Command-Line Interface Definition
 #==============================================================================
-_DESC_ = """This program is designed to run yellowstone-specific
-            tests of the PyReshaper.  Each named test (or all tests if
-            the -a or --all option is used) will be given a run
-            directory in the "rundirs" directory with the same
-            name as the test itself.  The run script will be placed
-            in this run directory, as will be placed the run output
-            error file.  All output data files will be placed in the
-            output subdirectory."""
+_DESC_ = """
+This program is designed to run yellowstone-specific
+tests of the PyReshaper.  Each named test (or all tests if
+the -a or --all option is used) will be given a run
+directory in the "rundirs" directory with the same
+name as the test itself.  The run script will be placed
+in this run directory, as will be placed the run output
+error file.  All output data files will be placed in the
+output subdirectory.
+"""
 
 _PARSER_ = optparse.OptionParser(description=_DESC_)
 _PARSER_.add_option('-a', '--all', default=False,
