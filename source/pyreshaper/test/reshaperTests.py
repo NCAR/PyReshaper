@@ -54,14 +54,17 @@ class ReshaperTests(unittest.TestCase):
 
     def _convert_header(self, infiles, prefix, suffix, metadata,
                         ncfmt, clevel, serial, verbosity, wmode, once,
-                        print_diags=False, meta1d=False):
+                        print_diags=False, meta1d=False, tseries=None):
         nfiles = len(infiles)
-        ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c'
-                                                else '4')
-        self._test_header(("convert() - {0} infile(s), NC{1}-CL{2}, serial={3},{4}"
-                           "            verbosity={5}, wmode={6!r}, once={7}, meta1d={8}"
+        ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c' else '4')
+        if tseries is not None:
+            tsvstr = ', numtsv={0}'.format(len(tseries))
+        else:
+            tsvstr = ''
+        self._test_header(("convert() - {0} infile(s), NC{1}-CL{2}, serial={3}, wmode={6!r},{4}"
+                           "            verbosity={5}, once={7}, meta1d={8}{9}"
                            "").format(nfiles, ncvers, clevel, serial, eol,
-                                      verbosity, wmode, once, meta1d))
+                                      verbosity, wmode, once, meta1d, tsvstr))
 
     def _assertion(self, name, actual, expected,
                    data=None, show=True, assertion=None):
@@ -79,12 +82,20 @@ class ReshaperTests(unittest.TestCase):
         else:
             self.assertEqual(actual, expected, msg)
 
+    def _check_outfile(self, tsvar, **args):
+        assertions_dict = mkTestData.check_outfile(tsvar=tsvar, **args)
+        failed_assertions = [key for key, value in assertions_dict.iteritems() if value is False]
+        assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
+        assert_msgs.extend(['   {0}'.format(assrt) for assrt in failed_assertions])
+        self.assertEqual(len(failed_assertions), 0, eol.join(assert_msgs))
+
     def _run_convert(self, infiles, prefix, suffix, metadata,
                      ncfmt, clevel, serial, verbosity, wmode, once,
-                     print_diags=False, meta1d=False):
+                     print_diags=False, meta1d=False, tseries=None):
         if not (serial and self.rank > 0):
             spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
-                             prefix=prefix, suffix=suffix, metadata=metadata, meta1d=meta1d)
+                             prefix=prefix, suffix=suffix, metadata=metadata,
+                             meta1d=meta1d, timeseries=tseries)
             rshpr = create_reshaper(spec, serial=serial,
                                     verbosity=verbosity,
                                     wmode=wmode, once=once)
@@ -95,12 +106,13 @@ class ReshaperTests(unittest.TestCase):
 
     def _run_convert_assert_no_output(self, infiles, prefix, suffix, metadata,
                                       ncfmt, clevel, serial, verbosity, wmode,
-                                      once, print_diags=False, meta1d=False):
+                                      once, print_diags=False, meta1d=False, tseries=None):
         oldout = sys.stdout
         newout = StringIO()
         sys.stdout = newout
         self._run_convert(infiles, prefix, suffix, metadata, ncfmt, clevel,
-                          serial, 0, wmode, once, print_diags=False, meta1d=meta1d)
+                          serial, 0, wmode, once, print_diags=False,
+                          meta1d=meta1d, tseries=tseries)
         actual = newout.getvalue()
         self._assertion("stdout empty", actual, '')
         sys.stdout = oldout
@@ -149,7 +161,7 @@ class ReshaperTests(unittest.TestCase):
         self._run_convert_assert_no_output(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_SER_V0_W_M1D(self):
@@ -162,7 +174,22 @@ class ReshaperTests(unittest.TestCase):
         self._run_convert_assert_no_output(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
+        MPI_COMM_WORLD.Barrier()
+
+    def test_convert_All_NC3_CL0_SER_V0_W_TSER(self):
+        tsers = mkTestData.tsvars[:2]
+        mdata = [v for v in mkTestData.tvmvars]
+        mdata.append('time')
+        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
+                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
+                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
+                'print_diags': False, 'tseries': tsers}
+        self._convert_header(**args)
+        self._run_convert_assert_no_output(**args)
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_1_NC3_CL0_SER_V0_W(self):
@@ -176,7 +203,7 @@ class ReshaperTests(unittest.TestCase):
         self._run_convert_assert_no_output(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC4_CL1_SER_V0_W(self):
@@ -190,7 +217,7 @@ class ReshaperTests(unittest.TestCase):
         self._run_convert_assert_no_output(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_W(self):
@@ -204,7 +231,7 @@ class ReshaperTests(unittest.TestCase):
         self._run_convert(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_W_ONCE(self):
@@ -217,9 +244,9 @@ class ReshaperTests(unittest.TestCase):
         self._convert_header(**args)
         self._run_convert(**args)
         if self.rank == 0:
-            mkTestData.check_outfile(tsvar='once', **args)
+            self._check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_O(self):
@@ -233,7 +260,7 @@ class ReshaperTests(unittest.TestCase):
         self._run_convert(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_O_ONCE(self):
@@ -246,9 +273,9 @@ class ReshaperTests(unittest.TestCase):
         self._convert_header(**args)
         self._run_convert(**args)
         if self.rank == 0:
-            mkTestData.check_outfile(tsvar='once', **args)
+            self._check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_S(self):
@@ -262,7 +289,7 @@ class ReshaperTests(unittest.TestCase):
         self._run_convert(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V1_S_ONCE(self):
@@ -275,9 +302,9 @@ class ReshaperTests(unittest.TestCase):
         self._convert_header(**args)
         self._run_convert(**args)
         if self.rank == 0:
-            mkTestData.check_outfile(tsvar='once', **args)
+            self._check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(tsvar=tsvar, **args)
+                self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V3_A(self):
@@ -293,7 +320,7 @@ class ReshaperTests(unittest.TestCase):
             self._run_convert(infiles=[infile], wmode='a', **args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+                self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V3_A_ONCE(self):
@@ -308,9 +335,9 @@ class ReshaperTests(unittest.TestCase):
         for infile in mkTestData.slices[1:]:
             self._run_convert(infiles=[infile], wmode='a', **args)
         if self.rank == 0:
-            mkTestData.check_outfile(infiles=mkTestData.slices, tsvar='once', **args)
+            self._check_outfile(infiles=mkTestData.slices, tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
-                mkTestData.check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+                self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_All_NC3_CL0_PAR_V3_A_MISSING(self):
@@ -330,9 +357,9 @@ class ReshaperTests(unittest.TestCase):
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
                 if tsvar == missingvar:
-                    mkTestData.check_outfile(infiles=mkTestData.slices[2:], tsvar=tsvar, **args)
+                    self._check_outfile(infiles=mkTestData.slices[2:], tsvar=tsvar, **args)
                 else:
-                    mkTestData.check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+                    self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
 
