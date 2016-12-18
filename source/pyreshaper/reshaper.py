@@ -10,6 +10,7 @@ See the LICENSE.rst file for details
 """
 
 # Built-in imports
+from sys import platform
 from os import linesep, remove, rename
 from os.path import exists, isfile
 
@@ -23,6 +24,22 @@ from asaptools.vprinter import VPrinter
 # PyReshaper imports
 from specification import Specifier
 import iobackend
+
+# For memory diagnostics
+from resource import getrusage, RUSAGE_SELF
+
+
+#===================================================================================================
+# _memory_usage_resource_
+#===================================================================================================
+def _get_memory_usage_MB_():
+    """
+    Return the maximum memory use of this Python process in MB
+    """
+    to_MB = 1024.
+    if platform == 'darwin':
+        to_MB *= to_MB
+    return getrusage(RUSAGE_SELF).ru_maxrss / to_MB
 
 
 #==============================================================================
@@ -208,7 +225,7 @@ class Reshaper(object):
         # Dictionary storing read/write data amounts
         self.assumed_block_size = float(4 * 1024 * 1024)
         self._byte_counts = {}
-
+        
         self._timer.start('Initializing Simple Communicator')
         if simplecomm is None:
             simplecomm = create_comm(serial=serial)
@@ -252,7 +269,7 @@ class Reshaper(object):
         self._time_series_names = specifier.time_series
         if self._time_series_names is not None:
             vnames = ', '.join(self._time_series_names)
-            self._vprint('WARNING: Extracting only variables: {0}'.format(vnames), verbosity=0)
+            self._vprint('WARNING: Extracting only variables: {0}'.format(vnames), verbosity=-1)
 
         # Store the list of metadata names
         self._metadata_names = specifier.time_variant_metadata
@@ -825,6 +842,8 @@ class Reshaper(object):
         # Get all totals and maxima
         my_times = self._timer.get_all_times()
         max_times = self._simplecomm.allreduce(my_times, op='max')
+        my_memory = {'Maximum Memory Usage': _get_memory_usage_MB_()}
+        max_memory = self._simplecomm.allreduce(my_memory, op='max')
         my_bytes = self._byte_counts
         total_bytes = self._simplecomm.allreduce(my_bytes, op='sum')
 
@@ -845,3 +864,9 @@ class Reshaper(object):
         byte_count_str = _pprint_dictionary('BYTE COUNTS (MB)', total_bytes)
         if self._simplecomm.is_manager():
             self._vprint(byte_count_str, verbosity=-1)
+        
+        # Print maximum memory use in MB
+        memory_str = _pprint_dictionary('MEMORY USAGE (MB)', max_memory)
+        if self._simplecomm.is_manager():
+            self._vprint(memory_str, verbosity=-1)
+
