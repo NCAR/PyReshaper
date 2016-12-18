@@ -842,7 +842,7 @@ class Reshaper(object):
         # Get all totals and maxima
         my_times = self._timer.get_all_times()
         max_times = self._simplecomm.allreduce(my_times, op='max')
-        my_memory = {'Maximum Memory Usage': _get_memory_usage_MB_()}
+        my_memory = {'Maximum Memory Use': _get_memory_usage_MB_()}
         max_memory = self._simplecomm.allreduce(my_memory, op='max')
         my_bytes = self._byte_counts
         total_bytes = self._simplecomm.allreduce(my_bytes, op='sum')
