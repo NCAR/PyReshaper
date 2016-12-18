@@ -32,10 +32,14 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized to tseries.')
         self.assertEqual(spec.output_file_suffix, '.nc',
                          'Output file prefix not initialized to .nc')
+        self.assertEqual(spec.time_series, None,
+                         'Time-series variables list is not initialized to None')
         self.assertEqual(len(spec.time_variant_metadata), 0,
                              'Time variant metadata list not initialized to empty')
+        self.assertEqual(spec.assume_1d_time_variant_metadata, False,
+                         'Time-variable 1D metadata flag is not initialized to False')
         self.assertEqual(spec.io_backend, 'netCDF4',
-                         'Time variant metadata list not initialized to empty')
+                         'I/O backend not initialized to netCDF4')
 
     def test_init_full(self):
         in_list = ['a', 'b', 'c']
@@ -43,12 +47,14 @@ class SpecifierTests(unittest.TestCase):
         cl = 4
         prefix = 'pre.'
         suffix = '.suf.nc'
+        tseries = ['1', '2']
         metadata = ['x', 'y', 'z']
         meta1d = True
         backend = 'Nio'
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-            suffix=suffix, metadata=metadata, meta1d=meta1d, backend=backend)
+            suffix=suffix, timeseries=tseries, metadata=metadata,
+            meta1d=meta1d, backend=backend)
         for i1, i2 in zip(spec.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
@@ -62,11 +68,20 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_suffix, suffix,
                          'Output file prefix not initialized properly')
+        for i1, i2 in zip(spec.time_series, tseries):
+            self.assertEqual(i1, i2,
+                             'Time-series list not initialized properly')
         for i1, i2 in zip(spec.time_variant_metadata, metadata):
             self.assertEqual(i1, i2,
-                             'Time variant metadata list not initialized properly')
+                             'Time-variant metadata list not initialized properly')
         self.assertEqual(spec.assume_1d_time_variant_metadata, meta1d,
                          '1D metadata flag not initialized properly')
+
+
+    def test_validate_types_defaults(self):
+        in_list = ['a', 'b', 'c']
+        spec = specification.Specifier(infiles=in_list)
+        spec.validate_types()
 
     def test_validate_types(self):
         in_list = ['a', 'b', 'c']
@@ -74,10 +89,11 @@ class SpecifierTests(unittest.TestCase):
         cl = 3
         prefix = 'pre.'
         suffix = '.suf.nc'
+        tseries = ['1', '2']
         metadata = ['x', 'y', 'z']
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-            suffix=suffix, metadata=metadata)
+            suffix=suffix, timeseries=tseries, metadata=metadata, meta1d=True)
         spec.validate_types()
 
     def test_validate_types_fail_input(self):
@@ -151,6 +167,19 @@ class SpecifierTests(unittest.TestCase):
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, metadata=metadata)
+        self.assertRaises(TypeError, spec.validate_types)
+
+    def test_validate_types_fail_timeseries(self):
+        in_list = ['a', 'b', 'c']
+        fmt = 'netcdf'
+        cl = 5
+        prefix = 'pre.'
+        suffix = '.suf.nc'
+        tseries = ['1', 2.5]
+        metadata = ['x', 'y', 'z']
+        spec = specification.Specifier(
+            infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
+            suffix=suffix, timeseries=tseries, metadata=metadata)
         self.assertRaises(TypeError, spec.validate_types)
 
     def test_validate_types_fail_metadata(self):
@@ -263,10 +292,11 @@ class SpecifierTests(unittest.TestCase):
         cl = 8
         prefix = 'pre.'
         suffix = '.suf.nc'
+        tseries = ['1', '2']
         metadata = ['time']
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-            suffix=suffix, metadata=metadata)
+            suffix=suffix, timeseries=tseries, metadata=metadata)
         fname = 'test_write.s2s'
         spec.write(fname)
         self.assertTrue(os.path.exists(fname), 'Specfile failed to write')
@@ -282,6 +312,9 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized properly')
         self.assertEqual(spec2.output_file_suffix, suffix,
                          'Output file prefix not initialized properly')
+        for i1, i2 in zip(spec2.time_series, tseries):
+            self.assertEqual(i1, i2,
+                             'Time series name list not initialized properly')
         for i1, i2 in zip(spec2.time_variant_metadata, metadata):
             self.assertEqual(i1, i2,
                              'Time variant metadata list not initialized properly')

@@ -57,6 +57,13 @@ def cli(argv=None):
                             'file will be named according to the rule: '
                             'output_prefix + variable_name + output_suffix '
                             '[Default: ".nc"]'))
+    parser.add_option('--time_series', action='append', default=None,
+                      help=('Names of variables to be given their own output file. '
+                            'There may be more than one --time_series option given, and '
+                            'each name will be appended to a list.  If the --time_series '
+                            'option is not used, then all time-variant variables that '
+                            'are not labelled as metadata will be given their own '
+                            'output file. [Default: None]'))
     opts, args = parser.parse_args(argv)
 
     # Check that input files are given
@@ -101,6 +108,7 @@ def main(argv=None):
     spec.netcdf_format = opts.netcdf_format
     spec.output_file_prefix = opts.output_prefix
     spec.output_file_suffix = opts.output_suffix
+    spec.time_series = opts.time_series
     spec.time_variant_metadata = opts.metadata
     spec.assume_1d_time_variant_metadata = opts.meta1d
 

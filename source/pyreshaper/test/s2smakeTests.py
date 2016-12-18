@@ -39,6 +39,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not "tseries."')
         self.assertEqual(opts.output_suffix, '.nc',
                          'Default output suffix is not ".nc"')
+        self.assertEqual(opts.time_series, None,
+                         'Default time series names is not None')
         self.assertEqual(opts.specfile, 'input.s2s',
                          'Default output suffix is not ".nc"')
         self.assertEqual(opts.meta1d, False,
@@ -60,7 +62,6 @@ class s2smakeTest(unittest.TestCase):
         argv.extend(['-o', specfile, '-p', prefix, '-s', suffix])
         argv.extend(infiles)
         opts, args = s2smake.cli(argv)
-        print opts.metadata
 
         self.assertEqual(opts.compression_level, clevel,
                          'Default compression level is not {0!r}'.format(clevel))
@@ -80,6 +81,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not {0!r}'.format(prefix))
         self.assertEqual(opts.output_suffix, suffix,
                          'Default output suffix is not {0!r}'.format(suffix))
+        self.assertEqual(opts.time_series, None,
+                         'Default time-series list is not None')
         self.assertEqual(opts.specfile, specfile,
                          'Default output suffix is not {0!r}'.format(specfile))
         self.assertEqual(opts.meta1d, True,
@@ -92,6 +95,7 @@ class s2smakeTest(unittest.TestCase):
         specfile = 'myspec.s2s'
         prefix = 'prefix.'
         suffix = '.suffix'
+        tseries = ['tsvar1', 'tsvar2']
         infiles = ['s2smakeTests.py', 'specificationTests.py']
 
         argv = ['--meta1d']
@@ -100,6 +104,8 @@ class s2smakeTest(unittest.TestCase):
             argv.extend(['--metadata', md])
         argv.extend(['--specfile', specfile, '--output_prefix', prefix,
                      '--output_suffix', suffix])
+        for ts in tseries:
+            argv.extend(['--time_series', ts])
         argv.extend(infiles)
         opts, args = s2smake.cli(argv)
 
@@ -119,6 +125,9 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not {0!r}'.format(prefix))
         self.assertEqual(opts.output_suffix, suffix,
                          'Default output suffix is not {0!r}'.format(suffix))
+        for i1, i2 in zip(opts.time_series, tseries):
+            self.assertEqual(i1, i2,
+                             'Default time-series list is not {0}'.format(tseries))
         self.assertEqual(opts.specfile, specfile,
                          'Default output suffix is not {0!r}'.format(specfile))
         self.assertEqual(opts.meta1d, True,
@@ -150,6 +159,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not "tseries."')
         self.assertEqual(spec.output_file_suffix, '.nc',
                          'Default output suffix is not ".nc"')
+        self.assertEqual(spec.time_series, None,
+                         'Default NetCDF format is not None')
         self.assertEqual(spec.assume_1d_time_variant_metadata, False,
                          'Default 1D time-variant metadata flag is not False')
 
@@ -196,6 +207,8 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not {0!r}'.format(prefix))
         self.assertEqual(spec.output_file_suffix, suffix + '.nc',
                          'Default output suffix is not {0!r}'.format(suffix))
+        self.assertEqual(spec.time_series, None,
+                         'Default time series names is not None')
         self.assertEqual(spec.assume_1d_time_variant_metadata, True,
                          'Default 1D time-variant metadata flag is not True')
 
@@ -206,6 +219,7 @@ class s2smakeTest(unittest.TestCase):
         specfile = 'myspec.s2s'
         prefix = 'prefix.'
         suffix = '.suffix'
+        tseries = ['tsvar1', 'tsvar2']
         infiles = ['s2smakeTests.py', 'specificationTests.py']
 
         argv = ['--meta1d', '--compression_level', str(clevel), '--netcdf_format', ncfmt]
@@ -213,6 +227,8 @@ class s2smakeTest(unittest.TestCase):
             argv.extend(['--metadata', md])
         argv.extend(['--specfile', specfile, '--output_prefix', prefix,
                      '--output_suffix', suffix])
+        for ts in tseries:
+            argv.extend(['--time_series', ts])
         argv.extend(infiles)
 
         if os.path.exists(specfile):
@@ -243,6 +259,9 @@ class s2smakeTest(unittest.TestCase):
                          'Default output prefix is not {0!r}'.format(prefix))
         self.assertEqual(spec.output_file_suffix, suffix + '.nc',
                          'Default output suffix is not {0!r}'.format(suffix))
+        for i1, i2 in zip(spec.time_series, tseries):
+            self.assertEqual(i1, i2,
+                             'Default time-series list is not {0}'.format(tseries))
         self.assertEqual(spec.assume_1d_time_variant_metadata, True,
                          'Default 1D time-variant metadata flag is not True')
 
