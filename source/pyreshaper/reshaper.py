@@ -242,13 +242,17 @@ class Reshaper(object):
         else:
             self._backend = iobackend.get_backend()
             self._vprint(('  I/O Backend {0} not available.  Using {1} '
-                          'instead').format(specifier.io_backend, self._backend))
+                          'instead').format(specifier.io_backend, self._backend),
+                         verbosity=1)
 
         # Store the input file names
         self._input_filenames = specifier.input_file_list
 
         # Store the time-series variable names
         self._time_series_names = specifier.time_series
+        if self._time_series_names is not None:
+            vnames = ', '.join(self._time_series_names)
+            self._vprint('WARNING: Extracting only variables: {0}'.format(vnames), verbosity=0)
 
         # Store the list of metadata names
         self._metadata_names = specifier.time_variant_metadata

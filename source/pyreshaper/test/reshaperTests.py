@@ -12,6 +12,7 @@ from glob import glob
 from cStringIO import StringIO
 from os import linesep as eol
 from os import remove
+from os.path import exists
 from mpi4py import MPI
 
 from pyreshaper.reshaper import Reshaper, create_reshaper
@@ -177,19 +178,23 @@ class ReshaperTests(unittest.TestCase):
                 self._check_outfile(tsvar=tsvar, **args)
         MPI_COMM_WORLD.Barrier()
 
-    def test_convert_All_NC3_CL0_SER_V0_W_TSER(self):
-        tsers = mkTestData.tsvars[:2]
+    def test_convert_All_NC3_CL0_SER_V1_W_TSER(self):
+        tsers = [mkTestData.tsvars[1], 'tsvarX']
         mdata = [v for v in mkTestData.tvmvars]
         mdata.append('time')
         args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
                 'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
+                'serial': True, 'verbosity': 1, 'wmode': 'w', 'once': False,
                 'print_diags': False, 'tseries': tsers}
         self._convert_header(**args)
-        self._run_convert_assert_no_output(**args)
+        self._run_convert(**args)
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                if tsvar in tsers:
+                    self._check_outfile(tsvar=tsvar, **args)
+                else:
+                    fname = args['prefix'] + tsvar + args['suffix']
+                    self.assertFalse(exists(fname), 'File {0!r} should not exist'.format(fname))
         MPI_COMM_WORLD.Barrier()
 
     def test_convert_1_NC3_CL0_SER_V0_W(self):
