@@ -225,7 +225,7 @@ class Reshaper(object):
         # Dictionary storing read/write data amounts
         self.assumed_block_size = float(4 * 1024 * 1024)
         self._byte_counts = {}
-        
+
         self._timer.start('Initializing Simple Communicator')
         if simplecomm is None:
             simplecomm = create_comm(serial=serial)
@@ -548,7 +548,78 @@ class Reshaper(object):
                        "variables: {0}").format(self._existing)
             raise RuntimeError(err_msg)
 
-    def convert(self, output_limit=0):
+    def _chunk_iter(self, vobj, chunks={}, corder=True):
+        """
+        This is a generator function to iterator over chunks of arrays with named dimensions
+        
+        Parameters:
+            vobj: A NetCDF file variable object with dimensions and shape attributes
+            chunks (dict): A dictionary of dimension names mapped to chunk sizes along that
+                named dimension
+            corder (bool): Whether to assume the array has C-style axis ordering, where the
+                fastest changing dimension is assumed to be the first axis.  If False, then
+                the fastest changing dimension is assumed to be the last.
+        """
+        dimensions = vobj.dimensions
+        shape = vobj.shape
+
+        nchunks = 1
+        dchunks = []
+        for dname, dlen in zip(dimensions, shape):
+            if dname in chunks:
+                clen = chunks[dname]
+                cnum = dlen // clen
+                if dlen % clen > 0:
+                    cnum += 1
+                nchunks *= cnum
+            else:
+                clen = dlen
+                cnum = 1
+            dchunks.append((dlen, clen, cnum))
+
+        for n in xrange(nchunks):
+            cidx = []
+            nidx = n
+            nstride = nchunks
+            if corder:
+                diter = reversed(dchunks)
+            else:
+                diter = iter(dchunks)
+            for dlen, clen, cnum in diter:
+                nstride = nstride // cnum
+                cidx.append(nidx // nstride)
+                nidx = nidx % nstride
+            if corder:
+                cidx.reverse()
+
+            cslice = []
+            for d in xrange(len(shape)):
+                ic = cidx[d]
+                dlen, clen, cnum = dchunks[d]
+
+                ibeg = ic * clen
+                iend = (ic + 1) * clen
+                if iend >= dlen:
+                    iend = dlen
+
+                cslice.append(slice(ibeg, iend))
+
+            yield tuple(cslice)
+
+    def _offset_chunk(self, chunk, vobj, offset):
+        """
+        Compute a new chunk/slice for a variable with a given offset
+        """
+        new_chunk = []
+        for i, d in enumerate(vobj.dimensions):
+            if d in offset:
+                o = offset[d]
+            else:
+                o = 0
+            new_chunk.append(slice(chunk[i].start + o, chunk[i].stop + o))
+        return tuple(new_chunk)
+
+    def convert(self, output_limit=0, chunks=None):
         """
         Method to perform the Reshaper's designated operation.
 
@@ -560,6 +631,8 @@ class Reshaper(object):
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
                 parallel run.
+            chunks (dict): A dictionary of dimension names mapped to chunk sizes 
+                along that named dimension
         """
         iobackend.set_backend(self._backend)
 
@@ -567,6 +640,21 @@ class Reshaper(object):
         if type(output_limit) is not int:
             err_msg = 'Output limit must be an integer'
             raise TypeError(err_msg)
+
+        # Check the chunking
+        if chunks is None:
+            # Default chunking is over 1 time-step at a time
+            chunks = {self._unlimited_dim: 1}
+        if not isinstance(chunks, dict):
+            err_msg = 'Chunks must be specified with a dictionary'
+            raise TypeError(err_msg)
+        for key, value in chunks.iteritems():
+            if not isinstance(key, basestring):
+                err_msg = 'Chunks dictionary must have string-type keys'
+                raise TypeError(err_msg)
+            if not isinstance(value, int):
+                err_msg = 'Chunks dictionary must have integer chunk sizes'
+                raise TypeError(err_msg)
 
         # Start the total convert process timer
         self._simplecomm.sync()
@@ -663,7 +751,7 @@ class Reshaper(object):
                 appending = False
             self._timer.stop('Open Output Files')
 
-            # Start the loop over input files (i.e., time-steps)
+            # Start the loop over input files (i.e., time-slices)
             series_step_index = self._time_series_step_index[out_name]
             for in_filename in self._input_filenames:
 
@@ -734,44 +822,46 @@ class Reshaper(object):
                         for name in self._time_invariant_metadata:
                             in_var = in_file.variables[name]
                             out_var = out_file.variables[name]
-                            self._timer.start('Read Time-Invariant Metadata')
-                            tmp_data = in_var.get_value()
-                            self._timer.stop('Read Time-Invariant Metadata')
-                            self._timer.start('Write Time-Invariant Metadata')
-                            out_var.assign_value(tmp_data)
-                            self._timer.stop('Write Time-Invariant Metadata')
 
-                            requested_nbytes = _get_bytesize(tmp_data)
-                            self._byte_counts[
-                                'Requested Data'] += requested_nbytes
-                            actual_nbytes = self.assumed_block_size \
-                                * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                            self._byte_counts['Actual Data'] += actual_nbytes
+                            for rslice in self._chunk_iter(in_var, chunks=chunks):
 
-                # Get the number of time steps in this slice file
-                num_steps = in_file.dimensions[self._unlimited_dim]
+                                self._timer.start('Read Time-Invariant Metadata')
+                                tmp_data = in_var[rslice]
+                                self._timer.stop('Read Time-Invariant Metadata')
+                                self._timer.start('Write Time-Invariant Metadata')
+                                out_var[rslice] = tmp_data
+                                self._timer.stop('Write Time-Invariant Metadata')
 
-                # Explicitly loop over time steps (to control memory use)
-                for slice_step_index in xrange(num_steps):
+                                requested_nbytes = _get_bytesize(tmp_data)
+                                self._byte_counts[
+                                    'Requested Data'] += requested_nbytes
+                                actual_nbytes = self.assumed_block_size \
+                                    * numpy.ceil(requested_nbytes / self.assumed_block_size)
+                                self._byte_counts['Actual Data'] += actual_nbytes
 
-                    # Copy the time-varient metadata
-                    if write_meta_data:
+#                 # Get the number of time steps in this slice file
+#                 num_steps = in_file.dimensions[self._unlimited_dim]
+#
+#                 # Explicitly loop over time steps (to control memory use)
+#                 for slice_step_index in xrange(num_steps):
 
-                        for name in self._time_variant_metadata:
-                            in_var = in_file.variables[name]
-                            out_var = out_file.variables[name]
-                            ndims = len(in_var.dimensions)
-                            udidx = in_var.dimensions.index(
-                                self._unlimited_dim)
-                            in_slice = [slice(None)] * ndims
-                            in_slice[udidx] = slice_step_index
-                            out_slice = [slice(None)] * ndims
-                            out_slice[udidx] = series_step_index
+                offsets = {self._unlimited_dim: series_step_index}
+
+                # Copy the time-varient metadata
+                if write_meta_data:
+
+                    for name in self._time_variant_metadata:
+                        in_var = in_file.variables[name]
+                        out_var = out_file.variables[name]
+
+                        for rslice in self._chunk_iter(in_var, chunks=chunks):
+
                             self._timer.start('Read Time-Variant Metadata')
-                            tmp_data = in_var[tuple(in_slice)]
+                            tmp_data = in_var[rslice]
                             self._timer.stop('Read Time-Variant Metadata')
+                            wslice = self._offset_chunk(rslice, out_var, offsets)
                             self._timer.start('Write Time-Variant Metadata')
-                            out_var[tuple(out_slice)] = tmp_data
+                            out_var[wslice] = tmp_data
                             self._timer.stop('Write Time-Variant Metadata')
 
                             requested_nbytes = _get_bytesize(tmp_data)
@@ -781,23 +871,21 @@ class Reshaper(object):
                                 * numpy.ceil(requested_nbytes / self.assumed_block_size)
                             self._byte_counts['Actual Data'] += actual_nbytes
 
-                    # Copy the time-series variables
-                    if write_tser_data:
+                # Copy the time-series variables
+                if write_tser_data:
 
-                        in_var = in_file.variables[out_name]
-                        out_var = out_file.variables[out_name]
-                        ndims = len(in_var.dimensions)
-                        udidx = in_var.dimensions.index(self._unlimited_dim)
-                        in_slice = [slice(None)] * ndims
-                        in_slice[udidx] = slice_step_index
-                        out_slice = [slice(None)] * ndims
-                        out_slice[udidx] = series_step_index
-                        self._timer.start('Read Time-Series Variables')
-                        tmp_data = in_var[tuple(in_slice)]
-                        self._timer.stop('Read Time-Series Variables')
-                        self._timer.start('Write Time-Series Variables')
-                        out_var[tuple(out_slice)] = tmp_data
-                        self._timer.stop('Write Time-Series Variables')
+                    in_var = in_file.variables[out_name]
+                    out_var = out_file.variables[out_name]
+
+                    for rslice in self._chunk_iter(in_var, chunks=chunks):
+
+                        self._timer.start('Read Time-Variant Metadata')
+                        tmp_data = in_var[rslice]
+                        self._timer.stop('Read Time-Variant Metadata')
+                        wslice = self._offset_chunk(rslice, out_var, offsets)
+                        self._timer.start('Write Time-Variant Metadata')
+                        out_var[wslice] = tmp_data
+                        self._timer.stop('Write Time-Variant Metadata')
 
                         requested_nbytes = _get_bytesize(tmp_data)
                         self._byte_counts['Requested Data'] += requested_nbytes
@@ -805,8 +893,8 @@ class Reshaper(object):
                             * numpy.ceil(requested_nbytes / self.assumed_block_size)
                         self._byte_counts['Actual Data'] += actual_nbytes
 
-                    # Increment the time-series step index
-                    series_step_index += 1
+                # Increment the time-series step index
+                series_step_index += 1
 
                 # Close the input file
                 self._timer.start('Close Input Files')
@@ -864,7 +952,7 @@ class Reshaper(object):
         byte_count_str = _pprint_dictionary('BYTE COUNTS (MB)', total_bytes)
         if self._simplecomm.is_manager():
             self._vprint(byte_count_str, verbosity=-1)
-        
+
         # Print maximum memory use in MB
         memory_str = _pprint_dictionary('MEMORY USAGE (MB)', max_memory)
         if self._simplecomm.is_manager():
