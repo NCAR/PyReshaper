@@ -320,6 +320,7 @@ class Reshaper(object):
         # Open first file
         ifile = iobackend.NCFile(self._input_filenames[0])
 
+        print 'HERE'
         # Look for the 'unlimited' dimension
         try:
             self._unlimited_dim = next(dim for dim in ifile.dimensions
@@ -508,9 +509,8 @@ class Reshaper(object):
 
                 # Check that the file has the unlimited dim and var
                 if not tsfile.unlimited(self._unlimited_dim):
-                    err_msg = ("Cannot append to time-series file with "
-                               "missing unlimited dimension "
-                               "'{0}'").format(self._unlimited_dim)
+                    err_msg = ("Cannot append to time-series file with missing unlimited "
+                               "dimension {0!r}").format(self._unlimited_dim)
                     raise RuntimeError(err_msg)
 
                 # Check for once file
@@ -619,6 +619,26 @@ class Reshaper(object):
             new_chunk.append(slice(chunk[i].start + o, chunk[i].stop + o))
         return tuple(new_chunk)
 
+    def _copy_var(self, kind, in_var, out_var, chunks={}, offsets={}):
+        """
+        Copy variable data from one variable object to another via chunking
+        """
+        for rslice in self._chunk_iter(in_var, chunks=chunks):
+
+            self._timer.start('Read {0}'.format(kind))
+            tmp_data = in_var[rslice]
+            self._timer.stop('Read {0}'.format(kind))
+            wslice = self._offset_chunk(rslice, out_var, offsets)
+            self._timer.start('Write {0}'.format(kind))
+            out_var[wslice] = tmp_data
+            self._timer.stop('Write {0}'.format(kind))
+
+            requested_nbytes = tmp_data.nbytes if hasattr(tmp_data, 'nbytes') else 0
+            self._byte_counts['Requested Data'] += requested_nbytes
+            actual_nbytes = (self.assumed_block_size *
+                             numpy.ceil(requested_nbytes / self.assumed_block_size))
+            self._byte_counts['Actual Data'] += actual_nbytes
+
     def convert(self, output_limit=0, chunks=None):
         """
         Method to perform the Reshaper's designated operation.
@@ -710,11 +730,6 @@ class Reshaper(object):
         # Initialize the byte count dictionary
         self._byte_counts['Requested Data'] = 0
         self._byte_counts['Actual Data'] = 0
-
-        # Defining a simple helper function to determine the bytes size of
-        # a variable given to it, whether an NDArray or not
-        def _get_bytesize(data):
-            return data.nbytes if hasattr(data, 'nbytes') else 0
 
         #===== LOOP OVER TIME_SERIES VARIABLES =====
 
@@ -818,83 +833,30 @@ class Reshaper(object):
 
                     # Copy the time-invariant metadata
                     if write_meta_data:
-
                         for name in self._time_invariant_metadata:
                             in_var = in_file.variables[name]
                             out_var = out_file.variables[name]
-
-                            for rslice in self._chunk_iter(in_var, chunks=chunks):
-
-                                self._timer.start('Read Time-Invariant Metadata')
-                                tmp_data = in_var[rslice]
-                                self._timer.stop('Read Time-Invariant Metadata')
-                                self._timer.start('Write Time-Invariant Metadata')
-                                out_var[rslice] = tmp_data
-                                self._timer.stop('Write Time-Invariant Metadata')
-
-                                requested_nbytes = _get_bytesize(tmp_data)
-                                self._byte_counts[
-                                    'Requested Data'] += requested_nbytes
-                                actual_nbytes = self.assumed_block_size \
-                                    * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                                self._byte_counts['Actual Data'] += actual_nbytes
-
-#                 # Get the number of time steps in this slice file
-#                 num_steps = in_file.dimensions[self._unlimited_dim]
-#
-#                 # Explicitly loop over time steps (to control memory use)
-#                 for slice_step_index in xrange(num_steps):
+                            self._copy_var('Time-Invariant Metadata', in_var, out_var, chunks=chunks)
 
                 offsets = {self._unlimited_dim: series_step_index}
 
                 # Copy the time-varient metadata
                 if write_meta_data:
-
                     for name in self._time_variant_metadata:
                         in_var = in_file.variables[name]
                         out_var = out_file.variables[name]
-
-                        for rslice in self._chunk_iter(in_var, chunks=chunks):
-
-                            self._timer.start('Read Time-Variant Metadata')
-                            tmp_data = in_var[rslice]
-                            self._timer.stop('Read Time-Variant Metadata')
-                            wslice = self._offset_chunk(rslice, out_var, offsets)
-                            self._timer.start('Write Time-Variant Metadata')
-                            out_var[wslice] = tmp_data
-                            self._timer.stop('Write Time-Variant Metadata')
-
-                            requested_nbytes = _get_bytesize(tmp_data)
-                            self._byte_counts[
-                                'Requested Data'] += requested_nbytes
-                            actual_nbytes = self.assumed_block_size \
-                                * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                            self._byte_counts['Actual Data'] += actual_nbytes
+                        self._copy_var('Time-Variant Metadata', in_var, out_var,
+                                       chunks=chunks, offsets=offsets)
 
                 # Copy the time-series variables
                 if write_tser_data:
-
                     in_var = in_file.variables[out_name]
                     out_var = out_file.variables[out_name]
+                    self._copy_var('Time-Series Variables', in_var, out_var,
+                                   chunks=chunks, offsets=offsets)
 
-                    for rslice in self._chunk_iter(in_var, chunks=chunks):
-
-                        self._timer.start('Read Time-Variant Metadata')
-                        tmp_data = in_var[rslice]
-                        self._timer.stop('Read Time-Variant Metadata')
-                        wslice = self._offset_chunk(rslice, out_var, offsets)
-                        self._timer.start('Write Time-Variant Metadata')
-                        out_var[wslice] = tmp_data
-                        self._timer.stop('Write Time-Variant Metadata')
-
-                        requested_nbytes = _get_bytesize(tmp_data)
-                        self._byte_counts['Requested Data'] += requested_nbytes
-                        actual_nbytes = self.assumed_block_size \
-                            * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                        self._byte_counts['Actual Data'] += actual_nbytes
-
-                # Increment the time-series step index
-                series_step_index += 1
+                # Increment the time-series index offset
+                series_step_index += in_file.dimensions[self._unlimited_dim]
 
                 # Close the input file
                 self._timer.start('Close Input Files')
@@ -916,8 +878,7 @@ class Reshaper(object):
         # Information
         self._simplecomm.sync()
         if self._simplecomm.is_manager():
-            self._vprint(('Finished converting time-slices '
-                          'to time-series.'), verbosity=0)
+            self._vprint('Finished converting time-slices to time-series.', verbosity=0)
 
         # Finish clocking the entire convert procedure
         self._timer.stop('Complete Conversion Process')
