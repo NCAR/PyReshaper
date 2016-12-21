@@ -20,7 +20,7 @@ from pyreshaper.specification import Specifier
 
 import mkTestData
 
-MPI_COMM_WORLD = MPI.COMM_WORLD
+MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
 
 class ReshaperTests(unittest.TestCase):
@@ -97,8 +97,7 @@ class ReshaperTests(unittest.TestCase):
             spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
                              prefix=prefix, suffix=suffix, metadata=metadata,
                              meta1d=meta1d, timeseries=tseries)
-            rshpr = create_reshaper(spec, serial=serial,
-                                    verbosity=verbosity,
+            rshpr = create_reshaper(spec, serial=serial, verbosity=verbosity,
                                     wmode=wmode, once=once)
             rshpr.convert()
             if print_diags:
