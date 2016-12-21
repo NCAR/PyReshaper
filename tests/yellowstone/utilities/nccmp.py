@@ -80,8 +80,8 @@ if __name__ == '__main__':
     for dim in dims12:
         dim1 = nc1.dimensions[dim]
         dim2 = nc2.dimensions[dim]
-        if dim1.size != dim2.size or dim1.isunlimited() != dim2.isunlimited():
-            dvaldiffs[dim] = ((dim1.size, dim1.isunlimited()), (dim2.size, dim2.isunlimited()))
+        if len(dim1) != len(dim2) or dim1.isunlimited() != dim2.isunlimited():
+            dvaldiffs[dim] = ((len(dim1), dim1.isunlimited()), (len(dim2), dim2.isunlimited()))
     if len(dvaldiffs) > 0:
         dimdiffs['values'] = dvaldiffs
     
