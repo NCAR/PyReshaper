@@ -18,6 +18,23 @@ _PARSER_ = optparse.OptionParser(usage=_USAGE_, description=_DESC_)
 _PARSER_.add_option('--header', action='store_true', default=False,
                     help='Compare only the header information and not the data values')
 
+#===================================================================================================
+# _pprint_dict
+#===================================================================================================
+def _pprint_dict(d, indent=0):
+    retstr = ''
+    indstr = '   ' * indent
+    if isinstance(d, dict):
+        retstr += os.linesep
+        for key, value in d.iteritems():
+            retstr += '{0}{1}: {2}'.format(indstr, key, _pprint_dict(value, indent=indent+1)) + os.linesep
+    elif isinstance(d, (list, tuple)):
+        retstr += ', '.join(d) + os.linesep
+    else:
+        retstr += str(d) + os.linesep
+    return retstr
+
+
 #==============================================================================
 # Command-Line Operation
 #==============================================================================
@@ -95,8 +112,11 @@ if __name__ == '__main__':
     vars1m2 = vars1 - vars2
     vars2m1 = vars2 - vars1
     if len(vars1m2) > 0:
-        dimdiffs['names1'] = sorted(vars1m2)
+        vardiffs['names1'] = sorted(vars1m2)
     if len(vars2m1) > 0:
-        dimdiffs['names2'] = sorted(vars2m1)
+        vardiffs['names2'] = sorted(vars2m1)
 
-    print diffs
+    if len(vardiffs) > 0:
+        diffs['variables'] = vardiffs
+    
+    print _pprint_dict(diffs)
