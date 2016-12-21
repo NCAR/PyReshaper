@@ -15,7 +15,7 @@ _DESC_ = """Compare two NetCDF files by comparing the header information and the
 binary values of each field in the files.
 """
 _PARSER_ = optparse.OptionParser(usage=_USAGE_, description=_DESC_)
-_PARSER_.add_option('-h', '--header', action='store_true', default=False,
+_PARSER_.add_option('--header', action='store_true', default=False,
                     help='Compare only the header information and not the data values')
 
 #==============================================================================
