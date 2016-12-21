@@ -297,6 +297,11 @@ The arguments to the ``s2smake`` utility are as follows.
 -  ``--metadata VNAME`` (``-m VNAME``):  Indicate that the variable ``VNAME`` should
    be treated as metadata, and written to all output files.  There may be more than
    one ``--metadata`` (or ``-m``) options given, each one being added to a list.
+
+-  ``--meta1d`` (``-1``):  This flag forces all 1D time-variant variables to be treated
+   as metadata.  These variables need not be added explicitly to the list of metadata
+   variables (i.e., with the ``--metadata`` or ``-m`` argument).  These variables will
+   be added to the list when the PyReshaper runs.
    
 -  ``--specfile SPECFILE`` (``-o SPECFILE``):  The name of the *specfile* to write,
    containing the specification of the PyReshaper job.  The default *specfile* name
@@ -318,6 +323,18 @@ The arguments to the ``s2smake`` utility are as follows.
    
    The default output filename suffix is ``'.nc'``.
 
+-  ``--time_series VNAME``:  Indicate that only the named ``VNAME`` variables should
+   be treated as time-series variables and extracted into their own time-series files.
+   This option works like the ``--metadata`` option, in that multiple occurrences of
+   this option can be used to extract out only the time-series variables given.  If
+   any variable names are given to both the ``--metadata`` and ``--time_series`` 
+   options, then the variable will be treated as metadata.  If the ``--time_series``
+   option is *not* used, then all time-dependent variables that are not specified to
+   be metadata (i.e., with the ``--metadata`` option) will be treated as time-series
+   variables and given their own output file.  **NOTE: If you use this option, data
+   can be left untransformed from time-slice to time-series output!  DO NOT DELETE
+   YOUR OLD TIME-SLICE FILES!**
+    
 Each input file should be listed in sequence, space separated, on the command line to
 the utility, nominally after all other options have been specified.
 
@@ -450,6 +467,17 @@ can include the full, absolute path information for the output
    time-invariant (time-independent) variables will be treat as metadata
    automatically.
 
+-  ``assume_1d_time_variant_metadata``: If set to ``True``, this indicates
+   that all 1D time-variant variables (i.e., variables that *only* depend
+   upon ``time``) should be added to the list of ``time_variant_metadata``
+   when the Reshaper runs.  The default for this option is ``False``.
+
+-  ``time_series``: If set to a list of string variable names, only these
+   variable names will be transformed into time-series format.  This is
+   equivalent to the ``--time_series`` option to the ``s2smake`` utility.
+   **NOTE: Setting this attribute can leave data untransformed from time-slice
+   to time-series format!  DO NOT DELETE YOUR OLD TIME-SLICE FILES!**
+   
 -  ``backend``: This specifies which I/O backend to use for reading
    and writing NetCDF files.  The default backend is ``'netCDF4'``, but
    the user can alternatively specify ``'Nio'`` to use PyNIO.

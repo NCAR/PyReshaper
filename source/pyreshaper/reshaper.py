@@ -10,6 +10,7 @@ See the LICENSE.rst file for details
 """
 
 # Built-in imports
+from sys import platform
 from os import linesep, remove, rename
 from os.path import exists, isfile
 
@@ -23,6 +24,22 @@ from asaptools.vprinter import VPrinter
 # PyReshaper imports
 from specification import Specifier
 import iobackend
+
+# For memory diagnostics
+from resource import getrusage, RUSAGE_SELF
+
+
+#===================================================================================================
+# _memory_usage_resource_
+#===================================================================================================
+def _get_memory_usage_MB_():
+    """
+    Return the maximum memory use of this Python process in MB
+    """
+    to_MB = 1024.
+    if platform == 'darwin':
+        to_MB *= to_MB
+    return getrusage(RUSAGE_SELF).ru_maxrss / to_MB
 
 
 #==============================================================================
@@ -208,11 +225,11 @@ class Reshaper(object):
         # Dictionary storing read/write data amounts
         self.assumed_block_size = float(4 * 1024 * 1024)
         self._byte_counts = {}
-
+        
         self._timer.start('Initializing Simple Communicator')
         if simplecomm is None:
             simplecomm = create_comm(serial=serial)
-            
+
         # Reference to the simple communicator
         self._simplecomm = simplecomm
         self._timer.stop('Initializing Simple Communicator')
@@ -242,13 +259,23 @@ class Reshaper(object):
         else:
             self._backend = iobackend.get_backend()
             self._vprint(('  I/O Backend {0} not available.  Using {1} '
-                          'instead').format(specifier.io_backend, self._backend))
+                          'instead').format(specifier.io_backend, self._backend),
+                         verbosity=1)
 
         # Store the input file names
         self._input_filenames = specifier.input_file_list
 
+        # Store the time-series variable names
+        self._time_series_names = specifier.time_series
+        if self._time_series_names is not None:
+            vnames = ', '.join(self._time_series_names)
+            self._vprint('WARNING: Extracting only variables: {0}'.format(vnames), verbosity=-1)
+
         # Store the list of metadata names
         self._metadata_names = specifier.time_variant_metadata
+
+        # Store whether to treat 1D time-variant variables as metadata
+        self._1d_metadata = specifier.assume_1d_time_variant_metadata
 
         # Store the output file prefix and suffix
         self._output_prefix = specifier.output_file_prefix
@@ -278,6 +305,7 @@ class Reshaper(object):
 
         We check the file contents here.
         """
+        # Set the I/O backend according to what is specified
         iobackend.set_backend(self._backend)
 
         # Initialize the list of variable names for each category
@@ -303,18 +331,20 @@ class Reshaper(object):
         # Get the time values
         time_values = [ifile.variables[self._unlimited_dim][:]]
 
-        # Get the list of variable names and missing variables
-        var_names = set(ifile.variables.keys())
-        missing_vars = set()
-
         # Categorize each variable (only looking at first file)
         for var_name, var in ifile.variables.iteritems():
             if self._unlimited_dim not in var.dimensions:
                 self._time_invariant_metadata.append(var_name)
-            elif var_name in self._metadata_names:
+            elif (var_name in self._metadata_names or
+                  (self._1d_metadata and len(var.dimensions) == 1)):
                 self._time_variant_metadata.append(var_name)
-            else:
+            elif (self._time_series_names is None or
+                  var_name in self._time_series_names):
                 all_tsvars[var_name] = var.datatype.itemsize * var.size
+
+        # Get the list of variable names and missing variables
+        var_names = set(all_tsvars.keys() + self._time_invariant_metadata + self._time_variant_metadata)
+        missing_vars = set()
 
         # Close the first file
         ifile.close()
@@ -364,10 +394,9 @@ class Reshaper(object):
 
         # Make sure that the list of variables in each file is the same
         if len(missing_vars) != 0:
-            warning = ("WARNING: The first input file has variables that are "
-                       "not in all input files:{0}{1}").format(linesep, '   ')
-            for var in missing_vars:
-                warning += ' {0}'.format(var)
+            warning = ("WARNING: The first input file has variables "
+                       "that are not in all input files:{0}   "
+                       "{1}").format(linesep, ', '.join(sorted(missing_vars)))
             self._vprint(warning, header=True, verbosity=0)
 
         if self._simplecomm.is_manager():
@@ -441,17 +470,18 @@ class Reshaper(object):
                           if isfile(f)]
 
         # Set the starting step index for each variable
-        self._time_series_step_index = \
-            dict([(variable, 0) for variable in self._time_series_variables])
+        self._time_series_step_index = dict([(variable, 0) for variable in
+                                             self._time_series_variables])
 
         # If overwrite is enabled, delete all existing files first
         if self._write_mode == 'o':
             if self._simplecomm.is_manager() and len(self._existing) > 0:
-                self._vprint('WARNING: Deleting existing output files for '
-                             'time-series variables: {0}'.format(self._existing),
+                self._vprint('WARNING: Deleting existing output files for time-series '
+                             ']variables: {0}'.format(', '.join(self._existing)),
                              verbosity=0)
             for variable in self._existing:
                 remove(self._time_series_filenames[variable])
+            self._existing = []
 
         # Or, if skip existing is set, remove the existing time-series
         # variables from the list of time-series variables to convert
@@ -507,8 +537,7 @@ class Reshaper(object):
                     raise RuntimeError(err_msg)
 
                 # Get the starting step index to start writing from
-                self._time_series_step_index[variable] = \
-                    tsfile.dimensions[self._unlimited_dim]
+                self._time_series_step_index[variable] = tsfile.dimensions[self._unlimited_dim]
 
                 # Close the time-series file
                 tsfile.close()
@@ -623,7 +652,7 @@ class Reshaper(object):
                 remove(temp_filename)
             if self._write_mode == 'a' and out_name in self._existing:
                 rename(out_filename, temp_filename)
-                out_file = iobackend.NCFile(temp_filename, 'a', 
+                out_file = iobackend.NCFile(temp_filename, 'a',
                                             self._netcdf_format,
                                             self._netcdf_compression)
                 appending = True
@@ -813,6 +842,8 @@ class Reshaper(object):
         # Get all totals and maxima
         my_times = self._timer.get_all_times()
         max_times = self._simplecomm.allreduce(my_times, op='max')
+        my_memory = {'Maximum Memory Use': _get_memory_usage_MB_()}
+        max_memory = self._simplecomm.allreduce(my_memory, op='max')
         my_bytes = self._byte_counts
         total_bytes = self._simplecomm.allreduce(my_bytes, op='sum')
 
@@ -833,3 +864,9 @@ class Reshaper(object):
         byte_count_str = _pprint_dictionary('BYTE COUNTS (MB)', total_bytes)
         if self._simplecomm.is_manager():
             self._vprint(byte_count_str, verbosity=-1)
+        
+        # Print maximum memory use in MB
+        memory_str = _pprint_dictionary('MEMORY USAGE (MB)', max_memory)
+        if self._simplecomm.is_manager():
+            self._vprint(memory_str, verbosity=-1)
+

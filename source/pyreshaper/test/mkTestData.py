@@ -108,6 +108,9 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
         return assertions
     ncout = Nio.open_file(outfile, 'r')
 
+    if 'meta1d' in kwds and kwds['meta1d'] is True:
+        metadata.append('time')
+
     series_step = 0
     for infile in infiles:
         _assert('{0!r} exists'.format(infile), os.path.exists(infile))
