@@ -19,7 +19,7 @@ import mkTestData
 
 s2srun = imp.load_source('s2srun', '../../../scripts/s2srun')
 
-MPI_COMM_WORLD = MPI.COMM_WORLD
+MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
 
 class s2srunTest(unittest.TestCase):
