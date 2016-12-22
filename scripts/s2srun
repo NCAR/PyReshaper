@@ -13,6 +13,7 @@ See the LICENSE.rst file for details
 # Builtin Modules
 import optparse
 import glob
+import sys
 import cPickle as pickle
 
 # Package Modules
@@ -32,6 +33,13 @@ def cli(argv=None):
                       action='store_true', dest='once',
                       help=('Whether to write a "once" file with all '
                             'metadata. [Default: False]'))
+    parser.add_option('-c', '--chunk', default=None, action='append',
+                      help=('Chunk size for a named dimension.  This should '
+                            'be given as a comma-separated pair (e.g., NAME,SIZE) '
+                            'indicating the name of the dimension to chunk over '
+                            'and the chunk size.  Multiple chunk options can be '
+                            'given on the command line, each one enabling chunking '
+                            'over a new dimension.  [Default: None]'))
     parser.add_option('-l', '--limit', default=0, type='int',
                       help=('The limit on the number of time-series files per '
                             'processor to write.  Useful when debugging.  A '
@@ -59,6 +67,10 @@ def cli(argv=None):
         raise ValueError('Must supply a specfile as input')
     else:
         specfile = args[0]
+    
+    if opts.chunk is not None:
+        chunks = dict((c.split(',')[0],int(c.split(',')[1])) for c in opts.chunk)
+        opts.chunk = chunks
     
     return opts, specfile
 
