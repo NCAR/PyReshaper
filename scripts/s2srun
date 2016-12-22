@@ -13,7 +13,6 @@ See the LICENSE.rst file for details
 # Builtin Modules
 import optparse
 import glob
-import sys
 import cPickle as pickle
 
 # Package Modules
@@ -33,7 +32,7 @@ def cli(argv=None):
                       action='store_true', dest='once',
                       help=('Whether to write a "once" file with all '
                             'metadata. [Default: False]'))
-    parser.add_option('-c', '--chunk', default=None, action='append',
+    parser.add_option('-c', '--chunk', default=None, action='append', dest='chunks',
                       help=('Chunk size for a named dimension.  This should '
                             'be given as a comma-separated pair (e.g., NAME,SIZE) '
                             'indicating the name of the dimension to chunk over '
@@ -68,9 +67,9 @@ def cli(argv=None):
     else:
         specfile = args[0]
     
-    if opts.chunk is not None:
-        chunks = dict((c.split(',')[0],int(c.split(',')[1])) for c in opts.chunk)
-        opts.chunk = chunks
+    if opts.chunks is not None:
+        chunks = dict((c.split(',')[0],int(c.split(',')[1])) for c in opts.chunks)
+        opts.chunks = chunks
     
     return opts, specfile
 
@@ -97,7 +96,7 @@ def main(argv=None):
                                       once=opts.once)
 
     # Run the conversion (slice-to-series) process
-    reshpr.convert(output_limit=opts.limit)
+    reshpr.convert(output_limit=opts.limit, chunks=opts.chunks)
 
     # Print timing diagnostics
     reshpr.print_diagnostics()
