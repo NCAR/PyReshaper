@@ -545,14 +545,13 @@ class TimeDB(object):
         abs_path = os.path.abspath(name)
 
         # Try opening and reading the testinfo file
-        self._timings = {}
         try:
             dbfile = open(abs_path, 'r')
             self._timings = dict(json.load(dbfile))
             dbfile.close()
         except:
-            err_msg = 'Problem reading and parsing timings file: {0!s}'.format(abs_path)
-            raise ValueError(err_msg)
+            print 'Timings file does not exist.  Creating a new timings database.'
+            self._timings = {}
 
     def getdb(self):
         """
