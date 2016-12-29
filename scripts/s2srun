@@ -68,8 +68,7 @@ def cli(argv=None):
         specfile = args[0]
     
     if opts.chunks is not None:
-        chunks = dict((c.split(',')[0],int(c.split(',')[1])) for c in opts.chunks)
-        opts.chunks = chunks
+        opts.chunks = dict((c.split(',')[0],int(c.split(',')[1])) for c in opts.chunks)
     
     return opts, specfile
 
