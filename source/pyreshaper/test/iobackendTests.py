@@ -5,15 +5,25 @@ Copyright 2016, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
+from __future__ import print_function, absolute_import
+
 import unittest
 import numpy as np
-import numpy.testing as npt
-import netCDF4
-import Nio
+from numpy import testing as npt
 
 from pyreshaper import iobackend
 from os import linesep, remove
 from os.path import exists
+
+try:
+    import netCDF4
+except ImportError:
+    netCDF4 = None
+
+try:
+    import Nio
+except ImportError:
+    Nio = None
 
 
 #===============================================================================
@@ -27,16 +37,248 @@ def print_test_msg(testname, indata=None, actual=None, expected=None):
         msg += '   - actual:   {0!r}{1}'.format(actual, linesep)
     if expected is not None:
         msg += '   - expected: {0!r}{1}'.format(expected, linesep)
-    print msg
+    print(msg)
     
 
 #===============================================================================
-# IOBackendReadTests
+# NioBackendReadTests
 #===============================================================================
-class IOBackendReadTests(unittest.TestCase):
+class NioBackendReadTests(unittest.TestCase):
 
     """
-    IOBackendReadTests Class
+    NetCDF4BackendReadTests Class
+
+    This class defines all of the unit tests for the iobackend module.
+    """
+    
+    def setUp(self):
+        self.ncfrname = 'nioreadtest.nc'
+        self.ncattrs = {'a1': 'attribute 1',
+                        'a2': 'attribute 2'}
+        self.ncdims = {'t': 10, 'x': 5, 'c': 14}
+        self.t = np.arange(0, self.ncdims['t'], dtype='d')
+        self.x = np.random.ranf(self.ncdims['x']).astype('d')
+        self.v = np.random.ranf(self.ncdims['t']*self.ncdims['x']).reshape(10,5).astype('f')
+        self.s = np.array([c for c in 'this is a stri'])
+        self.vattrs = {'long_name': 'variable',
+                       'units': 'meters'}
+
+        ncfile = Nio.open_file(self.ncfrname, 'w')
+        for a,v in self.ncattrs.iteritems():
+            setattr(ncfile, a, v)
+        ncfile.create_dimension('t')
+        ncfile.create_dimension('x', self.ncdims['x'])
+        ncfile.create_dimension('c', self.ncdims['c'])
+        t = ncfile.create_variable('t', 'd', ('t',))
+        t[:] = self.t
+        x = ncfile.create_variable('x', 'd', ('x',))
+        x[:] = self.x
+        v = ncfile.create_variable('v', 'f', ('t', 'x'))
+        for a,val in self.vattrs.iteritems():
+            setattr(v, a, val)
+        v[:,:] = self.v
+        s = ncfile.create_variable('s', 'S1', ('c',))
+        s[:] = self.s
+        
+        ncfile.close()
+    
+    def tearDown(self):
+        if exists(self.ncfrname):
+            remove(self.ncfrname)
+
+    def test_avail(self):
+        actual = iobackend._AVAILABLE_
+        print_test_msg('_AVAIL_', actual=actual)
+        self.assertTrue('Nio' in iobackend._AVAILABLE_,
+                        'Nio importable but not available')
+
+    def test_set_backend(self):
+        indata = 'Nio'
+        iobackend.set_backend(indata)
+        actual = iobackend._BACKEND_
+        expected = indata
+        print_test_msg('set_backend()', indata, actual, expected)
+        self.assertEqual(iobackend._BACKEND_, indata,
+                        'PyNIO backend name not set')
+
+    def test_set_backend_x(self):
+        indata = 'x'
+        actual = iobackend._BACKEND_
+        print_test_msg('set_backend()', indata, actual)
+        self.assertRaises(KeyError, iobackend.set_backend, indata)
+
+    def test_NCFile_init_mode_x(self):
+        expected = ValueError
+        print_test_msg('NCFile.__init__(mode=x)', expected=expected)
+        self.assertRaises(expected, iobackend.NCFile, self.ncfrname, mode='x')
+
+    def test_NCFile_init_read(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = type(ncf)
+        expected = iobackend.NCFile
+        ncf.close()
+        print_test_msg('Nio: NCFile.__init__()', actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCFile not created with correct type')
+        
+    def test_NCFile_dimensions(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.dimensions
+        expected = self.ncdims
+        ncf.close()
+        print_test_msg('Nio: NCFile.dimensions', actual=actual, expected=expected)
+        self.assertEqual(len(actual), len(expected),
+                         'NCFile dimensions not correct length')
+        for dn, dv in expected.iteritems():
+            self.assertTrue(dn in actual,
+                            'NCFile dimension {0!r} not present'.format(dn))
+            self.assertEqual(actual[dn], dv,
+                            'NCFile dimension {0!r} not correct'.format(dn))
+            
+    def test_NCFile_unlimited(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.unlimited('t')
+        expected = True
+        print_test_msg('Nio: NCFile.unlimited(t)', actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCFile dimension t not unlimited')
+        actual = ncf.unlimited('x')
+        expected = False
+        print_test_msg('Nio: NCFile.unlimited(x)', actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCFile dimension x not limited')
+        ncf.close()
+
+    def test_NCFile_ncattrs(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.ncattrs
+        expected = self.ncattrs.keys()
+        ncf.close()
+        print_test_msg('Nio: NCFile.ncattrs', actual=actual, expected=expected)
+        self.assertEqual(len(actual), len(expected),
+                         'NCFile ncattrs not correct length')
+        for dn in expected:
+            self.assertTrue(dn in actual,
+                            'NCFile ncattrs {0!r} not present'.format(dn))
+            self.assertEqual(ncf.getncattr(dn), self.ncattrs[dn],
+                            'NCFile ncattrs {0!r} not correct'.format(dn))
+
+    def test_NCFile_variables(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables
+        ncf.close()
+        print_test_msg('Nio: NCFile.variables', actual=actual)
+        self.assertEqual(len(actual), 4,
+                         'NCFile variables not correct length')
+        self.assertTrue('t' in actual,
+                        't variable not in NCFile')
+        self.assertTrue('x' in actual,
+                        'x variable not in NCFile')
+        self.assertTrue('v' in actual,
+                        'v variable not in NCFile')
+        for vn, vo in actual.iteritems():
+            self.assertTrue(isinstance(vo, iobackend.NCVariable),
+                            'Variable {0!r} has wrong type'.format(vn))
+            
+    def test_NCFile_close(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.close()
+        print_test_msg('Nio: NCFile.close', actual=actual)
+
+    def test_NCVariable_ncattrs(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].ncattrs
+        expected = self.vattrs.keys()
+        print_test_msg('Nio: NCVariable.ncattrs',
+                       actual=actual, expected=expected)
+        self.assertEqual(len(actual), len(expected),
+                         'NCVariable ncattrs not correct length')
+        for a in expected:
+            self.assertTrue(a in actual,
+                            'Attribute {0!r} not found in variable'.format(a))
+            self.assertEqual(ncf.variables['v'].getncattr(a), self.vattrs[a],
+                            'Attribute {0!r} not correct'.format(a))
+        ncf.close()
+
+    def test_NCVariable_dimensions(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].dimensions
+        expected = ('t', 'x')
+        ncf.close()
+        print_test_msg('Nio: NCVariable.dimensions',
+                       actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCVariable dimensions not correct')
+
+    def test_NCVariable_datatype(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].datatype
+        expected = 'f'
+        ncf.close()
+        print_test_msg('Nio: NCVariable.datatype',
+                       actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCVariable datatype not correct')
+        
+    def test_NCVariable_shape(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].shape
+        expected = (self.ncdims['t'], self.ncdims['x'])
+        ncf.close()
+        print_test_msg('Nio: NCVariable.shape',
+                       actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCVariable shape not correct')
+        
+    def test_NCVariable_size(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'].size
+        expected = self.ncdims['t'] * self.ncdims['x']
+        ncf.close()
+        print_test_msg('Nio: NCVariable.size',
+                       actual=actual, expected=expected)
+        self.assertEqual(actual, expected,
+                         'NCVariable size not correct')
+
+    def test_NCVariable_getitem(self):
+        iobackend.set_backend('Nio')
+        ncf = iobackend.NCFile(self.ncfrname)
+        actual = ncf.variables['v'][:]
+        expected = self.v[:]
+        print_test_msg('NCVariable[v].__getitem__',
+                       actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected)
+        actual = ncf.variables['t'][:]
+        expected = self.t[:]
+        print_test_msg('NCVariable[t].__getitem__',
+                       actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected)
+        actual = ncf.variables['x'][:]
+        expected = self.x[:]
+        print_test_msg('NCVariable[x].__getitem__',
+                       actual=actual, expected=expected)
+        npt.assert_array_equal(actual, expected)
+        ncf.close()
+
+
+#===============================================================================
+# NC4BackendReadTests
+#===============================================================================
+class NC4BackendReadTests(unittest.TestCase):
+
+    """
+    NC4BackendReadTests Class
 
     This class defines all of the unit tests for the iobackend module.
     """
