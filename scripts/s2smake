@@ -13,7 +13,10 @@ See the LICENSE.rst file for details
 # Builtin Modules
 import optparse
 import glob
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 # Package Modules
 from pyreshaper import specification

@@ -6,7 +6,10 @@ See LICENSE.txt for details
 import os
 import imp
 import unittest
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 from pyreshaper.specification import Specifier
 
@@ -140,7 +143,8 @@ class s2smakeTest(unittest.TestCase):
             os.remove(specfile)
         s2smake.main(argv)
         self.assertTrue(os.path.exists(specfile), 'Specfile not found')
-        spec = pickle.load(open(specfile, 'rb'))
+        with open(specfile, 'rb') as sf:
+            spec = pickle.load(sf)
         os.remove(specfile)
         self.assertTrue(isinstance(spec, Specifier),
                         'Specfile does not contain a Specifier')
@@ -184,7 +188,8 @@ class s2smakeTest(unittest.TestCase):
         s2smake.main(argv)
 
         self.assertTrue(os.path.exists(specfile), 'Specfile not found')
-        spec = pickle.load(open(specfile, 'rb'))
+        with open(specfile, 'rb') as sf:
+            spec = pickle.load(sf)
         os.remove(specfile)
 
         self.assertTrue(isinstance(spec, Specifier),
@@ -236,7 +241,8 @@ class s2smakeTest(unittest.TestCase):
         s2smake.main(argv)
 
         self.assertTrue(os.path.exists(specfile), 'Specfile not found')
-        spec = pickle.load(open(specfile, 'rb'))
+        with open(specfile, 'rb') as sf:
+            spec = pickle.load(sf)
         os.remove(specfile)
 
         self.assertTrue(isinstance(spec, Specifier),
