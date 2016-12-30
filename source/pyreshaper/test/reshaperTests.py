@@ -85,7 +85,7 @@ class ReshaperTests(unittest.TestCase):
 
     def _check_outfile(self, tsvar, **args):
         assertions_dict = mkTestData.check_outfile(tsvar=tsvar, **args)
-        failed_assertions = [key for key, value in assertions_dict.iteritems() if value is False]
+        failed_assertions = [key for key in assertions_dict if assertions_dict[key] is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
         assert_msgs.extend(['   {0}'.format(assrt) for assrt in failed_assertions])
         self.assertEqual(len(failed_assertions), 0, eol.join(assert_msgs))

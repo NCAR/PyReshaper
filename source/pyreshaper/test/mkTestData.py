@@ -33,8 +33,8 @@ def generate_data():
         fobj = Nio.open_file(fname, 'w')
 
         # Write attributes to file
-        for name, value in fattrs.iteritems():
-            setattr(fobj, name, value)
+        for name in fattrs:
+            setattr(fobj, name, fattrs[name])
 
         # Create the dimensions in the file
         fobj.create_dimension('lat', nlat)
@@ -138,11 +138,11 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                     tsvar in tsvars)
             _assert('{0}: attributes equal'.format(outfile),
                     ncout.attributes == ncinp.attributes)
-            for d, v in outdims.iteritems():
+            for d in outdims:
                 _assert("{0}: {1!r} in dimensions".format(outfile, d),
                         d in ncout.dimensions)
                 _assert("{0}: dimensions[{1!r}]".format(outfile, d),
-                        ncout.dimensions[d] == v)
+                        ncout.dimensions[d] == outdims[d])
             _assert("{0}: 'time' in dimensions".format(outfile),
                     'time' in ncout.dimensions)
             _assert("{0}: 'time' unlimited".format(outfile),

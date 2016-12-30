@@ -11,7 +11,10 @@ See the LICENSE.rst file for details
 """
 
 # Built-in imports
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 from os import path as ospath
 
 

@@ -13,6 +13,11 @@ See the LICENSE.rst file for details
 import numpy
 
 try:
+    from past.builtins import basestring
+except ImportError:
+    pass
+
+try:
     _dict_ = __import__('collections', fromlist=['OrderedDict']).OrderedDict
 except:
     try:
@@ -110,13 +115,13 @@ class NCFile(object):
             compression (int): Level of compression to use when writing to this
                 netcdf file
         """
-        if not isinstance(filename, (str, unicode)):
+        if not isinstance(filename, basestring):
             err_msg = "Netcdf filename must be a string"
             raise TypeError(err_msg)
-        if not isinstance(mode, (str, unicode)):
+        if not isinstance(mode, basestring):
             err_msg = "Netcdf write mode must be a string"
             raise TypeError(err_msg)
-        if not isinstance(ncfmt, (str, unicode)):
+        if not isinstance(ncfmt, basestring):
             err_msg = "Netcdf file format must be a string"
             raise TypeError(err_msg)
         if not isinstance(compression, int):
@@ -189,8 +194,7 @@ class NCFile(object):
         if self._backend == 'Nio':
             return self._obj.dimensions
         elif self._backend == 'netCDF4':
-            return _dict_((n, len(d)) for n, d
-                          in self._obj.dimensions.iteritems())
+            return _dict_((d, len(self._obj.dimensions[d])) for d in self._obj.dimensions)
         else:
             return _dict_()
 
@@ -229,8 +233,8 @@ class NCFile(object):
 
     @property
     def variables(self):
-        return _dict_((n, NCVariable(v, self._mode)) for n, v
-                      in self._obj.variables.iteritems())
+        return _dict_((n, NCVariable(self._obj.variables[n], self._mode))
+                      for n in self._obj.variables)
 
     def create_dimension(self, name, value=None):
         if self._mode == 'r':
