@@ -9,8 +9,6 @@ Copyright 2016, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
-from __future__ import absolute_import
-
 # Built-in imports
 from sys import platform
 from os import linesep, remove, rename
@@ -24,8 +22,8 @@ from asaptools.partition import WeightBalanced
 from asaptools.vprinter import VPrinter
 
 # PyReshaper imports
-from pyreshaper.specification import Specifier
-from pyreshaper import iobackend
+from specification import Specifier
+import iobackend
 
 # For memory diagnostics
 from resource import getrusage, RUSAGE_SELF
@@ -334,8 +332,7 @@ class Reshaper(object):
         time_values = [ifile.variables[self._unlimited_dim][:]]
 
         # Categorize each variable (only looking at first file)
-        for var_name in ifile.variables:
-            var = ifile.variables[var_name]
+        for var_name, var in ifile.variables.iteritems():
             if self._unlimited_dim not in var.dimensions:
                 self._time_invariant_metadata.append(var_name)
             elif (var_name in self._metadata_names or
@@ -469,8 +466,8 @@ class Reshaper(object):
                   for variable in self._time_series_variables])
 
         # Find which files already exist
-        self._existing = [v for v in self._time_series_filenames
-                          if isfile(self._time_series_filenames[v])]
+        self._existing = [v for (v, f) in self._time_series_filenames.iteritems()
+                          if isfile(f)]
 
         # Set the starting step index for each variable
         self._time_series_step_index = dict([(variable, 0) for variable in
@@ -699,8 +696,7 @@ class Reshaper(object):
         if not isinstance(chunks, dict):
             err_msg = 'Chunks must be specified with a dictionary'
             raise TypeError(err_msg)
-        for key in chunks:
-            value = chunks[key]
+        for key, value in chunks.iteritems():
             if not isinstance(key, basestring):
                 err_msg = 'Chunks dictionary must have string-type keys'
                 raise TypeError(err_msg)
@@ -789,8 +785,7 @@ class Reshaper(object):
                     # Copy file attributes and dimensions to output file
                     for name in in_file.ncattrs:
                         out_file.setncattr(name, in_file.getncattr(name))
-                    for name in in_file.dimensions:
-                        val = in_file.dimensions[name]
+                    for name, val in in_file.dimensions.iteritems():
                         if name == self._unlimited_dim:
                             out_file.create_dimension(name)
                         else:
