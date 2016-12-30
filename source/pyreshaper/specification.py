@@ -12,6 +12,10 @@ See the LICENSE.rst file for details
 
 # Built-in imports
 try:
+    from past.builtins import basestring
+except ImportError:
+    pass
+try:
     import cPickle as pickle
 except ImportError:
     import pickle
@@ -277,7 +281,7 @@ class Specifier(object):
             fname (str): Name of file to write
         """
         try:
-            fobj = open(fname, 'w')
+            fobj = open(fname, 'wb')
             pickle.dump(self, fobj)
             fobj.close()
         except:

@@ -7,7 +7,10 @@ See the LICENSE.rst file for details
 
 import os
 import unittest
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 from pyreshaper import specification
 
@@ -300,7 +303,8 @@ class SpecifierTests(unittest.TestCase):
         fname = 'test_write.s2s'
         spec.write(fname)
         self.assertTrue(os.path.exists(fname), 'Specfile failed to write')
-        spec2 = pickle.load(open(fname, 'r'))
+        with open(fname, 'rb') as specfile:
+            spec2 = pickle.load(specfile)
         for i1, i2 in zip(spec2.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
