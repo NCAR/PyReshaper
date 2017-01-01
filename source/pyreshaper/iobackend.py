@@ -244,10 +244,11 @@ class NCFile(object):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
         if self._backend == 'Nio':
-            if datatype.char == 'S':
+            dt = numpy.dtype(datatype)
+            if dt.char == 'S':
                 typecode = 'c'
             else:
-                typecode = datatype.char
+                typecode = dt.char
             var = self._obj.create_variable(name, typecode, dimensions)
         elif self._backend == 'netCDF4':
             var = self._obj.createVariable(name, datatype, dimensions,
