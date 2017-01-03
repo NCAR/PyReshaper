@@ -1,0 +1,206 @@
+{
+   "CAMFV-1.0": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/camfv-1.0",
+      "endYear": "1859",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/camfv-1.0",
+      "isize": 28447.744,
+      "n2dVars": 82,
+      "n3dVars": 40,
+      "nVars": 122,
+      "osize": 28525.4,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 1768.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "1850"
+   },
+   "CAMSE-0.25": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/camse-0.25",
+      "endYear": "0010",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/camse-0.25",
+      "isize": 1074790.4,
+      "n2dVars": 101,
+      "n3dVars": 97,
+      "nVars": 198,
+      "osize": 1078586.3,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 17136.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "0001"
+   },
+   "CAMSE-1.0": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/camse-1.0",
+      "endYear": "0010",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/camse-1.0",
+      "isize": 30681.088,
+      "n2dVars": 89,
+      "n3dVars": 43,
+      "nVars": 132,
+      "osize": 30848.5,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 1675.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "0001"
+   },
+   "CICE-0.1": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/cice-0.1",
+      "endYear": "0010",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/cice-0.1",
+      "isize": 444023.808,
+      "n2dVars": 112,
+      "nVars": 112,
+      "osize": 42112.4,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 8909.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "0001"
+   },
+   "CICE-1.0": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/cice-1.0",
+      "endYear": "0010",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/cice-1.0",
+      "isize": 6596.608,
+      "n2dVars": 117,
+      "nVars": 117,
+      "osize": 3923.2,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 1717.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "0001"
+   },
+   "CLM-0.25": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/clmse-0.25",
+      "endYear": "0010",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/clmse-0.25",
+      "isize": 81802.24,
+      "n2dVars": 150,
+      "nVars": 150,
+      "osize": 124702.8,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 4141.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "0001"
+   },
+   "CLM-1.0": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/clmse-1.0",
+      "endYear": "0010",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/clmse-1.0",
+      "isize": 8694.784,
+      "n2dVars": 297,
+      "n3dVars": 0,
+      "nVars": 297,
+      "osize": 14051.0,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 4321.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "0001"
+   },
+   "POP-0.1": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/pop-0.1",
+      "endYear": "0010",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/pop-0.1",
+      "isize": 3030384.64,
+      "n2dVars": 23,
+      "n3dVars": 11,
+      "nVars": 34,
+      "osize": 3124562.75,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 52558.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "0001"
+   },
+   "POP-1.0": {
+      "baseline": "/glade/p/tdd/asap/bakeoff/tseries/pop-1.0",
+      "endYear": "0010",
+      "input": "/glade/p/tdd/asap/bakeoff/hist/pop-1.0",
+      "isize": 192182.272,
+      "n2dVars": 78,
+      "n3dVars": 36,
+      "nVars": 114,
+      "osize": 194261.85,
+      "results": {
+         "nco": {
+            "??????-??????": {
+               "cores": 1,
+               "correct": "pass",
+               "metadata": true,
+               "nodes": 1,
+               "real": 5679.0,
+               "sys": "geyser"
+            }
+         }
+      },
+      "startYear": "0001"
+   }
+}
