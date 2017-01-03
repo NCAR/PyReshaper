@@ -18,9 +18,101 @@
                "real": 1768.0,
                "sys": "geyser"
             }
+         },
+         "pyreshaper4c-v0": {
+            "151005-141124": {
+               "TSr": 251.438382626,
+               "TSw": 60.7321989536,
+               "actual": 968848.0,
+               "cores": 16,
+               "metaTIr": 0.0118687152863,
+               "metaTIw": 0.33265209198,
+               "metaTVr": 1.06335258484,
+               "metaTVw": 10.987541914,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 31.2857921124,
+               "openo": 0.316594362259,
+               "real": 336.083908081,
+               "request": 28450.9692535,
+               "sys": "yellowstone"
+            }
          }
       },
       "startYear": "1850"
+   },
+   "CAMHF-6HOURLY-1.0": {
+      "results": {
+         "pyreshaper4c-v0": {
+            "151005-153203": {
+               "TSr": 1839.39458537,
+               "TSw": 3156.90317488,
+               "actual": 16880504.0,
+               "cores": 16,
+               "metaTIr": 1.22540211678,
+               "metaTIw": 0.101293802261,
+               "metaTVr": 568.625186205,
+               "metaTVw": 333.683583498,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 350.77940321,
+               "openo": 0.798895120621,
+               "real": 4755.39894795,
+               "request": 412733.208378,
+               "sys": "yellowstone"
+            }
+         }
+      }
+   },
+   "CAMHF-DAILY-1.0": {
+      "results": {
+         "pyreshaper4c-v0": {
+            "151005-142821": {
+               "TSr": 725.420089722,
+               "TSw": 107.214648724,
+               "actual": 11395904.0,
+               "cores": 16,
+               "metaTIr": 3.11352205276,
+               "metaTIw": 0.195004463196,
+               "metaTVr": 163.349392653,
+               "metaTVw": 165.829848766,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 148.906975985,
+               "openo": 1.03988480568,
+               "real": 1210.8861711,
+               "request": 39295.5901566,
+               "sys": "yellowstone"
+            }
+         }
+      }
+   },
+   "CAMHF-MONTHLY-1.0": {
+      "results": {
+         "pyreshaper4c-v0": {
+            "151005-141354": {
+               "TSr": 239.311976194,
+               "TSw": 84.3950455189,
+               "actual": 1023964.0,
+               "cores": 16,
+               "metaTIr": 3.44647073746,
+               "metaTIw": 0.237613201141,
+               "metaTVr": 2.22094035149,
+               "metaTVw": 8.04119968414,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 118.201842785,
+               "openo": 0.282948732376,
+               "real": 418.47419095,
+               "request": 41617.1186371,
+               "sys": "yellowstone"
+            }
+         }
+      }
    },
    "CAMSE-0.25": {
       "baseline": "/glade/p/tdd/asap/bakeoff/tseries/camse-0.25",
@@ -40,6 +132,26 @@
                "nodes": 1,
                "real": 17136.0,
                "sys": "geyser"
+            }
+         },
+         "pyreshaper4c-v0": {
+            "151005-144227": {
+               "TSr": 273.461855412,
+               "TSw": 1828.38464713,
+               "actual": 2561592.0,
+               "cores": 16,
+               "metaTIr": 0.79497218132,
+               "metaTIw": 6.30753397942,
+               "metaTVr": 1.44262719154,
+               "metaTVw": 10.0376775265,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 86.030144453,
+               "openo": 0.728790521622,
+               "real": 2194.46634698,
+               "request": 1078519.71414,
+               "sys": "yellowstone"
             }
          }
       },
@@ -64,6 +176,26 @@
                "real": 1675.0,
                "sys": "geyser"
             }
+         },
+         "pyreshaper4c-v0": {
+            "151005-141258": {
+               "TSr": 302.199320793,
+               "TSw": 65.4644916058,
+               "actual": 1043904.0,
+               "cores": 16,
+               "metaTIr": 0.102242946625,
+               "metaTIw": 0.530309677124,
+               "metaTVr": 2.07044291496,
+               "metaTVw": 16.0213608742,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 63.9010326862,
+               "openo": 0.194200992584,
+               "real": 430.064186811,
+               "request": 30828.9682617,
+               "sys": "yellowstone"
+            }
          }
       },
       "startYear": "0001"
@@ -85,6 +217,26 @@
                "nodes": 1,
                "real": 8909.0,
                "sys": "geyser"
+            }
+         },
+         "pyreshaper4c-v0": {
+            "151005-141659": {
+               "TSr": 153.592193604,
+               "TSw": 377.051423788,
+               "actual": 715008.0,
+               "cores": 16,
+               "metaTIr": 23.6473412514,
+               "metaTIw": 70.3968391418,
+               "metaTVr": 0.163871049881,
+               "metaTVw": 0.453300952911,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 45.6162559986,
+               "openo": 0.26899600029,
+               "real": 666.109079123,
+               "request": 561093.903809,
+               "sys": "yellowstone"
             }
          }
       },
@@ -108,6 +260,26 @@
                "real": 1717.0,
                "sys": "geyser"
             }
+         },
+         "pyreshaper4c-v0": {
+            "151005-141033": {
+               "TSr": 179.972988367,
+               "TSw": 7.15631198883,
+               "actual": 177840.0,
+               "cores": 16,
+               "metaTIr": 1.48803186417,
+               "metaTIw": 1.63100767136,
+               "metaTVr": 0.086678981781,
+               "metaTVw": 0.353240013123,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 19.2583482265,
+               "openo": 0.235752820969,
+               "real": 248.850775957,
+               "request": 8336.41067505,
+               "sys": "yellowstone"
+            }
          }
       },
       "startYear": "0001"
@@ -129,6 +301,26 @@
                "nodes": 1,
                "real": 4141.0,
                "sys": "geyser"
+            }
+         },
+         "pyreshaper4c-v0": {
+            "151005-141143": {
+               "TSr": 124.386564493,
+               "TSw": 65.0036051273,
+               "actual": 798360.0,
+               "cores": 16,
+               "metaTIr": 11.1683745384,
+               "metaTIw": 42.7969913483,
+               "metaTVr": 0.692959308624,
+               "metaTVw": 2.90459418297,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 69.9783821106,
+               "openo": 0.696071147919,
+               "real": 313.190394878,
+               "request": 124675.246468,
+               "sys": "yellowstone"
             }
          }
       },
@@ -153,6 +345,26 @@
                "real": 4321.0,
                "sys": "geyser"
             }
+         },
+         "pyreshaper4c-v0": {
+            "151005-141339": {
+               "TSr": 312.091857433,
+               "TSw": 9.57465410233,
+               "actual": 1443420.0,
+               "cores": 16,
+               "metaTIr": 3.0339858532,
+               "metaTIw": 5.92696642876,
+               "metaTVr": 1.17320466042,
+               "metaTVw": 10.8604056835,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 91.3150508404,
+               "openo": 0.4595246315,
+               "real": 435.240852833,
+               "request": 14019.9852104,
+               "sys": "yellowstone"
+            }
          }
       },
       "startYear": "0001"
@@ -176,6 +388,26 @@
                "real": 52558.0,
                "sys": "geyser"
             }
+         },
+         "pyreshaper4c-v0": {
+            "151005-154933": {
+               "TSr": 1048.0297327,
+               "TSw": 5279.75957608,
+               "actual": 3121360.0,
+               "cores": 16,
+               "metaTIr": 86.8662247658,
+               "metaTIw": 88.4578080177,
+               "metaTVr": 0.743849277496,
+               "metaTVw": 0.992867469788,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 67.3424155712,
+               "openo": 0.199492692947,
+               "real": 6141.01054811,
+               "request": 3073293.60839,
+               "sys": "yellowstone"
+            }
          }
       },
       "startYear": "0001"
@@ -198,6 +430,59 @@
                "nodes": 1,
                "real": 5679.0,
                "sys": "geyser"
+            }
+         },
+         "pyreshaper4c-v0": {
+            "151005-141834": {
+               "TSr": 394.218106985,
+               "TSw": 342.007935047,
+               "actual": 381048.0,
+               "cores": 16,
+               "metaTIr": 7.91029167175,
+               "metaTIw": 4.11476492882,
+               "metaTVr": 0.178674936295,
+               "metaTVw": 1.76582336426,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 59.2391593456,
+               "openo": 0.231271266937,
+               "real": 719.421389103,
+               "request": 194248.586632,
+               "sys": "yellowstone"
+            }
+         }
+      },
+      "startYear": "0001"
+   },
+   "POP-DAILY-1.0": {
+      "baseline": "/glade/u/tdd/asap/bakeoff/tseries/pop-daily-1.0",
+      "endYear": "0010",
+      "input": "/glade/u/tdd/asap/bakeoff/hist/pop-daily-1.0",
+      "isize": 6859.776,
+      "n2dVars": 0,
+      "n3dVars": 4,
+      "nVars": 4,
+      "osize": 6963.2,
+      "results": {
+         "pyreshaper4c-v0": {
+            "151005-141854": {
+               "TSr": 248.436975718,
+               "TSw": 43.21550107,
+               "actual": 158608.0,
+               "cores": 16,
+               "metaTIr": 2.96689176559,
+               "metaTIw": 0.44668006897,
+               "metaTVr": 41.7858102322,
+               "metaTVw": 4.16977286339,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 169.89680624,
+               "openo": 0.873800039291,
+               "real": 467.221978903,
+               "request": 6232.80738831,
+               "sys": "yellowstone"
             }
          }
       },
