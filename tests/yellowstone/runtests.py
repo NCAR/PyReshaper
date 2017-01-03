@@ -80,7 +80,7 @@ _PARSER_.add_option('-w', '--wtime', default=240, type=int,
 # Write an executable Python script to run the Reshaper
 #==============================================================================
 def write_pyscript(testnames, scriptname='runscript.py', verbosity=3,
-                   serial=False, wmode='o'):
+                   serial=False, wmode='o', chunks=None):
     """
     Write an executable Python script to run the PyReshaper with a set of specs
 
@@ -92,6 +92,7 @@ def write_pyscript(testnames, scriptname='runscript.py', verbosity=3,
         wmode (str): The mode to use when writing time-series files ('o'
             to overwrite, 'a' to append to existing files, 'w' to write
             new files, 's' to skip existing files)
+        chunks (dict): The dimensional chunking sizes to Read/Write operations
     """
 
     # Start defining the Python script
@@ -115,11 +116,16 @@ def write_pyscript(testnames, scriptname='runscript.py', verbosity=3,
             pyscript_list.append(
                 'specs["{0!s}"] = pickle.load(open("{0!s}.s2s", "rb"))'.format(testname))
 
+    # Read the chunking information
+    pyscript_list.extend(['',
+                          'chunks = {0!s}'.format(chunks),
+                          ''])
+    
     # Define the rest of the python script
     pyscript_list.extend([
         ('rshpr = reshaper.create_reshaper(specs, serial={0!s}, '
          'verbosity={1!s}, wmode={2!r})').format(serial, verbosity, wmode),
-        'rshpr.convert()',
+        'rshpr.convert(chunks=chunks)',
         'rshpr.print_diagnostics()',
         ''])
 
@@ -135,13 +141,14 @@ def write_pyscript(testnames, scriptname='runscript.py', verbosity=3,
 #==============================================================================
 # Run tests individually
 #==============================================================================
-def runtests(tests, nodes=0, tiling=16, minutes=120, queue='economy',
+def runtests(tests, testdb, nodes=0, tiling=16, minutes=120, queue='economy',
              project='STDD0002', wmode='o', ncformat='netcdf4c'):
     """
     Run a set of tests
 
     Parameters:
         tests (list, tuple): List or tuple of test names to run
+        testdb (TestDB): The testing database
         nodes (int): Number of nodes to run the test(s) with
         tiling (int): Number of processes per node to run the test(s) with
         minutes (int): Number of minutes to run the test(s) for
@@ -191,10 +198,13 @@ def runtests(tests, nodes=0, tiling=16, minutes=120, queue='economy',
         testspecfile = '{0!s}.s2s'.format(test_name)
         pickle.dump(testspec, open(testspecfile, 'wb'))
 
+        # Get chunk sizes
+        chunks = testdb.getDB()[test_name].get('chunks', None)
+        
         # Write the Python executable to be run
         pyscript_name = '{0!s}.py'.format(test_name)
         write_pyscript(testnames=test_name, scriptname=pyscript_name,
-                       serial=(nodes <= 0), wmode=wmode)
+                       serial=(nodes <= 0), wmode=wmode, chunks=chunks)
 
         # Generate the command and arguments
         if nodes > 0:
@@ -237,6 +247,6 @@ if __name__ == '__main__':
     else:
         test_list = [t for t in args if t in testdb.getdb()]
 
-    runtests(test_list, nodes=opts.nodes, tiling=opts.tiling,
+    runtests(test_list, testdb, nodes=opts.nodes, tiling=opts.tiling,
              minutes=opts.wtime, queue=opts.queue, project=opts.code,
              wmode=opts.wmode, ncformat=opts.ncformat)

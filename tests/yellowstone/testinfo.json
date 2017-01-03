@@ -12,7 +12,10 @@
       "metadata":[
          "time",
          "time_bound"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "pop-daily-1deg":{
       "common_name":"POP-DAILY-1.0",
@@ -34,7 +37,10 @@
       "metadata":[
          "time",
          "time_bound"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "pop-0.1deg":{
       "common_name":"POP-0.1",
@@ -48,7 +54,10 @@
       "metadata":[
          "time",
          "time_bound"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "cice-1deg":{
       "common_name":"CICE-1.0",
@@ -63,7 +72,10 @@
       "metadata":[
          "time",
          "time_bounds"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "cice-0.1deg":{
       "common_name":"CICE-0.1",
@@ -78,7 +90,10 @@
       "metadata":[
          "time",
          "time_bounds"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "camse-1deg":{
       "common_name":"CAMSE-1.0",
@@ -106,7 +121,10 @@
          "time",
          "time_bnds",
          "time_written"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "camse-0.25deg":{
       "common_name":"CAMSE-0.25",
@@ -134,7 +152,10 @@
          "time",
          "time_bnds",
          "time_written"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "camfv-1deg":{
       "common_name":"CAMFV-1.0",
@@ -161,7 +182,10 @@
          "time",
          "time_bnds",
          "time_written"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "camhf-monthly-1deg":{
       "common_name":"CAMHF-MONTHLY-1.0",
@@ -211,7 +235,10 @@
          "ntrk",
          "ntrm",
          "ntrn"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "camhf-daily-1deg":{
       "common_name":"CAMHF-DAILY-1.0",
@@ -261,7 +288,10 @@
          "ntrk",
          "ntrm",
          "ntrn"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "camhf-6hourly-1deg":{
       "common_name":"CAMHF-6HOURLY-1.0",
@@ -311,7 +341,10 @@
          "ntrk",
          "ntrm",
          "ntrn"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "clmse-1deg":{
       "common_name":"CLM-1.0",
@@ -333,7 +366,10 @@
          "mdcur",
          "mscur",
          "nstep"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    },
    "clmse-0.25deg":{
       "common_name":"CLM-0.25",
@@ -355,6 +391,9 @@
          "mdcur",
          "mscur",
          "nstep"
-      ]
+      ],
+      "chunks":{
+         "time": 10
+      }
    }
 }
