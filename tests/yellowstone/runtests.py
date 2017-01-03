@@ -199,7 +199,7 @@ def runtests(tests, testdb, nodes=0, tiling=16, minutes=120, queue='economy',
         pickle.dump(testspec, open(testspecfile, 'wb'))
 
         # Get chunk sizes
-        chunks = testdb.getDB()[test_name].get('chunks', None)
+        chunks = testdb.getdb()[test_name].get('chunks', None)
         
         # Write the Python executable to be run
         pyscript_name = '{0!s}.py'.format(test_name)
