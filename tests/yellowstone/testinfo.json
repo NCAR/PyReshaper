@@ -55,8 +55,8 @@
          "time_bound"
       ],
       "chunks":{
-         "z_t": 1,
-         "z_w_top": 1
+         "z_t": 10,
+         "z_w_top": 10
       }
    },
    "cice-1deg":{
