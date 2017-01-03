@@ -706,6 +706,7 @@ class Reshaper(object):
             
         # Debugging output
         if self._simplecomm.is_manager():
+            self._vprint('Read/write chunk sizes: {0!s}'.format(chunks), verbosity=1)
             self._vprint('Converting time-slices to time-series...', verbosity=0)
 
         # Partition the time-series variables across all processors
