@@ -668,7 +668,6 @@ class Reshaper(object):
             raise TypeError(err_msg)
 
         # Start the total convert process timer
-        self._simplecomm.sync()
         self._timer.start('Complete Conversion Process')
 
         # Validate the input files themselves
@@ -708,6 +707,7 @@ class Reshaper(object):
         if self._simplecomm.is_manager():
             self._vprint('Read/write chunk sizes: {0!s}'.format(chunks), verbosity=1)
             self._vprint('Converting time-slices to time-series...', verbosity=0)
+        self._simplecomm.sync()
 
         # Partition the time-series variables across all processors
         tsv_names_loc = self._time_series_variables
