@@ -477,7 +477,7 @@ class Reshaper(object):
         if self._write_mode == 'o':
             if self._simplecomm.is_manager() and len(self._existing) > 0:
                 self._vprint('WARNING: Deleting existing output files for time-series '
-                             ']variables: {0}'.format(', '.join(self._existing)),
+                             'variables: {0}'.format(', '.join(self._existing)),
                              verbosity=0)
             for variable in self._existing:
                 remove(self._time_series_filenames[variable])
