@@ -14,7 +14,6 @@
          "time_bound"
       ],
       "chunks":{
-         "time": 10
       }
    },
    "pop-daily-1deg":{
@@ -39,7 +38,7 @@
          "time_bound"
       ],
       "chunks":{
-         "time": 10
+         "time": 100
       }
    },
    "pop-0.1deg":{
@@ -56,7 +55,8 @@
          "time_bound"
       ],
       "chunks":{
-         "time": 10
+         "z_t": 1,
+         "z_w_top": 1
       }
    },
    "cice-1deg":{
@@ -74,7 +74,6 @@
          "time_bounds"
       ],
       "chunks":{
-         "time": 10
       }
    },
    "cice-0.1deg":{
@@ -92,7 +91,6 @@
          "time_bounds"
       ],
       "chunks":{
-         "time": 10
       }
    },
    "camse-1deg":{
@@ -123,7 +121,6 @@
          "time_written"
       ],
       "chunks":{
-         "time": 10
       }
    },
    "camse-0.25deg":{
@@ -154,7 +151,6 @@
          "time_written"
       ],
       "chunks":{
-         "time": 10
       }
    },
    "camfv-1deg":{
@@ -236,7 +232,6 @@
          "ntrn"
       ],
       "chunks":{
-         "time": 10
       }
    },
    "camhf-daily-1deg":{
@@ -289,7 +284,7 @@
          "ntrn"
       ],
       "chunks":{
-         "time": 10
+         "time": 100
       }
    },
    "camhf-6hourly-1deg":{
@@ -342,7 +337,7 @@
          "ntrn"
       ],
       "chunks":{
-         "time": 10
+         "time": 100
       }
    },
    "clmse-1deg":{
@@ -367,7 +362,6 @@
          "nstep"
       ],
       "chunks":{
-         "time": 10
       }
    },
    "clmse-0.25deg":{
@@ -392,7 +386,6 @@
          "nstep"
       ],
       "chunks":{
-         "time": 10
       }
    }
 }
