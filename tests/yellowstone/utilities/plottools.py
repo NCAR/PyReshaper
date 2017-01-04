@@ -388,7 +388,7 @@ def make_bar_plot(pdata, filename,
                   dataset_order, method_order, method_colors,
                   dataset_labels, method_labels,
                   title=None, xlabel=None, ylabel=None,
-                  figsize=(4, 3),
+                  figsize=(8, 6),
                   figadjustments={
                       'left': 0.175, 'right': 0.98, 'top': 0.915, 'bottom': 0.275},
                   labelrotation=35,
@@ -409,19 +409,19 @@ def make_bar_plot(pdata, filename,
         method_names.update(new_set)
 
     # Check that the order and colors lists contain enough names
-    if not set(dataset_order).issubset(dataset_names):
+    if not set(dataset_order).issuperset(dataset_names):
         raise ValueError(
             'Dataset order must contain all dataset names found in the plot dictionary')
-    if not set(dataset_labels).issubset(dataset_names):
+    if not set(dataset_labels).issuperset(dataset_names):
         raise ValueError(
             'Dataset labels must contain all dataset names found in the plot dictionary')
-    if not set(method_order).issubset(method_names):
+    if not set(method_order).issuperset(method_names):
         raise ValueError(
             'Method order must contain all method names found in the plot dictionary')
-    if not set(method_colors).issubset(method_names):
+    if not set(method_colors).issuperset(method_names):
         raise ValueError(
             'Method colors must contain all method names found in the plot dictionary')
-    if not set(method_labels).issubset(method_names):
+    if not set(method_labels).issuperset(method_names):
         raise ValueError(
             'Method labels must contain all method names found in the plot dictionary')
 

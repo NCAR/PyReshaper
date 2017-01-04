@@ -69,6 +69,9 @@ method_labels = {'ncl': 'NCL 6.1.2',
                  'pyniompi4_1': 'PyNIO+mpi4py (NetCDF4-CL1)',
                  'pagoda': 'Pagoda',
                  'cdo': 'CDO',
+                 'pyreshaper-v0': 'PyReshaper v0.9 (NetCDF3)',
+                 'pyreshaper4-v0': 'PyReshaper v0.9 (NetCDF4)', 
+                 'pyreshaper4c-v0': 'PyReshaper v0.9 (NetCDF4-CL1)',
                  'pyreshaper': 'PyReshaper (NetCDF3)',
                  'pyreshaper4': 'PyReshaper (NetCDF4)',
                  'pyreshaper4c': 'PyReshaper (NetCDF4-CL1)'}
@@ -83,6 +86,9 @@ method_colors = {'ncl': 'magenta',
                  'pyniompi4_1': 'blue',
                  'pagoda': 'yellow',
                  'cdo': 'cyan',
+                 'pyreshaper-v0': 'magenta',
+                 'pyreshaper4-v0': 'red', 
+                 'pyreshaper4c-v0': 'cyan',
                  'pyreshaper': 'purple',
                  'pyreshaper4': 'green',
                  'pyreshaper4c': 'blue'}
@@ -90,6 +96,7 @@ method_order = ['ncl', 'nco', 'pagoda', 'cdo',
                 'pynio', 'pynio4_0', 'pynio4_1',
                 'ncr',
                 'pyniompi', 'pyniompi4_0', 'pyniompi4_1',
+                'pyreshaper-v0', 'pyreshaper4-v0', 'pyreshaper4c-v0',
                 'pyreshaper', 'pyreshaper4', 'pyreshaper4c']
 
 
