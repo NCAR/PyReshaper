@@ -18,6 +18,9 @@ VERSION 1.0.0
  - Adding ability to extract out only some time-series files, instead of
    requiring all time-series files be extracted.  This option should be
    used sparingly and with caution!
+ - Adding the ability to "chunk" over user-specified dimensions when
+   reading and writing.  This finally allows for some control over memory
+   use!
 
 
 VERSION 0.9.10
