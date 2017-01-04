@@ -343,7 +343,18 @@ Arguments to the ``s2srun`` Script
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 While the basic options shown in the previous examples above are
-sufficient for most purposes, two a options are available.
+sufficient for most purposes, additional options are available.
+
+-  ``--chunk NAME,SIZE`` (``-c NAME,SIZE``):  This command-line option can be used
+   to specify a maximum read/write chunk-size ``SIZE`` along a given named dimension
+   ``NAME``.  Multiple ``--chunk`` options can be given to specify chunk-sizes along
+   multiple dimensions.  This option determines the size of the data "chunk" read
+   from a single input file (and then written to an output file).  If the chunk-size
+   is greater than the given dimension size, then the entire dimension will be read
+   at once.  If the chunk-size is less than the given dimension size, then all variables
+   that depend on that dimension will be read in multiple parts, each "chunk" being written
+   before the next is read.  This can be important to control memory use.  By default,
+   chunking is done over the unlimited dimension with a chunk-size of 1.
 
 -  ``--limit L`` (``-l L``):  This command-line option can be used to set the 
    ``output_limit`` argument of the PyReshaper ``convert()`` function, 
@@ -588,13 +599,24 @@ takes the following parameters.
 Arguments to the ``convert()`` Function
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-While not shown in the above examples, there is an argument to the
-``convert()`` function of the PyReshaper object called ``output_limit``.
-This argument sets an integer limit on the number of time-series files
-generated during the ``convert()`` operation (per MPI process). This can
-be useful for debugging purposes, as it can greatly reduce the length of
-time consumed in the ``convert()`` function. A value of ``0`` indicates
-no limit, or all output files will be generated.
+While not shown in the above examples, there are named arguments that can
+be passed to the ``convert()`` function of the Reshaper object.
+
+-  ``output_limit``:  This argument sets an integer limit on the number of
+   time-series files generated during the ``convert()`` operation (per MPI process).
+   This can be useful for debugging purposes, as it can greatly reduce the length
+   of time consumed in the ``convert()`` function. A value of ``0`` indicates
+   no limit, or all output files will be generated.
+
+-  ``chunks``:  This argument sets a dictionary of dimension names to chunk-sizes.
+   This is equivalent to the ``--chunk`` command-line option to ``s2srun``.  This option
+   determines the size of the data "chunk" read from a single input file (and then written 
+   to an output file) along each given dimension.  If a chunk-size is greater than the given
+   dimension size, then the entire dimension will be read at once.  If a chunk-size is less
+   than the given dimension size, then all variables  that depend on that dimension will be 
+   read in multiple parts, each "chunk" being written before the next is read.  This can be 
+   important to control memory use.  By default, the ``chunks`` parameter is equal to 
+   ``None``, which means chunking is done over the unlimited dimension with a chunk-size of 1.
 
 
 Obtaining Best Performance with the PyReshaper
