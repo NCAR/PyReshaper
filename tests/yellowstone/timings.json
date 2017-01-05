@@ -37,6 +37,24 @@
                "real": 214.892199993,
                "request": 28450.9692535,
                "sys": "yellowstone"
+            },
+            "170104-100716": {
+               "TSr": 67.4400093555,
+               "TSw": 61.8582854271,
+               "actual": 968848.0,
+               "cores": 16,
+               "metaTIr": 0.0617175102234,
+               "metaTIw": 0.0665860176086,
+               "metaTVr": 4.61358785629,
+               "metaTVw": 5.86532330513,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 52.648058176,
+               "openo": 0.173426866531,
+               "real": 212.642313004,
+               "request": 28450.9692535,
+               "sys": "yellowstone"
             }
          },
          "pyreshaper4c-v0": {
@@ -172,6 +190,24 @@
                "real": 2540.33662319,
                "request": 1078519.71414,
                "sys": "yellowstone"
+            },
+            "170104-105208": {
+               "TSr": 368.222280264,
+               "TSw": 1911.50331664,
+               "actual": 2561592.0,
+               "cores": 16,
+               "metaTIr": 1.40527367592,
+               "metaTIw": 3.70949554443,
+               "metaTVr": 42.0364191532,
+               "metaTVw": 5.73445129395,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 64.8759138584,
+               "openo": 0.112359046936,
+               "real": 2410.84378195,
+               "request": 1078519.71414,
+               "sys": "yellowstone"
             }
          },
          "pyreshaper4c-v0": {
@@ -233,6 +269,24 @@
                "openi": 75.2417881489,
                "openo": 0.863926410675,
                "real": 293.722089052,
+               "request": 30828.9682617,
+               "sys": "yellowstone"
+            },
+            "170104-100834": {
+               "TSr": 101.295251608,
+               "TSw": 57.6846690178,
+               "actual": 1043904.0,
+               "cores": 16,
+               "metaTIr": 0.132795810699,
+               "metaTIw": 0.108872890472,
+               "metaTVr": 7.15904402733,
+               "metaTVw": 8.73755931854,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 76.6875386238,
+               "openo": 0.288424253464,
+               "real": 290.038249969,
                "request": 30828.9682617,
                "sys": "yellowstone"
             }
@@ -297,6 +351,24 @@
                "real": 752.66496706,
                "request": 561093.903809,
                "sys": "yellowstone"
+            },
+            "170104-102328": {
+               "TSr": 188.637108326,
+               "TSw": 373.932635546,
+               "actual": 715008.0,
+               "cores": 16,
+               "metaTIr": 32.9010183811,
+               "metaTIw": 64.7088155746,
+               "metaTVr": 19.2243871689,
+               "metaTVw": 0.522397994995,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 33.5795981884,
+               "openo": 0.128201246262,
+               "real": 720.028633118,
+               "request": 561093.903809,
+               "sys": "yellowstone"
             }
          },
          "pyreshaper4c-v0": {
@@ -359,6 +431,24 @@
                "real": 128.356168985,
                "request": 8336.41067505,
                "sys": "yellowstone"
+            },
+            "170104-100543": {
+               "TSr": 37.2290420532,
+               "TSw": 7.04892301559,
+               "actual": 177840.0,
+               "cores": 16,
+               "metaTIr": 0.391742229462,
+               "metaTIw": 0.134761571884,
+               "metaTVr": 28.5068099499,
+               "metaTVw": 0.558147907257,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 32.5075061321,
+               "openo": 0.560415506363,
+               "real": 118.988889933,
+               "request": 8336.41067505,
+               "sys": "yellowstone"
             }
          },
          "pyreshaper4c-v0": {
@@ -419,6 +509,24 @@
                "openi": 52.782582283,
                "openo": 0.524458169937,
                "real": 358.438014984,
+               "request": 84629.9774551,
+               "sys": "yellowstone"
+            },
+            "170104-101711": {
+               "TSr": 137.892370939,
+               "TSw": 89.561924696,
+               "actual": 755160.0,
+               "cores": 16,
+               "metaTIr": 2.46095728874,
+               "metaTIw": 1.8906545639,
+               "metaTVr": 47.8124940395,
+               "metaTVw": 3.76889061928,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 46.272790432,
+               "openo": 0.326344966888,
+               "real": 342.894929886,
                "request": 84629.9774551,
                "sys": "yellowstone"
             }
@@ -484,6 +592,24 @@
                "real": 264.54977417,
                "request": 9064.19198227,
                "sys": "yellowstone"
+            },
+            "170104-100756": {
+               "TSr": 91.9671385288,
+               "TSw": 10.4563491344,
+               "actual": 1436292.0,
+               "cores": 16,
+               "metaTIr": 0.229573965073,
+               "metaTIw": 0.176153182983,
+               "metaTVr": 7.06545376778,
+               "metaTVw": 6.32949018478,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 87.7128083706,
+               "openo": 1.07958054543,
+               "real": 252.360585928,
+               "request": 9064.19198227,
+               "sys": "yellowstone"
             }
          },
          "pyreshaper4c-v0": {
@@ -547,6 +673,24 @@
                "real": 6403.45959306,
                "request": 3073293.60839,
                "sys": "yellowstone"
+            },
+            "170105-134458": {
+               "TSr": 1368.83460212,
+               "TSw": 5157.85125303,
+               "actual": 3133696.0,
+               "cores": 16,
+               "metaTIr": 27.2387111187,
+               "metaTIw": 82.7989630699,
+               "metaTVr": 18.3602511883,
+               "metaTVw": 0.466962575912,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 77.5593559742,
+               "openo": 0.12478017807,
+               "real": 6185.68609095,
+               "request": 3073293.60839,
+               "sys": "yellowstone"
             }
          },
          "pyreshaper4c-v0": {
@@ -608,6 +752,24 @@
                "openi": 39.6051537991,
                "openo": 0.481953144073,
                "real": 475.79409194,
+               "request": 194248.586632,
+               "sys": "yellowstone"
+            },
+            "170104-101131": {
+               "TSr": 101.284484625,
+               "TSw": 336.792274475,
+               "actual": 381048.0,
+               "cores": 16,
+               "metaTIr": 0.745910167694,
+               "metaTIw": 0.202309846878,
+               "metaTVr": 30.0527272224,
+               "metaTVw": 0.86515212059,
+               "metadata": true,
+               "nodes": 4,
+               "once": false,
+               "openi": 44.797388792,
+               "openo": 0.106647253036,
+               "real": 466.590247869,
                "request": 194248.586632,
                "sys": "yellowstone"
             }
