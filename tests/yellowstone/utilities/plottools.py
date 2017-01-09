@@ -355,6 +355,23 @@ def get_duration_pdata(data_dict):
 
 
 #==============================================================================
+# Gather speedup data from a data dictionary and return a plot dictionary
+#==============================================================================
+def get_speedup_pdata(plot_dict, over_method):
+    to_remove = []
+    for dataset in plot_dict:
+        if over_method in plot_dict[dataset]:
+            over_time = plot_dict[dataset].pop(over_method)
+            for method in plot_dict[dataset]:
+                plot_dict[dataset][method] *= 1.0/over_time 
+        else:
+            to_remove.append(dataset)
+    for dataset in to_remove:
+        plot_dict.pop(dataset)
+    return plot_dict
+
+
+#==============================================================================
 # Gather throughput data from a data dictionary and return a plot dictionary
 #==============================================================================
 def get_throughput_pdata(data_dict):
@@ -378,8 +395,9 @@ def get_throughput_pdata(data_dict):
 def reduce_pdata(plot_dict, func=numpy.average):
     for dataset in plot_dict:
         for method in plot_dict[dataset]:
-            reduced_data = func(plot_dict[dataset][method])
-            plot_dict[dataset][method] = reduced_data
+            if isinstance(plot_dict[dataset][method], (list,tuple)):
+                reduced_data = func(plot_dict[dataset][method])
+                plot_dict[dataset][method] = reduced_data
     return plot_dict
 
 
@@ -398,11 +416,7 @@ def make_bar_plot(pdata, filename,
                   tickfontsize=9,
                   legendfontsize=8,
                   logplot=False,
-                  reduce_func=numpy.average,
                   figformat='pdf'):
-
-    # Reduce the data first (if already reduced, does nothing)
-    pdata = reduce_pdata(pdata, func=reduce_func)
 
     # Get the names of the datasets and the methods
     dataset_names = set(pdata.keys())

@@ -168,7 +168,7 @@ if __name__ == '__main__':
     data = pt.subselect_jobs_by_data(data, [subdata])
 
     # THROUGHPUT PLOTS
-    tdata = pt.get_throughput_pdata(data)
+    tdata = pt.reduce_pdata(pt.get_throughput_pdata(data), func=reduce_func)
     pt.make_bar_plot(tdata, 'throughput.pdf',
                      title='Throughput', ylabel='Throughput [MB/sec]',
                      dataset_order=dataset_order,
@@ -176,11 +176,10 @@ if __name__ == '__main__':
                      method_colors=method_colors,
                      dataset_labels=dataset_labels,
                      method_labels=method_labels,
-                     logplot=opts.log,
-                     reduce_func=reduce_func)
+                     logplot=opts.log)
 
     # DURATION PLOTS
-    ddata = pt.get_duration_pdata(data)
+    ddata = pt.reduce_pdata(pt.get_duration_pdata(data), func=reduce_func)
     pt.make_bar_plot(ddata, 'duration.pdf',
                      title='Duration', ylabel='Duration [min]',
                      dataset_order=dataset_order,
@@ -188,5 +187,17 @@ if __name__ == '__main__':
                      method_colors=method_colors,
                      dataset_labels=dataset_labels,
                      method_labels=method_labels,
-                     logplot=opts.log,
-                     reduce_func=reduce_func)
+                     logplot=opts.log)
+
+    # SPEEDUP PLOTS
+    over_method = methods_to_plot[0]
+    sdata = pt.get_speedup_pdata(tdata, over_method)
+    pt.make_bar_plot(sdata, 'speedup.pdf',
+                     title='Speedup over {0}'.format(method_labels[over_method]),
+                     ylabel='Speedup',
+                     dataset_order=dataset_order,
+                     method_order=method_order,
+                     method_colors=method_colors,
+                     dataset_labels=dataset_labels,
+                     method_labels=method_labels,
+                     logplot=opts.log)
