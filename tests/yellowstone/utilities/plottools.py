@@ -395,6 +395,7 @@ def make_bar_plot(pdata, filename,
                   labelfontsize=10,
                   tickfontsize=9,
                   legendfontsize=8,
+                  logplot=False,
                   figformat='pdf'):
 
     # Reduce the data first (if already reduced, does nothing)
@@ -453,7 +454,7 @@ def make_bar_plot(pdata, filename,
 
             clr = method_colors[str(method)]
             lab = method_labels[str(method)]
-            plt.bar(xvalues, yvalues, width, color=clr, label=lab)
+            plt.bar(xvalues, yvalues, width, color=clr, label=lab, log=logplot)
             offset += width
 
     # Label the x-axis values
