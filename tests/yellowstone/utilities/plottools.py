@@ -347,7 +347,8 @@ def get_duration_pdata(data_dict):
             plot_dict[dataset] = {}
             for method in data_dict[dataset][__RESULTS__]:
                 plot_dict[dataset][method] = []
-                for job_data in data_dict[dataset][__RESULTS__][method].values():
+                for job_id in sorted(data_dict[dataset][__RESULTS__][method]):
+                    job_data = data_dict[dataset][__RESULTS__][method][job_id]
                     real_time = float(job_data['real']) / 60.0
                     plot_dict[dataset][method].append(real_time)
     return plot_dict
@@ -364,7 +365,8 @@ def get_throughput_pdata(data_dict):
             plot_dict[dataset] = {}
             for method in data_dict[dataset][__RESULTS__]:
                 plot_dict[dataset][method] = []
-                for job_data in data_dict[dataset][__RESULTS__][method].values():
+                for job_id in sorted(data_dict[dataset][__RESULTS__][method]):
+                    job_data = data_dict[dataset][__RESULTS__][method][job_id]
                     throughput = isize / float(job_data['real'])
                     plot_dict[dataset][method].append(throughput)
     return plot_dict
@@ -396,10 +398,11 @@ def make_bar_plot(pdata, filename,
                   tickfontsize=9,
                   legendfontsize=8,
                   logplot=False,
+                  reduce_func=numpy.average,
                   figformat='pdf'):
 
     # Reduce the data first (if already reduced, does nothing)
-    pdata = reduce_pdata(pdata)
+    pdata = reduce_pdata(pdata, func=reduce_func)
 
     # Get the names of the datasets and the methods
     dataset_names = set(pdata.keys())
@@ -439,7 +442,7 @@ def make_bar_plot(pdata, filename,
     plt.figure(figsize=figsize)
     plt.subplots_adjust(**figadjustments)
 
-    # Plot every method and dataset in the plot dictionary
+    axes = {'xmin': [], 'xmax': [], 'ymin': [], 'ymax': []}
     for method in method_order:
         if method in method_names:
             yvalues = numpy.zeros(n_datasets)
@@ -456,6 +459,15 @@ def make_bar_plot(pdata, filename,
             lab = method_labels[str(method)]
             plt.bar(xvalues, yvalues, width, color=clr, label=lab, log=logplot)
             offset += width
+            
+            for nm,vl in zip(['xmin', 'xmax', 'ymin', 'ymax'], plt.axis()):
+                axes[nm].append(vl)
+    
+    axes['xmin'] = min(axes['xmin'])
+    axes['xmax'] = max(axes['xmax'])
+    axes['ymin'] = min(axes['ymin'])
+    axes['ymax'] = max(axes['ymax'])
+    new_axes = [axes[nm] for nm in ['xmin', 'xmax', 'ymin', 'ymax']]
 
     # Label the x-axis values
     xlabels = []
@@ -473,4 +485,5 @@ def make_bar_plot(pdata, filename,
     plt.xticks(xbase, xlabels, rotation=labelrotation,
                ha='right', fontsize=tickfontsize)
     plt.legend(loc=2, fontsize=legendfontsize)
+    plt.axis(new_axes)
     plt.savefig(filename, format=figformat)

@@ -21,6 +21,7 @@
 #==============================================================================
 
 import optparse
+import numpy
 
 from utilities import plottools as pt
 
@@ -32,14 +33,25 @@ _USAGE_ = 'Usage:  %prog [options] [DATASET1 [DATASET2 [...]]]'
 _DESC_ = """Create throughput and duration plots of timing data"""
 
 _PARSER_ = optparse.OptionParser(description=_DESC_)
-_PARSER_.add_option('-t', '--timefile', type='string',
-                    default='timings.json',
-                    help=('Path to the timings.json file '
-                          '[Default: "timings.json"]'))
+_PARSER_.add_option('-d', '--data', action='append', type='string',
+                    dest='data', default=[],
+                    help=('Only plot jobs that match the given data '
+                          '(in the format NAME,TYPE,VALUE, where TYPE '
+                          'can be int, float, str, or bool)'))
+_PARSER_.add_option('-f', '--func', type='string', default='latest',
+                    help=('Which function to use when determining which '
+                          'jobs to plot for each dataset and method.  Can '
+                          'be average, latest, or first'))
+_PARSER_.add_option('-l', '--log', action='store_true', default=False,
+                    help='Plot graphs on a log-scale')
 _PARSER_.add_option('-m', '--method', action='append', type='string',
                     dest='methods', default=[],
                     help=('Include a method to plot, by name.  If no methods '
                           'are listed, then include all methods found'))
+_PARSER_.add_option('-t', '--timefile', type='string',
+                    default='timings.json',
+                    help=('Path to the timings.json file '
+                          '[Default: "timings.json"]'))
 _PARSER_.add_option('-x', '--exclusive', action='store_true',
                     dest='exclusive', default=False,
                     help=('Option indicating that datasets that do not '
@@ -99,17 +111,37 @@ method_order = ['ncl', 'nco', 'pagoda', 'cdo',
                 'pyreshaper-v0', 'pyreshaper4-v0', 'pyreshaper4c-v0',
                 'pyreshaper', 'pyreshaper4', 'pyreshaper4c']
 
+data_types = {'int': int,
+              'float': float,
+              'str': str,
+              'bool': bool}
 
 #==============================================================================
 # Command-line Operation
 #==============================================================================
 if __name__ == '__main__':
     opts, datasets = _PARSER_.parse_args()
+    
+    # Reduce function
+    if opts.func.lower() == 'average':
+        reduce_func = numpy.average
+    elif opts.func.lower() == 'latest':
+        reduce_func = lambda x: x[-1]
+    elif opts.func.lower() == 'first':
+        reduce_func = lambda x: x[0]
+    else:
+        raise ValueError('Reduce function {0} is not average, latest, or first'.format(opts.func))
 
     # Read the data file
     jsondata = pt.read_json_data(opts.timefile)
     if jsondata is None:
         raise ValueError('Could not find timings JSON data file.')
+    
+    # Parse the subselection data options
+    subdata = {}
+    for ds in opts.data:
+        dname, dtype, dval = ds.split(',')
+        subdata[dname] = data_types[dtype.lower()](dval)
 
     # Initialize the data to the entire file contents
     data = jsondata
@@ -131,6 +163,9 @@ if __name__ == '__main__':
                 methods_to_plot.append(method)
         data = pt.subselect_methods(data, methods=methods_to_plot,
                                     exclusive=opts.exclusive)
+    
+    # Subselect the jobs by time and data criteria
+    data = pt.subselect_jobs_by_data(data, [subdata])
 
     # THROUGHPUT PLOTS
     tdata = pt.get_throughput_pdata(data)
@@ -140,7 +175,9 @@ if __name__ == '__main__':
                      method_order=method_order,
                      method_colors=method_colors,
                      dataset_labels=dataset_labels,
-                     method_labels=method_labels)
+                     method_labels=method_labels,
+                     logplot=opts.log,
+                     reduce_func=reduce_func)
 
     # DURATION PLOTS
     ddata = pt.get_duration_pdata(data)
@@ -150,4 +187,6 @@ if __name__ == '__main__':
                      method_order=method_order,
                      method_colors=method_colors,
                      dataset_labels=dataset_labels,
-                     method_labels=method_labels)
+                     method_labels=method_labels,
+                     logplot=opts.log,
+                     reduce_func=reduce_func)
