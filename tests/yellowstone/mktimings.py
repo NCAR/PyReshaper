@@ -28,7 +28,10 @@ _PARSER_.add_option('-i', '--infofile', default='testinfo.json', type="string",
                     help=('Location of the testinfo.json database file '
                           '[Default: testinfo.json]'))
 _PARSER_.add_option('-t', '--timefile', default='timings.json', type="string",
-                    help=('Location of the timings.json database file '
+                    help=('Location of the input timings.json database file '
+                          '[Default: timings.json]'))
+_PARSER_.add_option('-o', '--outfile', default='timings.json', type="string",
+                    help=('The name of the output timings file to write.'
                           '[Default: timings.json]'))
 
 
@@ -189,4 +192,4 @@ if __name__ == '__main__':
                               system='yellowstone')
 
     # Write the JSON data file
-    timedb.save(opts.timefile)
+    timedb.save(opts.outfile)

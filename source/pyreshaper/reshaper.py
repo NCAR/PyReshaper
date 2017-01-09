@@ -225,7 +225,7 @@ class Reshaper(object):
         # Dictionary storing read/write data amounts
         self.assumed_block_size = float(4 * 1024 * 1024)
         self._byte_counts = {}
-        
+
         self._timer.start('Initializing Simple Communicator')
         if simplecomm is None:
             simplecomm = create_comm(serial=serial)
@@ -477,7 +477,7 @@ class Reshaper(object):
         if self._write_mode == 'o':
             if self._simplecomm.is_manager() and len(self._existing) > 0:
                 self._vprint('WARNING: Deleting existing output files for time-series '
-                             ']variables: {0}'.format(', '.join(self._existing)),
+                             'variables: {0}'.format(', '.join(self._existing)),
                              verbosity=0)
             for variable in self._existing:
                 remove(self._time_series_filenames[variable])
@@ -508,9 +508,8 @@ class Reshaper(object):
 
                 # Check that the file has the unlimited dim and var
                 if not tsfile.unlimited(self._unlimited_dim):
-                    err_msg = ("Cannot append to time-series file with "
-                               "missing unlimited dimension "
-                               "'{0}'").format(self._unlimited_dim)
+                    err_msg = ("Cannot append to time-series file with missing unlimited "
+                               "dimension {0!r}").format(self._unlimited_dim)
                     raise RuntimeError(err_msg)
 
                 # Check for once file
@@ -548,7 +547,105 @@ class Reshaper(object):
                        "variables: {0}").format(self._existing)
             raise RuntimeError(err_msg)
 
-    def convert(self, output_limit=0):
+    def _create_var(self, in_file, out_file, vname):
+        in_var = in_file.variables[vname]
+        out_var = out_file.create_variable(vname, in_var.datatype, in_var.dimensions)
+        for att_name in in_var.ncattrs:
+            att_value = in_var.getncattr(att_name)
+            out_var.setncattr(att_name, att_value)
+        
+    def _chunk_iter(self, vobj, chunks={}, corder=True):
+        """
+        This is a generator function to iterator over chunks of arrays with named dimensions
+        
+        Parameters:
+            vobj: A NetCDF file variable object with dimensions and shape attributes
+            chunks (dict): A dictionary of dimension names mapped to chunk sizes along that
+                named dimension
+            corder (bool): Whether to assume the array has C-style axis ordering, where the
+                fastest changing dimension is assumed to be the first axis.  If False, then
+                the fastest changing dimension is assumed to be the last.
+        """
+        dimensions = vobj.dimensions
+        shape = vobj.shape
+
+        nchunks = 1
+        dchunks = []
+        for dname, dlen in zip(dimensions, shape):
+            if dname in chunks:
+                clen = chunks[dname]
+                cnum = dlen // clen
+                if dlen % clen > 0:
+                    cnum += 1
+                nchunks *= cnum
+            else:
+                clen = dlen
+                cnum = 1
+            dchunks.append((dlen, clen, cnum))
+
+        for n in xrange(nchunks):
+            cidx = []
+            nidx = n
+            nstride = nchunks
+            if corder:
+                diter = reversed(dchunks)
+            else:
+                diter = iter(dchunks)
+            for dlen, clen, cnum in diter:
+                nstride = nstride // cnum
+                cidx.append(nidx // nstride)
+                nidx = nidx % nstride
+            if corder:
+                cidx.reverse()
+
+            cslice = []
+            for d in xrange(len(shape)):
+                ic = cidx[d]
+                dlen, clen, cnum = dchunks[d]
+
+                ibeg = ic * clen
+                iend = (ic + 1) * clen
+                if iend >= dlen:
+                    iend = dlen
+
+                cslice.append(slice(ibeg, iend))
+
+            yield tuple(cslice)
+
+    def _offset_chunk(self, chunk, vobj, offset):
+        """
+        Compute a new chunk/slice for a variable with a given offset
+        """
+        new_chunk = []
+        for i, d in enumerate(vobj.dimensions):
+            if d in offset:
+                o = offset[d]
+            else:
+                o = 0
+            new_chunk.append(slice(chunk[i].start + o, chunk[i].stop + o))
+        return tuple(new_chunk)
+
+    def _copy_var(self, kind, in_var, out_var, chunks={}, offsets={}):
+        """
+        Copy variable data from one variable object to another via chunking
+        """
+        for rslice in self._chunk_iter(in_var, chunks=chunks):
+
+            self._timer.start('Read {0}'.format(kind))
+            tmp_data = in_var[rslice]
+            self._timer.stop('Read {0}'.format(kind))
+            wslice = self._offset_chunk(rslice, out_var, offsets)
+            self._timer.start('Write {0}'.format(kind))
+            out_var[wslice] = tmp_data
+            self._timer.stop('Write {0}'.format(kind))
+
+            requested_nbytes = tmp_data.nbytes if hasattr(tmp_data, 'nbytes') else 0
+            self._byte_counts['Requested Data'] += requested_nbytes
+            actual_nbytes = (self.assumed_block_size *
+                             numpy.ceil(requested_nbytes / self.assumed_block_size))
+            self._byte_counts['Actual Data'] += actual_nbytes
+
+    def convert(self, output_limit=0, chunks=None):
         """
         Method to perform the Reshaper's designated operation.
 
@@ -560,6 +657,8 @@ class Reshaper(object):
                 to 0, no limit is placed.  This limits the number
                 of output files produced by each processor in a
                 parallel run.
+            chunks (dict): A dictionary of dimension names mapped to chunk sizes 
+                along that named dimension
         """
         iobackend.set_backend(self._backend)
 
@@ -569,7 +668,6 @@ class Reshaper(object):
             raise TypeError(err_msg)
 
         # Start the total convert process timer
-        self._simplecomm.sync()
         self._timer.start('Complete Conversion Process')
 
         # Validate the input files themselves
@@ -590,9 +688,26 @@ class Reshaper(object):
         if self._simplecomm.is_manager():
             self._vprint('...Output files inspected.', verbosity=0)
 
+        # Check the chunking
+        if chunks is None:
+            # Default chunking is over 1 time-step at a time
+            chunks = {self._unlimited_dim: 1}
+        if not isinstance(chunks, dict):
+            err_msg = 'Chunks must be specified with a dictionary'
+            raise TypeError(err_msg)
+        for key, value in chunks.iteritems():
+            if not isinstance(key, basestring):
+                err_msg = 'Chunks dictionary must have string-type keys'
+                raise TypeError(err_msg)
+            if not isinstance(value, int):
+                err_msg = 'Chunks dictionary must have integer chunk sizes'
+                raise TypeError(err_msg)
+            
         # Debugging output
         if self._simplecomm.is_manager():
+            self._vprint('Read chunk sizes: {0!s}'.format(chunks), verbosity=1)
             self._vprint('Converting time-slices to time-series...', verbosity=0)
+        self._simplecomm.sync()
 
         # Partition the time-series variables across all processors
         tsv_names_loc = self._time_series_variables
@@ -623,11 +738,6 @@ class Reshaper(object):
         self._byte_counts['Requested Data'] = 0
         self._byte_counts['Actual Data'] = 0
 
-        # Defining a simple helper function to determine the bytes size of
-        # a variable given to it, whether an NDArray or not
-        def _get_bytesize(data):
-            return data.nbytes if hasattr(data, 'nbytes') else 0
-
         #===== LOOP OVER TIME_SERIES VARIABLES =====
 
         # Loop over all time-series variables
@@ -652,19 +762,17 @@ class Reshaper(object):
                 remove(temp_filename)
             if self._write_mode == 'a' and out_name in self._existing:
                 rename(out_filename, temp_filename)
-                out_file = iobackend.NCFile(temp_filename, 'a',
-                                            self._netcdf_format,
+                out_file = iobackend.NCFile(temp_filename, 'a', self._netcdf_format,
                                             self._netcdf_compression)
                 appending = True
             else:
-                out_file = iobackend.NCFile(temp_filename, 'w',
-                                            self._netcdf_format,
+                out_file = iobackend.NCFile(temp_filename, 'w', self._netcdf_format,
                                             self._netcdf_compression)
                 appending = False
             self._timer.stop('Open Output Files')
 
-            # Start the loop over input files (i.e., time-steps)
-            series_step_index = self._time_series_step_index[out_name]
+            # Start the loop over input files (i.e., time-slices)
+            offsets = {self._unlimited_dim: self._time_series_step_index[out_name]}
             for in_filename in self._input_filenames:
 
                 # Open the input file
@@ -690,23 +798,13 @@ class Reshaper(object):
                         # Time-invariant metadata variables
                         self._timer.start('Create Time-Invariant Metadata')
                         for name in self._time_invariant_metadata:
-                            in_var = in_file.variables[name]
-                            out_var = out_file.create_variable(
-                                name, in_var.datatype, in_var.dimensions)
-                            for att_name in in_var.ncattrs:
-                                att_value = in_var.getncattr(att_name)
-                                out_var.setncattr(att_name, att_value)
+                            self._create_var(in_file, out_file, name)
                         self._timer.stop('Create Time-Invariant Metadata')
 
                         # Time-variant metadata variables
                         self._timer.start('Create Time-Variant Metadata')
                         for name in self._time_variant_metadata:
-                            in_var = in_file.variables[name]
-                            out_var = out_file.create_variable(
-                                name, in_var.datatype, in_var.dimensions)
-                            for att_name in in_var.ncattrs:
-                                att_value = in_var.getncattr(att_name)
-                                out_var.setncattr(att_name, att_value)
+                            self._create_var(in_file, out_file, name)
                         self._timer.stop('Create Time-Variant Metadata')
 
                     # Create the time-series variable
@@ -714,12 +812,7 @@ class Reshaper(object):
 
                         # Time-series variable
                         self._timer.start('Create Time-Series Variables')
-                        in_var = in_file.variables[out_name]
-                        out_var = out_file.create_variable(
-                            out_name, in_var.datatype, in_var.dimensions)
-                        for att_name in in_var.ncattrs:
-                            att_value = in_var.getncattr(att_name)
-                            out_var.setncattr(att_name, att_value)
+                        self._create_var(in_file, out_file, out_name)
                         self._timer.stop('Create Time-Series Variables')
 
                     dbg_msg = ('Writing output file for variable: '
@@ -730,83 +823,29 @@ class Reshaper(object):
 
                     # Copy the time-invariant metadata
                     if write_meta_data:
-
                         for name in self._time_invariant_metadata:
                             in_var = in_file.variables[name]
                             out_var = out_file.variables[name]
-                            self._timer.start('Read Time-Invariant Metadata')
-                            tmp_data = in_var.get_value()
-                            self._timer.stop('Read Time-Invariant Metadata')
-                            self._timer.start('Write Time-Invariant Metadata')
-                            out_var.assign_value(tmp_data)
-                            self._timer.stop('Write Time-Invariant Metadata')
+                            self._copy_var('Time-Invariant Metadata', in_var, out_var,
+                                           chunks=chunks)
 
-                            requested_nbytes = _get_bytesize(tmp_data)
-                            self._byte_counts[
-                                'Requested Data'] += requested_nbytes
-                            actual_nbytes = self.assumed_block_size \
-                                * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                            self._byte_counts['Actual Data'] += actual_nbytes
+                # Copy the time-varient metadata
+                if write_meta_data:
+                    for name in self._time_variant_metadata:
+                        in_var = in_file.variables[name]
+                        out_var = out_file.variables[name]
+                        self._copy_var('Time-Variant Metadata', in_var, out_var,
+                                       chunks=chunks, offsets=offsets)
 
-                # Get the number of time steps in this slice file
-                num_steps = in_file.dimensions[self._unlimited_dim]
+                # Copy the time-series variables
+                if write_tser_data:
+                    in_var = in_file.variables[out_name]
+                    out_var = out_file.variables[out_name]
+                    self._copy_var('Time-Series Variables', in_var, out_var,
+                                   chunks=chunks, offsets=offsets)
 
-                # Explicitly loop over time steps (to control memory use)
-                for slice_step_index in xrange(num_steps):
-
-                    # Copy the time-varient metadata
-                    if write_meta_data:
-
-                        for name in self._time_variant_metadata:
-                            in_var = in_file.variables[name]
-                            out_var = out_file.variables[name]
-                            ndims = len(in_var.dimensions)
-                            udidx = in_var.dimensions.index(
-                                self._unlimited_dim)
-                            in_slice = [slice(None)] * ndims
-                            in_slice[udidx] = slice_step_index
-                            out_slice = [slice(None)] * ndims
-                            out_slice[udidx] = series_step_index
-                            self._timer.start('Read Time-Variant Metadata')
-                            tmp_data = in_var[tuple(in_slice)]
-                            self._timer.stop('Read Time-Variant Metadata')
-                            self._timer.start('Write Time-Variant Metadata')
-                            out_var[tuple(out_slice)] = tmp_data
-                            self._timer.stop('Write Time-Variant Metadata')
-
-                            requested_nbytes = _get_bytesize(tmp_data)
-                            self._byte_counts[
-                                'Requested Data'] += requested_nbytes
-                            actual_nbytes = self.assumed_block_size \
-                                * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                            self._byte_counts['Actual Data'] += actual_nbytes
-
-                    # Copy the time-series variables
-                    if write_tser_data:
-
-                        in_var = in_file.variables[out_name]
-                        out_var = out_file.variables[out_name]
-                        ndims = len(in_var.dimensions)
-                        udidx = in_var.dimensions.index(self._unlimited_dim)
-                        in_slice = [slice(None)] * ndims
-                        in_slice[udidx] = slice_step_index
-                        out_slice = [slice(None)] * ndims
-                        out_slice[udidx] = series_step_index
-                        self._timer.start('Read Time-Series Variables')
-                        tmp_data = in_var[tuple(in_slice)]
-                        self._timer.stop('Read Time-Series Variables')
-                        self._timer.start('Write Time-Series Variables')
-                        out_var[tuple(out_slice)] = tmp_data
-                        self._timer.stop('Write Time-Series Variables')
-
-                        requested_nbytes = _get_bytesize(tmp_data)
-                        self._byte_counts['Requested Data'] += requested_nbytes
-                        actual_nbytes = self.assumed_block_size \
-                            * numpy.ceil(requested_nbytes / self.assumed_block_size)
-                        self._byte_counts['Actual Data'] += actual_nbytes
-
-                    # Increment the time-series step index
-                    series_step_index += 1
+                # Increment the time-series index offset
+                offsets[self._unlimited_dim] += in_file.dimensions[self._unlimited_dim]
 
                 # Close the input file
                 self._timer.start('Close Input Files')
@@ -828,8 +867,7 @@ class Reshaper(object):
         # Information
         self._simplecomm.sync()
         if self._simplecomm.is_manager():
-            self._vprint(('Finished converting time-slices '
-                          'to time-series.'), verbosity=0)
+            self._vprint('Finished converting time-slices to time-series.', verbosity=0)
 
         # Finish clocking the entire convert procedure
         self._timer.stop('Complete Conversion Process')
@@ -864,7 +902,7 @@ class Reshaper(object):
         byte_count_str = _pprint_dictionary('BYTE COUNTS (MB)', total_bytes)
         if self._simplecomm.is_manager():
             self._vprint(byte_count_str, verbosity=-1)
-        
+
         # Print maximum memory use in MB
         memory_str = _pprint_dictionary('MEMORY USAGE (MB)', max_memory)
         if self._simplecomm.is_manager():
