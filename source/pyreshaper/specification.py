@@ -6,7 +6,7 @@ the PyReshaper code is specified.  Currently all types of supported
 operations for the PyReshaper are specified with derived dypes of the
 Specification class.
 
-Copyright 2016, University Corporation for Atmospheric Research
+Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 

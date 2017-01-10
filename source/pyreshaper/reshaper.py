@@ -5,7 +5,7 @@ This is the main reshaper module.  This is where the specific operations
 are defined.  Currently, only one operation has been implemented (i.e.,
 the time-slice to time-series operation).
 
-Copyright 2016, University Corporation for Atmospheric Research
+Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
