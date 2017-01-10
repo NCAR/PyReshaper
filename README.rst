@@ -5,7 +5,7 @@ A package for converting NetCDF files from time-slice (history) format
 to time-series (single-variable) format.
 
 :AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-:Copyright 2017, University Corporation for Atmospheric Research
+:COPYRIGHT: 2017, University Corporation for Atmospheric Research
 :LICENSE: See the LICENSE.rst file for details
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
