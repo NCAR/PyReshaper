@@ -344,12 +344,18 @@ class NCVariable(object):
                 self._obj[:] = value
 
     def __getitem__(self, key):
-        return self._obj[key]
+        if self._backend == 'Nio' and self.shape == ():
+            return self._obj.get_value()
+        else:
+            return self._obj[key]
 
     def __setitem__(self, key, value):
         if self._mode == 'r':
             raise RuntimeError('Cannot set variable in read mode')
-        self._obj[key] = value
+        if self._backend == 'Nio' and self.shape == ():
+            self._obj.assign_value(value)
+        else:
+            self._obj[key] = value
 
 
 #===============================================================================
