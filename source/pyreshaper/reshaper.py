@@ -11,8 +11,9 @@ See the LICENSE.rst file for details
 
 # Built-in imports
 from sys import platform
-from os import linesep, remove, rename
-from os.path import exists, isfile
+from os import linesep, remove, rename, fstatvfs
+from os import open as fdopen, close as fdclose, O_RDONLY, O_CREAT
+from os.path import exists, isfile, isdir, join
 
 # Third-party imports
 import numpy
@@ -40,6 +41,27 @@ def _get_memory_usage_MB_():
     if platform == 'darwin':
         to_MB *= to_MB
     return getrusage(RUSAGE_SELF).ru_maxrss / to_MB
+
+
+#===================================================================================================
+# _get_io_blocksize_MB_
+#===================================================================================================
+def _get_io_blocksize_MB_(pathname):
+    """
+    Return the I/O blocksize for a given path (used to estimate IOPS)
+    """
+    if isfile(pathname):
+        fname = pathname
+        fflag = O_RDONLY
+    elif isdir(pathname):
+        fname = join(pathname, '.bsize_test_file')
+        fflag = O_CREAT
+    else:
+        return None
+    fd = fdopen(fname, fflag)
+    bsize = fstatvfs(fd).f_bsize
+    fdclose(fd)
+    return bsize
 
 
 #==============================================================================
@@ -222,10 +244,6 @@ class Reshaper(object):
         # Internal timer data
         self._timer = TimeKeeper()
 
-        # Dictionary storing read/write data amounts
-        self.assumed_block_size = float(4 * 1024 * 1024)
-        self._byte_counts = {}
-
         self._timer.start('Initializing Simple Communicator')
         if simplecomm is None:
             simplecomm = create_comm(serial=serial)
@@ -233,6 +251,10 @@ class Reshaper(object):
         # Reference to the simple communicator
         self._simplecomm = simplecomm
         self._timer.stop('Initializing Simple Communicator')
+
+        # Dictionary storing read/write data amounts
+        self.assumed_block_size = float(4 * 1024 * 1024)
+        self._byte_counts = {}
 
         # Contruct the print header
         header = ''.join(['[', str(self._simplecomm.get_rank()),
