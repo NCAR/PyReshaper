@@ -649,10 +649,12 @@ class Reshaper(object):
         """
         for rslice in self._chunk_iter(in_var, chunks=chunks):
 
+            print '>>>>> Reading {}[{}]'.format(in_var.name, rslice)
             self._timer.start('Read {0}'.format(kind))
             tmp_data = in_var[rslice]
             self._timer.stop('Read {0}'.format(kind))
             wslice = self._offset_chunk(rslice, out_var, offsets)
+            print '<<<<< Writing {}[{}]'.format(out_var.name, wslice)
             self._timer.start('Write {0}'.format(kind))
             out_var[wslice] = tmp_data
             self._timer.stop('Write {0}'.format(kind))
