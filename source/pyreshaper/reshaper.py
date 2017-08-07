@@ -855,7 +855,7 @@ class Reshaper(object):
                 if write_tser_data:
                     in_var = in_file.variables[out_name]
                     out_var = out_file.variables[out_name]
-                    self._copy_var('Time-Series Variables', in_var, out_var, chunks=chunks, offsets=offsets, name=name)
+                    self._copy_var('Time-Series Variables', in_var, out_var, chunks=chunks, offsets=offsets, name=out_name)
 
                 # Increment the time-series index offset
                 offsets[self._unlimited_dim] += in_file.dimensions[self._unlimited_dim]
