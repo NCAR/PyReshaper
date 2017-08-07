@@ -636,7 +636,7 @@ class Reshaper(object):
             new_chunk.append(slice(chunk[i].start + o, chunk[i].stop + o))
         return tuple(new_chunk)
 
-    def _copy_var(self, kind, in_var, out_var, chunks={}, offsets={}):
+    def _copy_var(self, kind, in_var, out_var, chunks={}, offsets={}, name=''):
         """
         Copy variable data from one variable object to another via chunking
         
@@ -649,12 +649,12 @@ class Reshaper(object):
         """
         for rslice in self._chunk_iter(in_var, chunks=chunks):
 
-            print '>>>>> Reading {}[{}]'.format(in_var.name, rslice)
+            print '>>>>> Reading {}[{}]'.format(name, rslice)
             self._timer.start('Read {0}'.format(kind))
             tmp_data = in_var[rslice]
             self._timer.stop('Read {0}'.format(kind))
             wslice = self._offset_chunk(rslice, out_var, offsets)
-            print '<<<<< Writing {}[{}]'.format(out_var.name, wslice)
+            print '<<<<< Writing {}[{}]'.format(name, wslice)
             self._timer.start('Write {0}'.format(kind))
             out_var[wslice] = tmp_data
             self._timer.stop('Write {0}'.format(kind))
@@ -842,20 +842,20 @@ class Reshaper(object):
                         for name in self._time_invariant_metadata:
                             in_var = in_file.variables[name]
                             out_var = out_file.variables[name]
-                            self._copy_var('Time-Invariant Metadata', in_var, out_var, chunks=chunks)
+                            self._copy_var('Time-Invariant Metadata', in_var, out_var, chunks=chunks, name=name)
 
                 # Copy the time-varient metadata
                 if write_meta_data:
                     for name in self._time_variant_metadata:
                         in_var = in_file.variables[name]
                         out_var = out_file.variables[name]
-                        self._copy_var('Time-Variant Metadata', in_var, out_var, chunks=chunks, offsets=offsets)
+                        self._copy_var('Time-Variant Metadata', in_var, out_var, chunks=chunks, offsets=offsets, name=name)
 
                 # Copy the time-series variables
                 if write_tser_data:
                     in_var = in_file.variables[out_name]
                     out_var = out_file.variables[out_name]
-                    self._copy_var('Time-Series Variables', in_var, out_var, chunks=chunks, offsets=offsets)
+                    self._copy_var('Time-Series Variables', in_var, out_var, chunks=chunks, offsets=offsets, name=name)
 
                 # Increment the time-series index offset
                 offsets[self._unlimited_dim] += in_file.dimensions[self._unlimited_dim]
