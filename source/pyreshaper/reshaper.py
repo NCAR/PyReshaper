@@ -658,6 +658,7 @@ class Reshaper(object):
             self._timer.start('Write {0}'.format(kind))
             out_var[wslice] = tmp_data
             self._timer.stop('Write {0}'.format(kind))
+            print '===== Done {}'.format(name)
 
             requested_nbytes = tmp_data.nbytes if hasattr(tmp_data, 'nbytes') else 0
             self._byte_counts['Requested Data'] += requested_nbytes
