@@ -105,10 +105,8 @@ class NCFile(object):
         Parameters:
             filename (str): Name of netCDF file to open
             mode (str): Write-mode ('r' for read, 'w' for write, 'a' for append)
-            ncfmt (str): Format to use of the netcdf file, if being created
-                ('netcdf' or 'netcdf4')
-            compression (int): Level of compression to use when writing to this
-                netcdf file
+            ncfmt (str): Format to use of the netcdf file, if being created ('netcdf' or 'netcdf4')
+            compression (int): Level of compression to use when writing to this netcdf file
         """
         if not isinstance(filename, (str, unicode)):
             err_msg = "Netcdf filename must be a string"
@@ -124,16 +122,13 @@ class NCFile(object):
             raise TypeError(err_msg)
 
         if mode not in ['r', 'w', 'a']:
-            err_msg = ("Netcdf write mode {0!r} is not one of "
-                       "'r', 'w', or 'a'").format(mode)
+            err_msg = "Netcdf write mode {0!r} is not one of 'r', 'w', or 'a'".format(mode)
             raise ValueError(err_msg)
         if ncfmt not in ['netcdf', 'netcdf4', 'netcdf4c']:
-            err_msg = ("Netcdf format {0!r} is not one of "
-                       "'netcdf', 'netcdf4', or 'netcdf4c'").format(mode)
+            err_msg = "Netcdf format {0!r} is not one of 'netcdf', 'netcdf4', or 'netcdf4c'".format(mode)
             raise ValueError(err_msg)
         if compression > 9 or compression < 0:
-            err_msg = ("Netcdf compression level {0} is not in range "
-                       "0 to 9").format(compression)
+            err_msg = "Netcdf compression level {0} is not in range 0 to 9".format(compression)
             raise ValueError(err_msg)
 
         self._mode = mode
@@ -178,8 +173,7 @@ class NCFile(object):
             if mode == 'r':
                 self._obj = self._iolib.Dataset(filename)
             else:
-                self._obj = self._iolib.Dataset(filename, mode,
-                                                **self._file_opts)
+                self._obj = self._iolib.Dataset(filename, mode, **self._file_opts)
 
     @property
     def dimensions(self):
@@ -189,8 +183,7 @@ class NCFile(object):
         if self._backend == 'Nio':
             return self._obj.dimensions
         elif self._backend == 'netCDF4':
-            return _dict_((n, len(d)) for n, d
-                          in self._obj.dimensions.iteritems())
+            return _dict_((n, len(d)) for n, d in self._obj.dimensions.iteritems())
         else:
             return _dict_()
 
@@ -229,8 +222,7 @@ class NCFile(object):
 
     @property
     def variables(self):
-        return _dict_((n, NCVariable(v, self._mode)) for n, v
-                      in self._obj.variables.iteritems())
+        return _dict_((n, NCVariable(v, self._mode)) for n, v in self._obj.variables.iteritems())
 
     def create_dimension(self, name, value=None):
         if self._mode == 'r':
@@ -251,8 +243,7 @@ class NCFile(object):
                 typecode = dt.char
             var = self._obj.create_variable(name, typecode, dimensions)
         elif self._backend == 'netCDF4':
-            var = self._obj.createVariable(name, datatype, dimensions,
-                                           **self._var_opts)
+            var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
         return NCVariable(var, self._mode)
 
     def close(self):
