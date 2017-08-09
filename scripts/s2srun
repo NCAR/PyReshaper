@@ -24,8 +24,7 @@ from pyreshaper import reshaper
 # Command-line Interface
 #==============================================================================
 def cli(argv=None):
-    desc = """This tool is designed to run a PyReshaper Specifier as read
-              from a pickled Specifier object (specfile)"""
+    desc = """This tool is designed to run a PyReshaper Specifier as read from a pickled Specifier object (specfile)"""
 
     parser = optparse.OptionParser(prog='s2srun', description=desc)
     parser.add_option('-1', '--once', default=False,
