@@ -19,7 +19,7 @@ from os.path import exists, isfile, isdir, join
 import numpy
 from asaptools.simplecomm import create_comm, SimpleComm
 from asaptools.timekeeper import TimeKeeper
-from asaptools.partition import WeightBalanced
+from asaptools.partition import WeightBalanced, EqualStride, Duplicate
 from asaptools.vprinter import VPrinter
 
 # PyReshaper imports
@@ -30,9 +30,9 @@ import iobackend
 from resource import getrusage, RUSAGE_SELF
 
 
-#===================================================================================================
-# _memory_usage_resource_
-#===================================================================================================
+#=======================================================================================================================
+# _get_memory_usage_MB_
+#=======================================================================================================================
 def _get_memory_usage_MB_():
     """
     Return the maximum memory use of this Python process in MB
@@ -43,9 +43,9 @@ def _get_memory_usage_MB_():
     return getrusage(RUSAGE_SELF).ru_maxrss / to_MB
 
 
-#===================================================================================================
+#=======================================================================================================================
 # _get_io_blocksize_MB_
-#===================================================================================================
+#=======================================================================================================================
 def _get_io_blocksize_MB_(pathname):
     """
     Return the I/O blocksize for a given path (used to estimate IOPS)
@@ -64,11 +64,10 @@ def _get_io_blocksize_MB_(pathname):
     return bsize
 
 
-#==============================================================================
+#=======================================================================================================================
 # create_reshaper factory function
-#==============================================================================
-def create_reshaper(specifier, serial=False, verbosity=1, wmode='w',
-                    once=False, simplecomm=None):
+#=======================================================================================================================
+def create_reshaper(specifier, serial=False, verbosity=1, wmode='w', once=False, simplecomm=None):
     """
     Factory function for Reshaper class instantiations.
 
@@ -102,24 +101,18 @@ def create_reshaper(specifier, serial=False, verbosity=1, wmode='w',
     """
     # Determine the type of Reshaper object to instantiate
     if isinstance(specifier, Specifier):
-        return Reshaper(specifier,
-                        serial=serial,
-                        verbosity=verbosity,
-                        wmode=wmode,
-                        once=once,
-                        simplecomm=simplecomm)
+        return Reshaper(specifier, serial=serial, verbosity=verbosity, wmode=wmode, once=once, simplecomm=simplecomm)
     else:
         err_msg = 'Specifier of type {} is not a valid Specifier object.'.format(type(specifier))
         raise TypeError(err_msg)
 
 
-#==============================================================================
+#=======================================================================================================================
 # _pprint_dictionary - Helper method for printing diagnostic data
-#==============================================================================
+#=======================================================================================================================
 def _pprint_dictionary(title, dictionary, order=None):
     """
-    Hidden method for pretty-printing a dictionary of numeric values,
-    with a given title.
+    Hidden method for pretty-printing a dictionary of numeric values, with a given title.
 
     Parameters:
         title (str): The title to give to the printed table
@@ -132,13 +125,13 @@ def _pprint_dictionary(title, dictionary, order=None):
         str: A string with the pretty-printed dictionary data
     """
     # Type checking
-    if (type(title) is not str):
-        err_msg = 'Title must be a str type'
+    if not isinstance(title, basestring):
+        err_msg = 'Title must be a string type'
         raise TypeError(err_msg)
-    if (not isinstance(dictionary, dict)):
+    if not isinstance(dictionary, dict):
         err_msg = 'Input dictionary needs to be a dictionary type'
         raise TypeError(err_msg)
-    if (order is not None and not isinstance(order, list)):
+    if order is not None and not isinstance(order, (tuple, list)):
         err_msg = 'Order list needs to be a list type'
         raise TypeError(err_msg)
 
@@ -172,9 +165,9 @@ def _pprint_dictionary(title, dictionary, order=None):
     return ostr
 
 
-#==============================================================================
+#=======================================================================================================================
 # Reshaper Base Class
-#==============================================================================
+#=======================================================================================================================
 class Reshaper(object):
 
     """
@@ -184,8 +177,7 @@ class Reshaper(object):
     reshaping operation is to be performed.
     """
 
-    def __init__(self, specifier, serial=False, verbosity=1, wmode='w',
-                 once=False, simplecomm=None):
+    def __init__(self, specifier, serial=False, verbosity=1, wmode='w', once=False, simplecomm=None):
         """
         Constructor
 
@@ -278,8 +270,8 @@ class Reshaper(object):
             self._backend = specifier.io_backend
         else:
             self._backend = iobackend.get_backend()
-            self._vprint('  I/O Backend {0} not available.  Using {1} instead'.format(specifier.io_backend, 
-                                                                                      self._backend), verbosity=1)
+            self._vprint(('  I/O Backend {0} not available.  Using {1} '
+                         'instead').format(specifier.io_backend, self._backend), verbosity=1)
 
         # Store the input file names
         self._input_filenames = specifier.input_file_list
@@ -325,50 +317,61 @@ class Reshaper(object):
         iobackend.set_backend(self._backend)
 
         # Initialize the list of variable names for each category
-        self._time_variant_metadata = []
-        self._time_invariant_metadata = []
+        udim = None
+        timeta = []
+        tvmeta = []
 
         # Initialize the local dictionary of time-series variables and sizes
         all_tsvars = {}
+        file_times = {}
 
-        #===== INSPECT FIRST INPUT FILE =====
+        #===== INSPECT FIRST INPUT FILE (ON MASTER PROCESS ONLY) =====
 
         # Open first file
-        ifile = iobackend.NCFile(self._input_filenames[0])
+        if self._simplecomm.is_manager():
+            ifile = iobackend.NCFile(self._input_filenames[0])
 
-        # Look for the 'unlimited' dimension
-        try:
-            self._unlimited_dim = next(dim for dim in ifile.dimensions
-                                       if ifile.unlimited(dim))
-        except StopIteration:
-            err_msg = 'Unlimited dimension not found.'
-            raise LookupError(err_msg)
+            # Look for the 'unlimited' dimension
+            try:
+                udim = next(dim for dim in ifile.dimensions if ifile.unlimited(dim))
+            except StopIteration:
+                err_msg = 'Unlimited dimension not found.'
+                raise LookupError(err_msg)
+    
+            # Get the first file's time values
+            file_times[self._input_filenames[0]] = ifile.variables[udim][:]
+    
+            # Categorize each variable (only looking at first file)
+            for var_name, var in ifile.variables.iteritems():
+                if udim not in var.dimensions:
+                    timeta.append(var_name)
+                elif var_name in self._metadata_names or (self._1d_metadata and len(var.dimensions) == 1):
+                    tvmeta.append(var_name)
+                elif self._time_series_names is None or var_name in self._time_series_names:
+                    all_tsvars[var_name] = var.datatype.itemsize * var.size
+    
+            # Close the first file
+            ifile.close()
 
-        # Get the time values
-        time_values = [ifile.variables[self._unlimited_dim][:]]
-
-        # Categorize each variable (only looking at first file)
-        for var_name, var in ifile.variables.iteritems():
-            if self._unlimited_dim not in var.dimensions:
-                self._time_invariant_metadata.append(var_name)
-            elif (var_name in self._metadata_names or
-                  (self._1d_metadata and len(var.dimensions) == 1)):
-                self._time_variant_metadata.append(var_name)
-            elif (self._time_series_names is None or
-                  var_name in self._time_series_names):
-                all_tsvars[var_name] = var.datatype.itemsize * var.size
-
-        # Get the list of variable names and missing variables
-        var_names = set(all_tsvars.keys() + self._time_invariant_metadata + self._time_variant_metadata)
-        missing_vars = set()
-
-        # Close the first file
-        ifile.close()
+        # Send information to worker processes
+        self._unlimited_dim = self._simplecomm.partition(udim, func=Duplicate(), involved=True)
+        self._time_invariant_metadata = self._simplecomm.partition(timeta, func=Duplicate(), involved=True)
+        self._time_variant_metadata = self._simplecomm.partition(tvmeta, func=Duplicate(), involved=True)
+        all_tsvars = self._simplecomm.partition(all_tsvars, func=Duplicate(), involved=True)
 
         if self._simplecomm.is_manager():
             self._vprint('  First input file inspected.', verbosity=2)
 
-        #===== INSPECT REMAINING INPUT FILES =====
+        #===== INSPECT REMAINING INPUT FILES (IN PARALLEL) =====
+
+        # Get the list of variable names and missing variables
+        var_names = set(all_tsvars.keys() + self._time_invariant_metadata + self._time_variant_metadata)
+        missing_vars = set()
+        
+        #print '{}: vars = {}'.format(self._simplecomm.get_rank(), var_names)
+    
+        # Partition the remaining filenames to inspect
+        input_filenames = self._simplecomm.partition(self._input_filenames[1:], func=EqualStride(), involved=True)
 
         # Make a pass through remaining files and:
         # (1) Make sure it has the 'unlimited' dimension
@@ -376,7 +379,7 @@ class Reshaper(object):
         # (3) Check that this dimension has a corresponding variable
         # (4) Check if there are any missing variables
         # (5) Get the time values from the files
-        for ifilename in self._input_filenames[1:]:
+        for ifilename in input_filenames:
             ifile = iobackend.NCFile(ifilename)
 
             # Determine the unlimited dimension
@@ -391,7 +394,7 @@ class Reshaper(object):
                 raise LookupError(err_msg)
 
             # Get the time values (list of NDArrays)
-            time_values.append(ifile.variables[self._unlimited_dim][:])
+            file_times[ifilename] = ifile.variables[self._unlimited_dim][:]
 
             # Get the missing variables
             var_names_next = set(ifile.variables.keys())
@@ -404,38 +407,60 @@ class Reshaper(object):
             self._vprint('  Remaining input files inspected.', verbosity=2)
 
         #===== CHECK FOR MISSING VARIABLES =====
-
-        # Make sure that the list of variables in each file is the same
-        if len(missing_vars) != 0:
-            warning = ("WARNING: The first input file has variables that are not in all input files:{0}   "
-                       "{1}").format(linesep, ', '.join(sorted(missing_vars)))
-            self._vprint(warning, header=True, verbosity=0)
-
+        
+        # Gather all missing variables on the master process
+        if self._simplecomm.get_size() > 1:
+            if self._simplecomm.is_manager():
+                for _ in range(1, self._simplecomm.get_size()):
+                    missing_vars.update(self._simplecomm.collect()[1])
+            else:
+                self._simplecomm.collect(missing_vars)
+        
+        # Check for missing variables only on master process
         if self._simplecomm.is_manager():
+            
+            # Make sure that the list of variables in each file is the same
+            if len(missing_vars) != 0:
+                warning = ("WARNING: The first input file has variables that are not in all input files:{0}   "
+                           "{1}").format(linesep, ', '.join(sorted(missing_vars)))
+                self._vprint(warning, header=False, verbosity=0)
+    
             self._vprint('  Checked for missing variables.', verbosity=2)
 
         #===== SORT INPUT FILES BY TIME =====
+        
+        # Gather the file time values onto the master process
+        if self._simplecomm.get_size() > 1:
+            if self._simplecomm.is_manager():
+                for _ in range(1, self._simplecomm.get_size()):
+                    file_times.update(self._simplecomm.collect()[1])
+            else:
+                self._simplecomm.collect(file_times)
+        
+        # Check the order of the input files based on the time values
+        if self._simplecomm.is_manager():
 
-        # Determine the sort order based on the first time in the time values
-        old_order = range(len(self._input_filenames))
-        new_order = sorted(old_order, key=lambda i: time_values[i][0])
+            # Determine the sort order based on the first time in the time values
+            old_order = range(len(self._input_filenames))
+            new_order = sorted(old_order, key=lambda i: file_times[self._input_filenames[i]][0])
+    
+            # Re-order the list of input filenames and time values
+            new_filenames = [self._input_filenames[i] for i in new_order]
+            new_values = [file_times[self._input_filenames[i]] for i in new_order]
+    
+            # Now, check that the largest time in each file is less than the smallest time
+            # in the next file (so that the time spans of each file do not overlap)
+            for i in xrange(1, len(new_values)):
+                if new_values[i - 1][-1] >= new_values[i][0]:
+                    err_msg = ('Times in input files {0} and {1} appear to '
+                               'overlap').format(new_filenames[i - 1], new_filenames[i])
+                    raise ValueError(err_msg)
+        
+        else:
+            new_filenames = None
 
-        # Re-order the list of input filenames and time values
-        new_filenames = [self._input_filenames[i] for i in new_order]
-        new_values = [time_values[i] for i in new_order]
-
-        # Now, check that the largest time in each file is less than the
-        # smallest time in the next file (so that the time spans of each file
-        # do not overlap)
-        for i in xrange(1, len(new_values)):
-            if new_values[i - 1][-1] >= new_values[i][0]:
-                err_msg = ('Times in input files {0} and {1} appear to overlap').format(new_filenames[i - 1],
-                                                                                        new_filenames[i])
-                raise ValueError(err_msg)
-
-        # Now that this is validated, save the time values and filename in
-        # the new order
-        self._input_filenames = new_filenames
+        # Now that this is validated, save the time values and filename in the new order
+        self._input_filenames = self._simplecomm.partition(new_filenames, func=Duplicate(), involved=True)
 
         if self._simplecomm.is_manager():
             self._vprint('  Input files sorted by time.', verbosity=2)
@@ -636,7 +661,7 @@ class Reshaper(object):
             new_chunk.append(slice(chunk[i].start + o, chunk[i].stop + o))
         return tuple(new_chunk)
 
-    def _copy_var(self, kind, in_var, out_var, chunks={}, offsets={}, name=''):
+    def _copy_var(self, kind, in_var, out_var, chunks={}, offsets={}):
         """
         Copy variable data from one variable object to another via chunking
         
@@ -649,16 +674,13 @@ class Reshaper(object):
         """
         for rslice in self._chunk_iter(in_var, chunks=chunks):
 
-            print '>>>>> Reading {}[{}]'.format(name, rslice)
             self._timer.start('Read {0}'.format(kind))
             tmp_data = in_var[rslice]
             self._timer.stop('Read {0}'.format(kind))
             wslice = self._offset_chunk(rslice, out_var, offsets)
-            print '<<<<< Writing {}[{}]'.format(name, wslice)
             self._timer.start('Write {0}'.format(kind))
             out_var[wslice] = tmp_data
             self._timer.stop('Write {0}'.format(kind))
-            print '===== Done {}'.format(name)
 
             requested_nbytes = tmp_data.nbytes if hasattr(tmp_data, 'nbytes') else 0
             self._byte_counts['Requested Data'] += requested_nbytes
@@ -843,20 +865,20 @@ class Reshaper(object):
                         for name in self._time_invariant_metadata:
                             in_var = in_file.variables[name]
                             out_var = out_file.variables[name]
-                            self._copy_var('Time-Invariant Metadata', in_var, out_var, chunks=chunks, name=name)
+                            self._copy_var('Time-Invariant Metadata', in_var, out_var, chunks=chunks)
 
                 # Copy the time-varient metadata
                 if write_meta_data:
                     for name in self._time_variant_metadata:
                         in_var = in_file.variables[name]
                         out_var = out_file.variables[name]
-                        self._copy_var('Time-Variant Metadata', in_var, out_var, chunks=chunks, offsets=offsets, name=name)
+                        self._copy_var('Time-Variant Metadata', in_var, out_var, chunks=chunks, offsets=offsets)
 
                 # Copy the time-series variables
                 if write_tser_data:
                     in_var = in_file.variables[out_name]
                     out_var = out_file.variables[out_name]
-                    self._copy_var('Time-Series Variables', in_var, out_var, chunks=chunks, offsets=offsets, name=out_name)
+                    self._copy_var('Time-Series Variables', in_var, out_var, chunks=chunks, offsets=offsets)
 
                 # Increment the time-series index offset
                 offsets[self._unlimited_dim] += in_file.dimensions[self._unlimited_dim]
