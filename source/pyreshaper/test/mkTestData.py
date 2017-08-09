@@ -48,15 +48,18 @@ def generate_data(backend='netCDF4'):
 
         # Create the coordinate variables & add attributes
         lat = fobj.create_variable('lat', 'f', ('lat',))
-        lon = fobj.create_variable('lon', 'f', ('lon',))
+        lon = fobj.create_variable('lon', 'f', ('lon',), fill_value=1e36)
         time = fobj.create_variable('time', 'f', ('time',))
 
         # Set the coordinate variable attributes
         lat.setncattr('long_name', 'latitude')
-        lon.setncattr('long_name', 'longitude')
-        time.setncattr('long_name', 'time')
         lat.setncattr('units', 'degrees_north')
+
+        lon.setncattr('long_name', 'longitude')
         lon.setncattr('units', 'degrees_east')
+        lon.setncattr('missing_value', 1e36)
+
+        time.setncattr('long_name', 'time')
         time.setncattr('units', 'days since 01-01-0001')
         time.setncattr('calendar', 'noleap')
 
@@ -107,7 +110,6 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
     """
 
     assertions = {}
-
     def _assert(key, value):
         assertions[key] = value
 

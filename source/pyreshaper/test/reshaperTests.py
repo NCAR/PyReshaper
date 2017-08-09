@@ -8,6 +8,7 @@ See the LICENSE.rst file for details
 import unittest
 
 import sys
+import inspect
 from glob import glob
 from cStringIO import StringIO
 from os import linesep as eol
@@ -33,305 +34,238 @@ class ConvertTests(unittest.TestCase):
         # Parallel Management - Just for Tests
         self.rank = MPI_COMM_WORLD.Get_rank()
         self.size = MPI_COMM_WORLD.Get_size()
-
+        
+        # Default arguments for testing
+        self.spec_args = {'infiles': mkTestData.slices,
+                          'ncfmt': 'netcdf4',
+                          'compression': 0,
+                          'prefix': 'out.',
+                          'suffix': '.nc',
+                          'timeseries': None,
+                          'metadata': [v for v in mkTestData.tvmvars] + ['time'],
+                          'meta1d': False,
+                          'backend': 'netCDF4'}
+        self.create_args = {'serial': False,
+                            'verbosity': 1,
+                            'wmode': 'w',
+                            'once': False,
+                            'simplecomm': None}
+        self.convert_args = {'output_limit': 0,
+                             'chunks': None}
+        
         # Test Data Generation
-        self._clean_directory()
+        self.clean()
         if self.rank == 0:
             mkTestData.generate_data()
         MPI_COMM_WORLD.Barrier()
 
     def tearDown(self):
-        self._clean_directory()
+        self.clean()
 
-    def _clean_directory(self):
+    def clean(self):
         if self.rank == 0:
             for ncfile in glob('*.nc'):
                 remove(ncfile)
         MPI_COMM_WORLD.Barrier()
 
-    def _test_header(self, testname):
+    def header(self, testname):
         if self.rank == 0:
+            nf = len(self.spec_args['infiles'])
+            nt = len(mkTestData.tsvars) if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
+
             hline = '-' * 70
-            print hline
-            print testname
-            print hline
+            hdrstr = [hline, '{}:'.format(testname), '',
+                      '   specifier({} infile(s), {} TSV(s), ncfmt={ncfmt},'.format(nf, nt, **self.spec_args),
+                      '             compression={compression}, meta1d={meta1d}, backend={backend})'.format(**self.spec_args),
+                      '   create(serial={serial}, verbosity={verbosity}, wmode={wmode},'.format(**self.create_args),
+                      '          once={once}, simplecomm={simplecomm})'.format(**self.create_args),
+                      '   convert(output_limit={output_limit}, chunks={chunks})'.format(**self.convert_args), hline]
+            print eol.join(hdrstr)
 
-    def _convert_header(self, infiles=[], ncfmt='netcdf', clevel=0, serial=True, verbosity=1,
-                        wmode='w', once=False, meta1d=False, tseries=None, **dummy):
-        nfiles = len(infiles)
-        ncvers = '3' if ncfmt == 'netcdf' else ('4c' if ncfmt == 'netcdf4c' else '4')
-        if tseries is not None:
-            tsvstr = ', numtsv={0}'.format(len(tseries))
-        else:
-            tsvstr = ''
-        self._test_header(("convert() - {0} infile(s), NC{1}-CL{2}, serial={3}, wmode={6!r},{4}"
-                           "            verbosity={5}, once={7}, meta1d={8}{9}"
-                           "").format(nfiles, ncvers, clevel, serial, eol,
-                                      verbosity, wmode, once, meta1d, tsvstr))
-
-    def _assertion(self, name, actual, expected, data=None, show=True, assertion=None):
-        rknm = '[{0}/{1}] {2}'.format(self.rank, self.size, name)
-        spcr = ' ' * len(rknm)
-        msg = eol + rknm
-        if data:
-            msg += ' - Input:    {0}'.format(data) + eol + spcr
-        msg += ' - Actual:   {0}'.format(actual) + eol + spcr
-        msg += ' - Expected: {0}'.format(expected)
-        if show:
-            print msg
-        if assertion:
-            assertion(actual, expected, msg)
-        else:
-            self.assertEqual(actual, expected, msg)
-
-    def _check_outfile(self, tsvar, **args):
+    def check(self, tsvar):
+        args = {}
+        args.update(self.spec_args)
+        args.update(self.create_args)
+        args.update(self.convert_args)        
         assertions_dict = mkTestData.check_outfile(tsvar=tsvar, **args)
         failed_assertions = [key for key, value in assertions_dict.iteritems() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
         assert_msgs.extend(['   {0}'.format(assrt) for assrt in failed_assertions])
         self.assertEqual(len(failed_assertions), 0, eol.join(assert_msgs))
 
-    def _run_convert(self, infiles, prefix, suffix, metadata,
-                     ncfmt, clevel, serial, verbosity, wmode, once,
-                     print_diags=False, meta1d=False, tseries=None):
-        if not (serial and self.rank > 0):
-            if verbosity == 0:
+    def convert(self, print_diags=False):
+        if not (self.create_args.get('serial', False) and self.rank > 0):
+            if self.create_args.get('verbosity', 1) == 0:
                 oldout = sys.stdout
                 newout = StringIO()
                 sys.stdout = newout
-                
-            spec = Specifier(infiles=infiles, ncfmt=ncfmt, compression=clevel,
-                             prefix=prefix, suffix=suffix, metadata=metadata,
-                             meta1d=meta1d, timeseries=tseries)
-            rshpr = create_reshaper(spec, serial=serial, verbosity=verbosity,
-                                    wmode=wmode, once=once)
-            self.assertEqual(type(rshpr), Reshaper, 'type(reshaper) failure')
 
-            rshpr.convert()
-            
-            if verbosity == 0:
+            spec = Specifier(**self.spec_args)
+            rshpr = create_reshaper(spec, **self.create_args)
+            self.assertEqual(type(rshpr), Reshaper, 'type(reshaper) failure')
+            rshpr.convert(**self.convert_args)
+
+            if self.create_args.get('verbosity', 1) == 0:
                 actual = newout.getvalue()
-                self._assertion("stdout empty", actual, '')
+                self.assertEqual(actual, '', 'stdout should be empty')
                 sys.stdout = oldout
 
             if print_diags:
                 rshpr.print_diagnostics()
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_SER_V0_W(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': True, 'verbosity': 3, 'wmode': 'w', 'once': False,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_defaults(self):
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_SER_V0_W_M1D(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
-                'print_diags': False, 'meta1d': True}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_I1(self):
+        self.spec_args['infiles'] = mkTestData.slices[1:2]
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_SER_V1_W_TSER(self):
-        tsers = [mkTestData.tsvars[1], 'tsvarX']
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': True, 'verbosity': 1, 'wmode': 'w', 'once': False,
-                'print_diags': False, 'tseries': tsers}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_V0(self):
+        self.create_args['verbosity'] = 0
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                if tsvar in tsers:
-                    self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
+        MPI_COMM_WORLD.Barrier()
+
+    def test_V3(self):
+        self.create_args['verbosity'] = 3
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                self.check(tsvar)
+        MPI_COMM_WORLD.Barrier()
+
+    def test_TSV2(self):
+        self.spec_args['timeseries'] = mkTestData.tsvars[1:3] + ['tsvarX']
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
+        if self.rank == 0:
+            for tsvar in self.spec_args['timeseries']:
+                if tsvar in mkTestData.tsvars:
+                    self.check(tsvar)
                 else:
-                    fname = args['prefix'] + tsvar + args['suffix']
+                    fname = self.spec_args['prefix'] + tsvar + self.spec_args['suffix']
                     self.assertFalse(exists(fname), 'File {0!r} should not exist'.format(fname))
         MPI_COMM_WORLD.Barrier()
 
-    def test_1_NC3_CL0_SER_V0_W(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices[0:1], 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_NC3(self):
+        self.spec_args['ncfmt'] = 'netcdf'
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC4_CL1_SER_V0_W(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf4', 'clevel': 1,
-                'serial': True, 'verbosity': 0, 'wmode': 'w', 'once': False,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_ser(self):
+        self.create_args['serial'] = True
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_PAR_V1_W(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 'w', 'once': False,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_CL1(self):
+        self.spec_args['compression'] = 1
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_PAR_V1_W_ONCE(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 'w', 'once': True,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_meta1d(self):
+        self.spec_args['meta1d'] = True
+        self.spec_args['metadata'] = [v for v in mkTestData.tvmvars]
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
         if self.rank == 0:
-            self._check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_PAR_V1_O(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 'o', 'once': False,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_once(self):
+        self.create_args['once'] = True
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_PAR_V1_O_ONCE(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 'o', 'once': True,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_overwrite(self):
+        self.create_args['wmode'] = 'o'
+        self.header(inspect.currentframe().f_code.co_name)
+        self.create_args['verbosity'] = 0
+        self.convert()
+        self.create_args['verbosity'] = 1
+        self.convert()
         if self.rank == 0:
-            self._check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_PAR_V1_S(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 's', 'once': False,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_skip(self):
+        self.create_args['wmode'] = 's'
+        self.header(inspect.currentframe().f_code.co_name)
+        self.create_args['verbosity'] = 0
+        self.convert()
+        self.create_args['verbosity'] = 1
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_PAR_V1_S_ONCE(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'infiles': mkTestData.slices, 'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'wmode': 's', 'once': True,
-                'print_diags': False}
-        self._convert_header(**args)
-        self._run_convert(**args)
+    def test_append(self):
+        self.create_args['wmode'] = 'a'
+        self.header(inspect.currentframe().f_code.co_name)
+        self.create_args['wmode'] = 'w'
+        self.spec_args['infiles'] = mkTestData.slices[0:2]
+        self.convert()
+        self.create_args['wmode'] = 'a'
+        self.spec_args['infiles'] = mkTestData.slices[2:]
+        self.convert()
         if self.rank == 0:
-            self._check_outfile(tsvar='once', **args)
             for tsvar in mkTestData.tsvars:
-                self._check_outfile(tsvar=tsvar, **args)
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_All_NC3_CL0_PAR_V3_A(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'once': False,
-                'print_diags': False}
-        self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
-        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
-        for infile in mkTestData.slices[1:]:
-            self._run_convert(infiles=[infile], wmode='a', **args)
+    def test_append_missing(self):
+        missing = mkTestData.tsvars[2]
+        self.create_args['wmode'] = 'a'
+        self.header(inspect.currentframe().f_code.co_name)
+        self.create_args['wmode'] = 'w'
+        self.spec_args['infiles'] = mkTestData.slices[0:2]
+        self.convert()
         if self.rank == 0:
-            for tsvar in mkTestData.tsvars:
-                self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+            remove(self.spec_args['prefix'] + missing + self.spec_args['suffix'])
         MPI_COMM_WORLD.Barrier()
-
-    def test_All_NC3_CL0_PAR_V3_A_ONCE(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'once': True,
-                'print_diags': False}
-        self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
-        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
-        for infile in mkTestData.slices[1:]:
-            self._run_convert(infiles=[infile], wmode='a', **args)
-        if self.rank == 0:
-            self._check_outfile(infiles=mkTestData.slices, tsvar='once', **args)
-            for tsvar in mkTestData.tsvars:
-                self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
-        MPI_COMM_WORLD.Barrier()
-
-    def test_All_NC3_CL0_PAR_V3_A_MISSING(self):
-        mdata = [v for v in mkTestData.tvmvars]
-        mdata.append('time')
-        args = {'prefix': 'out.', 'suffix': '.nc',
-                'metadata': mdata, 'ncfmt': 'netcdf', 'clevel': 0,
-                'serial': False, 'verbosity': 1, 'once': False,
-                'print_diags': False}
-        missingvar = mkTestData.tsvars[2]
-        self._convert_header(infiles=mkTestData.slices, wmode='a', **args)
-        self._run_convert(infiles=[mkTestData.slices[0]], wmode='w', **args)
-        self._run_convert(infiles=[mkTestData.slices[1]], wmode='a', **args)
-        remove(args['prefix'] + missingvar + args['suffix'])
-        for infile in mkTestData.slices[2:]:
-            self._run_convert(infiles=[infile], wmode='a', **args)
+        self.create_args['wmode'] = 'a'
+        self.spec_args['infiles'] = mkTestData.slices[2:]
+        self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
-                if tsvar == missingvar:
-                    self._check_outfile(infiles=mkTestData.slices[2:], tsvar=tsvar, **args)
+                if tsvar == missing:
+                    self.spec_args['infiles'] = mkTestData.slices[2:]
                 else:
-                    self._check_outfile(infiles=mkTestData.slices, tsvar=tsvar, **args)
+                    self.spec_args['infiles'] = mkTestData.slices
+                self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
 

@@ -232,7 +232,7 @@ class NCFile(object):
         elif self._backend == 'netCDF4':
             self._obj.createDimension(name, value)
 
-    def create_variable(self, name, datatype, dimensions):
+    def create_variable(self, name, datatype, dimensions, fill_value=None):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
         if self._backend == 'Nio':
@@ -242,8 +242,13 @@ class NCFile(object):
             else:
                 typecode = dt.char
             var = self._obj.create_variable(name, typecode, dimensions)
+            if fill_value is not None:
+                setattr(var, '_FillValue', fill_value)
         elif self._backend == 'netCDF4':
-            var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
+            vopts = self._var_opts
+            if fill_value is not None:
+                vopts['fill_value'] = fill_value
+            var = self._obj.createVariable(name, datatype, dimensions, **vopts)
         return NCVariable(var, self._mode)
 
     def close(self):
@@ -258,7 +263,7 @@ class NCVariable(object):
     Wrapper class for NetCDF variables
     """
 
-    def __init__(self, vobj, mode='r'):
+    def __init__(self, vobj, mode='r', fill_value=None):
         self._mode = mode
         self._obj = vobj
         if _NC4_ is not None and isinstance(vobj, _NC4_VAR_):
@@ -290,7 +295,8 @@ class NCVariable(object):
         if self._backend == 'Nio':
             setattr(self._obj, name, value)
         elif self._backend == 'netCDF4':
-            self._obj.setncattr(name, value)
+            if name != '_FillValue':
+                self._obj.setncattr(name, value)
 
     @property
     def dimensions(self):

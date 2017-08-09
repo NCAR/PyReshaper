@@ -280,7 +280,8 @@ class Reshaper(object):
         self._time_series_names = specifier.time_series
         if self._time_series_names is not None:
             vnames = ', '.join(self._time_series_names)
-            self._vprint('WARNING: Extracting only variables: {0}'.format(vnames), verbosity=-1)
+            if self._simplecomm.is_manager():
+                self._vprint('WARNING: Extracting only variables: {0}'.format(vnames), verbosity=-1)
 
         # Store the list of metadata names
         self._metadata_names = specifier.time_variant_metadata
@@ -415,6 +416,7 @@ class Reshaper(object):
                     missing_vars.update(self._simplecomm.collect()[1])
             else:
                 self._simplecomm.collect(missing_vars)
+        self._simplecomm.sync()
         
         # Check for missing variables only on master process
         if self._simplecomm.is_manager():
