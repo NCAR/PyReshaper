@@ -171,6 +171,24 @@ class ConvertTests(unittest.TestCase):
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
+    def test_Nio(self):
+        self.spec_args['backend'] = 'Nio'
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                self.check(tsvar)
+        MPI_COMM_WORLD.Barrier()
+        
+    def test_netCDF4(self):
+        self.spec_args['backend'] = 'netCDF4'
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
+        if self.rank == 0:
+            for tsvar in mkTestData.tsvars:
+                self.check(tsvar)
+        MPI_COMM_WORLD.Barrier()
+
     def test_ser(self):
         self.create_args['serial'] = True
         self.header(inspect.currentframe().f_code.co_name)
