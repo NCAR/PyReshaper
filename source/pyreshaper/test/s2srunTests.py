@@ -31,7 +31,7 @@ MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 # CLITests
 #=======================================================================================================================
 class CLITests(unittest.TestCase):
-    
+
     def test_empty(self):
         argv = []
         self.assertRaises(ValueError, s2srun.cli, argv)
@@ -174,11 +174,6 @@ class MainTests(unittest.TestCase):
 
     def convert(self):
         if not (self.create_args.get('serial', False) and self.rank > 0):
-            if self.create_args.get('verbosity', 1) == 0:
-                oldout = sys.stdout
-                newout = StringIO()
-                sys.stdout = newout
-
             spec = Specifier(**self.spec_args)
             specfile = 'input.s2s'
             pickle.dump(spec, open(specfile, 'wb'))
@@ -189,11 +184,6 @@ class MainTests(unittest.TestCase):
             argv.append(specfile)
             s2srun.main(argv)
             remove(specfile)
-
-            if self.create_args.get('verbosity', 1) == 0:
-                actual = newout.getvalue()
-                self.assertEqual(actual, '', 'stdout should be empty')
-                sys.stdout = oldout
         MPI_COMM_WORLD.Barrier()
 
     def test_defaults(self):
@@ -380,22 +370,19 @@ if __name__ == "__main__":
         print hline
     MPI_COMM_WORLD.Barrier()
 
-    mystream = StringIO()
-    tests = unittest.TestLoader().loadTestsFromTestCase(CLITests)
-    unittest.TextTestRunner(stream=mystream).run(tests)
+    if MPI_COMM_WORLD.Get_rank() == 0:
+        mystream = StringIO()
+        clitests = unittest.TestLoader().loadTestsFromTestCase(CLITests)
+        unittest.TextTestRunner(stream=mystream).run(clitests)
+        print hline
+        print 'CLI TESTS RESULTS:'
+        print hline
+        print mystream.getvalue()
     MPI_COMM_WORLD.Barrier()
 
-    results = MPI_COMM_WORLD.gather(mystream.getvalue())
-    if MPI_COMM_WORLD.Get_rank() == 0:
-        for rank, result in enumerate(results):
-            print hline
-            print 'CLI TESTS RESULTS FOR RANK ' + str(rank) + ':'
-            print hline
-            print str(result)
-
     mystream = StringIO()
-    tests = unittest.TestLoader().loadTestsFromTestCase(MainTests)
-    unittest.TextTestRunner(stream=mystream).run(tests)
+    maintests = unittest.TestLoader().loadTestsFromTestCase(MainTests)
+    unittest.TextTestRunner(stream=mystream).run(maintests)
     MPI_COMM_WORLD.Barrier()
 
     results = MPI_COMM_WORLD.gather(mystream.getvalue())
