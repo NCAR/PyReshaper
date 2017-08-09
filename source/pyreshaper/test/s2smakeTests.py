@@ -13,6 +13,9 @@ from pyreshaper.specification import Specifier
 s2smake = imp.load_source('s2smake', '../../../scripts/s2smake')
 
 
+#=======================================================================================================================
+# s2smakeTest
+#=======================================================================================================================
 class s2smakeTest(unittest.TestCase):
 
     def test_CLI_empty(self):
