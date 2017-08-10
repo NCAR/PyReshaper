@@ -68,7 +68,7 @@ class ConvertTests(unittest.TestCase):
                 remove(ncfile)
         MPI_COMM_WORLD.Barrier()
 
-    def header(self, testname):
+    def header(self):
         if self.rank == 0:
             mf = len(mkTestData.slices)
             mt = len(mkTestData.tsvars)
@@ -76,7 +76,7 @@ class ConvertTests(unittest.TestCase):
             nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
 
             hline = '-' * 70
-            hdrstr = [hline, '{}:'.format(testname), '',
+            hdrstr = [hline, '{}:'.format(inspect.stack()[1][3]), '',
                       '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt},'.format(nf, mf, nt, mt, **self.spec_args),
                       '             compression={compression}, meta1d={meta1d}, backend={backend})'.format(**self.spec_args),
                       '   create(serial={serial}, verbosity={verbosity}, wmode={wmode},'.format(**self.create_args),
@@ -117,7 +117,7 @@ class ConvertTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def test_defaults(self):
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -126,7 +126,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_I1(self):
         self.spec_args['infiles'] = mkTestData.slices[1:2]
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -135,7 +135,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_V0(self):
         self.create_args['verbosity'] = 0
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -144,7 +144,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_V3(self):
         self.create_args['verbosity'] = 3
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -153,7 +153,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_TSV2(self):
         self.spec_args['timeseries'] = mkTestData.tsvars[1:3] + ['tsvarX']
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in self.spec_args['timeseries']:
@@ -166,7 +166,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_NC3(self):
         self.spec_args['ncfmt'] = 'netcdf'
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -175,7 +175,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_Nio(self):
         self.spec_args['backend'] = 'Nio'
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -184,7 +184,7 @@ class ConvertTests(unittest.TestCase):
         
     def test_netCDF4(self):
         self.spec_args['backend'] = 'netCDF4'
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -193,7 +193,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_ser(self):
         self.create_args['serial'] = True
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -202,7 +202,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_CL1(self):
         self.spec_args['compression'] = 1
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -212,7 +212,7 @@ class ConvertTests(unittest.TestCase):
     def test_meta1d(self):
         self.spec_args['meta1d'] = True
         self.spec_args['metadata'] = [v for v in mkTestData.tvmvars]
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -221,7 +221,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_once(self):
         self.create_args['once'] = True
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -230,7 +230,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_overwrite(self):
         self.create_args['wmode'] = 'o'
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.create_args['verbosity'] = 0
         self.convert()
         self.create_args['verbosity'] = 1
@@ -242,7 +242,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_skip(self):
         self.create_args['wmode'] = 's'
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.create_args['verbosity'] = 0
         self.convert()
         self.create_args['verbosity'] = 1
@@ -254,7 +254,7 @@ class ConvertTests(unittest.TestCase):
 
     def test_append(self):
         self.create_args['wmode'] = 'a'
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.create_args['wmode'] = 'w'
         self.spec_args['infiles'] = mkTestData.slices[0:2]
         self.convert()
@@ -269,7 +269,7 @@ class ConvertTests(unittest.TestCase):
     def test_append_missing(self):
         missing = mkTestData.tsvars[2]
         self.create_args['wmode'] = 'a'
-        self.header(inspect.currentframe().f_code.co_name)
+        self.header()
         self.create_args['wmode'] = 'w'
         self.spec_args['infiles'] = mkTestData.slices[0:2]
         self.convert()
