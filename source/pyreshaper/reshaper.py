@@ -584,7 +584,8 @@ class Reshaper(object):
 
     def _create_var(self, in_file, out_file, vname):
         in_var = in_file.variables[vname]
-        out_var = out_file.create_variable(vname, in_var.datatype, in_var.dimensions)
+        fill_value = in_var.getncattr('_FillValue') if '_FillValue' in in_var.ncattrs else None
+        out_var = out_file.create_variable(vname, in_var.datatype, in_var.dimensions, fill_value=fill_value)
         for att_name in in_var.ncattrs:
             att_value = in_var.getncattr(att_name)
             out_var.setncattr(att_name, att_value)
@@ -814,12 +815,10 @@ class Reshaper(object):
                 remove(temp_filename)
             if self._write_mode == 'a' and out_name in self._existing:
                 rename(out_filename, temp_filename)
-                out_file = iobackend.NCFile(temp_filename, 'a', self._netcdf_format,
-                                            self._netcdf_compression)
+                out_file = iobackend.NCFile(temp_filename, 'a', self._netcdf_format, self._netcdf_compression)
                 appending = True
             else:
-                out_file = iobackend.NCFile(temp_filename, 'w', self._netcdf_format,
-                                            self._netcdf_compression)
+                out_file = iobackend.NCFile(temp_filename, 'w', self._netcdf_format, self._netcdf_compression)
                 appending = False
             self._timer.stop('Open Output Files')
 
