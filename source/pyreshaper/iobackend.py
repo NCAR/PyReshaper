@@ -245,10 +245,9 @@ class NCFile(object):
             if fill_value is not None:
                 setattr(var, '_FillValue', fill_value)
         elif self._backend == 'netCDF4':
-            vopts = self._var_opts
             if fill_value is not None:
-                vopts['fill_value'] = fill_value
-            var = self._obj.createVariable(name, datatype, dimensions, **vopts)
+                self._var_opts['fill_value'] = fill_value
+            var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
         return NCVariable(var, self._mode)
 
     def close(self):
