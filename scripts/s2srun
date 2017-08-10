@@ -82,16 +82,12 @@ def main(argv=None):
     try:
         spec = pickle.load(open(specfile, 'rb'))
     except:
-        err_msg = ("Specifier File '{}' could not be "
-                   "opened and read").format(specfile)
+        err_msg = "Specifier File '{}' could not be opened and read".format(specfile)
         raise RuntimeError(err_msg)
 
     # Create the PyReshaper object
-    reshpr = reshaper.create_reshaper(spec,
-                                      serial=opts.serial,
-                                      verbosity=opts.verbosity,
-                                      wmode=opts.write_mode,
-                                      once=opts.once)
+    reshpr = reshaper.create_reshaper(spec, serial=opts.serial, verbosity=opts.verbosity,
+                                      wmode=opts.write_mode, once=opts.once)
 
     # Run the conversion (slice-to-series) process
     reshpr.convert(output_limit=opts.limit, chunks=opts.chunks)

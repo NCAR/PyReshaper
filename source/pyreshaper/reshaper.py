@@ -303,7 +303,7 @@ class Reshaper(object):
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
-            self._vprint('Reshaper initialized.', verbosity=0)
+            self._vprint('...Reshaper initialized.', verbosity=0)
 
         # Sync before continuing..
         self._simplecomm.sync()
@@ -353,6 +353,7 @@ class Reshaper(object):
     
             # Close the first file
             ifile.close()
+        self._simplecomm.sync()
 
         # Send information to worker processes
         self._unlimited_dim = self._simplecomm.partition(udim, func=Duplicate(), involved=True)
@@ -360,6 +361,7 @@ class Reshaper(object):
         self._time_variant_metadata = self._simplecomm.partition(tvmeta, func=Duplicate(), involved=True)
         all_tsvars = self._simplecomm.partition(all_tsvars, func=Duplicate(), involved=True)
 
+        self._simplecomm.sync()
         if self._simplecomm.is_manager():
             self._vprint('  First input file inspected.', verbosity=2)
 
@@ -404,6 +406,7 @@ class Reshaper(object):
             # Close the file
             ifile.close()
 
+        self._simplecomm.sync()
         if self._simplecomm.is_manager():
             self._vprint('  Remaining input files inspected.', verbosity=2)
 
@@ -417,7 +420,7 @@ class Reshaper(object):
             else:
                 self._simplecomm.collect(missing_vars)
         self._simplecomm.sync()
-        
+
         # Check for missing variables only on master process
         if self._simplecomm.is_manager():
             
@@ -438,7 +441,8 @@ class Reshaper(object):
                     file_times.update(self._simplecomm.collect()[1])
             else:
                 self._simplecomm.collect(file_times)
-        
+        self._simplecomm.sync()
+
         # Check the order of the input files based on the time values
         if self._simplecomm.is_manager():
 
@@ -468,12 +472,13 @@ class Reshaper(object):
             self._vprint('  Input files sorted by time.', verbosity=2)
 
         #===== FINALIZING OUTPUT =====
+        self._simplecomm.sync()
 
         # Debug output
         if self._simplecomm.is_manager():
-            self._vprint('  Time-Invariant Metadata: {0}'.format(self._time_invariant_metadata), verbosity=1)
-            self._vprint('  Time-Variant Metadata: {0}'.format(self._time_variant_metadata), verbosity=1)
-            self._vprint('  Time-Series Variables: {0}'.format(all_tsvars.keys()), verbosity=1)
+            self._vprint('  Time-Invariant Metadata: {0}'.format(', '.join(self._time_invariant_metadata)), verbosity=1)
+            self._vprint('  Time-Variant Metadata: {0}'.format(', '.join(self._time_variant_metadata)), verbosity=1)
+            self._vprint('  Time-Series Variables: {0}'.format(', '.join(all_tsvars.keys())), verbosity=1)
 
         # Add 'once' variable if writing to a once file
         # NOTE: This is a "cheat"!  There is no 'once' variable.  It's just
@@ -512,7 +517,7 @@ class Reshaper(object):
         if self._write_mode == 'o':
             if self._simplecomm.is_manager() and len(self._existing) > 0:
                 self._vprint('WARNING: Deleting existing output files for time-series '
-                             'variables: {0}'.format(', '.join(self._existing)), verbosity=0)
+                             'variables: {0}'.format(', '.join(sorted(self._existing))), verbosity=0)
             for variable in self._existing:
                 remove(self._time_series_filenames[variable])
             self._existing = []
@@ -522,7 +527,7 @@ class Reshaper(object):
         elif self._write_mode == 's':
             if self._simplecomm.is_manager() and len(self._existing) > 0:
                 self._vprint('WARNING: Skipping time-series variables with '
-                             'existing output files: {0}'.format(self._existing), verbosity=0)
+                             'existing output files: {0}'.format(', '.join(sorted(self._existing))), verbosity=0)
             for variable in self._existing:
                 self._time_series_variables.remove(variable)
 
@@ -574,7 +579,7 @@ class Reshaper(object):
 
         # Otherwise, throw an exception if any existing output files are found
         elif len(self._existing) > 0:
-            err_msg = "Found existing output files for time-series variables: {0}".format(self._existing)
+            err_msg = "Found existing output files for time-series variables: {0}".format(', '.join(sorted(self._existing)))
             raise RuntimeError(err_msg)
 
     def _create_var(self, in_file, out_file, vname):
@@ -747,7 +752,12 @@ class Reshaper(object):
             
         # Debugging output
         if self._simplecomm.is_manager():
-            self._vprint('Read chunk sizes: {0!s}'.format(chunks), verbosity=1)
+            if len(chunks) > 0:
+                self._vprint('Read chunk sizes:', verbosity=1)
+                for dname in chunks:
+                    self._vprint('  {!s}: {}'.format(dname, chunks[dname]), verbosity=1)
+            else:
+                self._vprint('No chunking specified.', verbosity=1)
             self._vprint('Converting time-slices to time-series...', verbosity=0)
         self._simplecomm.sync()
 
@@ -757,7 +767,7 @@ class Reshaper(object):
             tsv_names_loc = tsv_names_loc[0:output_limit]
 
         # Print partitions for all ranks
-        dbg_msg = 'Converting time-series variables: {0}'.format(tsv_names_loc)
+        dbg_msg = 'Converting time-series variables: {0}'.format(', '.join(tsv_names_loc))
         self._vprint(dbg_msg, header=True, verbosity=1)
 
         # Reset all of the timer values (as it is possible that there are no
@@ -905,7 +915,7 @@ class Reshaper(object):
         # Information
         self._simplecomm.sync()
         if self._simplecomm.is_manager():
-            self._vprint('Finished converting time-slices to time-series.', verbosity=0)
+            self._vprint('...Finished converting time-slices to time-series.', verbosity=0)
 
         # Finish clocking the entire convert procedure
         self._timer.stop('Complete Conversion Process')

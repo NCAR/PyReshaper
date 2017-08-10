@@ -70,12 +70,14 @@ class ConvertTests(unittest.TestCase):
 
     def header(self, testname):
         if self.rank == 0:
+            mf = len(mkTestData.slices)
+            mt = len(mkTestData.tsvars)
             nf = len(self.spec_args['infiles'])
-            nt = len(mkTestData.tsvars) if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
+            nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
 
             hline = '-' * 70
             hdrstr = [hline, '{}:'.format(testname), '',
-                      '   specifier({} infile(s), {} TSV(s), ncfmt={ncfmt},'.format(nf, nt, **self.spec_args),
+                      '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt},'.format(nf, mf, nt, mt, **self.spec_args),
                       '             compression={compression}, meta1d={meta1d}, backend={backend})'.format(**self.spec_args),
                       '   create(serial={serial}, verbosity={verbosity}, wmode={wmode},'.format(**self.create_args),
                       '          once={once}, simplecomm={simplecomm})'.format(**self.create_args),

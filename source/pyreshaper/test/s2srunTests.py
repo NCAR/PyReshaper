@@ -8,7 +8,6 @@ See the LICENSE.rst file for details
 import unittest
 
 import imp
-import sys
 import inspect
 from glob import glob
 from cStringIO import StringIO
@@ -16,7 +15,6 @@ from os import linesep as eol
 from os import remove
 from os.path import exists
 from mpi4py import MPI
-import pickle
 
 from pyreshaper.specification import Specifier
 
@@ -32,75 +30,62 @@ MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 #=======================================================================================================================
 class CLITests(unittest.TestCase):
 
+
+    def setUp(self):
+        self.run_args = {'serial': False,
+                         'chunks': None,
+                         'limit': 0,
+                         'verbosity': 1,
+                         'write_mode': 'w',
+                         'once': False,
+                         'specfile': 'input.s2s'}
+
+    def longargs(self):
+        argv = ['--verbosity', str(self.run_args['verbosity']),
+                '--write_mode', self.run_args['write_mode']]
+        if self.run_args['limit'] > 0:
+            argv.extend(['--limit', str(self.run_args['limit'])])
+        if self.run_args['once']:
+            argv.append('--once')
+        if self.run_args['serial']:
+            argv.append('--serial')
+        if self.run_args['chunks'] is not None and len(self.run_args['chunks']) > 0:
+            chunks = []
+            for c in self.run_args['chunks']:
+                chunks.extend(['--chunk', c])
+            argv.extend(chunks)
+        argv.append(self.run_args['specfile'])
+        return argv
+    
+    def shortargs(self):
+        long_to_short = {'--verbosity': '-v', '--write_mode': '-m', '--limit': '-l',
+                         '--once': '-l', '--serial': '-s', '--chunk': '-c'}
+        return [long_to_short[a] if a in long_to_short else a for a in self.longargs()]
+
+    def cliassert(self, args):
+        opts, specfile = s2srun.cli(args)
+        self.assertEqual(opts.once, self.run_args['once'], 'Once-file incorrect')
+        self.assertEqual(opts.chunks, self.run_args['chunks'], 'Chunks incorrect')
+        self.assertEqual(opts.limit, self.run_args['limit'], 'Output limit incorrect')
+        self.assertEqual(opts.write_mode, self.run_args['write_mode'], 'Write mode incorrect')
+        self.assertEqual(opts.serial, self.run_args['serial'], 'Serial mode incorrect')
+        self.assertEqual(opts.verbosity, self.run_args['verbosity'], 'Verbosity incorrect')
+        self.assertEqual(specfile, self.run_args['specfile'], 'Specfile name incorrect')
+
     def test_empty(self):
-        argv = []
-        self.assertRaises(ValueError, s2srun.cli, argv)
+        self.assertRaises(ValueError, s2srun.cli, [])
 
     def test_help(self):
-        argv = ['-h']
-        self.assertRaises(SystemExit, s2srun.cli, argv)
+        self.assertRaises(SystemExit, s2srun.cli, ['-h'])
 
     def test_defaults(self):
-        argv = ['s2srunTests.py']
-        opts, opts_specfile = s2srun.cli(argv)
-        self.assertFalse(opts.once, 'Once-file is set')
-        self.assertEqual(opts.limit, 0, 'Output limit is set')
-        self.assertEqual(opts.write_mode, 'w', 'Write mode is not "w"')
-        self.assertFalse(opts.serial, 'Serial mode is set')
-        self.assertEqual(opts.verbosity, 1, 'Verbosity is not 1')
-        self.assertEqual(opts_specfile, argv[0], 'Specfile name is not set')
+        self.cliassert([self.run_args['specfile']])
 
     def test_short(self):
-        once = True
-        limit = 3
-        write_mode = 'x'
-        serial = True
-        verbosity = 5
-        specfile = 'myspec.s2s'
-
-        argv = []
-        if once:
-            argv.append('-1')
-        argv.extend(['-l', str(limit)])
-        argv.extend(['-m', str(write_mode)])
-        if serial:
-            argv.append('-s')
-        argv.extend(['-v', str(verbosity)])
-        argv.append(specfile)
-        opts, opts_specfile = s2srun.cli(argv)
-
-        self.assertEqual(opts.once, once, 'Once-file is not {0!r}'.format(once))
-        self.assertEqual(opts.limit, limit, 'Output limit is not {0!r}'.format(limit))
-        self.assertEqual(opts.write_mode, write_mode, 'Write mode is not {0!r}'.format(write_mode))
-        self.assertEqual(opts.serial, serial, 'Serial mode is not {0!r}'.format(serial))
-        self.assertEqual(opts.verbosity, verbosity, 'Verbosity is not {0!r}'.format(verbosity))
-        self.assertEqual(opts_specfile, specfile, 'Specfile name is not {0!r}'.format(specfile))
+        self.cliassert(self.shortargs())
 
     def test_long(self):
-        once = True
-        limit = 3
-        write_mode = 'x'
-        serial = True
-        verbosity = 5
-        specfile = 'myspec.s2s'
-
-        argv = []
-        if once:
-            argv.append('--once')
-        argv.extend(['--limit', str(limit)])
-        argv.extend(['--write_mode', str(write_mode)])
-        if serial:
-            argv.append('--serial')
-        argv.extend(['--verbosity', str(verbosity)])
-        argv.append(specfile)
-        opts, opts_specfile = s2srun.cli(argv)
-
-        self.assertEqual(opts.once, once, 'Once-file is not {0!r}'.format(once))
-        self.assertEqual(opts.limit, limit, 'Output limit is not {0!r}'.format(limit))
-        self.assertEqual(opts.write_mode, write_mode, 'Write mode is not {0!r}'.format(write_mode))
-        self.assertEqual(opts.serial, serial, 'Serial mode is not {0!r}'.format(serial))
-        self.assertEqual(opts.verbosity, verbosity, 'Verbosity is not {0!r}'.format(verbosity))
-        self.assertEqual(opts_specfile, specfile, 'Specfile name is not {0!r}'.format(specfile))
+        self.cliassert(self.longargs())
 
 
 #=======================================================================================================================
@@ -124,13 +109,13 @@ class MainTests(unittest.TestCase):
                           'metadata': [v for v in mkTestData.tvmvars] + ['time'],
                           'meta1d': False,
                           'backend': 'netCDF4'}
-        self.create_args = {'serial': False,
-                            'verbosity': 1,
-                            'wmode': 'w',
-                            'once': False,
-                            'simplecomm': None}
-        self.convert_args = {'output_limit': 0,
-                             'chunks': None}
+        self.run_args = {'serial': False,
+                         'chunks': [],
+                         'limit': 0,
+                         'verbosity': 1,
+                         'write_mode': 'w',
+                         'once': False,
+                         'specfile': 'input.s2s'}
         
         # Test Data Generation
         self.clean()
@@ -149,41 +134,59 @@ class MainTests(unittest.TestCase):
 
     def header(self, testname):
         if self.rank == 0:
+            mf = len(mkTestData.slices)
+            mt = len(mkTestData.tsvars)
             nf = len(self.spec_args['infiles'])
-            nt = len(mkTestData.tsvars) if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
+            nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
 
             hline = '-' * 70
             hdrstr = [hline, '{}:'.format(testname), '',
-                      '   specifier({} infile(s), {} TSV(s), ncfmt={ncfmt},'.format(nf, nt, **self.spec_args),
+                      '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt},'.format(nf, mf, nt, mt, **self.spec_args),
                       '             compression={compression}, meta1d={meta1d}, backend={backend})'.format(**self.spec_args),
-                      '   create(serial={serial}, verbosity={verbosity}, wmode={wmode},'.format(**self.create_args),
-                      '          once={once}, simplecomm={simplecomm})'.format(**self.create_args),
-                      '   convert(output_limit={output_limit}, chunks={chunks})'.format(**self.convert_args), hline]
+                      '   s2srun {}'.format(' '.join(str(a) for a in self.runargs())), hline]
             print eol.join(hdrstr)
 
     def check(self, tsvar):
         args = {}
         args.update(self.spec_args)
-        args.update(self.create_args)
-        args.update(self.convert_args)        
+        args.update(self.run_args)
         assertions_dict = mkTestData.check_outfile(tsvar=tsvar, **args)
         failed_assertions = [key for key, value in assertions_dict.iteritems() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
         assert_msgs.extend(['   {0}'.format(assrt) for assrt in failed_assertions])
         self.assertEqual(len(failed_assertions), 0, eol.join(assert_msgs))
+    
+    def runargs(self):
+        argv = ['-v', str(self.run_args['verbosity']),
+                '-m', self.run_args['write_mode'],
+                '-l', str(self.run_args['limit'])]
+        if self.run_args['once']:
+            argv.append('-1')
+        if self.run_args['serial']:
+            argv.append('-s')
+        if len(self.run_args['chunks']) > 0:
+            chunks = []
+            for c in self.run_args['chunks']:
+                chunks.extend(['-c', c])
+            argv.extend(chunks)
+        argv.append(self.run_args['specfile'])
+        return argv
 
     def convert(self):
-        if not (self.create_args.get('serial', False) and self.rank > 0):
-            spec = Specifier(**self.spec_args)
-            specfile = 'input.s2s'
-            pickle.dump(spec, open(specfile, 'wb'))
-
-            argv = ['-v', str(self.create_args.get('verbosity', 1)), '-m', self.create_args.get('wmode', 'w')]
-            if self.create_args.get('once', False):
-                argv.append('-1')
-            argv.append(specfile)
-            s2srun.main(argv)
-            remove(specfile)
+        if self.run_args['serial']:
+            if self.rank == 0:
+                spec = Specifier(**self.spec_args)
+                spec.write(self.run_args['specfile'])
+                s2srun.main(self.runargs())
+                remove(self.run_args['specfile'])
+        else:
+            if self.rank == 0:
+                spec = Specifier(**self.spec_args)
+                spec.write(self.run_args['specfile'])
+            MPI_COMM_WORLD.Barrier()
+            s2srun.main(self.runargs())
+            if self.rank == 0:
+                remove(self.run_args['specfile'])
         MPI_COMM_WORLD.Barrier()
 
     def test_defaults(self):
@@ -204,7 +207,7 @@ class MainTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def test_V0(self):
-        self.create_args['verbosity'] = 0
+        self.run_args['verbosity'] = 0
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
@@ -213,7 +216,7 @@ class MainTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def test_V3(self):
-        self.create_args['verbosity'] = 3
+        self.run_args['verbosity'] = 3
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
@@ -262,7 +265,7 @@ class MainTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def test_ser(self):
-        self.create_args['serial'] = True
+        self.run_args['serial'] = True
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
@@ -290,7 +293,7 @@ class MainTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def test_once(self):
-        self.create_args['once'] = True
+        self.run_args['once'] = True
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
@@ -299,11 +302,11 @@ class MainTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def test_overwrite(self):
-        self.create_args['wmode'] = 'o'
+        self.run_args['write_mode'] = 'o'
         self.header(inspect.currentframe().f_code.co_name)
-        self.create_args['verbosity'] = 0
+        self.run_args['verbosity'] = 0
         self.convert()
-        self.create_args['verbosity'] = 1
+        self.run_args['verbosity'] = 1
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -311,11 +314,11 @@ class MainTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def test_skip(self):
-        self.create_args['wmode'] = 's'
+        self.run_args['write_mode'] = 's'
         self.header(inspect.currentframe().f_code.co_name)
-        self.create_args['verbosity'] = 0
+        self.run_args['verbosity'] = 0
         self.convert()
-        self.create_args['verbosity'] = 1
+        self.run_args['verbosity'] = 1
         self.convert()
         if self.rank == 0:
             for tsvar in mkTestData.tsvars:
@@ -323,12 +326,12 @@ class MainTests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
     def test_append(self):
-        self.create_args['wmode'] = 'a'
+        self.run_args['write_mode'] = 'a'
         self.header(inspect.currentframe().f_code.co_name)
-        self.create_args['wmode'] = 'w'
+        self.run_args['write_mode'] = 'w'
         self.spec_args['infiles'] = mkTestData.slices[0:2]
         self.convert()
-        self.create_args['wmode'] = 'a'
+        self.run_args['write_mode'] = 'a'
         self.spec_args['infiles'] = mkTestData.slices[2:]
         self.convert()
         if self.rank == 0:
@@ -338,15 +341,15 @@ class MainTests(unittest.TestCase):
 
     def test_append_missing(self):
         missing = mkTestData.tsvars[2]
-        self.create_args['wmode'] = 'a'
+        self.run_args['write_mode'] = 'a'
         self.header(inspect.currentframe().f_code.co_name)
-        self.create_args['wmode'] = 'w'
+        self.run_args['write_mode'] = 'w'
         self.spec_args['infiles'] = mkTestData.slices[0:2]
         self.convert()
         if self.rank == 0:
             remove(self.spec_args['prefix'] + missing + self.spec_args['suffix'])
         MPI_COMM_WORLD.Barrier()
-        self.create_args['wmode'] = 'a'
+        self.run_args['write_mode'] = 'a'
         self.spec_args['infiles'] = mkTestData.slices[2:]
         self.convert()
         if self.rank == 0:
@@ -371,21 +374,21 @@ if __name__ == "__main__":
     MPI_COMM_WORLD.Barrier()
 
     if MPI_COMM_WORLD.Get_rank() == 0:
-        mystream = StringIO()
+        clistream = StringIO()
         clitests = unittest.TestLoader().loadTestsFromTestCase(CLITests)
-        unittest.TextTestRunner(stream=mystream).run(clitests)
+        unittest.TextTestRunner(stream=clistream).run(clitests)
         print hline
         print 'CLI TESTS RESULTS:'
         print hline
-        print mystream.getvalue()
+        print clistream.getvalue()
     MPI_COMM_WORLD.Barrier()
 
-    mystream = StringIO()
+    mainstream = StringIO()
     maintests = unittest.TestLoader().loadTestsFromTestCase(MainTests)
-    unittest.TextTestRunner(stream=mystream).run(maintests)
+    unittest.TextTestRunner(stream=mainstream).run(maintests)
     MPI_COMM_WORLD.Barrier()
 
-    results = MPI_COMM_WORLD.gather(mystream.getvalue())
+    results = MPI_COMM_WORLD.gather(mainstream.getvalue())
     if MPI_COMM_WORLD.Get_rank() == 0:
         for rank, result in enumerate(results):
             print hline
