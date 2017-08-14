@@ -11,6 +11,7 @@ See the LICENSE.rst file for details
 """
 
 import numpy
+from copy import deepcopy
 
 try:
     _dict_ = __import__('collections', fromlist=['OrderedDict']).OrderedDict
@@ -25,7 +26,6 @@ _AVAILABLE_ = []
 _BACKEND_MAP_ = {}
 
 _BACKEND_ = None
-_IOLIB_ = None
 
 # FIRST PREFERENCE
 try:
@@ -65,17 +65,14 @@ def is_available(name=None):
 #===============================================================================
 def set_backend(name=None):
     global _BACKEND_
-    global _IOLIB_
     if name is None:
         if is_available():
             _BACKEND_ = _AVAILABLE_[0]
-            _IOLIB_ = _BACKEND_MAP_[_BACKEND_]
         else:
             raise RuntimeError('No I/O Backends available')
     else:
         if is_available(name):
             _BACKEND_ = name
-            _IOLIB_ = _BACKEND_MAP_[name]
         else:
             raise KeyError('I/O Backend {0!r} not available'.format(name))
 
@@ -132,14 +129,14 @@ class NCFile(object):
             raise ValueError(err_msg)
 
         self._mode = mode
-        self._backend = get_backend()
-        self._iolib = _IOLIB_
+        self._backend = deepcopy(get_backend())
+        self._iolib = _BACKEND_MAP_[self._backend]
 
         self._file_opts = {}
         self._var_opts = {}
 
         if self._backend == 'Nio':
-            file_options = _IOLIB_.options()
+            file_options = self._iolib.options()
             file_options.PreFill = False
             if ncfmt == 'netcdf':
                 file_options.Format = 'Classic'
@@ -262,7 +259,7 @@ class NCVariable(object):
     Wrapper class for NetCDF variables
     """
 
-    def __init__(self, vobj, mode='r', fill_value=None):
+    def __init__(self, vobj, mode='r'):
         self._mode = mode
         self._obj = vobj
         if _NC4_ is not None and isinstance(vobj, _NC4_VAR_):
@@ -278,9 +275,9 @@ class NCVariable(object):
     @property
     def ncattrs(self):
         if self._backend == 'Nio':
-            return self._obj.attributes.keys()
+            return [a for a in self._obj.attributes if a != '_FillValue']
         elif self._backend == 'netCDF4':
-            return self._obj.ncattrs()
+            return [a for a in self._obj.ncattrs() if a != '_FillValue']
 
     def getncattr(self, name):
         if self._backend == 'Nio':
@@ -291,11 +288,12 @@ class NCVariable(object):
     def setncattr(self, name, value):
         if self._mode == 'r':
             raise RuntimeError('Cannot set attribute in read mode')
+        if name == '_FillValue':
+            raise AttributeError('Cannot set fill value of NCVariable')
         if self._backend == 'Nio':
             setattr(self._obj, name, value)
         elif self._backend == 'netCDF4':
-            if name != '_FillValue':
-                self._obj.setncattr(name, value)
+            self._obj.setncattr(name, value)
 
     @property
     def dimensions(self):
@@ -318,6 +316,13 @@ class NCVariable(object):
             return numpy.dtype(self._obj.typecode())
         elif self._backend == 'netCDF4':
             return self._obj.dtype
+
+    @property
+    def fill_value(self):
+        if self._backend == 'Nio':
+            return self._obj.attributes['_FillValue'] if '_FillValue' in self._obj.attributes else None
+        elif self._backend == 'netCDF4':
+            return self._obj.getncattr('_FillValue') if '_FillValue' in self._obj.ncattrs() else None
 
     def get_value(self):
         if self._backend == 'Nio':
