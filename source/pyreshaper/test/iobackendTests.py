@@ -34,9 +34,11 @@ def print_test_msg(testname, **kwds):
 def test_func(testname, func, expected, msg, kwds={}):
     try:
         actual = func(**kwds)
+        print_test_msg(testname, actual=actual, expected=expected, **kwds)
     except Exception, err:
         actual = type(err)
-    print_test_msg(testname, actual=actual, expected=expected, **kwds)
+        errmsg = str(err)
+        print_test_msg(testname, actual=actual, errmsg=errmsg, expected=expected, **kwds)
     npt.assert_equal(actual, expected, '{}'.format(msg))
 
 
@@ -171,7 +173,7 @@ class ReadTests(unittest.TestCase):
             return actual
         test_func_avail(test_name(), func, self.ncvars, 'NCFile variables incorrect')
 
-    def test_NCVariable_ncattrs(self):
+    def test_NCVariable_ncattrs_getncattr(self):
         def func(variable=''):
             ncf = iobackend.NCFile(self.ncfrname)
             actual = {a:ncf.variables[variable].getncattr(a) for a in ncf.variables[variable].ncattrs}
@@ -210,7 +212,7 @@ class ReadTests(unittest.TestCase):
             actual = ncf.variables[variable].shape
             ncf.close()
             return actual
-        for v in self.vdtype:
+        for v in self.vshape:
             expected = self.vshape[v]
             test_func_avail(test_name(), func, expected, 'NCVariable {} shape incorrect'.format(v),
                             kwds={'variable': v})
@@ -232,7 +234,7 @@ class ReadTests(unittest.TestCase):
             actual = ncf.variables[variable].size
             ncf.close()
             return actual
-        for v in self.vfill:
+        for v in self.vdims:
             expected = reduce(lambda x, y: x*y, (self.ncdims[d] for d in self.vdims[v]), 1)
             test_func_avail(test_name(), func, expected, 'NCVariable {} size incorrect'.format(v),
                             kwds={'variable': v})
@@ -243,7 +245,7 @@ class ReadTests(unittest.TestCase):
             actual = ncf.variables[variable][:]
             ncf.close()
             return actual
-        for v in self.vfill:
+        for v in self.vdims:
             expected = self.ncvars[v]
             test_func_avail(test_name(), func, expected, 'NCVariable {} getitem incorrect'.format(v),
                             kwds={'variable': v})
@@ -264,19 +266,20 @@ class WriteTests(unittest.TestCase):
         self.ncfwname = 'writetest.nc'
         self.ncattrs = {'a1': 'attribute 1', 'a2': 'attribute 2'}
         self.ncdims = {'t': 10, 'x': 5, 'c': 14, 'n': 2}
-        self.vdims = {'t': ('t',), 'x': ('x',), 'v': ('t', 'x'), 's': ('n', 'c')}
-        self.vdtype = {'t': 'd', 'x': 'd', 'v': 'f', 's': 'c'}
-        self.vshape = {'t': (self.ncdims['t'],), 'x': (self.ncdims['x'],),
-                       'v': (self.ncdims['t'],self.ncdims['x']), 's': (self.ncdims['c'],)}
+        self.vdims = {'t': ('t',), 'x': ('x',), 'v': ('t', 'x'), 's': ('n', 'c'), 'c': ('c',)}
+        self.vdtype = {'t': 'd', 'x': 'd', 'v': 'f', 's': 'c', 'c': 'c'}
+        self.vshape = {v: tuple(self.ncdims[d] for d in self.vdims[v]) for v in self.vdims}
         self.ncvars = {'t': np.arange(0, self.ncdims['t'], dtype=self.vdtype['t']),
                        'x': np.random.ranf(self.ncdims['x']).astype(self.vdtype['x']),
                        'v': np.random.ranf(self.ncdims['t']*self.ncdims['x']).reshape(10,5).astype(self.vdtype['v']),
-                       's': np.array(['a string', 'another string']).view('S1').reshape(2,14)}
+                       's': np.array(['a string', 'another string'], dtype='S14').view('S1').reshape(self.vshape['s']),
+                       'c': np.array('scalar str', dtype='S14').reshape(1).view('S1')}
         self.vattrs = {'t': {'long_name': u'time', 'units': u'days'},
                        'x': {'long_name': u'space', 'units': u'meters'},
                        'v': {'long_name': u'variable', 'units': u'kg', 'missing_value': np.float32(1e20)},
-                       's': {'long_name': u'string'}}
-        self.vfill = {'t': None, 'x': None, 'v': np.float32(1e20), 's': None}
+                       's': {'long_name': u'vector of strings'},
+                       'c': {'long_name': u'scalar string'}}
+        self.vfill = {'t': None, 'x': None, 'v': np.float32(1e20), 's': '', 'c': None}
     
     def tearDown(self):
         if exists(self.ncfwname):
@@ -337,18 +340,72 @@ class WriteTests(unittest.TestCase):
     def test_NCFile_create_variable(self):
         def func(variable=''):
             ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            for d in self.ncdims:
+            for d in self.vdims[variable]:
                 if d == 't':
                     ncf.create_dimension(d)
                 else:
                     ncf.create_dimension(d, self.ncdims[d])
-            for v in self.ncvars:
-                print 'variable', v
-                vobj = ncf.create_variable(v, self.vdtype[v], self.vdims[v])
-                print 'created variable', v
-                vobj[:] = self.ncvars[v]
-                print 'set variable', v
-            print 'variables created'
+            ncf.create_variable(variable, self.vdtype[variable], self.vdims[variable])
+            ncf.close()
+            ncfr = iobackend.NCFile(self.ncfwname)
+            actual = type(ncfr.variables[variable])
+            ncfr.close()
+            remove(self.ncfwname)
+            return actual
+        for v in self.ncvars:
+            expected = iobackend.NCVariable
+            test_func_avail(test_name(), func, expected, 'NCFile variables incorrect', kwds={'variable': v})
+
+    def test_NCFile_create_variable_fill(self):
+        def func(variable=''):
+            ncf = iobackend.NCFile(self.ncfwname, mode='w')
+            for d in self.vdims[variable]:
+                if d == 't':
+                    ncf.create_dimension(d)
+                else:
+                    ncf.create_dimension(d, self.ncdims[d])
+            ncf.create_variable(variable, self.vdtype[variable], self.vdims[variable], fill_value=self.vfill[variable])
+            ncf.close()
+            ncfr = iobackend.NCFile(self.ncfwname)
+            actual = type(ncfr.variables[variable])
+            ncfr.close()
+            remove(self.ncfwname)
+            return actual
+        for v in self.ncvars:
+            expected = iobackend.NCVariable
+            test_func_avail(test_name(), func, expected, 'NCFile variables incorrect', kwds={'variable': v})
+
+    def test_NCVariable_setncattr(self):
+        def func(variable=''):
+            ncf = iobackend.NCFile(self.ncfwname, mode='w')
+            for d in self.vdims[variable]:
+                if d == 't':
+                    ncf.create_dimension(d)
+                else:
+                    ncf.create_dimension(d, self.ncdims[d])
+            vobj = ncf.create_variable(variable, self.vdtype[variable], self.vdims[variable])
+            for attr in self.vattrs[variable]:
+                vobj.setncattr(attr, self.vattrs[variable][attr])
+            ncf.close()
+            ncfr = iobackend.NCFile(self.ncfwname)
+            actual = {a:ncfr.variables[variable].getncattr(a) for a in ncfr.variables[variable].ncattrs}
+            ncfr.close()
+            remove(self.ncfwname)
+            return actual
+        for v in self.vattrs:
+            expected = self.vattrs[v]
+            test_func_avail(test_name(), func, expected, 'NCFile variables incorrect', kwds={'variable': v})
+
+    def test_NCVariable_setitem_getitem(self):
+        def func(variable=''):
+            ncf = iobackend.NCFile(self.ncfwname, mode='w')
+            for d in self.vdims[variable]:
+                if d == 't':
+                    ncf.create_dimension(d)
+                else:
+                    ncf.create_dimension(d, self.ncdims[d])
+            vobj = ncf.create_variable(variable, self.vdtype[variable], self.vdims[variable])
+            vobj[:] = self.ncvars[variable]
             ncf.close()
             ncfr = iobackend.NCFile(self.ncfwname)
             actual = ncfr.variables[variable][:]
@@ -358,195 +415,7 @@ class WriteTests(unittest.TestCase):
         for v in self.ncvars:
             expected = self.ncvars[v]
             test_func_avail(test_name(), func, expected, 'NCFile variables incorrect', kwds={'variable': v})
-        
-        
 
-    def test_nio_NCFile_create_variable(self):
-        iobackend.set_backend('Nio')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('x', self.ncdims['x'])
-        x = ncf.create_variable('x', np.dtype('d'), ('x',))
-        x[:] = self.x
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['x'][:]
-        expected = self.x
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile x-variable incorrect')
-
-    def test_nio_NCFile_create_variable_fill(self):
-        iobackend.set_backend('Nio')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('x', self.ncdims['x'])
-        x = ncf.create_variable('x', np.dtype('d'), ('x',), fill_value=1e36)
-        x[:] = self.x
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['x'][:]
-        expected = np.ma.masked_array(self.x, fill_value=1e36)
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile x-variable incorrect')
-
-    def test_nc4_NCFile_create_variable(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('x', self.ncdims['x'])
-        x = ncf.create_variable('x', np.dtype('d'), ('x',))
-        x[:] = self.x
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['x'][:]
-        expected = self.x
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile x-variable incorrect')
-
-    def test_nc4_NCFile_create_variable_fill(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('x', self.ncdims['x'])
-        x = ncf.create_variable('x', np.dtype('d'), ('x',), fill_value=1e36)
-        x[:] = self.x
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['x'][:]
-        expected = np.ma.masked_array(self.x, fill_value=1e36)
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile x-variable incorrect')
-        
-    def test_nio_NCFile_create_variable_unlimited(self):
-        iobackend.set_backend('Nio')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('t')
-        t = ncf.create_variable('t', np.dtype('d'), ('t',))
-        t[:] = self.t
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['t'][:]
-        expected = self.t
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile t-variable incorrect')
-
-    def test_nc4_NCFile_create_variable_unlimited(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('t')
-        t = ncf.create_variable('t', np.dtype('d'), ('t',))
-        t[:] = self.t
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['t'][:]
-        expected = self.t
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile t-variable incorrect')
-
-    def test_nio_NCFile_create_variable_ndim(self):
-        iobackend.set_backend('Nio')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('t')
-        ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'))
-        v[:] = self.v
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['v'][:]
-        expected = self.v
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile 2d-variable incorrect')
-
-    def test_nc4_NCFile_create_variable_ndim(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('t')
-        ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'))
-        v[:] = self.v
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['v'][:]
-        expected = self.v
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile 2d-variable incorrect')
-
-    def test_nio_NCVariable_setncattr(self):
-        iobackend.set_backend('Nio')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('t')
-        ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'))
-        for attr,value in self.vattrs.iteritems():
-            v.setncattr(attr, value)
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['v'].attributes
-        expected = self.vattrs
-        ncfr.close()
-        print_test_msg('NCVariable.setncattr()', actual=actual, expected=expected)
-        for attr, value in expected.iteritems():
-            self.assertTrue(attr in actual, 'Variable attribute {0!r} not found'.format(attr))
-            self.assertEqual(actual[attr], value, 'Variable attribute {0!r} incorrect'.format(attr))
-
-    def test_nc4_NCVariable_setncattr(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('t')
-        ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'))
-        for attr,value in self.vattrs.iteritems():
-            v.setncattr(attr, value)
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['v'].attributes
-        expected = self.vattrs
-        ncfr.close()
-        print_test_msg('NCVariable.setncattr()', actual=actual, expected=expected)
-        for attr, value in expected.iteritems():
-            self.assertTrue(attr in actual, 'Variable attribute {0!r} not found'.format(attr))
-            self.assertEqual(actual[attr], value, 'Variable attribute {0!r} incorrect'.format(attr))
-
-    def test_nio_NCVariable_setncattr_fill(self):
-        iobackend.set_backend('Nio')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('t')
-        ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'), fill_value=1e20)
-        for attr,value in self.vattrs.iteritems():
-            v.setncattr(attr, value)
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['v'].attributes
-        expected = self.vattrs
-        ncfr.close()
-        print_test_msg('NCVariable.setncattr()', actual=actual, expected=expected)
-        for attr, value in expected.iteritems():
-            self.assertTrue(attr in actual, 'Variable attribute {0!r} not found'.format(attr))
-            self.assertEqual(actual[attr], value, 'Variable attribute {0!r} incorrect'.format(attr))
-
-    def test_nc4_NCVariable_setncattr_fill(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfwname, mode='w')
-        ncf.create_dimension('t')
-        ncf.create_dimension('x', self.ncdims['x'])
-        v = ncf.create_variable('v', np.dtype('f'), ('t', 'x'), fill_value=1e20)
-        for attr,value in self.vattrs.iteritems():
-            v.setncattr(attr, value)
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfwname)
-        actual = ncfr.variables['v'].attributes
-        expected = self.vattrs
-        ncfr.close()
-        print_test_msg('NCVariable.setncattr()', actual=actual, expected=expected)
-        for attr, value in expected.iteritems():
-            self.assertTrue(attr in actual, 'Variable attribute {0!r} not found'.format(attr))
-            self.assertEqual(actual[attr], value, 'Variable attribute {0!r} incorrect'.format(attr))
-            
 
 #===============================================================================
 # AppendTests

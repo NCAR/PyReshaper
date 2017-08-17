@@ -151,9 +151,10 @@ class NCFile(object):
             if mode == 'r':
                 self._obj = self._iolib.open_file(filename)
             else:
-                self._obj = self._iolib.open_file(filename, mode,
-                                                  **self._file_opts)
+                self._obj = self._iolib.open_file(filename, mode, **self._file_opts)
 
+            self._dimensions = _dict_((d, self._obj.dimensions[d]) for d in self._obj.dimensions)
+            
         elif self._backend == 'netCDF4':
             if ncfmt == 'netcdf':
                 self._file_opts["format"] = "NETCDF3_64BIT"
@@ -171,18 +172,17 @@ class NCFile(object):
                 self._obj = self._iolib.Dataset(filename)
             else:
                 self._obj = self._iolib.Dataset(filename, mode, **self._file_opts)
+        
+            self._dimensions = _dict_((d, len(self._obj.dimensions[d])) for d in self._obj.dimensions)
+            
+        self._variables = _dict_((v, NCVariable(self._obj.variables[v], mode=mode)) for v in self._obj.variables)
 
     @property
     def dimensions(self):
         """
         Return the dimension sizes dictionary
         """
-        if self._backend == 'Nio':
-            return self._obj.dimensions
-        elif self._backend == 'netCDF4':
-            return _dict_((n, len(d)) for n, d in self._obj.dimensions.iteritems())
-        else:
-            return _dict_()
+        return self._dimensions
 
     def unlimited(self, name):
         """
@@ -219,7 +219,7 @@ class NCFile(object):
 
     @property
     def variables(self):
-        return _dict_((n, NCVariable(v, self._mode)) for n, v in self._obj.variables.iteritems())
+        return self._variables
 
     def create_dimension(self, name, value=None):
         if self._mode == 'r':
@@ -228,24 +228,25 @@ class NCFile(object):
             self._obj.create_dimension(name, value)
         elif self._backend == 'netCDF4':
             self._obj.createDimension(name, value)
+        self._dimensions[name] = value
 
     def create_variable(self, name, datatype, dimensions, fill_value=None):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
+        dtchar = numpy.dtype(datatype).char
+        if dtchar == 'S' or dtchar == 'c':
+            fill_value = None
         if self._backend == 'Nio':
-            dt = numpy.dtype(datatype)
-            if dt.char == 'S':
-                typecode = 'c'
-            else:
-                typecode = dt.char
-            var = self._obj.create_variable(name, typecode, dimensions)
+            var = self._obj.create_variable(name, dtchar, dimensions)
             if fill_value is not None:
                 setattr(var, '_FillValue', fill_value)
         elif self._backend == 'netCDF4':
             if fill_value is not None:
                 self._var_opts['fill_value'] = fill_value
             var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
-        return NCVariable(var, self._mode)
+        new_var = NCVariable(var, self._mode)
+        self._variables[name] = new_var
+        return new_var
 
     def close(self):
         self._obj.close()
@@ -291,6 +292,8 @@ class NCVariable(object):
         if name == '_FillValue':
             raise AttributeError('Cannot set fill value of NCVariable')
         if self._backend == 'Nio':
+            if isinstance(value, unicode):
+                value = str(value)
             setattr(self._obj, name, value)
         elif self._backend == 'netCDF4':
             self._obj.setncattr(name, value)
@@ -302,6 +305,10 @@ class NCVariable(object):
     @property
     def shape(self):
         return self._obj.shape
+
+    @property
+    def ndim(self):
+        return len(self.shape)
 
     @property
     def size(self):
@@ -345,16 +352,21 @@ class NCVariable(object):
                 self._obj[:] = value
 
     def __getitem__(self, key):
-        if self._backend == 'Nio' and self.shape == ():
-            return self._obj.get_value()
+        if self.shape == ():
+            return self.get_value()
         else:
             return self._obj[key]
 
     def __setitem__(self, key, value):
         if self._mode == 'r':
             raise RuntimeError('Cannot set variable in read mode')
-        if self._backend == 'Nio' and self.shape == ():
-            self._obj.assign_value(value)
+        if self.shape == ():
+            self.assign_value(value)
+        elif self.datatype == numpy.dtype('c') and self._backend == 'Nio':
+            if self.ndim == 1:
+                self._obj[key] = value.tostring()
+            else:
+                self._obj[key] = value 
         else:
             self._obj[key] = value
 
