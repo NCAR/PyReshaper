@@ -367,12 +367,12 @@ class WriteTests(unittest.TestCase):
             ncf.create_variable(variable, self.vdtype[variable], self.vdims[variable], fill_value=self.vfill[variable])
             ncf.close()
             ncfr = iobackend.NCFile(self.ncfwname)
-            actual = type(ncfr.variables[variable])
+            actual = ncfr.variables[variable].fill_value
             ncfr.close()
             remove(self.ncfwname)
             return actual
         for v in self.ncvars:
-            expected = iobackend.NCVariable
+            expected = None if v == 's' else self.vfill[v]
             test_func_avail(test_name(), func, expected, 'NCFile variables incorrect', kwds={'variable': v})
 
     def test_NCVariable_setncattr(self):
