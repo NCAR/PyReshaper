@@ -75,13 +75,11 @@ class ConvertTests(unittest.TestCase):
             nf = len(self.spec_args['infiles'])
             nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
 
-            hline = '-' * 70
-            hdrstr = [hline, '{}:'.format(inspect.stack()[1][3]), '',
-                      '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt},'.format(nf, mf, nt, mt, **self.spec_args),
-                      '             compression={compression}, meta1d={meta1d}, backend={backend})'.format(**self.spec_args),
-                      '   create(serial={serial}, verbosity={verbosity}, wmode={wmode},'.format(**self.create_args),
-                      '          once={once}, simplecomm={simplecomm})'.format(**self.create_args),
-                      '   convert(output_limit={output_limit}, chunks={chunks})'.format(**self.convert_args), hline]
+            hline = '-' * 100
+            hdrstr = ['', hline, '{}:'.format(inspect.stack()[1][3]), '',
+                      '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt}, compression={compression}, meta1d={meta1d}, backend={backend})'.format(nf, mf, nt, mt, **self.spec_args),
+                      '   create(serial={serial}, verbosity={verbosity}, wmode={wmode}, once={once}, simplecomm={simplecomm})'.format(**self.create_args),
+                      '   convert(output_limit={output_limit}, chunks={chunks})'.format(**self.convert_args), hline, '']
             print eol.join(hdrstr)
 
     def check(self, tsvar):
@@ -173,14 +171,26 @@ class ConvertTests(unittest.TestCase):
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_Nio(self):
-        self.spec_args['backend'] = 'Nio'
-        self.header()
-        self.convert()
-        if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
-                self.check(tsvar)
-        MPI_COMM_WORLD.Barrier()
+#     def test_Nio_NC3(self):
+#         self.spec_args['ncfmt'] = 'netcdf'
+#         self.spec_args['backend'] = 'Nio'
+#         self.create_args['verbosity'] = 3
+#         self.header()
+#         self.convert()
+#         if self.rank == 0:
+#             for tsvar in makeTestData.tsvars:
+#                 self.check(tsvar)
+#         MPI_COMM_WORLD.Barrier()
+
+#     def test_Nio(self):
+#         self.spec_args['backend'] = 'Nio'
+#         self.create_args['verbosity'] = 3
+#         self.header()
+#         self.convert()
+#         if self.rank == 0:
+#             for tsvar in makeTestData.tsvars:
+#                 self.check(tsvar)
+#         MPI_COMM_WORLD.Barrier()
         
     def test_netCDF4(self):
         self.spec_args['backend'] = 'netCDF4'
