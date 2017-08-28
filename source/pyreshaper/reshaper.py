@@ -371,8 +371,6 @@ class Reshaper(object):
         var_names = set(all_tsvars.keys() + self._time_invariant_metadata + self._time_variant_metadata)
         missing_vars = set()
         
-        #print '{}: vars = {}'.format(self._simplecomm.get_rank(), var_names)
-    
         # Partition the remaining filenames to inspect
         input_filenames = self._simplecomm.partition(self._input_filenames[1:], func=EqualStride(), involved=True)
 
@@ -793,6 +791,7 @@ class Reshaper(object):
 
         #===== LOOP OVER TIME_SERIES VARIABLES =====
 
+        
         # Loop over all time-series variables
         for out_name in tsv_names_loc:
 
