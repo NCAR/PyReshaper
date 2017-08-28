@@ -175,7 +175,7 @@ class NCFile(object):
         
             self._dimensions = _dict_((d, len(self._obj.dimensions[d])) for d in self._obj.dimensions)
             
-        self._variables = _dict_((v, NCVariable(self._obj.variables[v], mode=mode)) for v in self._obj.variables)
+        self._variables = _dict_((v, NCVariable(v, self._obj.variables[v], mode=mode)) for v in self._obj.variables)
 
     @property
     def dimensions(self):
@@ -239,12 +239,12 @@ class NCFile(object):
         if self._backend == 'Nio':
             var = self._obj.create_variable(name, dtchar, dimensions)
             if fill_value is not None:
-                setattr(var, '_FillValue', fill_value)
+                setattr(var, '_FillValue', numpy.array(fill_value, dtype=numpy.dtype(datatype)))
         elif self._backend == 'netCDF4':
             if fill_value is not None:
-                self._var_opts['fill_value'] = fill_value
+                self._var_opts['fill_value'] = numpy.array(fill_value, dtype=numpy.dtype(datatype))
             var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
-        new_var = NCVariable(var, self._mode)
+        new_var = NCVariable(name, var, self._mode)
         self._variables[name] = new_var
         return new_var
 
@@ -260,7 +260,8 @@ class NCVariable(object):
     Wrapper class for NetCDF variables
     """
 
-    def __init__(self, vobj, mode='r'):
+    def __init__(self, vname, vobj, mode='r'):
+        self._name = vname
         self._mode = mode
         self._obj = vobj
         if _NC4_ is not None and isinstance(vobj, _NC4_VAR_):
@@ -291,6 +292,8 @@ class NCVariable(object):
             raise RuntimeError('Cannot set attribute in read mode')
         if name == '_FillValue':
             raise AttributeError('Cannot set fill value of NCVariable')
+        elif name == 'missing_value':
+            value = numpy.array(value, dtype=self.datatype)[()]
         if self._backend == 'Nio':
             if isinstance(value, unicode):
                 value = str(value)
@@ -305,6 +308,10 @@ class NCVariable(object):
     @property
     def shape(self):
         return self._obj.shape
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def ndim(self):
@@ -354,6 +361,8 @@ class NCVariable(object):
     def __getitem__(self, key):
         if self.shape == ():
             return self.get_value()
+        elif self.size == 0:
+            return numpy.zeros(self.shape, dtype=self.datatype)
         else:
             return self._obj[key]
 
