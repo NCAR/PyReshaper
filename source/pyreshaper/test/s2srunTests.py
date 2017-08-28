@@ -139,10 +139,9 @@ class MainTests(unittest.TestCase):
             nf = len(self.spec_args['infiles'])
             nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
 
-            hline = '-' * 70
+            hline = '-' * 100
             hdrstr = [hline, '{}:'.format(testname), '',
-                      '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt},'.format(nf, mf, nt, mt, **self.spec_args),
-                      '             compression={compression}, meta1d={meta1d}, backend={backend})'.format(**self.spec_args),
+                      '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt}, compression={compression}, meta1d={meta1d}, backend={backend})'.format(nf, mf, nt, mt, **self.spec_args),
                       '   s2srun {}'.format(' '.join(str(a) for a in self.runargs())), hline]
             print eol.join(hdrstr)
 
@@ -366,7 +365,7 @@ class MainTests(unittest.TestCase):
 # CLI
 #=======================================================================================================================
 if __name__ == "__main__":
-    hline = '=' * 70
+    hline = '=' * 100
     if MPI_COMM_WORLD.Get_rank() == 0:
         print hline
         print 'STANDARD OUTPUT FROM ALL TESTS:'
