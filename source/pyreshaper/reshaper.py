@@ -704,7 +704,8 @@ class Reshaper(object):
             output_limit (int): Limit on the number of output (time-series) files to write during the
                 convert() operation.  If set to 0, no limit is placed.  This limits the number of output files
                 produced by each processor in a parallel run.
-            chunks (dict): A dictionary of dimension names mapped to chunk sizes along that named dimension
+            chunks (dict): A dictionary of dimension names mapped to chunk sizes along that named
+                dimension
         """
         iobackend.set_backend(self._backend)
 
