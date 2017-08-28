@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pyreshaper.iobackend module &mdash; PyReshaper 1.0.2 documentation</title>
+  <title>pyreshaper.iobackend module &mdash; PyReshaper 1.0.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyReshaper 1.0.2 documentation" href="index.html"/>
+    <link rel="top" title="PyReshaper 1.0.3 documentation" href="index.html"/>
         <link rel="up" title="The PyReshaper Package" href="pyreshaper.html"/>
         <link rel="next" title="PyReshaper Change Log" href="changelog.html"/>
         <link rel="prev" title="pyreshaper.reshaper module" href="reshaper.html"/> 
@@ -196,7 +196,7 @@ See the LICENSE.rst file for details</p>
 
 <dl class="method">
 <dt id="pyreshaper.iobackend.NCFile.create_variable">
-<code class="descname">create_variable</code><span class="sig-paren">(</span><em>name</em>, <em>datatype</em>, <em>dimensions</em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.iobackend.NCFile.create_variable" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_variable</code><span class="sig-paren">(</span><em>name</em>, <em>datatype</em>, <em>dimensions</em>, <em>fill_value=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.iobackend.NCFile.create_variable" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -239,7 +239,7 @@ See the LICENSE.rst file for details</p>
 
 <dl class="class">
 <dt id="pyreshaper.iobackend.NCVariable">
-<em class="property">class </em><code class="descclassname">pyreshaper.iobackend.</code><code class="descname">NCVariable</code><span class="sig-paren">(</span><em>vobj</em>, <em>mode='r'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.iobackend.NCVariable" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyreshaper.iobackend.</code><code class="descname">NCVariable</code><span class="sig-paren">(</span><em>vname</em>, <em>vobj</em>, <em>mode='r'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.iobackend.NCVariable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Wrapper class for NetCDF variables</p>
 <dl class="method">
@@ -257,6 +257,11 @@ See the LICENSE.rst file for details</p>
 <code class="descname">dimensions</code><a class="headerlink" href="#pyreshaper.iobackend.NCVariable.dimensions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="attribute">
+<dt id="pyreshaper.iobackend.NCVariable.fill_value">
+<code class="descname">fill_value</code><a class="headerlink" href="#pyreshaper.iobackend.NCVariable.fill_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="pyreshaper.iobackend.NCVariable.get_value">
 <code class="descname">get_value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.iobackend.NCVariable.get_value" title="Permalink to this definition">¶</a></dt>
@@ -268,8 +273,18 @@ See the LICENSE.rst file for details</p>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="pyreshaper.iobackend.NCVariable.name">
+<code class="descname">name</code><a class="headerlink" href="#pyreshaper.iobackend.NCVariable.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="pyreshaper.iobackend.NCVariable.ncattrs">
 <code class="descname">ncattrs</code><a class="headerlink" href="#pyreshaper.iobackend.NCVariable.ncattrs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyreshaper.iobackend.NCVariable.ndim">
+<code class="descname">ndim</code><a class="headerlink" href="#pyreshaper.iobackend.NCVariable.ndim" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -350,7 +365,7 @@ See the LICENSE.rst file for details</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.2',
+            VERSION:'1.0.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
