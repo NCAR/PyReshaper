@@ -65,8 +65,6 @@ def is_available(name=None):
 #===============================================================================
 def set_backend(name=None):
     global _BACKEND_
-    if name == 'Nio':
-        raise RuntimeError('PyNIO is currently not working with this version')
     if name is None:
         if is_available():
             _BACKEND_ = _AVAILABLE_[0]
