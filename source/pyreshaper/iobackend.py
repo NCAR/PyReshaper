@@ -233,16 +233,17 @@ class NCFile(object):
     def create_variable(self, name, datatype, dimensions, fill_value=None):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
-        dtchar = numpy.dtype(datatype).char
-        if dtchar == 'S' or dtchar == 'U' or dtchar == 'c':
+        dt = datatype if isinstance(datatype, numpy.dtype) else numpy.dtype(datatype)
+        if dt.char in ('S', 'U', 'c'):
             fill_value = None
         if self._backend == 'Nio':
-            var = self._obj.create_variable(name, dtchar, dimensions)
+            dtc = 'c' if dt.char in ('S', 'U') else dt.char
+            var = self._obj.create_variable(name, dtc, dimensions)
             if fill_value is not None:
-                setattr(var, '_FillValue', numpy.array(fill_value, dtype=numpy.dtype(datatype)))
+                setattr(var, '_FillValue', numpy.array(fill_value, dtype=dt))
         elif self._backend == 'netCDF4':
             if fill_value is not None:
-                self._var_opts['fill_value'] = numpy.array(fill_value, dtype=numpy.dtype(datatype))
+                self._var_opts['fill_value'] = numpy.array(fill_value, dtype=dt)
             var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
         new_var = NCVariable(name, var, self._mode)
         self._variables[name] = new_var
