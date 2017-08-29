@@ -25,9 +25,9 @@ MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
 
 #=======================================================================================================================
-# ConvertTests
+# NetCDF4Tests
 #=======================================================================================================================
-class ConvertTests(unittest.TestCase):
+class NetCDF4Tests(unittest.TestCase):
 
     def setUp(self):
 
@@ -76,7 +76,7 @@ class ConvertTests(unittest.TestCase):
             nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
 
             hline = '-' * 100
-            hdrstr = ['', hline, '{}:'.format(inspect.stack()[1][3]), '',
+            hdrstr = ['', hline, '{}.{}:'.format(self.__class__.__name__, inspect.stack()[1][3]), '',
                       '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt}, compression={compression}, meta1d={meta1d}, backend={backend})'.format(nf, mf, nt, mt, **self.spec_args),
                       '   create(serial={serial}, verbosity={verbosity}, wmode={wmode}, once={once}, simplecomm={simplecomm})'.format(**self.create_args),
                       '   convert(output_limit={output_limit}, chunks={chunks})'.format(**self.convert_args), hline, '']
@@ -164,36 +164,6 @@ class ConvertTests(unittest.TestCase):
 
     def test_NC3(self):
         self.spec_args['ncfmt'] = 'netcdf'
-        self.header()
-        self.convert()
-        if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
-                self.check(tsvar)
-        MPI_COMM_WORLD.Barrier()
-
-#     def test_Nio_NC3(self):
-#         self.spec_args['ncfmt'] = 'netcdf'
-#         self.spec_args['backend'] = 'Nio'
-#         self.create_args['verbosity'] = 3
-#         self.header()
-#         self.convert()
-#         if self.rank == 0:
-#             for tsvar in makeTestData.tsvars:
-#                 self.check(tsvar)
-#         MPI_COMM_WORLD.Barrier()
-
-#     def test_Nio(self):
-#         self.spec_args['backend'] = 'Nio'
-#         self.create_args['verbosity'] = 3
-#         self.header()
-#         self.convert()
-#         if self.rank == 0:
-#             for tsvar in makeTestData.tsvars:
-#                 self.check(tsvar)
-#         MPI_COMM_WORLD.Barrier()
-        
-    def test_netCDF4(self):
-        self.spec_args['backend'] = 'netCDF4'
         self.header()
         self.convert()
         if self.rank == 0:
@@ -300,6 +270,17 @@ class ConvertTests(unittest.TestCase):
 
 
 #=======================================================================================================================
+# NioTests
+#=======================================================================================================================
+class NioTests(NetCDF4Tests):
+    """PyNIO tests"""
+    
+    def setUp(self):
+        NetCDF4Tests.setUp(self)
+        self.spec_args['backend'] = 'Nio'
+    
+
+#=======================================================================================================================
 # CLI
 #=======================================================================================================================
 if __name__ == "__main__":
@@ -311,11 +292,13 @@ if __name__ == "__main__":
     MPI_COMM_WORLD.Barrier()
 
     mystream = StringIO()
-    tests = unittest.TestLoader().loadTestsFromTestCase(ConvertTests)
-    unittest.TextTestRunner(stream=mystream).run(tests)
+    tests = [unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests),
+             unittest.TestLoader().loadTestsFromTestCase(NioTests)]
+    suite = unittest.TestSuite(tests)
+    unittest.TextTestRunner(stream=mystream).run(suite)
     MPI_COMM_WORLD.Barrier()
-
     results = MPI_COMM_WORLD.gather(mystream.getvalue())
+
     if MPI_COMM_WORLD.Get_rank() == 0:
         for rank, result in enumerate(results):
             print hline
