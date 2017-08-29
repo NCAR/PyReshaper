@@ -401,6 +401,7 @@ class NCVariable(object):
                 minlen = strlen if strlen < len(item) else len(item)
                 lidx = []
                 ridx = list(it.multi_index)
+                print '******', key_t[:-1], ridx
                 for k in key_t[:-1]:
                     if isinstance(k, slice):
                         lidx.append(ridx.pop(0))
