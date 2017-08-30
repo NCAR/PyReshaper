@@ -12,8 +12,10 @@ from pyreshaper import iobackend
 nlat = 19
 nlon = 36
 ntime = 10
+nchar = 7
 slices = ['input{0}.nc'.format(i) for i in xrange(5)]
 scalars = ['scalar{0}'.format(i) for i in xrange(2)]
+chvars = ['char{0}'.format(i) for i in xrange(1)]
 timvars = ['tim{0}'.format(i) for i in xrange(2)]
 tvmvars = ['tvm{0}'.format(i) for i in xrange(2)]
 tsvars = ['tsvar{0}'.format(i) for i in xrange(4)]
@@ -45,10 +47,11 @@ def generate_data(backend='netCDF4'):
         fobj.create_dimension('lat', nlat)
         fobj.create_dimension('lon', nlon)
         fobj.create_dimension('time', None)
+        fobj.create_dimension('strlen', nchar)
 
         # Create the coordinate variables & add attributes
         lat = fobj.create_variable('lat', 'f', ('lat',))
-        lon = fobj.create_variable('lon', 'f', ('lon',), fill_value=1e36)
+        lon = fobj.create_variable('lon', 'f', ('lon',))
         time = fobj.create_variable('time', 'f', ('time',))
 
         # Set the coordinate variable attributes
@@ -57,7 +60,6 @@ def generate_data(backend='netCDF4'):
 
         lon.setncattr('long_name', 'longitude')
         lon.setncattr('units', 'degrees_east')
-        lon.setncattr('missing_value', 1e36)
 
         time.setncattr('long_name', 'time')
         time.setncattr('units', 'days since 01-01-0001')
@@ -84,6 +86,14 @@ def generate_data(backend='netCDF4'):
             v.setncattr('units', '[{0}]'.format(vname))
             v[:] = np.ones((nlat, nlon), dtype=np.float64) * n
 
+        # Create the time-variant character variables
+        for n in xrange(len(chvars)):
+            vname = chvars[n]
+            v = fobj.create_variable(vname, 'c', ('time', 'strlen'))
+            v.setncattr('long_name', 'character array {0}'.format(n))
+            vdata = [str((n+1)*m) * (m+1) for m in xrange(ntime)]
+            v[:] = np.array(vdata, dtype='S{}'.format(nchar)).view('S1').reshape(ntime, nchar)
+
         # Create the time-variant metadata variables
         for n in xrange(len(tvmvars)):
             vname = tvmvars[n]
@@ -95,10 +105,13 @@ def generate_data(backend='netCDF4'):
         # Create the time-series variables
         for n in xrange(len(tsvars)):
             vname = tsvars[n]
-            v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'))
+            v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'), fill_value=1e36)
             v.setncattr('long_name', 'time-series variable {0}'.format(n))
             v.setncattr('units', '[{0}]'.format(vname))
-            v[:] = np.ones((ntime, nlat, nlon), dtype=np.float64) * n
+            v.setncattr('missing_value', 1e36)
+            vdata = np.ones((ntime, nlat, nlon), dtype=np.float64) * n
+            vmask = np.random.choice([True, False], ntime*nlat*nlon).reshape(ntime, nlat, nlon)
+            v[:] = np.ma.MaskedArray(vdata, mask=vmask)
 
 
 #=======================================================================================================================
@@ -127,24 +140,24 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
         _assert('{0!r} exists'.format(infile), os.path.exists(infile))
         if not os.path.exists(infile):
             return assertions
+        
         ncinp = iobackend.NCFile(infile)
         nsteps = ncinp.dimensions['time']
         if infile == infiles[0]:
-            scalars = [v for v in ncinp.variables if ncinp.variables[v].dimensions == ()]
+            scvars = [v for v in ncinp.variables if ncinp.variables[v].dimensions == ()]
             tivars = [v for v in ncinp.variables if 'time' not in ncinp.variables[v].dimensions]
             tsvars = [v for v in ncinp.variables if 'time' in ncinp.variables[v].dimensions and v not in metadata]
             if once:
                 tsvars.append('once')
 
-            outdims = {'lat': ncinp.dimensions['lat'],
-                       'lon': ncinp.dimensions['lon']}
+            outdims = {'lat': ncinp.dimensions['lat'], 'lon': ncinp.dimensions['lon'], 'strlen': ncinp.dimensions['strlen']}
 
             outmeta = [v for v in ncinp.variables if v not in tsvars]
 
-            _assert('{0}: variable {1!r} exists'.format(outfile, tsvar), tsvar in tsvars)
-            _assert('{0}: attribute names equal'.format(outfile), ncout.ncattrs == ncinp.ncattrs)
+            _assert('{0}: variable {1!r} found in input'.format(outfile, tsvar), tsvar in tsvars)
+            _assert('{0}: global attribute names equal'.format(outfile), ncout.ncattrs == ncinp.ncattrs)
             for a in set(ncout.ncattrs).intersection(set(ncinp.ncattrs)):
-                _assert('{0}: attribute {1} values equal'.format(outfile, a), ncout.getncattr(a) == ncinp.getncattr(a))
+                _assert('{0}: global attribute {1} values equal'.format(outfile, a), ncout.getncattr(a) == ncinp.getncattr(a))
             for d, v in outdims.iteritems():
                 _assert("{0}: {1!r} in dimensions".format(outfile, d), d in ncout.dimensions)
                 _assert("{0}: dimensions[{1!r}]".format(outfile, d), ncout.dimensions[d] == v)
@@ -154,14 +167,16 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                 all_vars = outmeta if tsvar == 'once' else [tsvar]
             else:
                 all_vars = [tsvar] + outmeta
-            _assert("{0}: variable set".format(outfile), set(ncout.variables.keys()) == set(all_vars))
+            _assert("{0}: variable names same".format(outfile), set(ncout.variables.keys()) == set(all_vars))
             for v in all_vars:
-                if v in scalars:
+                if v in scvars:
                     expected = ()
                 elif v in ncinp.dimensions:
                     expected = (v,)
                 elif v in tivars:
                     expected = ('lat', 'lon')
+                elif v in chvars:
+                    expected = ('time', 'strlen')
                 else:
                     expected = ('time', 'lat', 'lon')
                 _assert("{0}: {1}.dimemsions equal".format(outfile, v), ncout.variables[v].dimensions == expected)
@@ -172,7 +187,7 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                 oslice = slice(series_step, series_step + nsteps)
                 actual = ncout.variables[v][oslice]
             elif 'time' in ncout.variables[v].dimensions:
-                oslice = [slice(None)] * 3
+                oslice = [slice(None)] * (2 if v in chvars else 3)
                 oslice[0] = slice(series_step, series_step + nsteps)
                 actual = ncout.variables[v][tuple(oslice)]
             else:

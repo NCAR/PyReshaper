@@ -42,7 +42,7 @@ class NetCDF4Tests(unittest.TestCase):
                           'prefix': 'out.',
                           'suffix': '.nc',
                           'timeseries': None,
-                          'metadata': [v for v in makeTestData.tvmvars] + ['time'],
+                          'metadata': [v for v in makeTestData.tvmvars] + ['time'] + [v for v in makeTestData.chvars],
                           'meta1d': False,
                           'backend': 'netCDF4'}
         self.create_args = {'serial': False,
