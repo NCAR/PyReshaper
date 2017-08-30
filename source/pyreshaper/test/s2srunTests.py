@@ -89,9 +89,9 @@ class CLITests(unittest.TestCase):
 
 
 #=======================================================================================================================
-# MainTests
+# NetCDF4Tests
 #=======================================================================================================================
-class MainTests(unittest.TestCase):
+class NetCDF4Tests(unittest.TestCase):
 
     def setUp(self):
 
@@ -140,7 +140,7 @@ class MainTests(unittest.TestCase):
             nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
 
             hline = '-' * 100
-            hdrstr = [hline, '{}:'.format(testname), '',
+            hdrstr = [hline, '{}.{}:'.format(self.__class__.__name__, testname), '',
                       '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt}, compression={compression}, meta1d={meta1d}, backend={backend})'.format(nf, mf, nt, mt, **self.spec_args),
                       '   s2srun {}'.format(' '.join(str(a) for a in self.runargs())), hline]
             print eol.join(hdrstr)
@@ -245,24 +245,6 @@ class MainTests(unittest.TestCase):
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-#     def test_Nio(self):
-#         self.spec_args['backend'] = 'Nio'
-#         self.header(inspect.currentframe().f_code.co_name)
-#         self.convert()
-#         if self.rank == 0:
-#             for tsvar in makeTestData.tsvars:
-#                 self.check(tsvar)
-#         MPI_COMM_WORLD.Barrier()
-        
-    def test_netCDF4(self):
-        self.spec_args['backend'] = 'netCDF4'
-        self.header(inspect.currentframe().f_code.co_name)
-        self.convert()
-        if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
-                self.check(tsvar)
-        MPI_COMM_WORLD.Barrier()
-
     def test_ser(self):
         self.run_args['serial'] = True
         self.header(inspect.currentframe().f_code.co_name)
@@ -359,6 +341,16 @@ class MainTests(unittest.TestCase):
                     self.spec_args['infiles'] = makeTestData.slices
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
+        
+
+#=======================================================================================================================
+# NioTests
+#=======================================================================================================================
+class NioTests(NetCDF4Tests):
+    
+    def setUp(self):
+        NetCDF4Tests.setUp(self)
+        self.spec_args['backend'] = 'Nio'
 
 
 #=======================================================================================================================
@@ -383,8 +375,11 @@ if __name__ == "__main__":
     MPI_COMM_WORLD.Barrier()
 
     mainstream = StringIO()
-    maintests = unittest.TestLoader().loadTestsFromTestCase(MainTests)
-    unittest.TextTestRunner(stream=mainstream).run(maintests)
+    nc4tests = unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests)
+    tests = [unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests),
+             unittest.TestLoader().loadTestsFromTestCase(NioTests)]
+    suite = unittest.TestSuite(tests)
+    unittest.TextTestRunner(stream=mainstream).run(suite)
     MPI_COMM_WORLD.Barrier()
 
     results = MPI_COMM_WORLD.gather(mainstream.getvalue())
