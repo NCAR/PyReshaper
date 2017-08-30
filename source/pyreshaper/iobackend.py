@@ -65,8 +65,6 @@ def is_available(name=None):
 #===============================================================================
 def set_backend(name=None):
     global _BACKEND_
-    if name == 'Nio':
-        raise RuntimeError('PyNIO is currently not working with this version')
     if name is None:
         if is_available():
             _BACKEND_ = _AVAILABLE_[0]
@@ -235,16 +233,17 @@ class NCFile(object):
     def create_variable(self, name, datatype, dimensions, fill_value=None):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
-        dtchar = numpy.dtype(datatype).char
-        if dtchar == 'S' or dtchar == 'U' or dtchar == 'c':
+        dt = datatype if isinstance(datatype, numpy.dtype) else numpy.dtype(datatype)
+        if dt.char in ('S', 'U', 'c'):
             fill_value = None
         if self._backend == 'Nio':
-            var = self._obj.create_variable(name, dtchar, dimensions)
+            dtc = 'c' if dt.char in ('S', 'U') else dt.char
+            var = self._obj.create_variable(name, dtc, dimensions)
             if fill_value is not None:
-                setattr(var, '_FillValue', numpy.array(fill_value, dtype=numpy.dtype(datatype)))
+                setattr(var, '_FillValue', numpy.array(fill_value, dtype=dt))
         elif self._backend == 'netCDF4':
             if fill_value is not None:
-                self._var_opts['fill_value'] = numpy.array(fill_value, dtype=numpy.dtype(datatype))
+                self._var_opts['fill_value'] = numpy.array(fill_value, dtype=dt)
             var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
         new_var = NCVariable(name, var, self._mode)
         self._variables[name] = new_var
@@ -379,36 +378,25 @@ class NCVariable(object):
                 raise KeyError('Too many indices specified for variable')
             key_t += (slice(None),)*(self.ndim - len(key_t))
             
-            def lenslice(l,s):
-                start, stop, step = s.indices(l)
-                return (stop-start)//step + int((stop-start)%step>0)
-            lshape = tuple(lenslice(l,s) for l,s in zip(self.shape, key_t) if isinstance(s, slice))
-            lndim = len(lshape)
-            strlen = lenslice(self.shape[-1], key_t[-1]) if isinstance(key_t[-1], slice) else 1
-            
             varray = numpy.ma.asarray(value)
             if varray.dtype.char not in ('c', 'S', 'U'):
                 raise TypeError('Incompatible type for string variable')
-            if varray.ndim == lndim and varray.itemsize == 1:
-                rvalue = numpy.ma.squeeze(varray.view('S{}'.format(varray.shape[-1])))
-            elif varray.ndim == lndim - 1:
-                rvalue = varray
-            else:
-                raise ValueError('Incompatible array sizes for string variable')
+            if self.ndim != varray.ndim:
+                raise ValueError('Incompatible array dimensions for string variable')
 
-            it = numpy.nditer(rvalue, flags=['multi_index'])
+            def lenslice(l,s):
+                start, stop, step = s.indices(l)
+                return (stop-start)//step + int((stop-start)%step>0)
+            strlen = lenslice(self.shape[-1], key_t[-1]) if isinstance(key_t[-1], slice) else 1
+            
+            rarray = numpy.squeeze(varray.view('S{}'.format(strlen)), axis=-1)
+            
+            it = numpy.nditer(rarray, flags=['multi_index'])
             while not it.finished:
                 item = it[0].tostring().replace('\x00', '')
                 minlen = strlen if strlen < len(item) else len(item)
-                lidx = []
-                ridx = list(it.multi_index)
-                for k in key_t[:-1]:
-                    if isinstance(k, slice):
-                        lidx.append(ridx.pop(0))
-                    else:
-                        lidx.append(k)
-                lidx.append(slice(minlen))
-                self._obj[tuple(lidx)] = item[:minlen]
+                lidx = key_t[:-1] + (slice(minlen),)
+                self._obj[lidx] = item[:minlen]
                 it.iternext()
         else:
             self._obj[key] = value

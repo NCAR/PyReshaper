@@ -582,7 +582,7 @@ class Reshaper(object):
 
     def _create_var(self, in_file, out_file, vname):
         in_var = in_file.variables[vname]
-        fill_value = in_var.getncattr('_FillValue') if '_FillValue' in in_var.ncattrs else None
+        fill_value = in_var.fill_value
         out_var = out_file.create_variable(vname, in_var.datatype, in_var.dimensions, fill_value=fill_value)
         for att_name in in_var.ncattrs:
             att_value = in_var.getncattr(att_name)

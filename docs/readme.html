@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The PyReshaper &mdash; PyReshaper 1.0.3 documentation</title>
+  <title>The PyReshaper &mdash; PyReshaper 1.0.4 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="PyReshaper 1.0.3 documentation" href="index.html"/>
+    <link rel="top" title="PyReshaper 1.0.4 documentation" href="index.html"/>
         <link rel="next" title="The PyReshaper User’s Manual" href="manual.html"/>
         <link rel="prev" title="Welcome to PyReshaper’s documentation!" href="index.html"/> 
 
@@ -204,14 +204,11 @@ implimented using the ASAPTools SimpleComm, which uses mpi4py.  Implicit
 dependencies exist as a result of these direct dependencies.</p>
 <p>The PyReshaper explicitly depends upon the following Python packages:</p>
 <ul class="simple">
-<li>PyNIO (v1.4.1+) or netCDF4-python (v1.2+)</li>
+<li>PyNIO (v1.5+) or netCDF4-python (v1.2+)</li>
 <li>ASAPPyTools (v0.4+)</li>
 </ul>
 <p>These packages imply a dependency on the NumPy (v1.4+) and mpi4py (v1.3+)
 packages, and the  libraries NetCDF and MPI/MPI-2.</p>
-<p>Additionally, the entire package is designed to work with Python v2.6 and up
-to (but not including) Python v3.0.  If using Python version 2.6, you will
-need to install the <code class="docutils literal"><span class="pre">ordereddict</span></code> package, too.</p>
 <p>The version requirements have not been rigidly tested, so earlier versions
 may actually work.  No version requirement is made during installation, though,
 so problems might occur if an earlier versions of these packages have been
@@ -269,20 +266,6 @@ to install.  To do this, type (on unix machines):</p>
 </div>
 <p>This can be handy since the site-packages directory will be common for all
 user installs, and therefore only needs to be added to the <code class="docutils literal"><span class="pre">PYTHONPATH</span></code> once.</p>
-<p>To install the documentation, you must have Sphinx installed on your system.
-Sphinx can be easily installed with pip, via:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$  pip install Sphinx
-</pre></div>
-</div>
-<p>Once Sphinx is installed, you can build the PyReshaper HTML documentation
-with:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$  cd docs
-$  make html
-</pre></div>
-</div>
-<p>The resulting HTML documentation will be placed in the docs/build/html
-directory, and the main page can be loaded with any browser pointing to
-‘docs/build/html/index.html’.</p>
 </div>
 <div class="section" id="before-using-the-pyreshaper-package">
 <h2>Before Using the PyReshaper Package<a class="headerlink" href="#before-using-the-pyreshaper-package" title="Permalink to this headline">¶</a></h2>
@@ -357,7 +340,7 @@ for how to build the documentation with Sphinx.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.0.3',
+            VERSION:'1.0.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

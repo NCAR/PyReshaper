@@ -14,14 +14,11 @@ Requirements
 
 The PyReshaper explicitly depends upon the following Python packages:
 
--  PyNIO (v1.4.1+) or netCDF4-python (v1.2+)
+-  PyNIO (v1.5+) or netCDF4-python (v1.2+)
 -  ASAPPyTools (v0.4+)
 
 These packages imply a dependency on the NumPy (v1.4+) and mpi4py (v1.3+) 
-packages, and the  libraries NetCDF and MPI/MPI-2.
-
-If using Python version 2.6, you will need to install the ``ordereddict``
-package, too.
+packages, and the libraries NetCDF and MPI/MPI-2.
 
 No thorough testing has been done to show whether earlier versions of
 these dependencies will work with the PyReshaper. The versions listed
@@ -59,36 +56,6 @@ When installing, the ``--user`` option to either ``pip`` or ``setup.py``
 will install the PyReshaper in the user's private workspace, as defined
 by the system on which the user is installing.  This is useful if you don't
 have permissions to install system-wide software.
-
-Generating the API Documentation
---------------------------------
-
-If you are a developer, you may find the Sphinx API documentation helpful 
-in understanding the design and functionality of the PyReshaper code. To 
-generate this documentation, you must have Sphinx available and installed. 
-If you do, the API documentation can be easily generated with the following 
-command from the ``docs`` directory.
-
-::
-
-    $  make html
-
-The API documentation will be placed in the ``docs/build/html/`` directory.
-
-Generating the User Documentation
----------------------------------
-
-The ``README.rst`` file and this User Manual should be consulted for help
-on installing and using the software. Both documents are included with
-the source. The ``README.rst`` file is included with the top-level
-PyReshaper directory, and the User Manual is contained in the
-``docs/source/manual.rst`` file. Both files are reStructuredText formatted
-files, meaning they are simple text files that can be read with any text
-viewer.
-
-An HTML version of the User Manual will automatically be created by
-Sphinx, as described in the previous section. A link will be created
-to the manual in the HTML documentation.
 
 Before Using the PyReshaper
 ---------------------------
