@@ -44,6 +44,9 @@ def cli(argv=None):
                             'output files.  There may be more than one '
                             '--metadata (-m) option given, and each one is '
                             'appended to a list.  [Default: []]'))
+    parser.add_option('--metadata_file', default=None, type="string",
+                      help=('The name of a time-slice input file from which '
+                            'metadata variable names will be read.  [Default: None]'))
     parser.add_option('-o', '--specfile', default='input.s2s', type="string",
                       help=('The name of the Pickled Specifier (specfile) '
                             'to be output [Default: "input.spec"]'))
@@ -90,6 +93,8 @@ def cli(argv=None):
 #==============================================================================
 # Main Script Function
 #==============================================================================
+
+
 def main(argv=None):
     opts, args = cli(argv)
 
@@ -110,6 +115,7 @@ def main(argv=None):
     spec.output_file_suffix = opts.output_suffix
     spec.time_series = opts.time_series
     spec.time_variant_metadata = opts.metadata
+    spec.metadata_filename = opts.metadata_file
     spec.assume_1d_time_variant_metadata = opts.meta1d
 
     # Validate before saving

@@ -23,7 +23,7 @@ class SpecifierTests(unittest.TestCase):
     def test_init(self):
         spec = specification.Specifier()
         self.assertEqual(len(spec.input_file_list), 0,
-                             'Input file list not initialized to empty')
+                         'Input file list not initialized to empty')
         self.assertEqual(spec.netcdf_format, 'netcdf4',
                          'NetCDF format not initialized to netcdf4')
         self.assertEqual(spec.compression_level, 0,
@@ -35,11 +35,13 @@ class SpecifierTests(unittest.TestCase):
         self.assertEqual(spec.time_series, None,
                          'Time-series variables list is not initialized to None')
         self.assertEqual(len(spec.time_variant_metadata), 0,
-                             'Time variant metadata list not initialized to empty')
+                         'Time variant metadata list not initialized to empty')
         self.assertEqual(spec.assume_1d_time_variant_metadata, False,
                          'Time-variable 1D metadata flag is not initialized to False')
         self.assertEqual(spec.io_backend, 'netCDF4',
                          'I/O backend not initialized to netCDF4')
+        self.assertEqual(spec.metadata_filename, None,
+                         'Metadata file does not default to None')
 
     def test_init_full(self):
         in_list = ['a', 'b', 'c']
@@ -50,16 +52,19 @@ class SpecifierTests(unittest.TestCase):
         tseries = ['1', '2']
         metadata = ['x', 'y', 'z']
         meta1d = True
+        metafile = 'd'
         backend = 'Nio'
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, timeseries=tseries, metadata=metadata,
-            meta1d=meta1d, backend=backend)
+            meta1d=meta1d, metafile=metafile, backend=backend)
         for i1, i2 in zip(spec.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
         self.assertEqual(spec.io_backend, backend,
                          'NetCDF I/O backend not set properly')
+        self.assertEqual(spec.metadata_filename, metafile,
+                         'Metadata filename not set properly')
         self.assertEqual(spec.netcdf_format, fmt,
                          'NetCDF format not initialized properly')
         self.assertEqual(spec.compression_level, cl,
@@ -76,7 +81,6 @@ class SpecifierTests(unittest.TestCase):
                              'Time-variant metadata list not initialized properly')
         self.assertEqual(spec.assume_1d_time_variant_metadata, meta1d,
                          '1D metadata flag not initialized properly')
-
 
     def test_validate_types_defaults(self):
         in_list = ['a', 'b', 'c']
