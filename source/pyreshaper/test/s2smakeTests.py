@@ -48,7 +48,7 @@ class CLITest(unittest.TestCase):
                          'Default output suffix is not ".nc"')
         self.assertEqual(opts.meta1d, False,
                          'Default 1D metadata flag is not False')
-        self.assertEqual(opts.metadata_file, None,
+        self.assertEqual(opts.metafile, None,
                          'Default metadata filename')
 
     def test_set_all_short(self):
