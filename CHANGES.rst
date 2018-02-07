@@ -4,6 +4,22 @@ PyReshaper Change Log
 Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 
+VERSION 1.0.5
+-------------
+
+ - New feature to allow reading additional time-invariant metadata
+   variable names from a "metadata file."  (Normally, all required
+   time-invariant metadata variable names are pulled from the first
+   time-slice file given as input to the Reshaper.  In addition to
+   the time-invariant metadata variable names found in the first
+   file, this option lets you pull additional names from a separately
+   declared file.)
+
+VERSION 1.0.4
+-------------
+
+ - Code cleanup and minor bugfixes
+ 
 VERSION 1.0.3
 -------------
 
