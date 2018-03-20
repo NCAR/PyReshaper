@@ -47,7 +47,7 @@ class Specifier(object):
                  infiles=[],
                  ncfmt='netcdf4',
                  compression=0,
-                 sigfig=None,
+                 lsigfig=None,
                  prefix='tseries.',
                  suffix='.nc',
                  timeseries=None,
@@ -69,7 +69,7 @@ class Specifier(object):
             infiles (list): List of full-path input filenames
             ncfmt (str): String specifying the NetCDF data format ('netcdf','netcdf4','netcdf4c')
             compression (int): Compression level to use for NetCDF4 formatted data (overridden by the 'netcdf4c' format)
-            sigfig (int): The digit (after the decimal) to assure precision to when using truncation before compression
+            lsigfig (int): The digit (after the decimal) to assure precision to when using truncation before compression
             prefix (str): String specifying the full-path prefix common to all time-series output files
             suffix (str): String specifying the suffix common to all time-series output files
             timeseries (list): List of variable names to extract out from the input time-slices into their own
@@ -94,7 +94,7 @@ class Specifier(object):
         self.compression_level = compression
 
         # Least significant digits argument to NetCDF4 (ignored by PyNIO)
-        self.least_significant_digit = sigfig
+        self.least_significant_digit = lsigfig
 
         # The common prefix to all output files (following the rule:
         #  prefix + variable_name + suffix)
