@@ -291,12 +291,12 @@ class NetCDF4Tests(unittest.TestCase):
 #=========================================================================
 # NioTests
 #=========================================================================
-class NioTests(NetCDF4Tests):
-    """PyNIO tests"""
-
-    def setUp(self):
-        NetCDF4Tests.setUp(self)
-        self.spec_args['backend'] = 'Nio'
+# class NioTests(NetCDF4Tests):
+#     """PyNIO tests"""
+#
+#     def setUp(self):
+#         NetCDF4Tests.setUp(self)
+#         self.spec_args['backend'] = 'Nio'
 
 
 #=========================================================================
@@ -311,8 +311,9 @@ if __name__ == "__main__":
     MPI_COMM_WORLD.Barrier()
 
     mystream = StringIO()
-    tests = [unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests),
-             unittest.TestLoader().loadTestsFromTestCase(NioTests)]
+    # tests = [unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests),
+    #         unittest.TestLoader().loadTestsFromTestCase(NioTests)]
+    tests = [unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests)]
     suite = unittest.TestSuite(tests)
     unittest.TextTestRunner(stream=mystream).run(suite)
     MPI_COMM_WORLD.Barrier()
