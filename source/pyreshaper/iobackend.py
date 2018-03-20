@@ -90,6 +90,17 @@ def get_backend():
 
 
 #=========================================================================
+# get_backend_version
+#=========================================================================
+def get_backend_version(name=None):
+    if name is None:
+        backend = _BACKEND_MAP_[_BACKEND_]
+    else:
+        backend = _BACKEND_MAP_[name]
+    return tuple(int(i) for i in backend.__version__.split('.'))
+
+
+#=========================================================================
 # NCFile
 #=========================================================================
 class NCFile(object):
@@ -385,7 +396,8 @@ class NCVariable(object):
             raise RuntimeError('Cannot set variable in read mode')
         if self.shape == ():
             self.assign_value(value)
-        elif self.datatype == numpy.dtype('c') and self._backend == 'Nio':
+        elif self.datatype == numpy.dtype('c') and self._backend == 'Nio' and get_backend_version(self._backend) < (1, 5, 0):
+            print get_backend_version()
             key_t = numpy.index_exp[key]
             if self.ndim < len(key_t):
                 raise KeyError('Too many indices specified for variable')
