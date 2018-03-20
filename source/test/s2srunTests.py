@@ -360,11 +360,14 @@ class NetCDF4Tests(unittest.TestCase):
 #=========================================================================
 # NioTests
 #=========================================================================
-# class NioTests(NetCDF4Tests):
-#
-#     def setUp(self):
-#         NetCDF4Tests.setUp(self)
-#         self.spec_args['backend'] = 'Nio'
+class NioTests(NetCDF4Tests):
+
+    def setUp(self):
+        NetCDF4Tests.setUp(self)
+        self.spec_args['backend'] = 'Nio'
+
+    def tearDown(self):
+        self.clean()
 
 
 #=========================================================================
