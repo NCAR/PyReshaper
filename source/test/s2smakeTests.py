@@ -32,6 +32,8 @@ class CLITest(unittest.TestCase):
         opts, args = s2smake.cli(argv)
         self.assertEqual(opts.compression_level, 1,
                          'Default compression level is not 1')
+        self.assertEqual(opts.least_significant_digit, None,
+                         'Default least significant digit is not None')
         for i1, i2 in zip(args, argv):
             self.assertEqual(
                 i1, i2, 'Default infiles list is not {0}'.format(argv))
@@ -54,6 +56,7 @@ class CLITest(unittest.TestCase):
 
     def test_set_all_short(self):
         clevel = 3
+        lsigfig = 2
         ncfmt = 'netcdf'
         metadata = ['meta1', 'meta2']
         specfile = 'myspec.s2s'
@@ -62,7 +65,7 @@ class CLITest(unittest.TestCase):
         infiles = ['s2smakeTests.py', 'specificationTests.py']
 
         argv = ['-1']
-        argv.extend(['-c', str(clevel), '-f', ncfmt])
+        argv.extend(['-c', str(clevel), '-d', str(lsigfig), '-f', ncfmt])
         for md in metadata:
             argv.extend(['-m', md])
         argv.extend(['-o', specfile, '-p', prefix, '-s', suffix])
@@ -71,6 +74,8 @@ class CLITest(unittest.TestCase):
 
         self.assertEqual(opts.compression_level, clevel,
                          'Default compression level is not {0!r}'.format(clevel))
+        self.assertEqual(opts.least_significant_digit, lsigfig,
+                         'Default least significant digit is not {0!r}'.format(lsigfig))
         self.assertEqual(len(args), len(
             infiles), 'Default infiles is not of length {0}'.format(len(infiles)))
         for i1, i2 in zip(args, infiles):
@@ -96,6 +101,7 @@ class CLITest(unittest.TestCase):
 
     def test_set_all_long(self):
         clevel = 3
+        lsigfig = 2
         ncfmt = 'netcdf'
         metadata = ['meta1', 'meta2']
         specfile = 'myspec.s2s'
@@ -106,6 +112,7 @@ class CLITest(unittest.TestCase):
 
         argv = ['--meta1d']
         argv.extend(['--compression_level', str(clevel),
+                     '--least_significant_digit', str(lsigfig),
                      '--netcdf_format', ncfmt])
         for md in metadata:
             argv.extend(['--metadata', md])
@@ -118,6 +125,8 @@ class CLITest(unittest.TestCase):
 
         self.assertEqual(opts.compression_level, clevel,
                          'Default compression level is not {0!r}'.format(clevel))
+        self.assertEqual(opts.least_significant_digit, lsigfig,
+                         'Default least significant digit is not {0!r}'.format(lsigfig))
         self.assertEqual(len(args), len(
             infiles), 'Default infiles list is not of length {0}'.format(len(infiles)))
         for i1, i2 in zip(args, infiles):
@@ -162,6 +171,8 @@ class MainTest(unittest.TestCase):
                         'Specfile does not contain a Specifier')
         self.assertEqual(spec.compression_level, 1,
                          'Default compression level is not 1')
+        self.assertEqual(spec.least_significant_digit, None,
+                         'Default least significant digit is not {0!r}'.format(None))
         self.assertEqual(len(spec.input_file_list), len(
             argv), 'Default infiles is not of lenght {0}'.format(len(argv)))
         for i1, i2 in zip(spec.input_file_list, argv):
@@ -182,6 +193,7 @@ class MainTest(unittest.TestCase):
 
     def test_set_all_short(self):
         clevel = 3
+        lsigfig = 2
         ncfmt = 'netcdf'
         metadata = ['meta1', 'meta2']
         specfile = 'myspec.s2s'
@@ -190,7 +202,7 @@ class MainTest(unittest.TestCase):
         infiles = [self.cwd +
                    f for f in ['/s2smakeTests.py', '/specificationTests.py']]
 
-        argv = ['-1', '-c', str(clevel), '-f', ncfmt]
+        argv = ['-1', '-c', str(clevel), '-d', str(lsigfig), '-f', ncfmt]
         for md in metadata:
             argv.extend(['-m', md])
         argv.extend(['-o', specfile, '-p', prefix, '-s', suffix])
@@ -208,6 +220,8 @@ class MainTest(unittest.TestCase):
                         'Specfile does not contain a Specifier')
         self.assertEqual(spec.compression_level, clevel,
                          'Default compression level is not {0!r}'.format(clevel))
+        self.assertEqual(spec.least_significant_digit, lsigfig,
+                         'Default least significant digit is not {0!r}'.format(lsigfig))
         self.assertEqual(len(spec.input_file_list), len(
             infiles), 'Default infiles is not of lenght {0}'.format(len(infiles)))
         for i1, i2 in zip(spec.input_file_list, infiles):
@@ -231,6 +245,7 @@ class MainTest(unittest.TestCase):
 
     def test_set_all_long(self):
         clevel = 3
+        lsigfig = 2
         ncfmt = 'netcdf'
         metadata = ['meta1', 'meta2']
         specfile = 'myspec.s2s'
@@ -240,8 +255,10 @@ class MainTest(unittest.TestCase):
         infiles = [self.cwd +
                    f for f in ['/s2smakeTests.py', '/specificationTests.py']]
 
-        argv = ['--meta1d', '--compression_level',
-                str(clevel), '--netcdf_format', ncfmt]
+        argv = ['--meta1d',
+                '--compression_level', str(clevel),
+                '--least_significant_digit', str(lsigfig),
+                '--netcdf_format', ncfmt]
         for md in metadata:
             argv.extend(['--metadata', md])
         argv.extend(['--specfile', specfile, '--output_prefix',
@@ -262,6 +279,8 @@ class MainTest(unittest.TestCase):
                         'Specfile does not contain a Specifier')
         self.assertEqual(spec.compression_level, clevel,
                          'Default compression level is not {0!r}'.format(clevel))
+        self.assertEqual(spec.least_significant_digit, lsigfig,
+                         'Default least significant digit is not {0!r}'.format(lsigfig))
         self.assertEqual(len(spec.input_file_list), len(
             infiles), 'Default infiles is not of lenght {0}'.format(len(infiles)))
         for i1, i2 in zip(spec.input_file_list, infiles):
