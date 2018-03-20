@@ -25,9 +25,9 @@ MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
 
 #=========================================================================
-# NetCDF4Tests
+# CommonTestsBase
 #=========================================================================
-class NetCDF4Tests(unittest.TestCase):
+class CommonTestsBase(object):
 
     def setUp(self):
 
@@ -44,8 +44,7 @@ class NetCDF4Tests(unittest.TestCase):
                           'timeseries': None,
                           'metadata': [v for v in makeTestData.tvmvars] + ['time'] + [v for v in makeTestData.chvars],
                           'meta1d': False,
-                          'metafile': None,
-                          'backend': 'netCDF4'}
+                          'metafile': None}
         self.create_args = {'serial': False,
                             'verbosity': 1,
                             'wmode': 'w',
@@ -59,9 +58,6 @@ class NetCDF4Tests(unittest.TestCase):
         if self.rank == 0:
             makeTestData.generate_data()
         MPI_COMM_WORLD.Barrier()
-
-    def tearDown(self):
-        self.clean()
 
     def clean(self):
         if self.rank == 0:
@@ -289,14 +285,31 @@ class NetCDF4Tests(unittest.TestCase):
 
 
 #=========================================================================
+# NetCDF4Tests
+#=========================================================================
+class NetCDF4Tests(unittest.TestCase, CommonTestsBase):
+    """NetCDF4 Python Tests"""
+
+    def setUp(self):
+        CommonTestsBase.setUp(self)
+        self.spec_args['backend'] = 'netCDF4'
+
+    def tearDown(self):
+        self.clean()
+
+
+#=========================================================================
 # NioTests
 #=========================================================================
-# class NioTests(NetCDF4Tests):
-#     """PyNIO tests"""
-#
-#     def setUp(self):
-#         NetCDF4Tests.setUp(self)
-#         self.spec_args['backend'] = 'Nio'
+class NioTests(unittest.TestCase, CommonTestsBase):
+    """PyNIO Tests"""
+
+    def setUp(self):
+        CommonTestsBase.setUp(self)
+        self.spec_args['backend'] = 'Nio'
+
+    def tearDown(self):
+        self.clean()
 
 
 #=========================================================================
@@ -311,9 +324,8 @@ if __name__ == "__main__":
     MPI_COMM_WORLD.Barrier()
 
     mystream = StringIO()
-    # tests = [unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests),
-    #         unittest.TestLoader().loadTestsFromTestCase(NioTests)]
-    tests = [unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests)]
+    tests = [unittest.TestLoader().loadTestsFromTestCase(NetCDF4Tests),
+             unittest.TestLoader().loadTestsFromTestCase(NioTests)]
     suite = unittest.TestSuite(tests)
     unittest.TextTestRunner(stream=mystream).run(suite)
     MPI_COMM_WORLD.Barrier()

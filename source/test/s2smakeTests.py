@@ -146,8 +146,11 @@ class CLITest(unittest.TestCase):
 #=========================================================================
 class MainTest(unittest.TestCase):
 
+    def setUp(self):
+        self.cwd = os.path.dirname(os.path.realpath(__file__))
+
     def test_defaults(self):
-        argv = ['s2smakeTests.py']
+        argv = [self.cwd + '/s2smakeTests.py']
         specfile = 'input.s2s'
         if os.path.exists(specfile):
             os.remove(specfile)
@@ -184,7 +187,8 @@ class MainTest(unittest.TestCase):
         specfile = 'myspec.s2s'
         prefix = 'prefix.'
         suffix = '.suffix'
-        infiles = ['s2smakeTests.py', 'specificationTests.py']
+        infiles = [self.cwd +
+                   f for f in ['/s2smakeTests.py', '/specificationTests.py']]
 
         argv = ['-1', '-c', str(clevel), '-f', ncfmt]
         for md in metadata:
@@ -233,7 +237,8 @@ class MainTest(unittest.TestCase):
         prefix = 'prefix.'
         suffix = '.suffix'
         tseries = ['tsvar1', 'tsvar2']
-        infiles = ['s2smakeTests.py', 'specificationTests.py']
+        infiles = [self.cwd +
+                   f for f in ['/s2smakeTests.py', '/specificationTests.py']]
 
         argv = ['--meta1d', '--compression_level',
                 str(clevel), '--netcdf_format', ncfmt]

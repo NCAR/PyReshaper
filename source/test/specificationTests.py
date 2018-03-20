@@ -20,6 +20,9 @@ class SpecifierTests(unittest.TestCase):
     This class defines all of the unit tests for the specification module.
     """
 
+    def setUp(self):
+        self.cwd = os.path.dirname(os.path.realpath(__file__))
+
     def test_init(self):
         spec = specification.Specifier()
         self.assertEqual(len(spec.input_file_list), 0,
@@ -277,7 +280,7 @@ class SpecifierTests(unittest.TestCase):
         self.assertRaises(ValueError, spec.validate_values)
 
     def test_validate_values_suffix(self):
-        in_list = ['specificationTests.py']
+        in_list = [self.cwd + '/specificationTests.py']
         fmt = 'netcdf4'
         prefix = 'pre.'
         suffix = '.suf'
