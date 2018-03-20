@@ -4,6 +4,11 @@ PyReshaper Change Log
 Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 
+VERSION 1.0.6
+-------------
+
+ - Cleaning up testing framework for serial execution
+
 VERSION 1.0.5
 -------------
 
