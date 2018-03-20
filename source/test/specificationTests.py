@@ -31,6 +31,8 @@ class SpecifierTests(unittest.TestCase):
                          'NetCDF format not initialized to netcdf4')
         self.assertEqual(spec.compression_level, 0,
                          'NetCDF compression level not initialized to 0')
+        self.assertEqual(spec.least_significant_digit, None,
+                         'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_prefix, 'tseries.',
                          'Output file prefix not initialized to tseries.')
         self.assertEqual(spec.output_file_suffix, '.nc',
@@ -57,10 +59,12 @@ class SpecifierTests(unittest.TestCase):
         meta1d = True
         metafile = 'd'
         backend = 'Nio'
+        sigfig = 3
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, timeseries=tseries, metadata=metadata,
-            meta1d=meta1d, metafile=metafile, backend=backend)
+            meta1d=meta1d, metafile=metafile, backend=backend,
+            sigfig=sigfig)
         for i1, i2 in zip(spec.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
@@ -75,6 +79,8 @@ class SpecifierTests(unittest.TestCase):
         self.assertEqual(spec.output_file_prefix, prefix,
                          'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_suffix, suffix,
+                         'Output file prefix not initialized properly')
+        self.assertEqual(spec.least_significant_digit, sigfig,
                          'Output file prefix not initialized properly')
         for i1, i2 in zip(spec.time_series, tseries):
             self.assertEqual(i1, i2,
