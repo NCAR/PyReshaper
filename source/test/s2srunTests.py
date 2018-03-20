@@ -12,24 +12,24 @@ import inspect
 from glob import glob
 from cStringIO import StringIO
 from os import linesep as eol
-from os import remove
+from os import remove, getcwd
 from os.path import exists
 from mpi4py import MPI
 
 from pyreshaper.specification import Specifier
 
-from pyreshaper.test import makeTestData
+from test import makeTestData
 
-s2srun = imp.load_source('s2srun', '../../../scripts/s2srun')
+top_dir = getcwd().split('/source')[0]
+s2srun = imp.load_source('s2srun', top_dir + '/scripts/s2srun')
 
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
 
-#=======================================================================================================================
+#=========================================================================
 # CLITests
-#=======================================================================================================================
+#=========================================================================
 class CLITests(unittest.TestCase):
-
 
     def setUp(self):
         self.run_args = {'serial': False,
@@ -56,7 +56,7 @@ class CLITests(unittest.TestCase):
             argv.extend(chunks)
         argv.append(self.run_args['specfile'])
         return argv
-    
+
     def shortargs(self):
         long_to_short = {'--verbosity': '-v', '--write_mode': '-m', '--limit': '-l',
                          '--once': '-l', '--serial': '-s', '--chunk': '-c'}
@@ -64,13 +64,20 @@ class CLITests(unittest.TestCase):
 
     def cliassert(self, args):
         opts, specfile = s2srun.cli(args)
-        self.assertEqual(opts.once, self.run_args['once'], 'Once-file incorrect')
-        self.assertEqual(opts.chunks, self.run_args['chunks'], 'Chunks incorrect')
-        self.assertEqual(opts.limit, self.run_args['limit'], 'Output limit incorrect')
-        self.assertEqual(opts.write_mode, self.run_args['write_mode'], 'Write mode incorrect')
-        self.assertEqual(opts.serial, self.run_args['serial'], 'Serial mode incorrect')
-        self.assertEqual(opts.verbosity, self.run_args['verbosity'], 'Verbosity incorrect')
-        self.assertEqual(specfile, self.run_args['specfile'], 'Specfile name incorrect')
+        self.assertEqual(
+            opts.once, self.run_args['once'], 'Once-file incorrect')
+        self.assertEqual(
+            opts.chunks, self.run_args['chunks'], 'Chunks incorrect')
+        self.assertEqual(
+            opts.limit, self.run_args['limit'], 'Output limit incorrect')
+        self.assertEqual(
+            opts.write_mode, self.run_args['write_mode'], 'Write mode incorrect')
+        self.assertEqual(
+            opts.serial, self.run_args['serial'], 'Serial mode incorrect')
+        self.assertEqual(
+            opts.verbosity, self.run_args['verbosity'], 'Verbosity incorrect')
+        self.assertEqual(
+            specfile, self.run_args['specfile'], 'Specfile name incorrect')
 
     def test_empty(self):
         self.assertRaises(ValueError, s2srun.cli, [])
@@ -88,9 +95,9 @@ class CLITests(unittest.TestCase):
         self.cliassert(self.longargs())
 
 
-#=======================================================================================================================
+#=========================================================================
 # NetCDF4Tests
-#=======================================================================================================================
+#=========================================================================
 class NetCDF4Tests(unittest.TestCase):
 
     def setUp(self):
@@ -98,7 +105,7 @@ class NetCDF4Tests(unittest.TestCase):
         # Parallel Management - Just for Tests
         self.rank = MPI_COMM_WORLD.Get_rank()
         self.size = MPI_COMM_WORLD.Get_size()
-        
+
         # Default arguments for testing
         self.spec_args = {'infiles': makeTestData.slices,
                           'ncfmt': 'netcdf4',
@@ -116,7 +123,7 @@ class NetCDF4Tests(unittest.TestCase):
                          'write_mode': 'w',
                          'once': False,
                          'specfile': 'input.s2s'}
-        
+
         # Test Data Generation
         self.clean()
         if self.rank == 0:
@@ -137,11 +144,13 @@ class NetCDF4Tests(unittest.TestCase):
             mf = len(makeTestData.slices)
             mt = len(makeTestData.tsvars)
             nf = len(self.spec_args['infiles'])
-            nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
+            nt = mt if self.spec_args['timeseries'] is None else len(
+                self.spec_args['timeseries'])
 
             hline = '-' * 100
             hdrstr = [hline, '{}.{}:'.format(self.__class__.__name__, testname), '',
-                      '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt}, compression={compression}, meta1d={meta1d}, backend={backend})'.format(nf, mf, nt, mt, **self.spec_args),
+                      '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt}, compression={compression}, meta1d={meta1d}, backend={backend})'.format(
+                          nf, mf, nt, mt, **self.spec_args),
                       '   s2srun {}'.format(' '.join(str(a) for a in self.runargs())), hline]
             print eol.join(hdrstr)
 
@@ -150,11 +159,13 @@ class NetCDF4Tests(unittest.TestCase):
         args.update(self.spec_args)
         args.update(self.run_args)
         assertions_dict = makeTestData.check_outfile(tsvar=tsvar, **args)
-        failed_assertions = [key for key, value in assertions_dict.iteritems() if value is False]
+        failed_assertions = [
+            key for key, value in assertions_dict.iteritems() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
-        assert_msgs.extend(['   {0}'.format(assrt) for assrt in failed_assertions])
+        assert_msgs.extend(['   {0}'.format(assrt)
+                            for assrt in failed_assertions])
         self.assertEqual(len(failed_assertions), 0, eol.join(assert_msgs))
-    
+
     def runargs(self):
         argv = ['-v', str(self.run_args['verbosity']),
                 '-m', self.run_args['write_mode'],
@@ -232,8 +243,10 @@ class NetCDF4Tests(unittest.TestCase):
                 if tsvar in makeTestData.tsvars:
                     self.check(tsvar)
                 else:
-                    fname = self.spec_args['prefix'] + tsvar + self.spec_args['suffix']
-                    self.assertFalse(exists(fname), 'File {0!r} should not exist'.format(fname))
+                    fname = self.spec_args['prefix'] + \
+                        tsvar + self.spec_args['suffix']
+                    self.assertFalse(
+                        exists(fname), 'File {0!r} should not exist'.format(fname))
         MPI_COMM_WORLD.Barrier()
 
     def test_NC3(self):
@@ -328,7 +341,8 @@ class NetCDF4Tests(unittest.TestCase):
         self.spec_args['infiles'] = makeTestData.slices[0:2]
         self.convert()
         if self.rank == 0:
-            remove(self.spec_args['prefix'] + missing + self.spec_args['suffix'])
+            remove(self.spec_args['prefix'] +
+                   missing + self.spec_args['suffix'])
         MPI_COMM_WORLD.Barrier()
         self.run_args['write_mode'] = 'a'
         self.spec_args['infiles'] = makeTestData.slices[2:]
@@ -341,21 +355,21 @@ class NetCDF4Tests(unittest.TestCase):
                     self.spec_args['infiles'] = makeTestData.slices
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
-        
 
-#=======================================================================================================================
+
+#=========================================================================
 # NioTests
-#=======================================================================================================================
+#=========================================================================
 class NioTests(NetCDF4Tests):
-    
+
     def setUp(self):
         NetCDF4Tests.setUp(self)
         self.spec_args['backend'] = 'Nio'
 
 
-#=======================================================================================================================
+#=========================================================================
 # CLI
-#=======================================================================================================================
+#=========================================================================
 if __name__ == "__main__":
     hline = '=' * 100
     if MPI_COMM_WORLD.Get_rank() == 0:

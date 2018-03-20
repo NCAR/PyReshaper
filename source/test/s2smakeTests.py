@@ -10,7 +10,8 @@ import cPickle as pickle
 
 from pyreshaper.specification import Specifier
 
-s2smake = imp.load_source('s2smake', '../../../scripts/s2smake')
+top_dir = os.getcwd().split('/source')[0]
+s2smake = imp.load_source('s2smake', top_dir + '/scripts/s2smake')
 
 
 #=========================================================================

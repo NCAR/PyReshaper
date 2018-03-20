@@ -19,7 +19,7 @@ from mpi4py import MPI
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
 
-from pyreshaper.test import makeTestData
+from test import makeTestData
 
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
