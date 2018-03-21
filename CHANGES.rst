@@ -8,6 +8,9 @@ VERSION 1.0.6
 -------------
 
  - Cleaning up testing framework for serial execution
+ - Adding feature to impose `least_significant_digit` option to NetCDF4-python,
+   which saves the data to file using compression and "bit truncation" (i.e.,
+   lossy compression).  
 
 VERSION 1.0.5
 -------------
