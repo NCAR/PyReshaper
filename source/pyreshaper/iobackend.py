@@ -255,7 +255,7 @@ class NCFile(object):
             self._obj.createDimension(name, value)
         self._dimensions[name] = value
 
-    def create_variable(self, name, datatype, dimensions, fill_value=None):
+    def create_variable(self, name, datatype, dimensions, fill_value=None, chunksizes=None):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
         dt = datatype if isinstance(
@@ -271,6 +271,7 @@ class NCFile(object):
             if fill_value is not None:
                 self._var_opts['fill_value'] = numpy.array(
                     fill_value, dtype=dt)
+            self._var_opts['chunksizes'] = chunksizes
             var = self._obj.createVariable(
                 name, datatype, dimensions, **self._var_opts)
         new_var = NCVariable(name, var, self._mode)
@@ -366,6 +367,13 @@ class NCVariable(object):
             return self._obj.attributes['_FillValue'] if '_FillValue' in self._obj.attributes else None
         elif self._backend == 'netCDF4':
             return self._obj.getncattr('_FillValue') if '_FillValue' in self._obj.ncattrs() else None
+
+    @property
+    def chunk_sizes(self):
+        if self._backend == 'Nio':
+            raise NotImplementedError('Chunking disabled with PyNIO')
+        elif self._backend == 'netCDF4':
+            return self._obj.chunking()
 
     def get_value(self):
         if self._backend == 'Nio':
