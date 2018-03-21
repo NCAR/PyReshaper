@@ -8,6 +8,7 @@ VERSION 1.0.6
 -------------
 
  - Cleaning up testing framework for serial execution
+ - Renabled PyNIO option as a backend.  Works with PyNIO 1.5.0.
  - Adding feature to impose `least_significant_digit` option to NetCDF4-python,
    which saves the data to file using compression and "bit truncation" (i.e.,
    lossy compression).  
