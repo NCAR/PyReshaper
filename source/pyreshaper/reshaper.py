@@ -635,11 +635,16 @@ class Reshaper(object):
                 ', '.join(sorted(self._existing)))
             raise RuntimeError(err_msg)
 
-    def _create_var(self, in_file, out_file, vname):
+    def _create_var(self, in_file, out_file, vname, chunks=None):
         in_var = in_file.variables[vname]
         fill_value = in_var.fill_value
+        if in_var.chunk_sizes is not None and chunks is not None:
+            chunksizes = [chunks[d] if d in chunks else c
+                          for d, c in zip(in_var.dimensions, in_var.chunk_sizes)]
+        else:
+            chunksizes = None
         out_var = out_file.create_variable(
-            vname, in_var.datatype, in_var.dimensions, fill_value=fill_value)
+            vname, in_var.datatype, in_var.dimensions, fill_value=fill_value, chunksizes=chunksizes)
         for att_name in in_var.ncattrs:
             att_value = in_var.getncattr(att_name)
             out_var.setncattr(att_name, att_value)
@@ -936,7 +941,8 @@ class Reshaper(object):
 
                         # Time-series variable
                         self._timer.start('Create Time-Series Variables')
-                        self._create_var(in_file, out_file, out_name)
+                        self._create_var(in_file, out_file,
+                                         out_name, chunks=chunks)
                         self._timer.stop('Create Time-Series Variables')
 
                     dbg_msg = 'Writing output file for variable: {0}'.format(

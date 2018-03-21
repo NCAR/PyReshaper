@@ -193,6 +193,15 @@ class CommonTestsBase(object):
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
+    def test_chunking(self):
+        self.convert_args['chunks'] = {'lat': 1, 'time': makeTestData.ntime}
+        self.header()
+        self.convert()
+        if self.rank == 0:
+            for tsvar in makeTestData.tsvars:
+                self.check(tsvar)
+        MPI_COMM_WORLD.Barrier()
+
     def test_meta1d(self):
         self.spec_args['meta1d'] = True
         self.spec_args['metadata'] = [v for v in makeTestData.tvmvars]
