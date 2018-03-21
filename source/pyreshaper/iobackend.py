@@ -371,7 +371,7 @@ class NCVariable(object):
     @property
     def chunk_sizes(self):
         if self._backend == 'Nio':
-            raise NotImplementedError('Chunking disabled with PyNIO')
+            return None
         elif self._backend == 'netCDF4':
             return self._obj.chunking()
 
