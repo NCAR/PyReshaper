@@ -276,6 +276,15 @@ class NetCDF4Tests(unittest.TestCase):
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
+    def test_CL1_LSF3(self):
+        self.spec_args['least_significant_digit'] = 3
+        self.header(inspect.currentframe().f_code.co_name)
+        self.convert()
+        if self.rank == 0:
+            for tsvar in makeTestData.tsvars:
+                self.check(tsvar)
+        MPI_COMM_WORLD.Barrier()
+
     def test_meta1d(self):
         self.spec_args['meta1d'] = True
         self.spec_args['metadata'] = [v for v in makeTestData.tvmvars]

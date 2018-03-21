@@ -303,7 +303,7 @@ class Reshaper(object):
         # Setup NetCDF file options
         self._netcdf_format = specifier.netcdf_format
         self._netcdf_compression = specifier.compression_level
-        self._netcdf_truncation = specifier.least_significant_digit
+        self._netcdf_least_significant_digit = specifier.least_significant_digit
         if self._simplecomm.is_manager():
             self._vprint(
                 '  NetCDF I/O Backend: {0}'.format(self._backend), verbosity=1)
@@ -311,8 +311,8 @@ class Reshaper(object):
                 self._netcdf_format), verbosity=1)
             self._vprint('  NetCDF Compression: {0}'.format(
                 self._netcdf_compression), verbosity=1)
-            trunc_str = ('{} decimal places'.format(self._netcdf_truncation)
-                         if self._netcdf_truncation else 'Disabled')
+            trunc_str = ('{} decimal places'.format(self._netcdf_least_significant_digit)
+                         if self._netcdf_least_significant_digit else 'Disabled')
             self._vprint('  NetCDF Truncation: {0}'.format(
                 trunc_str), verbosity=1)
 
@@ -879,12 +879,16 @@ class Reshaper(object):
                 remove(temp_filename)
             if self._write_mode == 'a' and out_name in self._existing:
                 rename(out_filename, temp_filename)
-                out_file = iobackend.NCFile(temp_filename, mode='a', self._netcdf_format,
-                                            self._netcdf_compression, self._netcdf_truncation)
+                out_file = iobackend.NCFile(temp_filename, mode='a',
+                                            ncfmt=self._netcdf_format,
+                                            compression=self._netcdf_compression,
+                                            least_significant_digit=self._netcdf_least_significant_digit)
                 appending = True
             else:
-                out_file = iobackend.NCFile(temp_filename, mode='w', self._netcdf_format,
-                                            self._netcdf_compression, self._netcdf_truncation)
+                out_file = iobackend.NCFile(temp_filename, mode='w',
+                                            ncfmt=self._netcdf_format,
+                                            compression=self._netcdf_compression,
+                                            least_significant_digit=self._netcdf_least_significant_digit)
                 appending = False
             self._timer.stop('Open Output Files')
 

@@ -64,7 +64,7 @@ class SpecifierTests(unittest.TestCase):
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, timeseries=tseries, metadata=metadata,
             meta1d=meta1d, metafile=metafile, backend=backend,
-            lsigfig=lsigfig)
+            least_significant_digit=lsigfig)
         for i1, i2 in zip(spec.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')

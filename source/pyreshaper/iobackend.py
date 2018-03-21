@@ -108,7 +108,7 @@ class NCFile(object):
     Wrapper class for netCDF files/datasets
     """
 
-    def __init__(self, filename, mode='r', ncfmt='netcdf4', compression=0):
+    def __init__(self, filename, mode='r', ncfmt='netcdf4', compression=0, least_significant_digit=None):
         """
         Initializer
 
@@ -117,6 +117,8 @@ class NCFile(object):
             mode (str): Write-mode ('r' for read, 'w' for write, 'a' for append)
             ncfmt (str): Format to use of the netcdf file, if being created ('netcdf' or 'netcdf4')
             compression (int): Level of compression to use when writing to this netcdf file
+            least_significant_digit (int): If not None, specifies the digit after the decimal to which
+                precision must be kept when applying lossy truncation before compression
         """
         if not isinstance(filename, (str, unicode)):
             err_msg = "Netcdf filename must be a string"
@@ -181,6 +183,8 @@ class NCFile(object):
                 if compression > 0:
                     self._var_opts["zlib"] = True
                     self._var_opts["complevel"] = int(compression)
+                    if least_significant_digit:
+                        self._var_opts["least_significant_digit"] = least_significant_digit
             elif ncfmt == 'netcdf4c':
                 self._file_opts["format"] = "NETCDF4_CLASSIC"
                 self._var_opts["zlib"] = True
