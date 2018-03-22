@@ -33,7 +33,8 @@ class CLITests(unittest.TestCase):
 
     def setUp(self):
         self.run_args = {'serial': False,
-                         'chunks': None,
+                         'rchunks': {'y': 5},
+                         'wchunks': {'x': 4, 'y': 10},
                          'limit': 0,
                          'verbosity': 1,
                          'write_mode': 'w',
@@ -49,17 +50,24 @@ class CLITests(unittest.TestCase):
             argv.append('--once')
         if self.run_args['serial']:
             argv.append('--serial')
-        if self.run_args['chunks'] is not None and len(self.run_args['chunks']) > 0:
-            chunks = []
-            for c in self.run_args['chunks']:
-                chunks.extend(['--chunk', c])
-            argv.extend(chunks)
+        if self.run_args['rchunks']:
+            rchunks = []
+            for d in self.run_args['rchunks']:
+                c = '{},{}'.format(d, self.run_args['rchunks'][d])
+                rchunks.extend(['--read_chunk', c])
+            argv.extend(rchunks)
+        if self.run_args['wchunks']:
+            wchunks = []
+            for d in self.run_args['wchunks']:
+                c = '{},{}'.format(d, self.run_args['wchunks'][d])
+                wchunks.extend(['--write_chunk', c])
+            argv.extend(wchunks)
         argv.append(self.run_args['specfile'])
         return argv
 
     def shortargs(self):
         long_to_short = {'--verbosity': '-v', '--write_mode': '-m', '--limit': '-l',
-                         '--once': '-l', '--serial': '-s', '--chunk': '-c'}
+                         '--once': '-l', '--serial': '-s', '--read_chunk': '-c', '--write_chunk': '-w'}
         return [long_to_short[a] if a in long_to_short else a for a in self.longargs()]
 
     def cliassert(self, args):
@@ -67,7 +75,9 @@ class CLITests(unittest.TestCase):
         self.assertEqual(
             opts.once, self.run_args['once'], 'Once-file incorrect')
         self.assertEqual(
-            opts.chunks, self.run_args['chunks'], 'Chunks incorrect')
+            opts.rchunks, self.run_args['rchunks'], 'Read chunks incorrect')
+        self.assertEqual(
+            opts.wchunks, self.run_args['wchunks'], 'Write chunks incorrect')
         self.assertEqual(
             opts.limit, self.run_args['limit'], 'Output limit incorrect')
         self.assertEqual(
@@ -84,9 +94,6 @@ class CLITests(unittest.TestCase):
 
     def test_help(self):
         self.assertRaises(SystemExit, s2srun.cli, ['-h'])
-
-    def test_defaults(self):
-        self.cliassert([self.run_args['specfile']])
 
     def test_short(self):
         self.cliassert(self.shortargs())
