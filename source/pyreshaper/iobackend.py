@@ -90,6 +90,17 @@ def get_backend():
 
 
 #=========================================================================
+# get_backend_version
+#=========================================================================
+def get_backend_version(name=None):
+    if name is None:
+        backend = _BACKEND_MAP_[_BACKEND_]
+    else:
+        backend = _BACKEND_MAP_[name]
+    return tuple(int(i) for i in backend.__version__.split('.'))
+
+
+#=========================================================================
 # NCFile
 #=========================================================================
 class NCFile(object):
@@ -97,7 +108,7 @@ class NCFile(object):
     Wrapper class for netCDF files/datasets
     """
 
-    def __init__(self, filename, mode='r', ncfmt='netcdf4', compression=0):
+    def __init__(self, filename, mode='r', ncfmt='netcdf4', compression=0, least_significant_digit=None):
         """
         Initializer
 
@@ -106,6 +117,8 @@ class NCFile(object):
             mode (str): Write-mode ('r' for read, 'w' for write, 'a' for append)
             ncfmt (str): Format to use of the netcdf file, if being created ('netcdf' or 'netcdf4')
             compression (int): Level of compression to use when writing to this netcdf file
+            least_significant_digit (int): If not None, specifies the digit after the decimal to which
+                precision must be kept when applying lossy truncation before compression
         """
         if not isinstance(filename, (str, unicode)):
             err_msg = "Netcdf filename must be a string"
@@ -170,6 +183,8 @@ class NCFile(object):
                 if compression > 0:
                     self._var_opts["zlib"] = True
                     self._var_opts["complevel"] = int(compression)
+                    if least_significant_digit:
+                        self._var_opts["least_significant_digit"] = least_significant_digit
             elif ncfmt == 'netcdf4c':
                 self._file_opts["format"] = "NETCDF4_CLASSIC"
                 self._var_opts["zlib"] = True
@@ -240,7 +255,7 @@ class NCFile(object):
             self._obj.createDimension(name, value)
         self._dimensions[name] = value
 
-    def create_variable(self, name, datatype, dimensions, fill_value=None):
+    def create_variable(self, name, datatype, dimensions, fill_value=None, chunksizes=None):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
         dt = datatype if isinstance(
@@ -256,6 +271,7 @@ class NCFile(object):
             if fill_value is not None:
                 self._var_opts['fill_value'] = numpy.array(
                     fill_value, dtype=dt)
+            self._var_opts['chunksizes'] = chunksizes
             var = self._obj.createVariable(
                 name, datatype, dimensions, **self._var_opts)
         new_var = NCVariable(name, var, self._mode)
@@ -352,6 +368,13 @@ class NCVariable(object):
         elif self._backend == 'netCDF4':
             return self._obj.getncattr('_FillValue') if '_FillValue' in self._obj.ncattrs() else None
 
+    @property
+    def chunk_sizes(self):
+        if self._backend == 'Nio':
+            return None
+        elif self._backend == 'netCDF4':
+            return self._obj.chunking()
+
     def get_value(self):
         if self._backend == 'Nio':
             return self._obj.get_value()
@@ -385,7 +408,8 @@ class NCVariable(object):
             raise RuntimeError('Cannot set variable in read mode')
         if self.shape == ():
             self.assign_value(value)
-        elif self.datatype == numpy.dtype('c') and self._backend == 'Nio':
+        elif self.datatype == numpy.dtype('c') and self._backend == 'Nio' and get_backend_version(self._backend) < (1, 5, 0):
+            print get_backend_version()
             key_t = numpy.index_exp[key]
             if self.ndim < len(key_t):
                 raise KeyError('Too many indices specified for variable')
