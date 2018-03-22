@@ -51,7 +51,8 @@ class CommonTestsBase(object):
                             'once': False,
                             'simplecomm': None}
         self.convert_args = {'output_limit': 0,
-                             'chunks': None}
+                             'rchunks': None,
+                             'wchunks': None}
 
         # Test Data Generation
         self.clean()
@@ -79,7 +80,7 @@ class CommonTestsBase(object):
                           nf, mf, nt, mt, **self.spec_args),
                       '   create(serial={serial}, verbosity={verbosity}, wmode={wmode}, once={once}, simplecomm={simplecomm})'.format(
                           **self.create_args),
-                      '   convert(output_limit={output_limit}, chunks={chunks})'.format(**self.convert_args), hline, '']
+                      '   convert(output_limit={output_limit}, rchunks={rchunks}, wchunks={wchunks})'.format(**self.convert_args), hline, '']
             print eol.join(hdrstr)
 
     def check(self, tsvar):
@@ -193,8 +194,17 @@ class CommonTestsBase(object):
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
-    def test_chunking(self):
-        self.convert_args['chunks'] = {'lat': 1, 'time': makeTestData.ntime}
+    def test_read_chunking(self):
+        self.convert_args['rchunks'] = {'lat': 1, 'time': makeTestData.ntime}
+        self.header()
+        self.convert()
+        if self.rank == 0:
+            for tsvar in makeTestData.tsvars:
+                self.check(tsvar)
+        MPI_COMM_WORLD.Barrier()
+
+    def test_write_chunking(self):
+        self.convert_args['wchunks'] = {'lat': 1, 'time': makeTestData.ntime}
         self.header()
         self.convert()
         if self.rank == 0:
