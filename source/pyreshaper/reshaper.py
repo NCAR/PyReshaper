@@ -296,6 +296,9 @@ class Reshaper(object):
         # Store the metadata filename
         self._metadata_filename = specifier.metadata_filename
 
+        # Store time invariant variables that should be excluded from the timeseries files
+        self._exclude_list = specifier.exclude_list
+
         # Store the output file prefix and suffix
         self._output_prefix = specifier.output_file_prefix
         self._output_suffix = specifier.output_file_suffix
@@ -361,7 +364,7 @@ class Reshaper(object):
 
             # Categorize each variable (only looking at first file)
             for var_name, var in ifile.variables.iteritems():
-                if udim not in var.dimensions:
+                if udim not in var.dimensions and var_name not in self._exclude_list:
                     timeta.append(var_name)
                 elif var_name in self._metadata_names or (self._1d_metadata and len(var.dimensions) == 1):
                     tvmeta.append(var_name)

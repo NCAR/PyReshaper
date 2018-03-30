@@ -54,6 +54,7 @@ class Specifier(object):
                  metadata=[],
                  meta1d=False,
                  backend='netCDF4',
+                 exclude_list=[],
                  metafile=None,
                  **kwargs):
         """
@@ -79,6 +80,7 @@ class Specifier(object):
                 time-series output file
             meta1d (bool): True if 1D time-variant variables should be treated as metadata variables, False otherwise.
             backend (str): Which I/O backend to use ('Nio' for PyNIO, 'netCDF4' for netCDF4-python)
+            exclude_list (list): List of time invariant variables to exclude from each timeseries file
             metafile (str): Name of file from which to search for metadata (if unspecified, PyReshaper searches
                 for metadata in the first input file given)
             kwargs (dict): Optional arguments describing the Reshaper run
@@ -117,6 +119,9 @@ class Specifier(object):
 
         # Store the netCDF I/O backend name
         self.io_backend = backend
+
+        # time invariant variables to exclude from each timeseries file
+        self.exclude_list = exclude_list
 
         # Name of file from which to search for metadata
         self.metadata_filename = metafile
