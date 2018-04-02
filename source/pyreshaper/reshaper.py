@@ -364,8 +364,9 @@ class Reshaper(object):
 
             # Categorize each variable (only looking at first file)
             for var_name, var in ifile.variables.iteritems():
-                if udim not in var.dimensions and var_name not in self._exclude_list:
-                    timeta.append(var_name)
+                if udim not in var.dimensions:
+                    if var_name not in self._exclude_list:
+                        timeta.append(var_name)
                 elif var_name in self._metadata_names or (self._1d_metadata and len(var.dimensions) == 1):
                     tvmeta.append(var_name)
                 elif self._time_series_names is None or var_name in self._time_series_names:
