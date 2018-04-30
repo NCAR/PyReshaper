@@ -236,3 +236,10 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
     ncout.close()
 
     return assertions
+
+
+def check_var_in(var, fname):
+    ncf = iobackend.NCFile(fname)
+    value = var in ncf.variables
+    ncf.close()
+    return value

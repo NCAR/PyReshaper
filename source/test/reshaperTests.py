@@ -167,6 +167,22 @@ class CommonTestsBase(object):
                         exists(fname), 'File {0!r} should not exist'.format(fname))
         MPI_COMM_WORLD.Barrier()
 
+    def test_exclude(self):
+        self.spec_args['exclude_list'] = makeTestData.timvars[0:1]
+        self.header()
+        self.convert()
+        if self.rank == 0:
+            for tsvar in makeTestData.tsvars:
+                fname = (self.spec_args['prefix'] +
+                         tsvar + self.spec_args['suffix'])
+                for timvar in makeTestData.timvars:
+                    if timvar in self.spec_args['exclude_list']:
+                        xassert = self.assertFalse
+                    else:
+                        xassert = self.assertTrue
+                    xassert(makeTestData.check_var_in(timvar, fname))
+        MPI_COMM_WORLD.Barrier()
+
     def test_NC3(self):
         self.spec_args['ncfmt'] = 'netcdf'
         self.header()
