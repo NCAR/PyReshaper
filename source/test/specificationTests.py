@@ -20,6 +20,9 @@ class SpecifierTests(unittest.TestCase):
     This class defines all of the unit tests for the specification module.
     """
 
+    def setUp(self):
+        self.cwd = os.path.dirname(os.path.realpath(__file__))
+
     def test_init(self):
         spec = specification.Specifier()
         self.assertEqual(len(spec.input_file_list), 0,
@@ -28,6 +31,8 @@ class SpecifierTests(unittest.TestCase):
                          'NetCDF format not initialized to netcdf4')
         self.assertEqual(spec.compression_level, 0,
                          'NetCDF compression level not initialized to 0')
+        self.assertEqual(spec.least_significant_digit, None,
+                         'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_prefix, 'tseries.',
                          'Output file prefix not initialized to tseries.')
         self.assertEqual(spec.output_file_suffix, '.nc',
@@ -40,6 +45,8 @@ class SpecifierTests(unittest.TestCase):
                          'Time-variable 1D metadata flag is not initialized to False')
         self.assertEqual(spec.io_backend, 'netCDF4',
                          'I/O backend not initialized to netCDF4')
+        self.assertEqual(spec.exclude_list, [],
+                         'Exclude list is not empty')
         self.assertEqual(spec.metadata_filename, None,
                          'Metadata file does not default to None')
 
@@ -51,13 +58,16 @@ class SpecifierTests(unittest.TestCase):
         suffix = '.suf.nc'
         tseries = ['1', '2']
         metadata = ['x', 'y', 'z']
+        xlist = ['g', 'h']
         meta1d = True
         metafile = 'd'
         backend = 'Nio'
+        lsigfig = 3
         spec = specification.Specifier(
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, timeseries=tseries, metadata=metadata,
-            meta1d=meta1d, metafile=metafile, backend=backend)
+            meta1d=meta1d, metafile=metafile, backend=backend,
+            least_significant_digit=lsigfig, exclude_list=xlist)
         for i1, i2 in zip(spec.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
@@ -72,6 +82,10 @@ class SpecifierTests(unittest.TestCase):
         self.assertEqual(spec.output_file_prefix, prefix,
                          'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_suffix, suffix,
+                         'Output file prefix not initialized properly')
+        self.assertEqual(spec.exclude_list, xlist,
+                         'Exclude list not initialized properly')
+        self.assertEqual(spec.least_significant_digit, lsigfig,
                          'Output file prefix not initialized properly')
         for i1, i2 in zip(spec.time_series, tseries):
             self.assertEqual(i1, i2,
@@ -277,7 +291,7 @@ class SpecifierTests(unittest.TestCase):
         self.assertRaises(ValueError, spec.validate_values)
 
     def test_validate_values_suffix(self):
-        in_list = ['specificationTests.py']
+        in_list = [self.cwd + '/specificationTests.py']
         fmt = 'netcdf4'
         prefix = 'pre.'
         suffix = '.suf'

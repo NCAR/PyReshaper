@@ -278,8 +278,8 @@ class WriteTests(unittest.TestCase):
         self.ncfwname = 'writetest.nc'
         self.ncattrs = {'a1': 'attribute 1', 'a2': 'attribute 2'}
         self.ncdims = {'t': 10, 'x': 5, 'c': 14, 'n': 2}
-        self.vdims = {'t': ('t',), 'x': ('x',), 'v': (
-            't', 'x'), 's': ('n', 'c'), 'c': ('c',)}
+        self.vdims = {'t': ('t',), 'x': ('x',), 'v': ('t', 'x'),
+                      's': ('n', 'c'), 'c': ('c',)}
         self.vdtype = {'t': 'd', 'x': 'd', 'v': 'f', 's': 'c', 'c': 'c'}
         self.vshape = {v: tuple(self.ncdims[d]
                                 for d in self.vdims[v]) for v in self.vdims}
@@ -295,6 +295,8 @@ class WriteTests(unittest.TestCase):
                        'c': {'long_name': u'scalar string'}}
         self.vfill = {'t': None, 'x': None,
                       'v': np.float32(1e20), 's': '', 'c': None}
+        self.chunks = {'t': [5], 'x': None,
+                       'v': [2, 3], 's': None, 'c': None}
 
     def tearDown(self):
         if exists(self.ncfwname):
@@ -398,6 +400,30 @@ class WriteTests(unittest.TestCase):
             expected = None if v == 's' else self.vfill[v]
             test_func_avail(test_name(), func, expected,
                             'NCFile variables incorrect', kwds={'variable': v})
+
+    def test_NCFile_create_variable_chunksizes(self):
+        def func(variable=''):
+            ncf = iobackend.NCFile(self.ncfwname, mode='w')
+            for d in self.vdims[variable]:
+                if d == 't':
+                    ncf.create_dimension(d)
+                else:
+                    ncf.create_dimension(d, self.ncdims[d])
+            ncf.create_variable(variable, self.vdtype[variable], self.vdims[variable],
+                                chunksizes=self.chunks[variable])
+            ncf.close()
+            ncfr = iobackend.NCFile(self.ncfwname)
+            actual = ncfr.variables[variable].chunk_sizes
+            ncfr.close()
+            remove(self.ncfwname)
+            return actual
+        iobackend.set_backend('netCDF4')
+        npt.assert_equal(iobackend.get_backend(), 'netCDF4',
+                         'Cannot set backend {}'.format(netCDF4))
+        for v in self.ncvars:
+            expected = self.chunks[v] if self.chunks[v] else 'contiguous'
+            test_func(test_name(), func, expected,
+                      msg='{}: {}'.format('netCDF4', 'NCFile variables incorrect'), kwds={'variable': v})
 
     def test_NCVariable_setncattr(self):
         def func(variable=''):

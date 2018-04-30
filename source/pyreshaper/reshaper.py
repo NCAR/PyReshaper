@@ -296,6 +296,9 @@ class Reshaper(object):
         # Store the metadata filename
         self._metadata_filename = specifier.metadata_filename
 
+        # Store time invariant variables that should be excluded from the timeseries files
+        self._exclude_list = specifier.exclude_list
+
         # Store the output file prefix and suffix
         self._output_prefix = specifier.output_file_prefix
         self._output_suffix = specifier.output_file_suffix
@@ -303,6 +306,7 @@ class Reshaper(object):
         # Setup NetCDF file options
         self._netcdf_format = specifier.netcdf_format
         self._netcdf_compression = specifier.compression_level
+        self._netcdf_least_significant_digit = specifier.least_significant_digit
         if self._simplecomm.is_manager():
             self._vprint(
                 '  NetCDF I/O Backend: {0}'.format(self._backend), verbosity=1)
@@ -310,6 +314,10 @@ class Reshaper(object):
                 self._netcdf_format), verbosity=1)
             self._vprint('  NetCDF Compression: {0}'.format(
                 self._netcdf_compression), verbosity=1)
+            trunc_str = ('{} decimal places'.format(self._netcdf_least_significant_digit)
+                         if self._netcdf_least_significant_digit else 'Disabled')
+            self._vprint('  NetCDF Truncation: {0}'.format(
+                trunc_str), verbosity=1)
 
         # Helpful debugging message
         if self._simplecomm.is_manager():
@@ -357,7 +365,8 @@ class Reshaper(object):
             # Categorize each variable (only looking at first file)
             for var_name, var in ifile.variables.iteritems():
                 if udim not in var.dimensions:
-                    timeta.append(var_name)
+                    if var_name not in self._exclude_list:
+                        timeta.append(var_name)
                 elif var_name in self._metadata_names or (self._1d_metadata and len(var.dimensions) == 1):
                     tvmeta.append(var_name)
                 elif self._time_series_names is None or var_name in self._time_series_names:
@@ -630,11 +639,16 @@ class Reshaper(object):
                 ', '.join(sorted(self._existing)))
             raise RuntimeError(err_msg)
 
-    def _create_var(self, in_file, out_file, vname):
+    def _create_var(self, in_file, out_file, vname, chunks=None):
         in_var = in_file.variables[vname]
         fill_value = in_var.fill_value
+        if in_var.chunk_sizes is not None and chunks is not None:
+            chunksizes = [chunks[d] if d in chunks else c
+                          for d, c in zip(in_var.dimensions, in_var.chunk_sizes)]
+        else:
+            chunksizes = None
         out_var = out_file.create_variable(
-            vname, in_var.datatype, in_var.dimensions, fill_value=fill_value)
+            vname, in_var.datatype, in_var.dimensions, fill_value=fill_value, chunksizes=chunksizes)
         for att_name in in_var.ncattrs:
             att_value = in_var.getncattr(att_name)
             out_var.setncattr(att_name, att_value)
@@ -746,7 +760,7 @@ class Reshaper(object):
                              numpy.ceil(requested_nbytes / self.assumed_block_size))
             self._byte_counts['Actual Data'] += actual_nbytes
 
-    def convert(self, output_limit=0, chunks=None):
+    def convert(self, output_limit=0, rchunks=None, wchunks=None):
         """
         Method to perform the Reshaper's designated operation.
 
@@ -756,7 +770,9 @@ class Reshaper(object):
             output_limit (int): Limit on the number of output (time-series) files to write during the
                 convert() operation.  If set to 0, no limit is placed.  This limits the number of output files
                 produced by each processor in a parallel run.
-            chunks (dict): A dictionary of dimension names mapped to chunk sizes along that named
+            rchunks (dict): A dictionary of dimension names mapped to reading chunk sizes along that named
+                dimension
+            wchunks (dict): A dictionary of dimension names mapped to writing chunk sizes along that named
                 dimension
         """
         iobackend.set_backend(self._backend)
@@ -787,14 +803,14 @@ class Reshaper(object):
         if self._simplecomm.is_manager():
             self._vprint('...Output files inspected.', verbosity=0)
 
-        # Check the chunking
-        if chunks is None:
+        # Check the read chunking
+        if rchunks is None:
             # Default chunking is over 1 time-step at a time
-            chunks = {self._unlimited_dim: 1}
-        if not isinstance(chunks, dict):
+            rchunks = {self._unlimited_dim: 1}
+        if not isinstance(rchunks, dict):
             err_msg = 'Chunks must be specified with a dictionary'
             raise TypeError(err_msg)
-        for key, value in chunks.iteritems():
+        for key, value in rchunks.iteritems():
             if not isinstance(key, basestring):
                 err_msg = 'Chunks dictionary must have string-type keys'
                 raise TypeError(err_msg)
@@ -804,13 +820,13 @@ class Reshaper(object):
 
         # Debugging output
         if self._simplecomm.is_manager():
-            if len(chunks) > 0:
+            if len(rchunks) > 0:
                 self._vprint('Read chunk sizes:', verbosity=1)
-                for dname in chunks:
+                for dname in rchunks:
                     self._vprint('  {!s}: {}'.format(
-                        dname, chunks[dname]), verbosity=1)
+                        dname, rchunks[dname]), verbosity=1)
             else:
-                self._vprint('No chunking specified.', verbosity=1)
+                self._vprint('No read chunking specified.', verbosity=1)
             self._vprint(
                 'Converting time-slices to time-series...', verbosity=0)
         self._simplecomm.sync()
@@ -874,12 +890,16 @@ class Reshaper(object):
                 remove(temp_filename)
             if self._write_mode == 'a' and out_name in self._existing:
                 rename(out_filename, temp_filename)
-                out_file = iobackend.NCFile(
-                    temp_filename, 'a', self._netcdf_format, self._netcdf_compression)
+                out_file = iobackend.NCFile(temp_filename, mode='a',
+                                            ncfmt=self._netcdf_format,
+                                            compression=self._netcdf_compression,
+                                            least_significant_digit=self._netcdf_least_significant_digit)
                 appending = True
             else:
-                out_file = iobackend.NCFile(
-                    temp_filename, 'w', self._netcdf_format, self._netcdf_compression)
+                out_file = iobackend.NCFile(temp_filename, mode='w',
+                                            ncfmt=self._netcdf_format,
+                                            compression=self._netcdf_compression,
+                                            least_significant_digit=self._netcdf_least_significant_digit)
                 appending = False
             self._timer.stop('Open Output Files')
 
@@ -927,7 +947,8 @@ class Reshaper(object):
 
                         # Time-series variable
                         self._timer.start('Create Time-Series Variables')
-                        self._create_var(in_file, out_file, out_name)
+                        self._create_var(in_file, out_file,
+                                         out_name, chunks=wchunks)
                         self._timer.stop('Create Time-Series Variables')
 
                     dbg_msg = 'Writing output file for variable: {0}'.format(
@@ -942,12 +963,12 @@ class Reshaper(object):
                             in_var = in_file.variables[name]
                             out_var = out_file.variables[name]
                             self._copy_var('Time-Invariant Metadata',
-                                           in_var, out_var, chunks=chunks)
+                                           in_var, out_var, chunks=rchunks)
                         for name in self._time_invariant_metafile_vars:
                             in_var = metafile.variables[name]
                             out_var = out_file.variables[name]
                             self._copy_var('Time-Invariant Metadata',
-                                           in_var, out_var, chunks=chunks)
+                                           in_var, out_var, chunks=rchunks)
 
                 # Copy the time-varient metadata
                 if write_meta_data:
@@ -955,14 +976,14 @@ class Reshaper(object):
                         in_var = in_file.variables[name]
                         out_var = out_file.variables[name]
                         self._copy_var('Time-Variant Metadata', in_var,
-                                       out_var, chunks=chunks, offsets=offsets)
+                                       out_var, chunks=rchunks, offsets=offsets)
 
                 # Copy the time-series variables
                 if write_tser_data:
                     in_var = in_file.variables[out_name]
                     out_var = out_file.variables[out_name]
                     self._copy_var('Time-Series Variables', in_var,
-                                   out_var, chunks=chunks, offsets=offsets)
+                                   out_var, chunks=rchunks, offsets=offsets)
 
                 # Increment the time-series index offset
                 offsets[self._unlimited_dim] += in_file.dimensions[self._unlimited_dim]
