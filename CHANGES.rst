@@ -13,6 +13,7 @@ VERSION 1.0.6
    which saves the data to file using compression and "bit truncation" (i.e.,
    lossy compression)
  - Adding ability to set the read and write chunk-sizes separately
+ - Adding feature to ignore specific time-invariable metadata
 
 VERSION 1.0.5
 -------------
