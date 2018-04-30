@@ -45,6 +45,8 @@ class SpecifierTests(unittest.TestCase):
                          'Time-variable 1D metadata flag is not initialized to False')
         self.assertEqual(spec.io_backend, 'netCDF4',
                          'I/O backend not initialized to netCDF4')
+        self.assertEqual(spec.exclude_list, [],
+                         'Exclude list is not empty')
         self.assertEqual(spec.metadata_filename, None,
                          'Metadata file does not default to None')
 
@@ -56,6 +58,7 @@ class SpecifierTests(unittest.TestCase):
         suffix = '.suf.nc'
         tseries = ['1', '2']
         metadata = ['x', 'y', 'z']
+        xlist = ['g', 'h']
         meta1d = True
         metafile = 'd'
         backend = 'Nio'
@@ -64,7 +67,7 @@ class SpecifierTests(unittest.TestCase):
             infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
             suffix=suffix, timeseries=tseries, metadata=metadata,
             meta1d=meta1d, metafile=metafile, backend=backend,
-            least_significant_digit=lsigfig)
+            least_significant_digit=lsigfig, exclude_list=xlist)
         for i1, i2 in zip(spec.input_file_list, in_list):
             self.assertEqual(i1, i2,
                              'Input file list not initialized properly')
@@ -80,6 +83,8 @@ class SpecifierTests(unittest.TestCase):
                          'Output file prefix not initialized properly')
         self.assertEqual(spec.output_file_suffix, suffix,
                          'Output file prefix not initialized properly')
+        self.assertEqual(spec.exclude_list, xlist,
+                         'Exclude list not initialized properly')
         self.assertEqual(spec.least_significant_digit, lsigfig,
                          'Output file prefix not initialized properly')
         for i1, i2 in zip(spec.time_series, tseries):
