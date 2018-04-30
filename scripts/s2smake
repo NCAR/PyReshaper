@@ -64,6 +64,11 @@ def cli(argv=None):
                             'file will be named according to the rule: '
                             'output_prefix + variable_name + output_suffix '
                             '[Default: ".nc"]'))
+    parser.add_option('-x', '--exclude', action='append', default=[],
+                      help=('Name of a time-invariant variable to be excluded '
+                            'from all output files.  There may be more than one '
+                            '--exclude (-x) option given, and each one is '
+                            'appended to a list.  [Default: []]'))
     parser.add_option('--time_series', action='append', default=None,
                       help=('Names of variables to be given their own output file. '
                             'There may be more than one --time_series option given, and '
@@ -121,6 +126,7 @@ def main(argv=None):
     spec.time_series = opts.time_series
     spec.time_variant_metadata = opts.metadata
     spec.metadata_filename = opts.metafile
+    spec.exclude_list = opts.exclude
     spec.assume_1d_time_variant_metadata = opts.meta1d
 
     # Validate before saving

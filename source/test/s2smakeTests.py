@@ -53,6 +53,8 @@ class CLITest(unittest.TestCase):
                          'Default 1D metadata flag is not False')
         self.assertEqual(opts.metafile, None,
                          'Default metadata filename')
+        self.assertEqual(opts.exclude, [],
+                         'Default exclude list')
 
     def test_set_all_short(self):
         clevel = 3
@@ -62,12 +64,15 @@ class CLITest(unittest.TestCase):
         specfile = 'myspec.s2s'
         prefix = 'prefix.'
         suffix = '.suffix'
+        xlist = ['x', 'y', 'z']
         infiles = ['s2smakeTests.py', 'specificationTests.py']
 
         argv = ['-1']
         argv.extend(['-c', str(clevel), '-d', str(lsigfig), '-f', ncfmt])
         for md in metadata:
             argv.extend(['-m', md])
+        for x in xlist:
+            argv.extend(['-x', x])
         argv.extend(['-o', specfile, '-p', prefix, '-s', suffix])
         argv.extend(infiles)
         opts, args = s2smake.cli(argv)
@@ -98,12 +103,15 @@ class CLITest(unittest.TestCase):
                          'Default output suffix is not {0!r}'.format(specfile))
         self.assertEqual(opts.meta1d, True,
                          'Default 1D metadata flag is not False')
+        self.assertEqual(opts.exclude, xlist,
+                         'Exclude list is not {0!r}'.format(xlist))
 
     def test_set_all_long(self):
         clevel = 3
         lsigfig = 2
         ncfmt = 'netcdf'
         metadata = ['meta1', 'meta2']
+        xlist = ['x', 'y', 'z']
         specfile = 'myspec.s2s'
         prefix = 'prefix.'
         suffix = '.suffix'
@@ -116,6 +124,8 @@ class CLITest(unittest.TestCase):
                      '--netcdf_format', ncfmt])
         for md in metadata:
             argv.extend(['--metadata', md])
+        for x in xlist:
+            argv.extend(['--exclude', x])
         argv.extend(['--specfile', specfile, '--output_prefix', prefix,
                      '--output_suffix', suffix])
         for ts in tseries:
@@ -148,6 +158,8 @@ class CLITest(unittest.TestCase):
                          'Default output suffix is not {0!r}'.format(specfile))
         self.assertEqual(opts.meta1d, True,
                          'Default 1D metadata flag is not False')
+        self.assertEqual(opts.exclude, xlist,
+                         'Exclude list is not {0!r}'.format(xlist))
 
 
 #=========================================================================
@@ -196,6 +208,7 @@ class MainTest(unittest.TestCase):
         lsigfig = 2
         ncfmt = 'netcdf'
         metadata = ['meta1', 'meta2']
+        xlist = ['x', 'y', 'z']
         specfile = 'myspec.s2s'
         prefix = 'prefix.'
         suffix = '.suffix'
@@ -205,6 +218,8 @@ class MainTest(unittest.TestCase):
         argv = ['-1', '-c', str(clevel), '-d', str(lsigfig), '-f', ncfmt]
         for md in metadata:
             argv.extend(['-m', md])
+        for x in xlist:
+            argv.extend(['-x', x])
         argv.extend(['-o', specfile, '-p', prefix, '-s', suffix])
         argv.extend(infiles)
 
@@ -242,6 +257,8 @@ class MainTest(unittest.TestCase):
                          'Default time series names is not None')
         self.assertEqual(spec.assume_1d_time_variant_metadata, True,
                          'Default 1D time-variant metadata flag is not True')
+        self.assertEqual(spec.exclude_list, xlist,
+                         'Exclude list is not {0!r}'.format(xlist))
 
     def test_set_all_long(self):
         clevel = 3
