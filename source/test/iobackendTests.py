@@ -29,9 +29,9 @@ def print_test_msg(testname, **kwds):
 
 
 #=========================================================================
-# test_func
+# _test_func
 #=========================================================================
-def test_func(testname, func, expected, msg, kwds={}):
+def _test_func(testname, func, expected, msg, kwds={}):
     try:
         actual = func(**kwds)
         print_test_msg(testname, actual=actual, expected=expected, **kwds)
@@ -46,19 +46,18 @@ def test_func(testname, func, expected, msg, kwds={}):
 #=========================================================================
 # test_func_avail
 #=========================================================================
-def test_func_avail(testname, func, expected, msg, kwds={}):
+def _test_func_avail(testname, func, expected, msg, kwds={}):
     for backend in iobackend._AVAILABLE_:
         iobackend.set_backend(backend)
         npt.assert_equal(iobackend.get_backend(), backend,
                          'Cannot set backend {}'.format(backend))
-        test_func(testname, func, expected,
-                  msg='{}: {}'.format(backend, msg), kwds=kwds)
+        _test_func(testname, func, expected, msg='{}: {}'.format(backend, msg), kwds=kwds)
 
 
 #=========================================================================
 # test_name
 #=========================================================================
-def test_name():
+def _test_name():
     frame = inspect.stack()[1][0]
     fclass = frame.f_locals["self"].__class__.__name__
     fmethod = frame.f_code.co_name
@@ -115,15 +114,15 @@ class ReadTests(unittest.TestCase):
             remove(self.ncfrname)
 
     def test_set_get(self):
-        test_func_avail(test_name(), lambda: True, True, 'Cannot set backend')
+        _test_func_avail(_test_name(), lambda: True, True, 'Cannot set backend')
 
     def test_set_failure(self):
-        test_func(test_name(), iobackend.set_backend, KeyError,
-                  'Expected failure', kwds={'name': 'x'})
+        _test_func(_test_name(), iobackend.set_backend, KeyError,
+                   'Expected failure', kwds={'name': 'x'})
 
     def test_NCFile_init_mode_failure(self):
-        test_func(test_name(), iobackend.NCFile, ValueError, 'Expected failure',
-                  kwds={'filename': self.ncfrname, 'mode': 'x'})
+        _test_func(_test_name(), iobackend.NCFile, ValueError, 'Expected failure',
+                   kwds={'filename': self.ncfrname, 'mode': 'x'})
 
     def test_NCFile_init(self):
         def func():
@@ -132,8 +131,8 @@ class ReadTests(unittest.TestCase):
             ncf.close()
             return actual
         expected = iobackend.NCFile
-        test_func_avail(test_name(), func, expected,
-                        'NCFile not created with correct type')
+        _test_func_avail(_test_name(), func, expected,
+                         'NCFile not created with correct type')
 
     def test_NCFile_dimensions(self):
         def func():
@@ -142,8 +141,8 @@ class ReadTests(unittest.TestCase):
             ncf.close()
             return actual
         expected = self.ncdims
-        test_func_avail(test_name(), func, expected,
-                        'NCFile dimensions incorrect')
+        _test_func_avail(_test_name(), func, expected,
+                         'NCFile dimensions incorrect')
 
     def test_NCFile_unlimited(self):
         def func(dimension=''):
@@ -152,8 +151,8 @@ class ReadTests(unittest.TestCase):
             ncf.close()
             return actual
         for d, x in [('t', True), ('x', False)]:
-            test_func_avail(test_name(), func, x, 'NCFile dimension {} unlimited is {}'.format(d, x),
-                            kwds={'dimension': d})
+            _test_func_avail(_test_name(), func, x, 'NCFile dimension {} unlimited is {}'.format(d, x),
+                             kwds={'dimension': d})
 
     def test_NCFile_ncattrs(self):
         def func():
@@ -161,8 +160,8 @@ class ReadTests(unittest.TestCase):
             actual = ncf.ncattrs
             ncf.close()
             return actual
-        test_func_avail(test_name(), func, self.ncattrs.keys(),
-                        'NCFile ncattrs incorrect')
+        _test_func_avail(_test_name(), func, self.ncattrs.keys(),
+                         'NCFile ncattrs incorrect')
 
     def test_NCFile_variables(self):
         def func():
@@ -171,8 +170,8 @@ class ReadTests(unittest.TestCase):
             ncf.close()
             return actual
         expected = {v: iobackend.NCVariable for v in self.ncvars}
-        test_func_avail(test_name(), func, expected,
-                        'NCFile variables incorrect')
+        _test_func_avail(_test_name(), func, expected,
+                         'NCFile variables incorrect')
 
     def test_NCFile_variable_data(self):
         def func():
@@ -180,8 +179,8 @@ class ReadTests(unittest.TestCase):
             actual = {v: ncf.variables[v][:] for v in ncf.variables}
             ncf.close()
             return actual
-        test_func_avail(test_name(), func, self.ncvars,
-                        'NCFile variables incorrect')
+        _test_func_avail(_test_name(), func, self.ncvars,
+                         'NCFile variables incorrect')
 
     def test_NCVariable_ncattrs_getncattr(self):
         def func(variable=''):
@@ -192,8 +191,8 @@ class ReadTests(unittest.TestCase):
             return actual
         for v in self.vattrs:
             expected = self.vattrs[v]
-            test_func_avail(test_name(), func, expected, 'NCVariable {} ncattrs incorrect'.format(v),
-                            kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected, 'NCVariable {} ncattrs incorrect'.format(v),
+                             kwds={'variable': v})
 
     def test_NCVariable_dimensions(self):
         def func(variable=''):
@@ -203,8 +202,8 @@ class ReadTests(unittest.TestCase):
             return actual
         for v in self.vdtype:
             expected = self.vdims[v]
-            test_func_avail(test_name(), func, expected, 'NCVariable {} dimensions incorrect'.format(v),
-                            kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected, 'NCVariable {} dimensions incorrect'.format(v),
+                             kwds={'variable': v})
 
     def test_NCVariable_datatype(self):
         def func(variable=''):
@@ -214,8 +213,8 @@ class ReadTests(unittest.TestCase):
             return actual
         for v in self.vdtype:
             expected = np.dtype(self.vdtype[v])
-            test_func_avail(test_name(), func, expected, 'NCVariable {} datatype incorrect'.format(v),
-                            kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected, 'NCVariable {} datatype incorrect'.format(v),
+                             kwds={'variable': v})
 
     def test_NCVariable_shape(self):
         def func(variable=''):
@@ -225,8 +224,8 @@ class ReadTests(unittest.TestCase):
             return actual
         for v in self.vshape:
             expected = self.vshape[v]
-            test_func_avail(test_name(), func, expected, 'NCVariable {} shape incorrect'.format(v),
-                            kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected, 'NCVariable {} shape incorrect'.format(v),
+                             kwds={'variable': v})
 
     def test_NCVariable_fill_value(self):
         def func(variable=''):
@@ -236,8 +235,8 @@ class ReadTests(unittest.TestCase):
             return actual
         for v in self.vfill:
             expected = self.vfill[v]
-            test_func_avail(test_name(), func, expected, 'NCVariable {} fill value incorrect'.format(v),
-                            kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected, 'NCVariable {} fill value incorrect'.format(v),
+                             kwds={'variable': v})
 
     def test_NCVariable_size(self):
         def func(variable=''):
@@ -248,8 +247,8 @@ class ReadTests(unittest.TestCase):
         for v in self.vdims:
             expected = reduce(lambda x, y: x * y,
                               (self.ncdims[d] for d in self.vdims[v]), 1)
-            test_func_avail(test_name(), func, expected, 'NCVariable {} size incorrect'.format(v),
-                            kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected, 'NCVariable {} size incorrect'.format(v),
+                             kwds={'variable': v})
 
     def test_NCVariable_getitem(self):
         def func(variable=''):
@@ -259,8 +258,8 @@ class ReadTests(unittest.TestCase):
             return actual
         for v in self.vdims:
             expected = self.ncvars[v]
-            test_func_avail(test_name(), func, expected, 'NCVariable {} getitem incorrect'.format(v),
-                            kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected, 'NCVariable {} getitem incorrect'.format(v),
+                             kwds={'variable': v})
 
 
 #=========================================================================
@@ -310,8 +309,8 @@ class WriteTests(unittest.TestCase):
             remove(self.ncfwname)
             return actual
         expected = iobackend.NCFile
-        test_func_avail(test_name(), func, expected,
-                        'NCFile not created with correct type')
+        _test_func_avail(_test_name(), func, expected,
+                         'NCFile not created with correct type')
 
     def test_NCFile_setncattr(self):
         def func():
@@ -325,8 +324,8 @@ class WriteTests(unittest.TestCase):
             remove(self.ncfwname)
             return actual
         expected = self.ncattrs
-        test_func_avail(test_name(), func, expected,
-                        'NCFile attributes incorrect')
+        _test_func_avail(_test_name(), func, expected,
+                         'NCFile attributes incorrect')
 
     def test_NCFile_create_dimension(self):
         def func():
@@ -340,8 +339,8 @@ class WriteTests(unittest.TestCase):
             remove(self.ncfwname)
             return actual
         expected = self.ncdims
-        test_func_avail(test_name(), func, expected,
-                        'NCFile dimensions incorrect')
+        _test_func_avail(_test_name(), func, expected,
+                         'NCFile dimensions incorrect')
 
     def test_NCFile_create_dimension_unlimited(self):
         def func():
@@ -356,8 +355,8 @@ class WriteTests(unittest.TestCase):
             remove(self.ncfwname)
             return actual
         expected = {'t': (0, True), 'x': (3, False)}
-        test_func_avail(test_name(), func, expected,
-                        'NCFile unlimited dimensions incorrect')
+        _test_func_avail(_test_name(), func, expected,
+                         'NCFile unlimited dimensions incorrect')
 
     def test_NCFile_create_variable(self):
         def func(variable=''):
@@ -377,8 +376,8 @@ class WriteTests(unittest.TestCase):
             return actual
         for v in self.ncvars:
             expected = iobackend.NCVariable
-            test_func_avail(test_name(), func, expected,
-                            'NCFile variables incorrect', kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected,
+                             'NCFile variables incorrect', kwds={'variable': v})
 
     def test_NCFile_create_variable_fill(self):
         def func(variable=''):
@@ -398,8 +397,8 @@ class WriteTests(unittest.TestCase):
             return actual
         for v in self.ncvars:
             expected = None if v == 's' else self.vfill[v]
-            test_func_avail(test_name(), func, expected,
-                            'NCFile variables incorrect', kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected,
+                             'NCFile variables incorrect', kwds={'variable': v})
 
     def test_NCFile_create_variable_chunksizes(self):
         def func(variable=''):
@@ -422,8 +421,8 @@ class WriteTests(unittest.TestCase):
                          'Cannot set backend {}'.format(netCDF4))
         for v in self.ncvars:
             expected = self.chunks[v] if self.chunks[v] else 'contiguous'
-            test_func(test_name(), func, expected,
-                      msg='{}: {}'.format('netCDF4', 'NCFile variables incorrect'), kwds={'variable': v})
+            _test_func(_test_name(), func, expected,
+                       msg='{}: {}'.format('netCDF4', 'NCFile variables incorrect'), kwds={'variable': v})
 
     def test_NCVariable_setncattr(self):
         def func(variable=''):
@@ -446,8 +445,8 @@ class WriteTests(unittest.TestCase):
             return actual
         for v in self.vattrs:
             expected = self.vattrs[v]
-            test_func_avail(test_name(), func, expected,
-                            'NCFile variables incorrect', kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected,
+                             'NCFile variables incorrect', kwds={'variable': v})
 
     def test_NCVariable_setitem_getitem(self):
         def func(variable=''):
@@ -468,8 +467,8 @@ class WriteTests(unittest.TestCase):
             return actual
         for v in self.ncvars:
             expected = self.ncvars[v]
-            test_func_avail(test_name(), func, expected,
-                            'NCFile variables incorrect', kwds={'variable': v})
+            _test_func_avail(_test_name(), func, expected,
+                             'NCFile variables incorrect', kwds={'variable': v})
 
 
 #=========================================================================
