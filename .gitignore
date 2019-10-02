@@ -6,3 +6,4 @@ PyReshaper.egg-info/
 /.settings/
 /.vscode/
 /.idea/
+.pytest_cache
