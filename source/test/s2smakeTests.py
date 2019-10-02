@@ -3,10 +3,10 @@ Copyright 2017, University Corporation for Atmospheric Research
 See LICENSE.txt for details
 """
 
-import os
-import imp
-import unittest
 import cPickle as pickle
+import imp
+import os
+import unittest
 
 from pyreshaper.specification import Specifier
 

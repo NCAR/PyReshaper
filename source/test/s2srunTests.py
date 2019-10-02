@@ -5,20 +5,19 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
-import unittest
-
 import imp
 import inspect
-from glob import glob
+import unittest
 from cStringIO import StringIO
+from glob import glob
+from os import getcwd
 from os import linesep as eol
-from os import remove, getcwd
+from os import remove
 from os.path import exists
-from mpi4py import MPI
-
-from pyreshaper.specification import Specifier
-
 from test import makeTestData
+
+from mpi4py import MPI
+from pyreshaper.specification import Specifier
 
 top_dir = getcwd().split('/source')[0]
 s2srun = imp.load_source('s2srun', top_dir + '/scripts/s2srun')

@@ -5,16 +5,16 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
-import unittest
-import numpy as np
-import numpy.testing as npt
-import netCDF4
-import Nio
 import inspect
-
-from pyreshaper import iobackend
+import unittest
 from os import linesep, remove
 from os.path import exists
+
+import netCDF4
+import Nio
+import numpy as np
+import numpy.testing as npt
+from pyreshaper import iobackend
 
 
 #=========================================================================

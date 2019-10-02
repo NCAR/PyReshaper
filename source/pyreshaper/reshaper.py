@@ -9,25 +9,27 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
+from os import O_CREAT, O_RDONLY
+from os import close as fdclose
+from os import fstatvfs, linesep
+from os import open as fdopen
+from os import remove, rename
+from os.path import exists, isdir, isfile, join
+# For memory diagnostics
+from resource import RUSAGE_SELF, getrusage
 # Built-in imports
 from sys import platform
-from os import linesep, remove, rename, fstatvfs
-from os import open as fdopen, close as fdclose, O_RDONLY, O_CREAT
-from os.path import exists, isfile, isdir, join
 
 # Third-party imports
 import numpy
-from asaptools.simplecomm import create_comm, SimpleComm
+from asaptools.partition import Duplicate, EqualStride, WeightBalanced
+from asaptools.simplecomm import SimpleComm, create_comm
 from asaptools.timekeeper import TimeKeeper
-from asaptools.partition import WeightBalanced, EqualStride, Duplicate
 from asaptools.vprinter import VPrinter
 
+import iobackend
 # PyReshaper imports
 from specification import Specifier
-import iobackend
-
-# For memory diagnostics
-from resource import getrusage, RUSAGE_SELF
 
 
 #=========================================================================

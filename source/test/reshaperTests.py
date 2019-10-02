@@ -5,21 +5,19 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
-import unittest
-
-import sys
 import inspect
-from glob import glob
+import sys
+import unittest
 from cStringIO import StringIO
+from glob import glob
 from os import linesep as eol
 from os import remove
 from os.path import exists
-from mpi4py import MPI
+from test import makeTestData
 
+from mpi4py import MPI
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
-
-from test import makeTestData
 
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
