@@ -173,8 +173,7 @@ class CommonTestsBase(object):
         self.convert()
         if self.rank == 0:
             for tsvar in makeTestData.tsvars:
-                fname = (self.spec_args['prefix'] +
-                         tsvar + self.spec_args['suffix'])
+                fname = (self.spec_args['prefix'] + tsvar + self.spec_args['suffix'])
                 for timvar in makeTestData.timvars:
                     if timvar in self.spec_args['exclude_list']:
                         xassert = self.assertFalse
@@ -303,8 +302,7 @@ class CommonTestsBase(object):
         self.spec_args['infiles'] = makeTestData.slices[0:2]
         self.convert()
         if self.rank == 0:
-            remove(self.spec_args['prefix'] +
-                   missing + self.spec_args['suffix'])
+            remove(self.spec_args['prefix'] + missing + self.spec_args['suffix'])
         MPI_COMM_WORLD.Barrier()
         self.create_args['wmode'] = 'a'
         self.spec_args['infiles'] = makeTestData.slices[2:]

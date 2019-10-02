@@ -212,8 +212,7 @@ class MainTest(unittest.TestCase):
         specfile = 'myspec.s2s'
         prefix = 'prefix.'
         suffix = '.suffix'
-        infiles = [self.cwd +
-                   f for f in ['/s2smakeTests.py', '/specificationTests.py']]
+        infiles = [self.cwd + f for f in ['/s2smakeTests.py', '/specificationTests.py']]
 
         argv = ['-1', '-c', str(clevel), '-d', str(lsigfig), '-f', ncfmt]
         for md in metadata:
@@ -269,8 +268,7 @@ class MainTest(unittest.TestCase):
         prefix = 'prefix.'
         suffix = '.suffix'
         tseries = ['tsvar1', 'tsvar2']
-        infiles = [self.cwd +
-                   f for f in ['/s2smakeTests.py', '/specificationTests.py']]
+        infiles = [self.cwd + f for f in ['/s2smakeTests.py', '/specificationTests.py']]
 
         argv = ['--meta1d',
                 '--compression_level', str(clevel),
