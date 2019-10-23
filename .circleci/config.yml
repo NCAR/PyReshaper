@@ -31,12 +31,12 @@ jobs:
     <<: *default-job
     environment:
       PYTHON: "2.7"
-      ENV_NAME: "pyreshaper-dev"
+      ENV_NAME: "pyreshaper-2.7"
       TEST_SCRIPT: "test.sh"
 
   "linting":
     <<: *default-job
     environment:
       PYTHON: "2.7"
-      ENV_NAME: "pyreshaper-dev"
+      ENV_NAME: "pyreshaper-2.7"
       TEST_SCRIPT: "lint.sh"

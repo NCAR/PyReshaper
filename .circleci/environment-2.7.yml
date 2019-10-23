@@ -1,4 +1,4 @@
-name: pyreshaper-dev
+name: pyreshaper-2.7
 channels:
   - conda-forge
   - defaults
