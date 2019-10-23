@@ -5,21 +5,19 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
-import unittest
-
-import sys
 import inspect
-from glob import glob
+import sys
+import unittest
 from cStringIO import StringIO
+from glob import glob
 from os import linesep as eol
 from os import remove
 from os.path import exists
-from mpi4py import MPI
+from test import makeTestData
 
+from mpi4py import MPI
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
-
-from test import makeTestData
 
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
@@ -173,8 +171,7 @@ class CommonTestsBase(object):
         self.convert()
         if self.rank == 0:
             for tsvar in makeTestData.tsvars:
-                fname = (self.spec_args['prefix'] +
-                         tsvar + self.spec_args['suffix'])
+                fname = (self.spec_args['prefix'] + tsvar + self.spec_args['suffix'])
                 for timvar in makeTestData.timvars:
                     if timvar in self.spec_args['exclude_list']:
                         xassert = self.assertFalse
@@ -303,8 +300,7 @@ class CommonTestsBase(object):
         self.spec_args['infiles'] = makeTestData.slices[0:2]
         self.convert()
         if self.rank == 0:
-            remove(self.spec_args['prefix'] +
-                   missing + self.spec_args['suffix'])
+            remove(self.spec_args['prefix'] + missing + self.spec_args['suffix'])
         MPI_COMM_WORLD.Barrier()
         self.create_args['wmode'] = 'a'
         self.spec_args['infiles'] = makeTestData.slices[2:]

@@ -1,6 +1,12 @@
 *.nc
 *.pyc
+__pycache__
 dist/
 build/
 PyReshaper.egg-info/
 /.settings/
+/.vscode/
+/.idea/
+.pytest_cache
+test-reports/
+.coverage

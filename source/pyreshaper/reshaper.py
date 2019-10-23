@@ -9,25 +9,27 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
+from os import O_CREAT, O_RDONLY
+from os import close as fdclose
+from os import fstatvfs, linesep
+from os import open as fdopen
+from os import remove, rename
+from os.path import exists, isdir, isfile, join
+# For memory diagnostics
+from resource import RUSAGE_SELF, getrusage
 # Built-in imports
 from sys import platform
-from os import linesep, remove, rename, fstatvfs
-from os import open as fdopen, close as fdclose, O_RDONLY, O_CREAT
-from os.path import exists, isfile, isdir, join
 
 # Third-party imports
 import numpy
-from asaptools.simplecomm import create_comm, SimpleComm
+from asaptools.partition import Duplicate, EqualStride, WeightBalanced
+from asaptools.simplecomm import SimpleComm, create_comm
 from asaptools.timekeeper import TimeKeeper
-from asaptools.partition import WeightBalanced, EqualStride, Duplicate
 from asaptools.vprinter import VPrinter
 
+import iobackend
 # PyReshaper imports
 from specification import Specifier
-import iobackend
-
-# For memory diagnostics
-from resource import getrusage, RUSAGE_SELF
 
 
 #=========================================================================
@@ -405,8 +407,7 @@ class Reshaper(object):
 
         # Get the list of variable names and missing variables
         var_names = set(
-            all_tsvars.keys() + self._time_invariant_metadata +
-            self._time_invariant_metafile_vars + self._time_variant_metadata)
+            all_tsvars.keys() + self._time_invariant_metadata + self._time_invariant_metafile_vars + self._time_variant_metadata)
         missing_vars = set()
 
         # Partition the remaining filenames to inspect
@@ -756,8 +757,7 @@ class Reshaper(object):
             requested_nbytes = tmp_data.nbytes if hasattr(
                 tmp_data, 'nbytes') else 0
             self._byte_counts['Requested Data'] += requested_nbytes
-            actual_nbytes = (self.assumed_block_size *
-                             numpy.ceil(requested_nbytes / self.assumed_block_size))
+            actual_nbytes = (self.assumed_block_size * numpy.ceil(requested_nbytes / self.assumed_block_size))
             self._byte_counts['Actual Data'] += actual_nbytes
 
     def convert(self, output_limit=0, rchunks=None, wchunks=None):

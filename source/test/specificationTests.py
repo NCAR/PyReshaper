@@ -5,9 +5,9 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
+import cPickle as pickle
 import os
 import unittest
-import cPickle as pickle
 
 from pyreshaper import specification
 

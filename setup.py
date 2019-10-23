@@ -8,6 +8,7 @@ See the LICENSE.rst file for details
 
 from setuptools import setup
 
+__version__ = None
 exec(open('source/pyreshaper/version.py').read())
 
 setup(name='PyReshaper',

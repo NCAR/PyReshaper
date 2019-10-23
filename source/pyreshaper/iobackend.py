@@ -10,8 +10,9 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.rst file for details
 """
 
-import numpy
 from copy import deepcopy
+
+import numpy
 
 try:
     _dict_ = __import__('collections', fromlist=['OrderedDict']).OrderedDict
