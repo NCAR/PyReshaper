@@ -9,5 +9,5 @@ conda env create --file .circleci/env-${PYTHON}.yml --name ${ENV_NAME} --quiet
 conda env list
 source activate ${ENV_NAME}
 pip install pip --upgrade
-pip install --no-deps --quiet -e .
+pip install --no-deps --quiet .
 conda list -n ${ENV_NAME}
