@@ -1,4 +1,4 @@
-name: pyreshaper-2.7
+name: pyreshaper-dev
 channels:
   - conda-forge
   - defaults
@@ -7,11 +7,13 @@ dependencies:
   - coverage
   - flake8
   - isort
+  - mpich
   - mpi4py
   - netcdf4
   - pynio
   - pytest
   - pytest-cov
   - python=2.7
+  - pip
   - pip:
     - asaptools

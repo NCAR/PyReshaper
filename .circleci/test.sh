@@ -4,6 +4,6 @@ set -e
 set -eo pipefail
 
 source activate ${ENV_NAME}
-pytest --junitxml=test-reports/junit.xml --cov=./ --verbose
-echo "[Upload coverage]"
-codecov
+
+echo "[Serial Tests]"
+python -m unittest discover --start-directory=source/test/ --pattern='*Tests.py'
