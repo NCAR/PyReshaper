@@ -8,13 +8,13 @@ See the LICENSE.rst file for details
 import imp
 import inspect
 import unittest
+import makeTestData
 from cStringIO import StringIO
 from glob import glob
 from os import getcwd
 from os import linesep as eol
 from os import remove
 from os.path import exists
-import makeTestData
 
 from mpi4py import MPI
 from pyreshaper.specification import Specifier
