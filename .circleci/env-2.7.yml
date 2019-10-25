@@ -7,6 +7,7 @@ dependencies:
   - coverage
   - flake8
   - isort
+  - mpich
   - mpi4py
   - netcdf4
   - pynio
