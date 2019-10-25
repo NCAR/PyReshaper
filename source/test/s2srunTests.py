@@ -8,7 +8,6 @@ See the LICENSE.rst file for details
 import imp
 import inspect
 import unittest
-import makeTestData
 from cStringIO import StringIO
 from glob import glob
 from os import getcwd
@@ -18,6 +17,8 @@ from os.path import exists
 
 from mpi4py import MPI
 from pyreshaper.specification import Specifier
+
+import makeTestData
 
 top_dir = getcwd().split('/source')[0]
 s2srun = imp.load_source('s2srun', top_dir + '/scripts/s2srun')

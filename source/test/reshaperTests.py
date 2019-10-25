@@ -8,7 +8,6 @@ See the LICENSE.rst file for details
 import inspect
 import sys
 import unittest
-import makeTestData
 from cStringIO import StringIO
 from glob import glob
 from os import linesep as eol
@@ -18,6 +17,8 @@ from os.path import exists
 from mpi4py import MPI
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
+
+import makeTestData
 
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
