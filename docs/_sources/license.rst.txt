@@ -1,4 +1,4 @@
 Product License
 ===============
 
-.. include:: ../../LICENSE.rst
+.. include:: ../../LICENSE.txt
