@@ -20,7 +20,7 @@ limitations under the License.
 
 from setuptools import setup
 
-__version__ = '1.0.6'
+__version__ = '1.0.7'
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()
