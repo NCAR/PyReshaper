@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - bumpversion
   - codecov
   - coverage
   - flake8

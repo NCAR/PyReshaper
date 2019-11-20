@@ -2,7 +2,7 @@
 Parallel Tests for the Reshaper class
 
 Copyright 2017, University Corporation for Atmospheric Research
-See the LICENSE.rst file for details
+See the LICENSE.txt file for details
 """
 
 import inspect
