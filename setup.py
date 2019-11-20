@@ -18,22 +18,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
-__version__ = None
-exec(open('source/pyreshaper/version.py').read())
+__version__ = '1.0.6'
+
+with open("README.rst", "r") as fh:
+    long_description = fh.read()
 
 setup(name='PyReshaper',
       version=__version__,
-      description='Python Time-Slice to Time-Series NetCDF Converter',
       author='Kevin Paul',
       author_email='kpaul@ucar.edu',
+      description='Python Time-Slice to Time-Series NetCDF Converter',
+      long_description=long_description,
+      long_description_content_type="text/x-rst",
       url='https://github.com/NCAR/PyReshaper',
-      download_url='https://github.com/NCAR/PyReshaper/tarball/v' + __version__,
-      license='https://github.com/NCAR/PyReshaper/blob/master/LICENSE.txt',
       packages=['pyreshaper'],
       package_dir={'pyreshaper': 'source/pyreshaper'},
-      package_data={'pyreshaper': ['LICENSE.txt']},
+      classifiers=[
+          "Programming Language :: Python :: 2.7",
+          "License :: OSI Approved :: Apache Software License"
+          "Operating System :: OS Independent",
+          "Topic :: Scientific/Engineering",
+          "Topic :: Scientific/Engineering :: Atmospheric Science",
+          "Topic :: Utilities"
+      ],
+      python_requires='>=2.7,<3.0',
       scripts=['scripts/s2smake', 'scripts/s2srun'],
       install_requires=['mpi4py', 'asaptools']
       )
