@@ -16,9 +16,9 @@ from os import remove
 from os.path import exists
 
 from mpi4py import MPI
-from pyreshaper.specification import Specifier
 
 import makeTestData
+from pyreshaper.specification import Specifier
 
 top_dir = getcwd().split('/source')[0]
 s2srun = imp.load_source('s2srun', top_dir + '/scripts/s2srun')
