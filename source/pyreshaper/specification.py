@@ -26,9 +26,6 @@ import cPickle as pickle
 from os import path as ospath
 
 
-#=========================================================================
-# create_specifier
-#=========================================================================
 def create_specifier(**kwargs):
     """
     Factory function for Specifier class objects.  Defined for convenience.
@@ -42,9 +39,6 @@ def create_specifier(**kwargs):
     return Specifier(**kwargs)
 
 
-#=========================================================================
-# Specifier
-#=========================================================================
 class Specifier(object):
 
     """
@@ -295,8 +289,5 @@ class Specifier(object):
             raise OSError(err_msg)
 
 
-#==============================================================================
-# Command-line Operation
-#==============================================================================
 if __name__ == '__main__':
     pass

@@ -22,9 +22,6 @@ from pyreshaper.specification import Specifier
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
 
-#=========================================================================
-# CommonTestsBase
-#=========================================================================
 class CommonTestsBase(object):
 
     def setUp(self):
@@ -315,9 +312,6 @@ class CommonTestsBase(object):
         MPI_COMM_WORLD.Barrier()
 
 
-#=========================================================================
-# NetCDF4Tests
-#=========================================================================
 class NetCDF4Tests(unittest.TestCase, CommonTestsBase):
     """NetCDF4 Python Tests"""
 
@@ -329,9 +323,6 @@ class NetCDF4Tests(unittest.TestCase, CommonTestsBase):
         self.clean()
 
 
-#=========================================================================
-# NioTests
-#=========================================================================
 class NioTests(unittest.TestCase, CommonTestsBase):
     """PyNIO Tests"""
 
@@ -343,9 +334,6 @@ class NioTests(unittest.TestCase, CommonTestsBase):
         self.clean()
 
 
-#=========================================================================
-# CLI
-#=========================================================================
 if __name__ == "__main__":
     hline = '=' * 70
     if MPI_COMM_WORLD.Get_rank() == 0:

@@ -25,9 +25,6 @@ fattrs = {'attr1': 'attribute one',
           'attr2': 'attribute two'}
 
 
-#=========================================================================
-# generate_data
-#=========================================================================
 def generate_data(backend='netCDF4'):
     """
     Generate dataset for testing purposes
@@ -120,9 +117,6 @@ def generate_data(backend='netCDF4'):
             v[:] = np.ma.MaskedArray(vdata, mask=vmask)
 
 
-#=========================================================================
-# check_outfile
-#=========================================================================
 def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
     """
     Check that a PyReshaper generated output file is correct

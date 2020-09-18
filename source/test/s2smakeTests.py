@@ -14,9 +14,6 @@ top_dir = os.getcwd().split('/source')[0]
 s2smake = imp.load_source('s2smake', top_dir + '/scripts/s2smake')
 
 
-#=========================================================================
-# CLITest
-#=========================================================================
 class CLITest(unittest.TestCase):
 
     def test_empty(self):
@@ -162,9 +159,6 @@ class CLITest(unittest.TestCase):
                          'Exclude list is not {0!r}'.format(xlist))
 
 
-#=========================================================================
-# MainTest
-#=========================================================================
 class MainTest(unittest.TestCase):
 
     def setUp(self):
@@ -319,8 +313,5 @@ class MainTest(unittest.TestCase):
                          'Default 1D time-variant metadata flag is not True')
 
 
-#=========================================================================
-# CLI
-#=========================================================================
 if __name__ == "__main__":
     unittest.main()

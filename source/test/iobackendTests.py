@@ -18,9 +18,6 @@ import numpy.testing as npt
 from pyreshaper import iobackend
 
 
-#=========================================================================
-# print_test_msg
-#=========================================================================
 def print_test_msg(testname, **kwds):
     msg = ['{} (backend={}):'.format(testname, iobackend.get_backend())]
     for kwd in sorted(kwds):
@@ -29,9 +26,6 @@ def print_test_msg(testname, **kwds):
     print linesep.join(msg)
 
 
-#=========================================================================
-# _test_func
-#=========================================================================
 def _test_func(testname, func, expected, msg, kwds={}):
     try:
         actual = func(**kwds)
@@ -44,9 +38,6 @@ def _test_func(testname, func, expected, msg, kwds={}):
     npt.assert_equal(actual, expected, '{}'.format(msg))
 
 
-#=========================================================================
-# test_func_avail
-#=========================================================================
 def _test_func_avail(testname, func, expected, msg, kwds={}):
     for backend in iobackend._AVAILABLE_:
         iobackend.set_backend(backend)
@@ -55,9 +46,6 @@ def _test_func_avail(testname, func, expected, msg, kwds={}):
         _test_func(testname, func, expected, msg='{}: {}'.format(backend, msg), kwds=kwds)
 
 
-#=========================================================================
-# test_name
-#=========================================================================
 def _test_name():
     frame = inspect.stack()[1][0]
     fclass = frame.f_locals["self"].__class__.__name__
@@ -65,9 +53,6 @@ def _test_name():
     return '{}.{}'.format(fclass, fmethod)
 
 
-#=========================================================================
-# ReadTests
-#=========================================================================
 class ReadTests(unittest.TestCase):
 
     """
@@ -263,9 +248,6 @@ class ReadTests(unittest.TestCase):
                              kwds={'variable': v})
 
 
-#=========================================================================
-# WriteTests
-#=========================================================================
 class WriteTests(unittest.TestCase):
 
     """
@@ -472,9 +454,6 @@ class WriteTests(unittest.TestCase):
                              'NCFile variables incorrect', kwds={'variable': v})
 
 
-#=========================================================================
-# AppendTests
-#=========================================================================
 class AppendTests(unittest.TestCase):
 
     """
@@ -687,9 +666,6 @@ class AppendTests(unittest.TestCase):
                 actual[attr], value, 'Variable attribute {0!r} incorrect'.format(attr))
 
 
-#=========================================================================
-# CLI
-#=========================================================================
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

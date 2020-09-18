@@ -19,6 +19,7 @@ limitations under the License.
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
 """
+# flake8: noqa
 
 import reshaper
 import specification

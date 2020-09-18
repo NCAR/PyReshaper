@@ -64,9 +64,6 @@ if _NIO_ is not None:
     _BACKEND_MAP_['Nio'] = _NIO_
 
 
-#=========================================================================
-# is_available
-#=========================================================================
 def is_available(name=None):
     if name is None:
         return len(_AVAILABLE_) > 0
@@ -74,9 +71,6 @@ def is_available(name=None):
         return name in _BACKEND_MAP_
 
 
-#=========================================================================
-# set_backend - Set the backend to the one named or first preferred
-#=========================================================================
 def set_backend(name=None):
     global _BACKEND_
     if name is None:
@@ -95,16 +89,10 @@ def set_backend(name=None):
 set_backend()
 
 
-#=========================================================================
-# get_backend - Get the currently set backend name
-#=========================================================================
 def get_backend():
     return _BACKEND_
 
 
-#=========================================================================
-# get_backend_version
-#=========================================================================
 def get_backend_version(name=None):
     if name is None:
         backend = _BACKEND_MAP_[_BACKEND_]
@@ -113,9 +101,6 @@ def get_backend_version(name=None):
     return tuple(int(i) for i in backend.__version__.split('.'))
 
 
-#=========================================================================
-# NCFile
-#=========================================================================
 class NCFile(object):
     """
     Wrapper class for netCDF files/datasets
@@ -295,9 +280,6 @@ class NCFile(object):
         self._obj.close()
 
 
-#=========================================================================
-# NCVariable
-#=========================================================================
 class NCVariable(object):
     """
     Wrapper class for NetCDF variables
@@ -447,7 +429,7 @@ class NCVariable(object):
             while not it.finished:
                 item = it[0].tostring().replace('\x00', '')
                 minlen = strlen if strlen < len(item) else len(item)
-                #lidx = key_t[:-1] + (slice(minlen),)
+                # lidx = key_t[:-1] + (slice(minlen),)
                 lidx = it.multi_index + (slice(minlen),)
                 self._obj[lidx] = item[:minlen]
                 it.iternext()
@@ -455,8 +437,5 @@ class NCVariable(object):
             self._obj[key] = value
 
 
-#=========================================================================
-# COMMAND-LINE OPERATION
-#=========================================================================
 if __name__ == '__main__':
     pass

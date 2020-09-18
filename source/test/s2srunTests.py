@@ -24,9 +24,6 @@ s2srun = imp.load_source('s2srun', top_dir + '/scripts/s2srun')
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
 
-#=========================================================================
-# CLITests
-#=========================================================================
 class CLITests(unittest.TestCase):
 
     def setUp(self):
@@ -100,9 +97,6 @@ class CLITests(unittest.TestCase):
         self.cliassert(self.longargs())
 
 
-#=========================================================================
-# NetCDF4Tests
-#=========================================================================
 class NetCDF4Tests(unittest.TestCase):
 
     def setUp(self):
@@ -370,9 +364,6 @@ class NetCDF4Tests(unittest.TestCase):
         MPI_COMM_WORLD.Barrier()
 
 
-#=========================================================================
-# NioTests
-#=========================================================================
 class NioTests(NetCDF4Tests):
 
     def setUp(self):
@@ -383,9 +374,6 @@ class NioTests(NetCDF4Tests):
         self.clean()
 
 
-#=========================================================================
-# CLI
-#=========================================================================
 if __name__ == "__main__":
     hline = '=' * 100
     if MPI_COMM_WORLD.Get_rank() == 0:
