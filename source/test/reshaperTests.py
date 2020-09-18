@@ -10,12 +10,12 @@ import sys
 import unittest
 from cStringIO import StringIO
 from glob import glob
-from os import linesep as eol
-from os import remove
+from os import linesep as eol, remove
 from os.path import exists
 
-import makeTestData
 from mpi4py import MPI
+
+import makeTestData
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
 

@@ -21,24 +21,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from os import O_CREAT, O_RDONLY
-from os import close as fdclose
-from os import fstatvfs, linesep
-from os import open as fdopen
-from os import remove, rename
+from os import (
+    O_CREAT,
+    O_RDONLY,
+    close as fdclose,
+    fstatvfs,
+    linesep,
+    open as fdopen,
+    remove,
+    rename,
+)
 from os.path import exists, isdir, isfile, join
 # For memory diagnostics
 from resource import RUSAGE_SELF, getrusage
 # Built-in imports
 from sys import platform
 
-import iobackend
 # Third-party imports
 import numpy
 from asaptools.partition import Duplicate, EqualStride, WeightBalanced
 from asaptools.simplecomm import SimpleComm, create_comm
 from asaptools.timekeeper import TimeKeeper
 from asaptools.vprinter import VPrinter
+
+import iobackend
 # PyReshaper imports
 from specification import Specifier
 
