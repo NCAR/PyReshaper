@@ -38,7 +38,7 @@ jobs:
       - name: Setup miniconda
         uses: goanpeca/setup-miniconda@v1
         with:
-          activate-environment: asaptools # Defined in ci/environment.yml
+          activate-environment: pyreshaper # Defined in ci/environment.yml
           auto-update-conda: false
           python-version: ${{ matrix.python }}
           environment-file: ci/environment.yml
