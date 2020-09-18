@@ -6,7 +6,6 @@ See LICENSE.txt for details
 import os
 
 import numpy as np
-
 from pyreshaper import iobackend
 
 # Dataset Information
