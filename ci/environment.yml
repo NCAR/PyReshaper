@@ -6,8 +6,6 @@ dependencies:
   - bumpversion
   - codecov
   - coverage
-  - flake8=3.7.9
-  - isort
   - mpi4py
   - netcdf4
   - pip
