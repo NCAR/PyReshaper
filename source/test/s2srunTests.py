@@ -15,10 +15,9 @@ from os import linesep as eol
 from os import remove
 from os.path import exists
 
+import makeTestData
 from mpi4py import MPI
 from pyreshaper.specification import Specifier
-
-import makeTestData
 
 top_dir = getcwd().split('/source')[0]
 s2srun = imp.load_source('s2srun', top_dir + '/scripts/s2srun')

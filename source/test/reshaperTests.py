@@ -14,11 +14,10 @@ from os import linesep as eol
 from os import remove
 from os.path import exists
 
+import makeTestData
 from mpi4py import MPI
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
-
-import makeTestData
 
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 

@@ -32,14 +32,13 @@ from resource import RUSAGE_SELF, getrusage
 # Built-in imports
 from sys import platform
 
+import iobackend
 # Third-party imports
 import numpy
 from asaptools.partition import Duplicate, EqualStride, WeightBalanced
 from asaptools.simplecomm import SimpleComm, create_comm
 from asaptools.timekeeper import TimeKeeper
 from asaptools.vprinter import VPrinter
-
-import iobackend
 # PyReshaper imports
 from specification import Specifier
 
