@@ -5,63 +5,33 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
-import inspect
-import unittest
-from os import linesep, remove
+from os import remove
 from os.path import exists
 
 import netCDF4
 import Nio
 import numpy as np
 import numpy.testing as npt
+import pytest
 
 from pyreshaper import iobackend
 
 
-def print_test_msg(testname, **kwds):
-    msg = ['{} (backend={}):'.format(testname, iobackend.get_backend())]
-    for kwd in sorted(kwds):
-        msg.append('   - {}: {}'.format(kwd, kwds[kwd]))
-    msg.append('')
-    print linesep.join(msg)
+@pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+def test_set_get_backend(backend):
+    iobackend.set_backend(backend)
+    npt.assert_equal(iobackend.get_backend(), backend)
 
 
-def _test_func(testname, func, expected, msg, kwds={}):
-    try:
-        actual = func(**kwds)
-        print_test_msg(testname, actual=actual, expected=expected, **kwds)
-    except Exception, err:
-        actual = type(err)
-        errmsg = str(err)
-        print_test_msg(testname, actual=actual, errmsg=errmsg,
-                       expected=expected, **kwds)
-    npt.assert_equal(actual, expected, '{}'.format(msg))
+def test_set_backend_failure():
+    with pytest.raises(KeyError):
+        iobackend.set_backend('x')
 
 
-def _test_func_avail(testname, func, expected, msg, kwds={}):
-    for backend in iobackend._AVAILABLE_:
-        iobackend.set_backend(backend)
-        npt.assert_equal(iobackend.get_backend(), backend,
-                         'Cannot set backend {}'.format(backend))
-        _test_func(testname, func, expected, msg='{}: {}'.format(backend, msg), kwds=kwds)
+class ReadTests:
 
-
-def _test_name():
-    frame = inspect.stack()[1][0]
-    fclass = frame.f_locals["self"].__class__.__name__
-    fmethod = frame.f_code.co_name
-    return '{}.{}'.format(fclass, fmethod)
-
-
-class ReadTests(unittest.TestCase):
-
-    """
-    ReadTests Class
-
-    This class defines all of the unit tests for the iobackend module.
-    """
-
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def data(self):
         self.ncfrname = 'readtest.nc'
         self.ncattrs = {'a1': 'attribute 1', 'a2': 'attribute 2'}
         self.ncdims = {'t': 10, 'x': 5, 'c': 14}
@@ -95,168 +65,127 @@ class ReadTests(unittest.TestCase):
             vobj[:] = self.ncvars[v]
         ncfile.close()
 
-    def tearDown(self):
+        yield
+
         if exists(self.ncfrname):
             remove(self.ncfrname)
 
-    def test_set_get(self):
-        _test_func_avail(_test_name(), lambda: True, True, 'Cannot set backend')
-
-    def test_set_failure(self):
-        _test_func(_test_name(), iobackend.set_backend, KeyError,
-                   'Expected failure', kwds={'name': 'x'})
-
     def test_NCFile_init_mode_failure(self):
-        _test_func(_test_name(), iobackend.NCFile, ValueError, 'Expected failure',
-                   kwds={'filename': self.ncfrname, 'mode': 'x'})
+        with pytest.raises(ValueError):
+            iobackend.NCFile(filename=self.ncfrname, mode='x')
 
-    def test_NCFile_init(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = type(ncf)
-            ncf.close()
-            return actual
-        expected = iobackend.NCFile
-        _test_func_avail(_test_name(), func, expected,
-                         'NCFile not created with correct type')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_init(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
+        assert isinstance(ncf, iobackend.NCFile)
+        ncf.close()
 
-    def test_NCFile_dimensions(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.dimensions
-            ncf.close()
-            return actual
-        expected = self.ncdims
-        _test_func_avail(_test_name(), func, expected,
-                         'NCFile dimensions incorrect')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_dimensions(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
+        assert ncf.dimensions == self.ncdims
+        ncf.close()
 
-    def test_NCFile_unlimited(self):
-        def func(dimension=''):
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.unlimited(dimension)
-            ncf.close()
-            return actual
-        for d, x in [('t', True), ('x', False)]:
-            _test_func_avail(_test_name(), func, x, 'NCFile dimension {} unlimited is {}'.format(d, x),
-                             kwds={'dimension': d})
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_unlimited(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
+        assert ncf.unlimited('t') is True
+        assert ncf.unlimited('x') is False
+        ncf.close()
 
-    def test_NCFile_ncattrs(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.ncattrs
-            ncf.close()
-            return actual
-        _test_func_avail(_test_name(), func, self.ncattrs.keys(),
-                         'NCFile ncattrs incorrect')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_ncattrs(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
+        assert ncf.ncattrs == self.ncattrs.keys()
+        ncf.close()
 
-    def test_NCFile_variables(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = {v: type(ncf.variables[v]) for v in ncf.variables}
-            ncf.close()
-            return actual
-        expected = {v: iobackend.NCVariable for v in self.ncvars}
-        _test_func_avail(_test_name(), func, expected,
-                         'NCFile variables incorrect')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_variables(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
+        for v in ncf.variables:
+            assert isinstance(ncf.variables[v], iobackend.NCVariable)
+        ncf.close()
 
-    def test_NCFile_variable_data(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = {v: ncf.variables[v][:] for v in ncf.variables}
-            ncf.close()
-            return actual
-        _test_func_avail(_test_name(), func, self.ncvars,
-                         'NCFile variables incorrect')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_variable_data(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
+        for v in ncf.variables:
+            npt.assert_array_equal(ncf.variables[v][:], self.ncvars[v])
+        ncf.close()
 
-    def test_NCVariable_ncattrs_getncattr(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = {a: ncf.variables[variable].getncattr(
-                a) for a in ncf.variables[variable].ncattrs}
-            ncf.close()
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_ncattrs_getncattr(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
         for v in self.vattrs:
-            expected = self.vattrs[v]
-            _test_func_avail(_test_name(), func, expected, 'NCVariable {} ncattrs incorrect'.format(v),
-                             kwds={'variable': v})
+            vattrs = {a: ncf.variables[v].getncattr(a) for a in ncf.variables[v].ncattrs}
+            assert vattrs == self.vattrs[v]
+        ncf.close()
 
-    def test_NCVariable_dimensions(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.variables[variable].dimensions
-            ncf.close()
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_dimensions(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
         for v in self.vdtype:
-            expected = self.vdims[v]
-            _test_func_avail(_test_name(), func, expected, 'NCVariable {} dimensions incorrect'.format(v),
-                             kwds={'variable': v})
+            vdims = ncf.variables[v].dimensions
+            assert vdims == self.vdims[v]
+        ncf.close()
 
-    def test_NCVariable_datatype(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.variables[variable].datatype
-            ncf.close()
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_datatype(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
         for v in self.vdtype:
-            expected = np.dtype(self.vdtype[v])
-            _test_func_avail(_test_name(), func, expected, 'NCVariable {} datatype incorrect'.format(v),
-                             kwds={'variable': v})
+            vdtype = ncf.variables[v].datatype
+            assert vdtype == np.dtype(self.vdtype[v])
 
-    def test_NCVariable_shape(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.variables[variable].shape
-            ncf.close()
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_shape(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
         for v in self.vshape:
-            expected = self.vshape[v]
-            _test_func_avail(_test_name(), func, expected, 'NCVariable {} shape incorrect'.format(v),
-                             kwds={'variable': v})
+            vshape = ncf.variables[v].shape
+            assert vshape == self.vshape[v]
+        ncf.close()
 
-    def test_NCVariable_fill_value(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.variables[variable].fill_value
-            ncf.close()
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_fill_value(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
         for v in self.vfill:
-            expected = self.vfill[v]
-            _test_func_avail(_test_name(), func, expected, 'NCVariable {} fill value incorrect'.format(v),
-                             kwds={'variable': v})
+            vfill = ncf.variables[v].fill_value
+            assert vfill == self.vfill[v]
+        ncf.close()
 
-    def test_NCVariable_size(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.variables[variable].size
-            ncf.close()
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_size(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
         for v in self.vdims:
-            expected = reduce(lambda x, y: x * y,
-                              (self.ncdims[d] for d in self.vdims[v]), 1)
-            _test_func_avail(_test_name(), func, expected, 'NCVariable {} size incorrect'.format(v),
-                             kwds={'variable': v})
+            vsize1 = ncf.variables[v].size
+            vsize2 = reduce(lambda x, y: x * y, (self.ncdims[d] for d in self.vdims[v]), 1)
+            assert vsize1 == vsize2
+        ncf.close()
 
-    def test_NCVariable_getitem(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfrname)
-            actual = ncf.variables[variable][:]
-            ncf.close()
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_getitem(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfrname)
         for v in self.vdims:
-            expected = self.ncvars[v]
-            _test_func_avail(_test_name(), func, expected, 'NCVariable {} getitem incorrect'.format(v),
-                             kwds={'variable': v})
+            npt.assert_array_equal(ncf.variables[v][:], self.ncvars[v])
+        ncf.close()
 
 
-class WriteTests(unittest.TestCase):
+class WriteTests:
 
-    """
-    WriteTests Class
-
-    This class defines all of the unit tests for the iobackend module.
-    """
-
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def data(self):
         self.ncfwname = 'writetest.nc'
         self.ncattrs = {'a1': 'attribute 1', 'a2': 'attribute 2'}
         self.ncdims = {'t': 10, 'x': 5, 'c': 14, 'n': 2}
@@ -280,189 +209,151 @@ class WriteTests(unittest.TestCase):
         self.chunks = {'t': [5], 'x': None,
                        'v': [2, 3], 's': None, 'c': None}
 
-    def tearDown(self):
+        yield
+
         if exists(self.ncfwname):
             remove(self.ncfwname)
 
-    def test_NCFile_init_write(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            actual = type(ncf)
-            ncf.close()
-            remove(self.ncfwname)
-            return actual
-        expected = iobackend.NCFile
-        _test_func_avail(_test_name(), func, expected,
-                         'NCFile not created with correct type')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_init_write(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        assert isinstance(ncf, iobackend.NCFile)
+        ncf.close()
 
-    def test_NCFile_setncattr(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            for a in self.ncattrs:
-                ncf.setncattr(a, self.ncattrs[a])
-            ncf.close()
-            ncfr = iobackend.NCFile(self.ncfwname)
-            actual = {a: ncfr.getncattr(a) for a in ncfr.ncattrs}
-            ncfr.close()
-            remove(self.ncfwname)
-            return actual
-        expected = self.ncattrs
-        _test_func_avail(_test_name(), func, expected,
-                         'NCFile attributes incorrect')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_setncattr(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        for a in self.ncattrs:
+            ncf.setncattr(a, self.ncattrs[a])
+        ncf.close()
+        ncfr = iobackend.NCFile(self.ncfwname)
+        attrs = {a: ncfr.getncattr(a) for a in ncfr.ncattrs}
+        ncfr.close()
+        assert attrs == self.ncattrs
 
-    def test_NCFile_create_dimension(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            for d in self.ncdims:
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_create_dimension(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        for d in self.ncdims:
+            ncf.create_dimension(d, self.ncdims[d])
+        ncf.close()
+        ncfr = iobackend.NCFile(self.ncfwname)
+        dims = ncfr.dimensions
+        ncfr.close()
+        assert dims == self.ncdims
+
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_create_dimension_unlimited(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        ncf.create_dimension('t')
+        ncf.create_dimension('x', 3)
+        ncf.close()
+        ncfr = iobackend.NCFile(self.ncfwname)
+        assert ncfr.dimensions['t'] == 0
+        assert ncfr.unlimited('t') is True
+        assert ncfr.dimensions['x'] == 3
+        assert ncfr.unlimited('x') is False
+        ncfr.close()
+
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_create_variable(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        for d in self.ncdims:
+            if d == 't':
+                ncf.create_dimension(d)
+            else:
                 ncf.create_dimension(d, self.ncdims[d])
-            ncf.close()
-            ncfr = iobackend.NCFile(self.ncfwname)
-            actual = ncfr.dimensions
-            ncfr.close()
-            remove(self.ncfwname)
-            return actual
-        expected = self.ncdims
-        _test_func_avail(_test_name(), func, expected,
-                         'NCFile dimensions incorrect')
-
-    def test_NCFile_create_dimension_unlimited(self):
-        def func():
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            ncf.create_dimension('t')
-            ncf.create_dimension('x', 3)
-            ncf.close()
-            ncfr = iobackend.NCFile(self.ncfwname)
-            actual = {d: (ncfr.dimensions[d], ncfr.unlimited(d))
-                      for d in ncfr.dimensions}
-            ncfr.close()
-            remove(self.ncfwname)
-            return actual
-        expected = {'t': (0, True), 'x': (3, False)}
-        _test_func_avail(_test_name(), func, expected,
-                         'NCFile unlimited dimensions incorrect')
-
-    def test_NCFile_create_variable(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            for d in self.vdims[variable]:
-                if d == 't':
-                    ncf.create_dimension(d)
-                else:
-                    ncf.create_dimension(d, self.ncdims[d])
-            ncf.create_variable(
-                variable, self.vdtype[variable], self.vdims[variable])
-            ncf.close()
-            ncfr = iobackend.NCFile(self.ncfwname)
-            actual = type(ncfr.variables[variable])
-            ncfr.close()
-            remove(self.ncfwname)
-            return actual
         for v in self.ncvars:
-            expected = iobackend.NCVariable
-            _test_func_avail(_test_name(), func, expected,
-                             'NCFile variables incorrect', kwds={'variable': v})
-
-    def test_NCFile_create_variable_fill(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            for d in self.vdims[variable]:
-                if d == 't':
-                    ncf.create_dimension(d)
-                else:
-                    ncf.create_dimension(d, self.ncdims[d])
-            ncf.create_variable(
-                variable, self.vdtype[variable], self.vdims[variable], fill_value=self.vfill[variable])
-            ncf.close()
-            ncfr = iobackend.NCFile(self.ncfwname)
-            actual = ncfr.variables[variable].fill_value
-            ncfr.close()
-            remove(self.ncfwname)
-            return actual
+            ncf.create_variable(v, self.vdtype[v], self.vdims[v])
+        ncf.close()
+        ncfr = iobackend.NCFile(self.ncfwname)
         for v in self.ncvars:
-            expected = None if v == 's' else self.vfill[v]
-            _test_func_avail(_test_name(), func, expected,
-                             'NCFile variables incorrect', kwds={'variable': v})
+            assert isinstance(ncfr.variables[v], iobackend.NCVariable)
+        ncfr.close()
+
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_create_variable_fill(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        for d in self.ncdims:
+            if d == 't':
+                ncf.create_dimension(d)
+            else:
+                ncf.create_dimension(d, self.ncdims[d])
+        for v in self.ncvars:
+            ncf.create_variable(v, self.vdtype[v], self.vdims[v], fill_value=self.vfill[v])
+        ncf.close()
+        ncfr = iobackend.NCFile(self.ncfwname)
+        for v in self.ncvars:
+            vfill = None if v == 's' else self.vfill[v]
+            assert ncfr.variables[v].fill_value == vfill
+        ncfr.close()
 
     def test_NCFile_create_variable_chunksizes(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            for d in self.vdims[variable]:
-                if d == 't':
-                    ncf.create_dimension(d)
-                else:
-                    ncf.create_dimension(d, self.ncdims[d])
-            ncf.create_variable(variable, self.vdtype[variable], self.vdims[variable],
-                                chunksizes=self.chunks[variable])
-            ncf.close()
-            ncfr = iobackend.NCFile(self.ncfwname)
-            actual = ncfr.variables[variable].chunk_sizes
-            ncfr.close()
-            remove(self.ncfwname)
-            return actual
         iobackend.set_backend('netCDF4')
-        npt.assert_equal(iobackend.get_backend(), 'netCDF4',
-                         'Cannot set backend {}'.format(netCDF4))
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        for d in self.ncdims:
+            if d == 't':
+                ncf.create_dimension(d)
+            else:
+                ncf.create_dimension(d, self.ncdims[d])
         for v in self.ncvars:
-            expected = self.chunks[v] if self.chunks[v] else 'contiguous'
-            _test_func(_test_name(), func, expected,
-                       msg='{}: {}'.format('netCDF4', 'NCFile variables incorrect'), kwds={'variable': v})
+            ncf.create_variable(v, self.vdtype[v], self.vdims[v], chunksizes=self.chunks[v])
+        ncf.close()
+        ncfr = iobackend.NCFile(self.ncfwname)
+        for v in self.ncvars:
+            chunksize = self.chunks[v] if self.chunks[v] else 'contiguous'
+            assert ncfr.variables[v].chunk_sizes == chunksize
+        ncfr.close()
 
-    def test_NCVariable_setncattr(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            for d in self.vdims[variable]:
-                if d == 't':
-                    ncf.create_dimension(d)
-                else:
-                    ncf.create_dimension(d, self.ncdims[d])
-            vobj = ncf.create_variable(
-                variable, self.vdtype[variable], self.vdims[variable])
-            for attr in self.vattrs[variable]:
-                vobj.setncattr(attr, self.vattrs[variable][attr])
-            ncf.close()
-            ncfr = iobackend.NCFile(self.ncfwname)
-            actual = {a: ncfr.variables[variable].getncattr(
-                a) for a in ncfr.variables[variable].ncattrs}
-            ncfr.close()
-            remove(self.ncfwname)
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_setncattr(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        for d in self.ncdims:
+            if d == 't':
+                ncf.create_dimension(d)
+            else:
+                ncf.create_dimension(d, self.ncdims[d])
         for v in self.vattrs:
-            expected = self.vattrs[v]
-            _test_func_avail(_test_name(), func, expected,
-                             'NCFile variables incorrect', kwds={'variable': v})
+            vobj = ncf.create_variable(v, self.vdtype[v], self.vdims[v])
+            for attr in self.vattrs[v]:
+                vobj.setncattr(attr, self.vattrs[v][attr])
+        ncf.close()
+        ncfr = iobackend.NCFile(self.ncfwname)
+        for v in self.vattrs:
+            vattrs = {a: ncfr.variables[v].getncattr(a) for a in ncfr.variables[v].ncattrs}
+            assert vattrs == self.vattrs[v]
+        ncfr.close()
 
-    def test_NCVariable_setitem_getitem(self):
-        def func(variable=''):
-            ncf = iobackend.NCFile(self.ncfwname, mode='w')
-            for d in self.vdims[variable]:
-                if d == 't':
-                    ncf.create_dimension(d)
-                else:
-                    ncf.create_dimension(d, self.ncdims[d])
-            vobj = ncf.create_variable(
-                variable, self.vdtype[variable], self.vdims[variable])
-            vobj[:] = self.ncvars[variable]
-            ncf.close()
-            ncfr = iobackend.NCFile(self.ncfwname)
-            actual = ncfr.variables[variable][:]
-            ncfr.close()
-            remove(self.ncfwname)
-            return actual
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_setitem_getitem(self, backend):
+        iobackend.set_backend(backend)
+        ncf = iobackend.NCFile(self.ncfwname, mode='w')
+        for d in self.ncdims:
+            if d == 't':
+                ncf.create_dimension(d)
+            else:
+                ncf.create_dimension(d, self.ncdims[d])
         for v in self.ncvars:
-            expected = self.ncvars[v]
-            _test_func_avail(_test_name(), func, expected,
-                             'NCFile variables incorrect', kwds={'variable': v})
+            vobj = ncf.create_variable(v, self.vdtype[v], self.vdims[v])
+            vobj[:] = self.ncvars[v]
+        ncf.close()
+        ncfr = iobackend.NCFile(self.ncfwname)
+        for v in self.ncvars:
+            npt.assert_array_equal(ncfr.variables[v][:], self.ncvars[v])
+        ncfr.close()
 
 
-class AppendTests(unittest.TestCase):
+class AppendTests:
 
-    """
-    AppendTests Class
-
-    This class defines all of the unit tests for the iobackend module.
-    """
-
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def data(self):
         self.ncfaname = 'appendtest.nc'
         self.ncattrs = {'a1': 'attribute 1', 'a2': 'attribute 2'}
         self.ncdims = {'t': 10, 'x': 5}
@@ -493,92 +384,47 @@ class AppendTests(unittest.TestCase):
 
         ncfile.close()
 
-    def tearDown(self):
+        yield
+
         if exists(self.ncfaname):
             remove(self.ncfaname)
 
-    def test_nio_NCFile_init_append(self):
-        iobackend.set_backend('Nio')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_init_append(self, backend):
+        iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        actual = type(ncf)
+        assert isinstance(ncf, iobackend.NCFile)
         ncf.close()
-        expected = iobackend.NCFile
-        print_test_msg('NCFile.__init__()', actual=actual, expected=expected)
-        assert actual == expected
 
-    def test_nc4_NCFile_init_append(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        actual = type(ncf)
-        ncf.close()
-        expected = iobackend.NCFile
-        print_test_msg('NCFile.__init__()', actual=actual, expected=expected)
-        assert actual == expected
-
-    def test_nio_NCFile_setncattr(self):
-        iobackend.set_backend('Nio')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_setncattr(self, backend):
+        iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
         for a, v in self.fattrs2.iteritems():
             ncf.setncattr(a, v)
         ncf.close()
-        ncfr = Nio.open_file(self.ncfaname)
-        actual = ncfr.attributes
+        ncfr = netCDF4.Dataset(self.ncfaname)
+        actual = {a: ncfr.getncattr(a) for a in ncfr.ncattrs()}
+        ncfr.close()
         expected = self.ncattrs
         expected.update(self.fattrs2)
-        ncfr.close()
-        print_test_msg('NCFile.setncattr()', actual=actual, expected=expected)
-        for a, v in expected.iteritems():
-            assert a in actual, 'NCFile attribute {0!r} not found'.format(a)
-            assert actual[a] == v, 'NCFile attribute {0!r} incorrect'.format(a)
+        assert actual == expected
 
-    def test_nc4_NCFile_setncattr(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        for a, v in self.fattrs2.iteritems():
-            ncf.setncattr(a, v)
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfaname)
-        actual = ncfr.attributes
-        expected = self.ncattrs
-        expected.update(self.fattrs2)
-        ncfr.close()
-        print_test_msg('NCFile.setncattr()', actual=actual, expected=expected)
-        for a, v in expected.iteritems():
-            assert a in actual, 'NCFile attribute {0!r} not found'.format(a)
-            assert actual[a] == v, 'NCFile attribute {0!r} incorrect'.format(a)
-
-    def test_nio_NCFile_create_variable_ndim(self):
-        iobackend.set_backend('Nio')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_create_variable_ndim(self, backend):
+        iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
         v2 = ncf.create_variable('v2', np.dtype('f'), ('t', 'x'))
         v2[:] = self.v2
         ncf.close()
-        ncfr = Nio.open_file(self.ncfaname)
-        actual = ncfr.variables['v2'][:]
-        expected = self.v2
+        ncfr = netCDF4.Dataset(self.ncfaname)
+        actual = ncfr['v2'][:]
         ncfr.close()
-        print_test_msg('NCFile.create_variable()',
-                       actual=actual, expected=expected)
-        npt.assert_array_equal(
-            actual, expected, 'NCFile 2d-variable incorrect')
+        npt.assert_array_equal(actual, self.v2)
 
-    def test_nc4_NCFile_create_variable_ndim(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        v2 = ncf.create_variable('v2', np.dtype('f'), ('t', 'x'))
-        v2[:] = self.v2
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfaname)
-        actual = ncfr.variables['v2'][:]
-        expected = self.v2
-        ncfr.close()
-        print_test_msg('NCFile.create_variable()',
-                       actual=actual, expected=expected)
-        npt.assert_array_equal(
-            actual, expected, 'NCFile 2d-variable incorrect')
-
-    def test_nio_NCFile_variable_append(self):
-        iobackend.set_backend('Nio')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCFile_variable_append(self, backend):
+        iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
         nt = self.ncdims['t']
         t = ncf.variables['t']
@@ -586,41 +432,18 @@ class AppendTests(unittest.TestCase):
         v = ncf.variables['v']
         v[nt:, :] = self.v2
         ncf.close()
-        ncfr = Nio.open_file(self.ncfaname)
+        ncfr = netCDF4.Dataset(self.ncfaname)
         actual = ncfr.variables['t'][:]
         expected = np.concatenate((self.t, self.t2))
-        print_test_msg('NCVariable append', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile t-variable incorrect')
+        npt.assert_array_equal(actual, expected)
         actual = ncfr.variables['v'][:]
         expected = np.concatenate((self.v, self.v2))
-        print_test_msg('NCVariable append', actual=actual, expected=expected)
-        npt.assert_array_equal(
-            actual, expected, 'NCFile 2d-variable incorrect')
+        npt.assert_array_equal(actual, expected)
         ncfr.close()
 
-    def test_nc4_NCFile_variable_append(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        nt = self.ncdims['t']
-        t = ncf.variables['t']
-        t[nt:] = self.t2
-        v = ncf.variables['v']
-        v[nt:, :] = self.v2
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfaname)
-        actual = ncfr.variables['t'][:]
-        expected = np.concatenate((self.t, self.t2))
-        print_test_msg('NCVariable append', actual=actual, expected=expected)
-        npt.assert_array_equal(actual, expected, 'NCFile t-variable incorrect')
-        actual = ncfr.variables['v'][:]
-        expected = np.concatenate((self.v, self.v2))
-        print_test_msg('NCVariable append', actual=actual, expected=expected)
-        npt.assert_array_equal(
-            actual, expected, 'NCFile 2d-variable incorrect')
-        ncfr.close()
-
-    def test_nio_NCVariable_setncattr(self):
-        iobackend.set_backend('Nio')
+    @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
+    def test_NCVariable_setncattr(self, backend):
+        iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
         v = ncf.variables['v']
         for attr, value in self.vattrs2.iteritems():
@@ -631,30 +454,4 @@ class AppendTests(unittest.TestCase):
         expected = self.vattrs
         expected.update(self.vattrs2)
         ncfr.close()
-        print_test_msg('NCVariable.setncattr()',
-                       actual=actual, expected=expected)
-        for attr, value in expected.iteritems():
-            assert attr in actual, 'Variable attribute {0!r} not found'.format(attr)
-            assert actual[attr] == value, 'Variable attribute {0!r} incorrect'.format(attr)
-
-    def test_nc4_NCVariable_setncattr(self):
-        iobackend.set_backend('netCDF4')
-        ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        v = ncf.variables['v']
-        for attr, value in self.vattrs2.iteritems():
-            v.setncattr(attr, value)
-        ncf.close()
-        ncfr = Nio.open_file(self.ncfaname)
-        actual = ncfr.variables['v'].attributes
-        expected = self.vattrs
-        expected.update(self.vattrs2)
-        ncfr.close()
-        print_test_msg('NCVariable.setncattr()',
-                       actual=actual, expected=expected)
-        for attr, value in expected.iteritems():
-            assert attr in actual, 'Variable attribute {0!r} not found'.format(attr)
-            assert actual[attr] == value, 'Variable attribute {0!r} incorrect'.format(attr)
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert actual == expected
