@@ -6,16 +6,16 @@ See LICENSE.txt for details
 import cPickle as pickle
 import imp
 import os
-import unittest
 
 from pyreshaper.specification import Specifier
 import pytest
 
+cwd = os.path.dirname(os.path.realpath(__file__))
 top_dir = os.getcwd().split('/source')[0]
 s2smake = imp.load_source('s2smake', top_dir + '/scripts/s2smake')
 
 
-class CLITest(unittest.TestCase):
+class CLITests:
 
     def test_empty(self):
         argv = []
@@ -127,13 +127,10 @@ class CLITest(unittest.TestCase):
         assert opts.exclude == xlist
 
 
-class MainTest(unittest.TestCase):
-
-    def setUp(self):
-        self.cwd = os.path.dirname(os.path.realpath(__file__))
+class MainTests(object):
 
     def test_defaults(self):
-        argv = [self.cwd + '/test_s2smake.py']
+        argv = [cwd + '/test_s2smake.py']
         specfile = 'input.s2s'
         if os.path.exists(specfile):
             os.remove(specfile)
@@ -165,7 +162,7 @@ class MainTest(unittest.TestCase):
         specfile = 'myspec.s2s'
         prefix = 'prefix.'
         suffix = '.suffix'
-        infiles = [self.cwd + f for f in ['/test_s2smake.py', '/test_specification.py']]
+        infiles = [cwd + f for f in ['/test_s2smake.py', '/test_specification.py']]
 
         argv = ['-1', '-c', str(clevel), '-d', str(lsigfig), '-f', ncfmt]
         for md in metadata:
@@ -211,7 +208,7 @@ class MainTest(unittest.TestCase):
         prefix = 'prefix.'
         suffix = '.suffix'
         tseries = ['tsvar1', 'tsvar2']
-        infiles = [self.cwd + f for f in ['/test_s2smake.py', '/test_specification.py']]
+        infiles = [cwd + f for f in ['/test_s2smake.py', '/test_specification.py']]
 
         argv = ['--meta1d',
                 '--compression_level', str(clevel),
@@ -251,7 +248,3 @@ class MainTest(unittest.TestCase):
         for i1, i2 in zip(spec.time_series, tseries):
             assert i1 == i2
         assert spec.assume_1d_time_variant_metadata is True
-
-
-if __name__ == "__main__":
-    unittest.main()
