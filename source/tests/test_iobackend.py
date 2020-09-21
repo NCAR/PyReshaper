@@ -504,8 +504,7 @@ class AppendTests(unittest.TestCase):
         ncf.close()
         expected = iobackend.NCFile
         print_test_msg('NCFile.__init__()', actual=actual, expected=expected)
-        self.assertEqual(actual, expected,
-                         'NCFile not created with correct type')
+        assert actual == expected
 
     def test_nc4_NCFile_init_append(self):
         iobackend.set_backend('netCDF4')
@@ -514,8 +513,7 @@ class AppendTests(unittest.TestCase):
         ncf.close()
         expected = iobackend.NCFile
         print_test_msg('NCFile.__init__()', actual=actual, expected=expected)
-        self.assertEqual(actual, expected,
-                         'NCFile not created with correct type')
+        assert actual == expected
 
     def test_nio_NCFile_setncattr(self):
         iobackend.set_backend('Nio')
@@ -530,10 +528,8 @@ class AppendTests(unittest.TestCase):
         ncfr.close()
         print_test_msg('NCFile.setncattr()', actual=actual, expected=expected)
         for a, v in expected.iteritems():
-            self.assertTrue(
-                a in actual, 'NCFile attribute {0!r} not found'.format(a))
-            self.assertEqual(
-                actual[a], v, 'NCFile attribute {0!r} incorrect'.format(a))
+            assert a in actual, 'NCFile attribute {0!r} not found'.format(a)
+            assert actual[a] == v, 'NCFile attribute {0!r} incorrect'.format(a)
 
     def test_nc4_NCFile_setncattr(self):
         iobackend.set_backend('netCDF4')
@@ -548,10 +544,8 @@ class AppendTests(unittest.TestCase):
         ncfr.close()
         print_test_msg('NCFile.setncattr()', actual=actual, expected=expected)
         for a, v in expected.iteritems():
-            self.assertTrue(
-                a in actual, 'NCFile attribute {0!r} not found'.format(a))
-            self.assertEqual(
-                actual[a], v, 'NCFile attribute {0!r} incorrect'.format(a))
+            assert a in actual, 'NCFile attribute {0!r} not found'.format(a)
+            assert actual[a] == v, 'NCFile attribute {0!r} incorrect'.format(a)
 
     def test_nio_NCFile_create_variable_ndim(self):
         iobackend.set_backend('Nio')
@@ -640,10 +634,8 @@ class AppendTests(unittest.TestCase):
         print_test_msg('NCVariable.setncattr()',
                        actual=actual, expected=expected)
         for attr, value in expected.iteritems():
-            self.assertTrue(
-                attr in actual, 'Variable attribute {0!r} not found'.format(attr))
-            self.assertEqual(
-                actual[attr], value, 'Variable attribute {0!r} incorrect'.format(attr))
+            assert attr in actual, 'Variable attribute {0!r} not found'.format(attr)
+            assert actual[attr] == value, 'Variable attribute {0!r} incorrect'.format(attr)
 
     def test_nc4_NCVariable_setncattr(self):
         iobackend.set_backend('netCDF4')
@@ -660,12 +652,9 @@ class AppendTests(unittest.TestCase):
         print_test_msg('NCVariable.setncattr()',
                        actual=actual, expected=expected)
         for attr, value in expected.iteritems():
-            self.assertTrue(
-                attr in actual, 'Variable attribute {0!r} not found'.format(attr))
-            self.assertEqual(
-                actual[attr], value, 'Variable attribute {0!r} incorrect'.format(attr))
+            assert attr in actual, 'Variable attribute {0!r} not found'.format(attr)
+            assert actual[attr] == value, 'Variable attribute {0!r} incorrect'.format(attr)
 
 
 if __name__ == "__main__":
-    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
