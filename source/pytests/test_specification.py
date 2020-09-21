@@ -29,6 +29,7 @@ def test_init():
     assert spec.exclude_list == []
     assert spec.metadata_filename is None
 
+
 def test_init_full():
     in_list = ['a', 'b', 'c']
     fmt = 'netcdf4c'
@@ -63,10 +64,12 @@ def test_init_full():
         assert i1 == i2
     assert spec.assume_1d_time_variant_metadata == meta1d
 
+
 def test_validate_types_defaults():
     in_list = ['a', 'b', 'c']
     spec = specification.Specifier(infiles=in_list)
     spec.validate_types()
+
 
 def test_validate_types():
     in_list = ['a', 'b', 'c']
@@ -81,6 +84,7 @@ def test_validate_types():
         suffix=suffix, timeseries=tseries, metadata=metadata, meta1d=True)
     spec.validate_types()
 
+
 def test_validate_types_fail_input():
     in_list = ['a', 2, 'c']
     fmt = 'netcdf'
@@ -93,6 +97,7 @@ def test_validate_types_fail_input():
         suffix=suffix, metadata=metadata)
     with pytest.raises(TypeError):
         spec.validate_types()
+
 
 def test_validate_types_fail_backend():
     in_list = ['a', 'b', 'c']
@@ -108,6 +113,7 @@ def test_validate_types_fail_backend():
     with pytest.raises(TypeError):
         spec.validate_types()
 
+
 def test_validate_types_fail_format():
     in_list = ['a', 'b', 'c']
     fmt = 2342
@@ -120,6 +126,7 @@ def test_validate_types_fail_format():
         suffix=suffix, metadata=metadata)
     with pytest.raises(TypeError):
         spec.validate_types()
+
 
 def test_validate_types_fail_cl():
     in_list = ['a', 'b', 'c']
@@ -134,6 +141,7 @@ def test_validate_types_fail_cl():
     with pytest.raises(TypeError):
         spec.validate_types()
 
+
 def test_validate_types_fail_prefix():
     in_list = ['a', 'b', 'c']
     fmt = 'netcdf'
@@ -147,6 +155,7 @@ def test_validate_types_fail_prefix():
     with pytest.raises(TypeError):
         spec.validate_types()
 
+
 def test_validate_types_fail_suffix():
     in_list = ['a', 'b', 'c']
     fmt = 'netcdf'
@@ -159,6 +168,7 @@ def test_validate_types_fail_suffix():
         suffix=suffix, metadata=metadata)
     with pytest.raises(TypeError):
         spec.validate_types()
+
 
 def test_validate_types_fail_timeseries():
     in_list = ['a', 'b', 'c']
@@ -174,6 +184,7 @@ def test_validate_types_fail_timeseries():
     with pytest.raises(TypeError):
         spec.validate_types()
 
+
 def test_validate_types_fail_metadata():
     in_list = ['a', 'b', 'c']
     fmt = 'netcdf'
@@ -186,6 +197,7 @@ def test_validate_types_fail_metadata():
         suffix=suffix, metadata=metadata)
     with pytest.raises(TypeError):
         spec.validate_types()
+
 
 def test_validate_types_fail_meta1d():
     in_list = ['a', 'b', 'c']
@@ -201,6 +213,7 @@ def test_validate_types_fail_meta1d():
     with pytest.raises(TypeError):
         spec.validate_types()
 
+
 def test_validate_values_fail_input():
     in_list = ['a', 'b', 'c']
     fmt = 'netcdf'
@@ -214,6 +227,7 @@ def test_validate_values_fail_input():
     spec.validate_types()
     with pytest.raises(ValueError):
         spec.validate_values()
+
 
 def test_validate_values_fail_backend():
     in_list = ['test_reshaper.py', 'test_s2srun.py']
@@ -230,6 +244,7 @@ def test_validate_values_fail_backend():
     with pytest.raises(ValueError):
         spec.validate_values()
 
+
 def test_validate_values_fail_format():
     in_list = ['test_reshaper.py', 'test_s2srun.py']
     fmt = 'netcdf9'
@@ -243,6 +258,7 @@ def test_validate_values_fail_format():
     spec.validate_types()
     with pytest.raises(ValueError):
         spec.validate_values()
+
 
 def test_validate_values_fail_cl():
     in_list = ['test_reshaper.py', 'test_s2srun.py']
@@ -258,6 +274,7 @@ def test_validate_values_fail_cl():
     with pytest.raises(ValueError):
         spec.validate_values()
 
+
 def test_validate_values_fail_prefix():
     in_list = ['test_reshaper.py', 'test_s2srun.py']
     fmt = 'netcdf4'
@@ -271,6 +288,7 @@ def test_validate_values_fail_prefix():
     with pytest.raises(ValueError):
         spec.validate_values()
 
+
 def test_validate_values_suffix():
     in_list = [cwd + '/test_specification.py']
     fmt = 'netcdf4'
@@ -283,6 +301,7 @@ def test_validate_values_suffix():
     spec.validate_types()
     spec.validate_values()
     assert spec.output_file_suffix == suffix + '.nc'
+
 
 def test_write():
     in_list = ['test_specification.py']
