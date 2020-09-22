@@ -10,20 +10,21 @@ repos:
       - id: check-yaml
       - id: double-quote-string-fixer
 
-  - repo: https://github.com/ambv/black
-    rev: 20.8b1
-    hooks:
-      - id: black
+  # - repo: https://github.com/ambv/black
+  #   rev: 20.8b1
+  #   hooks:
+  #     - id: black
 
-  - repo: https://github.com/keewis/blackdoc
-    rev: v0.1.2
-    hooks:
-      - id: blackdoc
+  # - repo: https://github.com/keewis/blackdoc
+  #   rev: v0.1.2
+  #   hooks:
+  #     - id: blackdoc
 
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.3
     hooks:
       - id: flake8
+        exclude: nwsc,docs
 
   - repo: https://github.com/asottile/seed-isort-config
     rev: v2.2.0
@@ -35,3 +36,4 @@ repos:
     rev: v5.5.3
     hooks:
       - id: isort
+        exclude: nwsc,docs
