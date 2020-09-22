@@ -23,4 +23,3 @@ Send questions and comments to Kevin Paul (kpaul@ucar.edu).
 
 import reshaper
 import specification
-from version import __version__
