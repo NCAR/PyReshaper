@@ -7,6 +7,9 @@
 .. image:: https://github.com/NCAR/PyReshaper/workflows/Tests/badge.svg
   :target: https://github.com/NCAR/PyReshaper/actions?query=workflow%3ATests
 
+.. image:: https://github.com/NCAR/PyReshaper/workflows/Linting/badge.svg
+  :target: https://github.com/NCAR/PyReshaper/actions?query=workflow%3ALinting
+
 The PyReshaper
 ==============
 
