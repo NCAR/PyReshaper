@@ -34,7 +34,7 @@ setup(name='PyReshaper',
       long_description_content_type="text/x-rst",
       url='https://github.com/NCAR/PyReshaper',
       packages=['pyreshaper'],
-      package_dir={'pyreshaper': 'source/pyreshaper'},
+      package_dir={'pyreshaper': 'pyreshaper'},
       classifiers=[
           "Programming Language :: Python :: 2.7",
           "License :: OSI Approved :: Apache Software License"

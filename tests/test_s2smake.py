@@ -7,8 +7,9 @@ import cPickle as pickle
 import imp
 import os
 
-from pyreshaper.specification import Specifier
 import pytest
+
+from pyreshaper.specification import Specifier
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 top_dir = os.getcwd().split('/source')[0]

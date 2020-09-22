@@ -5,28 +5,26 @@ Copyright 2017, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
-import imp
 import inspect
 import unittest
 from cStringIO import StringIO
 from glob import glob
-from os import getcwd, linesep as eol, remove
+from os import linesep as eol, remove
 from os.path import exists
 
+import pytest
 from mpi4py import MPI
 
-import makeTestData
+import data
+from pyreshaper.cli import s2srun
 from pyreshaper.specification import Specifier
-import pytest
-
-top_dir = getcwd().split('/source')[0]
-s2srun = imp.load_source('s2srun', top_dir + '/scripts/s2srun')
 
 MPI_COMM_WORLD = MPI.COMM_WORLD  # @UndefinedVariable
 
 
-class CLITests(unittest.TestCase):
+class CLITests:
 
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.run_args = {'serial': False,
                          'rchunks': {'y': 5},
@@ -101,13 +99,13 @@ class NetCDF4Tests(unittest.TestCase):
         self.size = MPI_COMM_WORLD.Get_size()
 
         # Default arguments for testing
-        self.spec_args = {'infiles': makeTestData.slices,
+        self.spec_args = {'infiles': data.slices,
                           'ncfmt': 'netcdf4',
                           'compression': 0,
                           'prefix': 'out.',
                           'suffix': '.nc',
                           'timeseries': None,
-                          'metadata': [v for v in makeTestData.tvmvars] + ['time'],
+                          'metadata': [v for v in data.tvmvars] + ['time'],
                           'meta1d': False,
                           'backend': 'netCDF4'}
         self.run_args = {'serial': False,
@@ -121,7 +119,7 @@ class NetCDF4Tests(unittest.TestCase):
         # Test Data Generation
         self.clean()
         if self.rank == 0:
-            makeTestData.generate_data()
+            data.generate_data()
         MPI_COMM_WORLD.Barrier()
 
     def tearDown(self):
@@ -135,8 +133,8 @@ class NetCDF4Tests(unittest.TestCase):
 
     def header(self, testname):
         if self.rank == 0:
-            mf = len(makeTestData.slices)
-            mt = len(makeTestData.tsvars)
+            mf = len(data.slices)
+            mt = len(data.tsvars)
             nf = len(self.spec_args['infiles'])
             nt = mt if self.spec_args['timeseries'] is None else len(
                 self.spec_args['timeseries'])
@@ -152,7 +150,7 @@ class NetCDF4Tests(unittest.TestCase):
         args = {}
         args.update(self.spec_args)
         args.update(self.run_args)
-        assertions_dict = makeTestData.check_outfile(tsvar=tsvar, **args)
+        assertions_dict = data.check_outfile(tsvar=tsvar, **args)
         failed_assertions = [
             key for key, value in assertions_dict.iteritems() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
@@ -197,16 +195,16 @@ class NetCDF4Tests(unittest.TestCase):
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_I1(self):
-        self.spec_args['infiles'] = makeTestData.slices[1:2]
+        self.spec_args['infiles'] = data.slices[1:2]
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -215,7 +213,7 @@ class NetCDF4Tests(unittest.TestCase):
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -224,17 +222,17 @@ class NetCDF4Tests(unittest.TestCase):
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_TSV2(self):
-        self.spec_args['timeseries'] = makeTestData.tsvars[1:3] + ['tsvarX']
+        self.spec_args['timeseries'] = data.tsvars[1:3] + ['tsvarX']
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
             for tsvar in self.spec_args['timeseries']:
-                if tsvar in makeTestData.tsvars:
+                if tsvar in data.tsvars:
                     self.check(tsvar)
                 else:
                     fname = self.spec_args['prefix'] + \
@@ -247,7 +245,7 @@ class NetCDF4Tests(unittest.TestCase):
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -256,7 +254,7 @@ class NetCDF4Tests(unittest.TestCase):
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -265,7 +263,7 @@ class NetCDF4Tests(unittest.TestCase):
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -274,17 +272,17 @@ class NetCDF4Tests(unittest.TestCase):
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_meta1d(self):
         self.spec_args['meta1d'] = True
-        self.spec_args['metadata'] = [v for v in makeTestData.tvmvars]
+        self.spec_args['metadata'] = [v for v in data.tvmvars]
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -293,7 +291,7 @@ class NetCDF4Tests(unittest.TestCase):
         self.header(inspect.currentframe().f_code.co_name)
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -305,7 +303,7 @@ class NetCDF4Tests(unittest.TestCase):
         self.run_args['verbosity'] = 1
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -317,7 +315,7 @@ class NetCDF4Tests(unittest.TestCase):
         self.run_args['verbosity'] = 1
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -325,35 +323,35 @@ class NetCDF4Tests(unittest.TestCase):
         self.run_args['write_mode'] = 'a'
         self.header(inspect.currentframe().f_code.co_name)
         self.run_args['write_mode'] = 'w'
-        self.spec_args['infiles'] = makeTestData.slices[0:2]
+        self.spec_args['infiles'] = data.slices[0:2]
         self.convert()
         self.run_args['write_mode'] = 'a'
-        self.spec_args['infiles'] = makeTestData.slices[2:]
+        self.spec_args['infiles'] = data.slices[2:]
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_append_missing(self):
-        missing = makeTestData.tsvars[2]
+        missing = data.tsvars[2]
         self.run_args['write_mode'] = 'a'
         self.header(inspect.currentframe().f_code.co_name)
         self.run_args['write_mode'] = 'w'
-        self.spec_args['infiles'] = makeTestData.slices[0:2]
+        self.spec_args['infiles'] = data.slices[0:2]
         self.convert()
         if self.rank == 0:
             remove(self.spec_args['prefix'] + missing + self.spec_args['suffix'])
         MPI_COMM_WORLD.Barrier()
         self.run_args['write_mode'] = 'a'
-        self.spec_args['infiles'] = makeTestData.slices[2:]
+        self.spec_args['infiles'] = data.slices[2:]
         self.convert()
         if self.rank == 0:
-            for tsvar in makeTestData.tsvars:
+            for tsvar in data.tsvars:
                 if tsvar == missing:
-                    self.spec_args['infiles'] = makeTestData.slices[2:]
+                    self.spec_args['infiles'] = data.slices[2:]
                 else:
-                    self.spec_args['infiles'] = makeTestData.slices
+                    self.spec_args['infiles'] = data.slices
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 

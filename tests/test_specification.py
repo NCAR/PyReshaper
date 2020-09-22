@@ -8,8 +8,9 @@ See the LICENSE.txt file for details
 import cPickle as pickle
 import os
 
-from pyreshaper import specification
 import pytest
+
+from pyreshaper import specification
 
 cwd = os.path.dirname(os.path.realpath(__file__))
 
