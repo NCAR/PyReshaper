@@ -1,7 +1,7 @@
 """
 Parallel Tests for the Reshaper class
 
-Copyright 2017, University Corporation for Atmospheric Research
+Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 

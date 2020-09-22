@@ -6,7 +6,7 @@ are defined.  Currently, only one operation has been implemented (i.e.,
 the time-slice to time-series operation).
 
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

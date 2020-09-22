@@ -7,7 +7,7 @@ can then be run directly from the command-line with the corresponding
 "runs2sspec" tool.
 
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

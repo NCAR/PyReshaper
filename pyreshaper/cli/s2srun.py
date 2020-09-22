@@ -7,7 +7,7 @@ The specfile itself should be constructed from a hand-written Python script,
 or from the makes2sspec tool that accompanies this script.
 
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

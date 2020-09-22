@@ -7,7 +7,7 @@ operations for the PyReshaper are specified with derived dypes of the
 Specification class.
 
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

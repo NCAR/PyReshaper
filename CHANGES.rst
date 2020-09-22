@@ -1,7 +1,7 @@
 PyReshaper Change Log
 =====================
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,19 +42,19 @@ VERSION 1.0.4
 -------------
 
  - Code cleanup and minor bugfixes
- 
+
 VERSION 1.0.3
 -------------
 
  - Bugfixes
  - Disabling use of PyNIO backend (for now) due to unknown problems
  - Fixes and ease of use with I/O backend utilities
- 
+
 VERSION 1.0.2
 -------------
 
  - Bugfixes
- 
+
 VERSION 1.0.1
 -------------
 
@@ -132,7 +132,7 @@ VERSION 0.9.2
 
 VERSION 0.9.1
 -------------
-  
+
  - Added many new helper tools in the Yellowstone testing directory.
  - Perform a sort of the time-series variables by size before partitioning
    them across processors.  Since the partition strides through the list of
@@ -147,13 +147,13 @@ VERSION 0.9.1
  - Switched to using the identified 'unlimited' dimension name instead of
    explicitly using the string 'time'.
  - Added the ability to process time-slice files with multiple time steps
-   in each slice file. 
+   in each slice file.
  - Added new plotting utility and module.  Some changes to the getsizes
    utility in the Yellowstone testing area.  Some more tweaks here, too.
  - Updated the PyReshaper to use the newly created PyTools/trunk.  (Will
    modify the externals to use a tag once the new PyTools has been tested and
    verified).
- - Renamed any ATM/LND 0.1 degree tests in the tests/yellowstone directory to 
+ - Renamed any ATM/LND 0.1 degree tests in the tests/yellowstone directory to
    0.25 degree, which they actually are.  Similarly, any 0.25 degree OCN/ICE
    tests were named 0.1 degree.
  - Updated the Specifier and Reshaper Doxygen comments to use Doxypypy
