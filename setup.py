@@ -3,7 +3,7 @@
 PyReshaper -- Setup Script
 
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ setup(name='PyReshaper',
       long_description=long_description,
       long_description_content_type="text/x-rst",
       url='https://github.com/NCAR/PyReshaper',
-      packages=['pyreshaper'],
-      package_dir={'pyreshaper': 'source/pyreshaper'},
+      packages=['pyreshaper', 'pyreshaper.cli'],
+      package_dir={'pyreshaper': 'pyreshaper', 'pyreshaper.cli': 'pyreshaper/cli'},
       classifiers=[
           "Programming Language :: Python :: 2.7",
           "License :: OSI Approved :: Apache Software License"
@@ -44,6 +44,10 @@ setup(name='PyReshaper',
           "Topic :: Utilities"
       ],
       python_requires='>=2.7,<3.0',
-      scripts=['scripts/s2smake', 'scripts/s2srun'],
+      entry_points="""
+          [console_scripts]
+          s2smake=pyreshaper.cli.s2smake:main
+          s2srun=pyreshaper.cli.s2srun:main
+          """,
       install_requires=['mpi4py', 'asaptools']
       )

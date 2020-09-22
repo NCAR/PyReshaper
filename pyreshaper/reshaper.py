@@ -6,7 +6,7 @@ are defined.  Currently, only one operation has been implemented (i.e.,
 the time-slice to time-series operation).
 
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,18 +21,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from os import O_CREAT, O_RDONLY
-from os import close as fdclose
-from os import fstatvfs, linesep
-from os import open as fdopen
-from os import remove, rename
+from os import (
+    O_CREAT,
+    O_RDONLY,
+    close as fdclose,
+    fstatvfs,
+    linesep,
+    open as fdopen,
+    remove,
+    rename,
+)
 from os.path import exists, isdir, isfile, join
-# For memory diagnostics
 from resource import RUSAGE_SELF, getrusage
-# Built-in imports
 from sys import platform
 
-# Third-party imports
 import numpy
 from asaptools.partition import Duplicate, EqualStride, WeightBalanced
 from asaptools.simplecomm import SimpleComm, create_comm
@@ -40,13 +42,9 @@ from asaptools.timekeeper import TimeKeeper
 from asaptools.vprinter import VPrinter
 
 import iobackend
-# PyReshaper imports
 from specification import Specifier
 
 
-#=========================================================================
-# _get_memory_usage_MB_
-#=========================================================================
 def _get_memory_usage_MB_():
     """
     Return the maximum memory use of this Python process in MB
@@ -57,9 +55,6 @@ def _get_memory_usage_MB_():
     return getrusage(RUSAGE_SELF).ru_maxrss / to_MB
 
 
-#=========================================================================
-# _get_io_blocksize_MB_
-#=========================================================================
 def _get_io_blocksize_MB_(pathname):
     """
     Return the I/O blocksize for a given path (used to estimate IOPS)
@@ -78,9 +73,6 @@ def _get_io_blocksize_MB_(pathname):
     return bsize
 
 
-#=========================================================================
-# create_reshaper factory function
-#=========================================================================
 def create_reshaper(specifier, serial=False, verbosity=1, wmode='w', once=False, simplecomm=None):
     """
     Factory function for Reshaper class instantiations.
@@ -122,9 +114,6 @@ def create_reshaper(specifier, serial=False, verbosity=1, wmode='w', once=False,
         raise TypeError(err_msg)
 
 
-#=========================================================================
-# _pprint_dictionary - Helper method for printing diagnostic data
-#=========================================================================
 def _pprint_dictionary(title, dictionary, order=None):
     """
     Hidden method for pretty-printing a dictionary of numeric values, with a given title.
@@ -180,9 +169,6 @@ def _pprint_dictionary(title, dictionary, order=None):
     return ostr
 
 
-#=========================================================================
-# Reshaper Base Class
-#=========================================================================
 class Reshaper(object):
 
     """
@@ -359,8 +345,6 @@ class Reshaper(object):
         all_tsvars = {}
         file_times = {}
 
-        #===== INSPECT FIRST INPUT FILE (ON MASTER PROCESS ONLY) =====
-
         # Open first file
         if self._simplecomm.is_manager():
             ifile = iobackend.NCFile(self._input_filenames[0])
@@ -415,8 +399,6 @@ class Reshaper(object):
         if self._simplecomm.is_manager():
             self._vprint('  First input file inspected.', verbosity=2)
 
-        #===== INSPECT REMAINING INPUT FILES (IN PARALLEL) =====
-
         # Get the list of variable names and missing variables
         var_names = set(
             all_tsvars.keys() + self._time_invariant_metadata + self._time_invariant_metafile_vars + self._time_variant_metadata)
@@ -463,8 +445,6 @@ class Reshaper(object):
         if self._simplecomm.is_manager():
             self._vprint('  Remaining input files inspected.', verbosity=2)
 
-        #===== CHECK FOR MISSING VARIABLES =====
-
         # Gather all missing variables on the master process
         if self._simplecomm.get_size() > 1:
             if self._simplecomm.is_manager():
@@ -487,8 +467,6 @@ class Reshaper(object):
                 self._vprint(warning, header=False, verbosity=0)
 
             self._vprint('  Checked for missing variables.', verbosity=2)
-
-        #===== SORT INPUT FILES BY TIME =====
 
         # Gather the file time values onto the master process
         if self._simplecomm.get_size() > 1:
@@ -533,7 +511,6 @@ class Reshaper(object):
         if self._simplecomm.is_manager():
             self._vprint('  Input files sorted by time.', verbosity=2)
 
-        #===== FINALIZING OUTPUT =====
         self._simplecomm.sync()
 
         # Debug output
@@ -872,8 +849,6 @@ class Reshaper(object):
         # Initialize the byte count dictionary
         self._byte_counts['Requested Data'] = 0
         self._byte_counts['Actual Data'] = 0
-
-        #===== LOOP OVER TIME_SERIES VARIABLES =====
 
         if len(self._time_invariant_metafile_vars) > 0:
             metafile = iobackend.NCFile(self._metadata_filename)

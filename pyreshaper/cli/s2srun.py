@@ -7,7 +7,7 @@ The specfile itself should be constructed from a hand-written Python script,
 or from the makes2sspec tool that accompanies this script.
 
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,19 +22,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-# Builtin Modules
-import optparse
-import glob
 import cPickle as pickle
+import optparse
 
-# Package Modules
-from pyreshaper import specification
 from pyreshaper import reshaper
 
 
-#==============================================================================
-# Command-line Interface
-#==============================================================================
 def cli(argv=None):
     desc = """This tool is designed to run a PyReshaper Specifier as read from a pickled Specifier object (specfile)"""
 
@@ -98,9 +91,6 @@ def cli(argv=None):
     return opts, specfile
 
 
-#==============================================================================
-# Main Script Function
-#==============================================================================
 def main(argv=None):
     opts, specfile = cli(argv)
 
@@ -117,15 +107,11 @@ def main(argv=None):
                                       wmode=opts.write_mode, once=opts.once)
 
     # Run the conversion (slice-to-series) process
-    reshpr.convert(output_limit=opts.limit,
-                   rchunks=opts.rchunks, wchunks=opts.wchunks)
+    reshpr.convert(output_limit=opts.limit, rchunks=opts.rchunks, wchunks=opts.wchunks)
 
     # Print timing diagnostics
     reshpr.print_diagnostics()
 
 
-#==============================================================================
-# Command-line Operation
-#==============================================================================
 if __name__ == '__main__':
     main()

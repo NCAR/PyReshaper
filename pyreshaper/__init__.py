@@ -3,7 +3,7 @@ The PyReshaper
 
 A tool for converting NetCDF time-slice files into time-series format
 
-Copyright 2019 University Corporation for Atmospheric Research
+Copyright 2020 University Corporation for Atmospheric Research
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ limitations under the License.
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
 """
+# flake8: noqa
 
 import reshaper
 import specification
-from version import __version__

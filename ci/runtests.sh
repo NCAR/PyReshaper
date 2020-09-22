@@ -3,4 +3,4 @@
 set -e
 set -eo pipefail
 
-python -m unittest discover --start-directory=source/test/ --pattern='*Tests.py'
+python -m pytest --cov=./ --cov-report=xml tests/
