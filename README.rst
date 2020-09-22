@@ -148,4 +148,3 @@ Instructions & Use
 Please see the more detailed instructions found in the docs/ directory for
 usage and examples.  See the 'Building & Installing from Source' section
 for how to build the documentation with Sphinx.
-

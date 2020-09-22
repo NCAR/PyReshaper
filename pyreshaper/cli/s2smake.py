@@ -36,10 +36,10 @@ def cli(argv=None):
 
     parser = optparse.OptionParser(prog='s2smake', description=desc)
     parser.add_option('-1', '--meta1d', default=False, action='store_true',
-                      help=("Treat all 1D time-variant variables as metadata "
-                            "variables"))
+                      help=('Treat all 1D time-variant variables as metadata '
+                            'variables'))
     parser.add_option('-b', '--backend', default='netCDF4', type='string',
-                      help=("I/O backend to be used when reading or writing "
+                      help=('I/O backend to be used when reading or writing '
                             "from NetCDF files ('Nio' or 'netCDF4')"))
     parser.add_option('-c', '--compression_level', type='int', default=1,
                       help=('NetCDF compression level, when using the '
@@ -48,7 +48,7 @@ def cli(argv=None):
                       help=('If used, specifies which digit after the decimal to '
                             'assure precision to and then truncates the data before '
                             'compression is applied [Default: None]'))
-    parser.add_option('-f', '--netcdf_format', default='netcdf4', type="string",
+    parser.add_option('-f', '--netcdf_format', default='netcdf4', type='string',
                       help=('NetCDF file format to be used for all output '
                             'files. [Default: "netcdf4"]'))
     parser.add_option('-m', '--metadata', action='append', default=[],
@@ -56,10 +56,10 @@ def cli(argv=None):
                             'output files.  There may be more than one '
                             '--metadata (-m) option given, and each one is '
                             'appended to a list.  [Default: []]'))
-    parser.add_option('--metafile', default=None, type="string",
+    parser.add_option('--metafile', default=None, type='string',
                       help=('The name of a time-slice input file from which '
                             'metadata variable names will be read.  [Default: None]'))
-    parser.add_option('-o', '--specfile', default='input.s2s', type="string",
+    parser.add_option('-o', '--specfile', default='input.s2s', type='string',
                       help=('The name of the Pickled Specifier (specfile) '
                             'to be output [Default: "input.s2s"]'))
     parser.add_option('-p', '--output_prefix', default='tseries.', type='string',
@@ -88,22 +88,22 @@ def cli(argv=None):
 
     # Check that input files are given
     if len(args) == 0:
-        raise ValueError("No input files given.")
+        raise ValueError('No input files given.')
 
     # Check range of compression levels
     if opts.compression_level < 0 or opts.compression_level > 9:
-        raise ValueError(("Unacceptable compression level of "
-                          "{0}".format(opts.compression_level)))
+        raise ValueError(('Unacceptable compression level of '
+                          '{0}'.format(opts.compression_level)))
 
     # Check for valid format types
     if opts.netcdf_format not in ['netcdf', 'netcdf4', 'netcdf4c']:
-        raise ValueError(("Unacceptable NetCDF format "
-                          "{0}".format(opts.netcdf_format)))
+        raise ValueError(('Unacceptable NetCDF format '
+                          '{0}'.format(opts.netcdf_format)))
 
     # Check the I/O backend name
     if opts.backend not in ['Nio', 'netCDF4']:
-        raise ValueError(("Unacceptable NetCDF backend name "
-                          "{0}".format(opts.backend)))
+        raise ValueError(('Unacceptable NetCDF backend name '
+                          '{0}'.format(opts.backend)))
 
     return opts, args
 

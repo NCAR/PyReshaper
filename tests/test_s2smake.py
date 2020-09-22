@@ -3,9 +3,9 @@ Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
-import cPickle as pickle
 import os
 
+import cPickle as pickle
 import pytest
 
 from pyreshaper.cli import s2smake

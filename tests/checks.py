@@ -71,9 +71,9 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                 _assert('{0}: global attribute {1} values equal'.format(
                     outfile, a), ncout.getncattr(a) == ncinp.getncattr(a))
             for d, v in outdims.iteritems():
-                _assert("{0}: {1!r} in dimensions".format(
+                _assert('{0}: {1!r} in dimensions'.format(
                     outfile, d), d in ncout.dimensions)
-                _assert("{0}: dimensions[{1!r}]".format(
+                _assert('{0}: dimensions[{1!r}]'.format(
                     outfile, d), ncout.dimensions[d] == v)
             _assert("{0}: 'time' in dimensions".format(
                 outfile), 'time' in ncout.dimensions)
@@ -85,7 +85,7 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                 all_vars = [tsvar] + outmeta
             if metafile:
                 all_vars += config.xtimvars
-            _assert("{0}: variable names same".format(outfile),
+            _assert('{0}: variable names same'.format(outfile),
                     set(ncout.variables.keys()) == set(all_vars))
             for v in all_vars:
                 if v in scvars:
@@ -98,7 +98,7 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                     expected = ('time', 'strlen')
                 else:
                     expected = ('time', 'lat', 'lon')
-                _assert("{0}: {1}.dimemsions equal".format(outfile, v),
+                _assert('{0}: {1}.dimemsions equal'.format(outfile, v),
                         ncout.variables[v].dimensions == expected)
 
         for v in all_vars:
@@ -115,7 +115,7 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                 actual = ncout.variables[v][tuple(oslice)]
             else:
                 actual = ncout.variables[v].get_value()
-            _assert(("{0}: {1!r} values equal").format(
+            _assert(('{0}: {1!r} values equal').format(
                 outfile, v), np.all(actual == expected))
 
         series_step += nsteps

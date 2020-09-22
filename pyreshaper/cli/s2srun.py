@@ -22,8 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cPickle as pickle
 import optparse
+
+import cPickle as pickle
 
 from pyreshaper import reshaper
 
@@ -49,7 +50,7 @@ def cli(argv=None):
                             'limit of 0 means write all output files.'
                             '[Default: 0]'))
     parser.add_option('-m', '--write_mode', default='w', type='str',
-                      help=("Determine the write mode to use for writing "
+                      help=('Determine the write mode to use for writing '
                             "output files.  Can be 'w' for normal operation, "
                             "'s' to skip generation of time-series files if "
                             "the files already exist, 'o' to overwrite "

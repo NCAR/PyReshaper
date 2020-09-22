@@ -7,10 +7,11 @@ from __future__ import print_function
 import inspect
 import sys
 import unittest
-from cStringIO import StringIO
 from glob import glob
 from os import linesep as eol, remove
 from os.path import exists
+
+from cStringIO import StringIO
 
 from checks import check_outfile, check_var_in
 from data import config, make
