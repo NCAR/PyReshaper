@@ -4,16 +4,14 @@ See LICENSE.txt for details
 """
 
 import cPickle as pickle
-import imp
 import os
 
 import pytest
 
+from pyreshaper.cli import s2smake
 from pyreshaper.specification import Specifier
 
 cwd = os.path.dirname(os.path.realpath(__file__))
-top_dir = os.getcwd().split('/source')[0]
-s2smake = imp.load_source('s2smake', top_dir + '/scripts/s2smake')
 
 
 class CLITests:
