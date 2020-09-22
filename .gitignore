@@ -11,3 +11,4 @@ PyReshaper.egg-info/
 .pytest_cache
 test-reports/
 .coverage
+coverage.xml
