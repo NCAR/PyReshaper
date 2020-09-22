@@ -1,5 +1,5 @@
 [tool.black]
-exclude = docs,nwsc
+exclude = 'nwsc\/|docs\/'
 line-length = 100
 target-version = ['py37']
 skip-string-normalization = true
