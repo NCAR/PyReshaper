@@ -3,4 +3,4 @@
 set -e
 set -eo pipefail
 
-python -m pytest tests/
+python -m pytest --cov=./ --cov-report=xml tests/
