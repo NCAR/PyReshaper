@@ -44,6 +44,10 @@ setup(name='PyReshaper',
           "Topic :: Utilities"
       ],
       python_requires='>=2.7,<3.0',
-      scripts=['scripts/s2smake', 'scripts/s2srun'],
+      entry_points="""
+          [console_scripts]
+          s2smake=pyreshaper.cli.s2smake:main
+          s2srun=pyreshaper.cli.s2srun:main
+          """,
       install_requires=['mpi4py', 'asaptools']
       )
