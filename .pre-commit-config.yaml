@@ -1,3 +1,5 @@
+exclude: 'docs/|nwsc/'
+
 repos:
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -24,7 +26,6 @@ repos:
     rev: 3.8.3
     hooks:
       - id: flake8
-        exclude: nwsc,docs
 
   - repo: https://github.com/asottile/seed-isort-config
     rev: v2.2.0
@@ -36,4 +37,3 @@ repos:
     rev: v5.5.3
     hooks:
       - id: isort
-        exclude: nwsc,docs
