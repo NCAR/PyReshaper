@@ -14,7 +14,7 @@ from os.path import exists
 
 from mpi4py import MPI
 
-import data
+import mkTestData
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
 
@@ -30,13 +30,13 @@ class CommonTestsBase(object):
         self.size = MPI_COMM_WORLD.Get_size()
 
         # Default arguments for testing
-        self.spec_args = {'infiles': data.slices,
+        self.spec_args = {'infiles': mkTestData.slices,
                           'ncfmt': 'netcdf4',
                           'compression': 0,
                           'prefix': 'out.',
                           'suffix': '.nc',
                           'timeseries': None,
-                          'metadata': [v for v in data.tvmvars] + ['time'] + [v for v in data.chvars],
+                          'metadata': [v for v in mkTestData.tvmvars] + ['time'] + [v for v in mkTestData.chvars],
                           'meta1d': False,
                           'metafile': None}
         self.create_args = {'serial': False,
@@ -51,7 +51,7 @@ class CommonTestsBase(object):
         # Test Data Generation
         self.clean()
         if self.rank == 0:
-            data.generate_data()
+            mkTestData.generate_data()
         MPI_COMM_WORLD.Barrier()
 
     def clean(self):
@@ -62,8 +62,8 @@ class CommonTestsBase(object):
 
     def header(self):
         if self.rank == 0:
-            mf = len(data.slices)
-            mt = len(data.tsvars)
+            mf = len(mkTestData.slices)
+            mt = len(mkTestData.tsvars)
             nf = len(self.spec_args['infiles'])
             nt = mt if self.spec_args['timeseries'] is None else len(
                 self.spec_args['timeseries'])
@@ -82,7 +82,7 @@ class CommonTestsBase(object):
         args.update(self.spec_args)
         args.update(self.create_args)
         args.update(self.convert_args)
-        assertions_dict = data.check_outfile(tsvar=tsvar, **args)
+        assertions_dict = mkTestData.check_outfile(tsvar=tsvar, **args)
         failed_assertions = [
             key for key, value in assertions_dict.iteritems() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
@@ -115,16 +115,16 @@ class CommonTestsBase(object):
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_I1(self):
-        self.spec_args['infiles'] = data.slices[1:2]
+        self.spec_args['infiles'] = mkTestData.slices[1:2]
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -133,7 +133,7 @@ class CommonTestsBase(object):
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -142,17 +142,17 @@ class CommonTestsBase(object):
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_TSV2(self):
-        self.spec_args['timeseries'] = data.tsvars[1:3] + ['tsvarX']
+        self.spec_args['timeseries'] = mkTestData.tsvars[1:3] + ['tsvarX']
         self.header()
         self.convert()
         if self.rank == 0:
             for tsvar in self.spec_args['timeseries']:
-                if tsvar in data.tsvars:
+                if tsvar in mkTestData.tsvars:
                     self.check(tsvar)
                 else:
                     fname = self.spec_args['prefix'] + \
@@ -161,18 +161,18 @@ class CommonTestsBase(object):
         MPI_COMM_WORLD.Barrier()
 
     def test_exclude(self):
-        self.spec_args['exclude_list'] = data.timvars[0:1]
+        self.spec_args['exclude_list'] = mkTestData.timvars[0:1]
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 fname = (self.spec_args['prefix'] + tsvar + self.spec_args['suffix'])
-                for timvar in data.timvars:
+                for timvar in mkTestData.timvars:
                     if timvar in self.spec_args['exclude_list']:
                         xassert = self.assertFalse
                     else:
                         xassert = self.assertTrue
-                    xassert(data.check_var_in(timvar, fname))
+                    xassert(mkTestData.check_var_in(timvar, fname))
         MPI_COMM_WORLD.Barrier()
 
     def test_NC3(self):
@@ -180,7 +180,7 @@ class CommonTestsBase(object):
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -189,7 +189,7 @@ class CommonTestsBase(object):
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -198,45 +198,45 @@ class CommonTestsBase(object):
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_read_chunking(self):
-        self.convert_args['rchunks'] = {'lat': 1, 'time': data.ntime}
+        self.convert_args['rchunks'] = {'lat': 1, 'time': mkTestData.ntime}
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_write_chunking(self):
-        self.convert_args['wchunks'] = {'lat': 1, 'time': data.ntime}
+        self.convert_args['wchunks'] = {'lat': 1, 'time': mkTestData.ntime}
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_meta1d(self):
         self.spec_args['meta1d'] = True
-        self.spec_args['metadata'] = [v for v in data.tvmvars]
+        self.spec_args['metadata'] = [v for v in mkTestData.tvmvars]
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_metafile(self):
         self.spec_args['metafile'] = 'metafile.nc'
-        self.spec_args['metadata'] = [v for v in data.tvmvars]
+        self.spec_args['metadata'] = [v for v in mkTestData.tvmvars]
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -245,7 +245,7 @@ class CommonTestsBase(object):
         self.header()
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -257,7 +257,7 @@ class CommonTestsBase(object):
         self.create_args['verbosity'] = 1
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -269,7 +269,7 @@ class CommonTestsBase(object):
         self.create_args['verbosity'] = 1
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
@@ -277,35 +277,35 @@ class CommonTestsBase(object):
         self.create_args['wmode'] = 'a'
         self.header()
         self.create_args['wmode'] = 'w'
-        self.spec_args['infiles'] = data.slices[0:2]
+        self.spec_args['infiles'] = mkTestData.slices[0:2]
         self.convert()
         self.create_args['wmode'] = 'a'
-        self.spec_args['infiles'] = data.slices[2:]
+        self.spec_args['infiles'] = mkTestData.slices[2:]
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 
     def test_append_missing(self):
-        missing = data.tsvars[2]
+        missing = mkTestData.tsvars[2]
         self.create_args['wmode'] = 'a'
         self.header()
         self.create_args['wmode'] = 'w'
-        self.spec_args['infiles'] = data.slices[0:2]
+        self.spec_args['infiles'] = mkTestData.slices[0:2]
         self.convert()
         if self.rank == 0:
             remove(self.spec_args['prefix'] + missing + self.spec_args['suffix'])
         MPI_COMM_WORLD.Barrier()
         self.create_args['wmode'] = 'a'
-        self.spec_args['infiles'] = data.slices[2:]
+        self.spec_args['infiles'] = mkTestData.slices[2:]
         self.convert()
         if self.rank == 0:
-            for tsvar in data.tsvars:
+            for tsvar in mkTestData.tsvars:
                 if tsvar == missing:
-                    self.spec_args['infiles'] = data.slices[2:]
+                    self.spec_args['infiles'] = mkTestData.slices[2:]
                 else:
-                    self.spec_args['infiles'] = data.slices
+                    self.spec_args['infiles'] = mkTestData.slices
                 self.check(tsvar)
         MPI_COMM_WORLD.Barrier()
 

@@ -10,7 +10,7 @@ from os.path import exists
 
 import pytest
 
-import data
+import mkTestData
 from pyreshaper.cli import s2srun
 from pyreshaper.specification import Specifier
 
@@ -87,13 +87,13 @@ class NetCDF4Tests(unittest.TestCase):
 
     @pytest.fixture(autouse=True)
     def init(self):
-        self.spec_args = {'infiles': data.slices,
+        self.spec_args = {'infiles': mkTestData.slices,
                           'ncfmt': 'netcdf4',
                           'compression': 0,
                           'prefix': 'out.',
                           'suffix': '.nc',
                           'timeseries': None,
-                          'metadata': [v for v in data.tvmvars] + ['time'],
+                          'metadata': [v for v in mkTestData.tvmvars] + ['time'],
                           'meta1d': False,
                           'backend': 'netCDF4'}
 
@@ -106,7 +106,7 @@ class NetCDF4Tests(unittest.TestCase):
                          'specfile': 'input.s2s'}
 
         self.clean()
-        data.generate_data()
+        mkTestData.generate_data()
 
     def tearDown(self):
         self.clean()
@@ -119,7 +119,7 @@ class NetCDF4Tests(unittest.TestCase):
         args = {}
         args.update(self.spec_args)
         args.update(self.run_args)
-        assertions_dict = data.check_outfile(tsvar=tsvar, **args)
+        assertions_dict = mkTestData.check_outfile(tsvar=tsvar, **args)
         failed_assertions = [
             key for key, value in assertions_dict.iteritems() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
@@ -150,32 +150,32 @@ class NetCDF4Tests(unittest.TestCase):
 
     def test_defaults(self):
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_I1(self):
-        self.spec_args['infiles'] = data.slices[1:2]
+        self.spec_args['infiles'] = mkTestData.slices[1:2]
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_V0(self):
         self.run_args['verbosity'] = 0
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_V3(self):
         self.run_args['verbosity'] = 3
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_TSV2(self):
-        self.spec_args['timeseries'] = data.tsvars[1:3] + ['tsvarX']
+        self.spec_args['timeseries'] = mkTestData.tsvars[1:3] + ['tsvarX']
         self.convert()
         for tsvar in self.spec_args['timeseries']:
-            if tsvar in data.tsvars:
+            if tsvar in mkTestData.tsvars:
                 self.check(tsvar)
             else:
                 fname = self.spec_args['prefix'] + \
@@ -185,38 +185,38 @@ class NetCDF4Tests(unittest.TestCase):
     def test_NC3(self):
         self.spec_args['ncfmt'] = 'netcdf'
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_ser(self):
         self.run_args['serial'] = True
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_CL1(self):
         self.spec_args['compression'] = 1
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_CL1_LSF3(self):
         self.spec_args['least_significant_digit'] = 3
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_meta1d(self):
         self.spec_args['meta1d'] = True
-        self.spec_args['metadata'] = [v for v in data.tvmvars]
+        self.spec_args['metadata'] = [v for v in mkTestData.tvmvars]
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_once(self):
         self.run_args['once'] = True
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_overwrite(self):
@@ -225,7 +225,7 @@ class NetCDF4Tests(unittest.TestCase):
         self.convert()
         self.run_args['verbosity'] = 1
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_skip(self):
@@ -234,35 +234,35 @@ class NetCDF4Tests(unittest.TestCase):
         self.convert()
         self.run_args['verbosity'] = 1
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_append(self):
         self.run_args['write_mode'] = 'a'
         self.run_args['write_mode'] = 'w'
-        self.spec_args['infiles'] = data.slices[0:2]
+        self.spec_args['infiles'] = mkTestData.slices[0:2]
         self.convert()
         self.run_args['write_mode'] = 'a'
-        self.spec_args['infiles'] = data.slices[2:]
+        self.spec_args['infiles'] = mkTestData.slices[2:]
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             self.check(tsvar)
 
     def test_append_missing(self):
-        missing = data.tsvars[2]
+        missing = mkTestData.tsvars[2]
         self.run_args['write_mode'] = 'a'
         self.run_args['write_mode'] = 'w'
-        self.spec_args['infiles'] = data.slices[0:2]
+        self.spec_args['infiles'] = mkTestData.slices[0:2]
         self.convert()
         remove(self.spec_args['prefix'] + missing + self.spec_args['suffix'])
         self.run_args['write_mode'] = 'a'
-        self.spec_args['infiles'] = data.slices[2:]
+        self.spec_args['infiles'] = mkTestData.slices[2:]
         self.convert()
-        for tsvar in data.tsvars:
+        for tsvar in mkTestData.tsvars:
             if tsvar == missing:
-                self.spec_args['infiles'] = data.slices[2:]
+                self.spec_args['infiles'] = mkTestData.slices[2:]
             else:
-                self.spec_args['infiles'] = data.slices
+                self.spec_args['infiles'] = mkTestData.slices
             self.check(tsvar)
 
 
