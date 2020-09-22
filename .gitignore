@@ -1,4 +1,5 @@
 *.nc
+*.s2s
 *.pyc
 __pycache__
 dist/
