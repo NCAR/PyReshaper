@@ -25,15 +25,11 @@ limitations under the License.
 # Builtin Modules
 import optparse
 import glob
-import cPickle as pickle
 
 # Package Modules
 from pyreshaper import specification
 
 
-#==============================================================================
-# Command-Line Interface
-#==============================================================================
 def cli(argv=None):
     desc = """Create a PyReshaper Specifier object from command-line
               options and write the Specifier to a named file."""
@@ -65,7 +61,7 @@ def cli(argv=None):
                             'metadata variable names will be read.  [Default: None]'))
     parser.add_option('-o', '--specfile', default='input.s2s', type="string",
                       help=('The name of the Pickled Specifier (specfile) '
-                            'to be output [Default: "input.spec"]'))
+                            'to be output [Default: "input.s2s"]'))
     parser.add_option('-p', '--output_prefix', default='tseries.', type='string',
                       help=('String prefix for all output files.  The output '
                             'file will be named according to the rule: '
@@ -111,10 +107,6 @@ def cli(argv=None):
 
     return opts, args
 
-#==============================================================================
-# Main Script Function
-#==============================================================================
-
 
 def main(argv=None):
     opts, args = cli(argv)
@@ -148,8 +140,5 @@ def main(argv=None):
     spec.write(opts.specfile)
 
 
-#==============================================================================
-# Command-line Operation
-#==============================================================================
 if __name__ == '__main__':
     main()
