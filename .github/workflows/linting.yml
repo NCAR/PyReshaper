@@ -16,6 +16,6 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.7'
-      - run: pip install flake8==3.7.9 isort==4.3.21
+      - run: pip install flake8 isort
       - run: flake8
       - run: isort --recursive -w 100 --check-only

@@ -22,7 +22,7 @@ limitations under the License.
 """
 
 # Built-in imports
-import cPickle as pickle
+import pickle
 from os import path as ospath
 
 
@@ -48,20 +48,22 @@ class Specifier(object):
     by the Reshaper to perform the time-slice to time-series operation.
     """
 
-    def __init__(self,
-                 infiles=[],
-                 ncfmt='netcdf4',
-                 compression=0,
-                 least_significant_digit=None,
-                 prefix='tseries.',
-                 suffix='.nc',
-                 timeseries=None,
-                 metadata=[],
-                 meta1d=False,
-                 backend='netCDF4',
-                 exclude_list=[],
-                 metafile=None,
-                 **kwargs):
+    def __init__(
+        self,
+        infiles=[],
+        ncfmt='netcdf4',
+        compression=0,
+        least_significant_digit=None,
+        prefix='tseries.',
+        suffix='.nc',
+        timeseries=None,
+        metadata=[],
+        meta1d=False,
+        backend='netCDF4',
+        exclude_list=[],
+        metafile=None,
+        **kwargs,
+    ):
         """
         Initializes the internal data with optional arguments.
 
@@ -154,64 +156,64 @@ class Specifier(object):
 
         # Validate the type of the input file list
         if not isinstance(self.input_file_list, list):
-            err_msg = "Input file list must be a list"
+            err_msg = 'Input file list must be a list'
             raise TypeError(err_msg)
 
         # Validate that each input file name is a string
         for ifile_name in self.input_file_list:
-            if not isinstance(ifile_name, basestring):
-                err_msg = "Input file names must be given as strings"
+            if not isinstance(ifile_name, str):
+                err_msg = 'Input file names must be given as strings'
                 raise TypeError(err_msg)
 
         # Validate the netcdf format string
-        if not isinstance(self.netcdf_format, basestring):
-            err_msg = "NetCDF format must be given as a string"
+        if not isinstance(self.netcdf_format, str):
+            err_msg = 'NetCDF format must be given as a string'
             raise TypeError(err_msg)
 
         # Validate the netcdf compression level
         if not isinstance(self.compression_level, int):
-            err_msg = "NetCDF compression level must be given as an int"
+            err_msg = 'NetCDF compression level must be given as an int'
             raise TypeError(err_msg)
 
         # Validate the output file prefix
-        if not isinstance(self.output_file_prefix, basestring):
-            err_msg = "Output file prefix must be given as a string"
+        if not isinstance(self.output_file_prefix, str):
+            err_msg = 'Output file prefix must be given as a string'
             raise TypeError(err_msg)
 
         # Validate the output file suffix
-        if not isinstance(self.output_file_suffix, basestring):
-            err_msg = "Output file suffix must be given as a string"
+        if not isinstance(self.output_file_suffix, str):
+            err_msg = 'Output file suffix must be given as a string'
             raise TypeError(err_msg)
 
         # Validate the type of the time-series variable list
         if self.time_series is not None:
             if not isinstance(self.time_series, list):
-                err_msg = "Time-series variables must be a list or None"
+                err_msg = 'Time-series variables must be a list or None'
                 raise TypeError(err_msg)
             for var_name in self.time_series:
-                if not isinstance(var_name, basestring):
-                    err_msg = "Time-series variable names must be given as strings"
+                if not isinstance(var_name, str):
+                    err_msg = 'Time-series variable names must be given as strings'
                     raise TypeError(err_msg)
 
         # Validate the type of the time-variant metadata list
         if not isinstance(self.time_variant_metadata, list):
-            err_msg = "Time-variant metadata must be a list"
+            err_msg = 'Time-variant metadata must be a list'
             raise TypeError(err_msg)
 
         # Validate the type of each time-variant metadata variable name
         for var_name in self.time_variant_metadata:
-            if not isinstance(var_name, basestring):
-                err_msg = "Time-variant metadata variable names must be given as strings"
+            if not isinstance(var_name, str):
+                err_msg = 'Time-variant metadata variable names must be given as strings'
                 raise TypeError(err_msg)
 
         # Validate the type of assume_1d_time_variant_metadata
         if not isinstance(self.assume_1d_time_variant_metadata, bool):
-            err_msg = "Flag to assume 1D time-variant metadata must be boolean"
+            err_msg = 'Flag to assume 1D time-variant metadata must be boolean'
             raise TypeError(err_msg)
 
         # Validate the type of the backend
-        if not isinstance(self.io_backend, basestring):
-            err_msg = "I/O backend must be given as a string"
+        if not isinstance(self.io_backend, str):
+            err_msg = 'I/O backend must be given as a string'
             raise TypeError(err_msg)
 
     def validate_values(self):
@@ -231,21 +233,19 @@ class Specifier(object):
 
         # Make sure there is at least 1 input file given
         if len(self.input_file_list) == 0:
-            err_msg = "There must be at least one input file given."
+            err_msg = 'There must be at least one input file given.'
             raise ValueError(err_msg)
 
         # Validate that each input file exists and is a regular file
         for ifile_name in self.input_file_list:
             if not ospath.isfile(ifile_name):
-                err_msg = "Input file {} is not a regular file".format(
-                    ifile_name)
+                err_msg = 'Input file {} is not a regular file'.format(ifile_name)
                 raise ValueError(err_msg)
 
         # Validate the value of the netcdf format string
         valid_formats = ['netcdf', 'netcdf4', 'netcdf4c']
         if self.netcdf_format not in valid_formats:
-            err_msg = "Output NetCDF file format {} is not valid".format(
-                self.netcdf_format)
+            err_msg = 'Output NetCDF file format {} is not valid'.format(self.netcdf_format)
             raise ValueError(err_msg)
 
         # Forcefully set the compression level if 'netcdf4c' format
@@ -254,16 +254,18 @@ class Specifier(object):
 
         # Validate the value of the compression level integer
         if self.compression_level < 0 or self.compression_level > 9:
-            err_msg = "NetCDF compression level {} is not in the valid range (0-9)".format(
-                self.compression_level)
+            err_msg = 'NetCDF compression level {} is not in the valid range (0-9)'.format(
+                self.compression_level
+            )
             raise ValueError(err_msg)
 
         # Validate the output file directory
         abs_output_prefix = ospath.abspath(self.output_file_prefix)
         abs_output_dir = ospath.dirname(abs_output_prefix)
         if not ospath.isdir(abs_output_dir):
-            err_msg = ("Output directory {} implied in output prefix {} is not "
-                       "valid").format(abs_output_dir, self.output_file_prefix)
+            err_msg = ('Output directory {} implied in output prefix {} is not ' 'valid').format(
+                abs_output_dir, self.output_file_prefix
+            )
             raise ValueError(err_msg)
         self.output_file_prefix = abs_output_prefix
 

@@ -30,8 +30,7 @@ try:
     _dict_ = __import__('collections', fromlist=['OrderedDict']).OrderedDict
 except:
     try:
-        _dict_ = __import__('ordereddict', fromlist=[
-                            'OrderedDict']).OrderedDict
+        _dict_ = __import__('ordereddict', fromlist=['OrderedDict']).OrderedDict
     except:
         _dict_ = dict
 
@@ -106,7 +105,9 @@ class NCFile(object):
     Wrapper class for netCDF files/datasets
     """
 
-    def __init__(self, filename, mode='r', ncfmt='netcdf4', compression=0, least_significant_digit=None):
+    def __init__(
+        self, filename, mode='r', ncfmt='netcdf4', compression=0, least_significant_digit=None
+    ):
         """
         Initializer
 
@@ -118,30 +119,29 @@ class NCFile(object):
             least_significant_digit (int): If not None, specifies the digit after the decimal to which
                 precision must be kept when applying lossy truncation before compression
         """
-        if not isinstance(filename, (str, unicode)):
-            err_msg = "Netcdf filename must be a string"
+        if not isinstance(filename, str):
+            err_msg = 'Netcdf filename must be a string'
             raise TypeError(err_msg)
-        if not isinstance(mode, (str, unicode)):
-            err_msg = "Netcdf write mode must be a string"
+        if not isinstance(mode, str):
+            err_msg = 'Netcdf write mode must be a string'
             raise TypeError(err_msg)
-        if not isinstance(ncfmt, (str, unicode)):
-            err_msg = "Netcdf file format must be a string"
+        if not isinstance(ncfmt, str):
+            err_msg = 'Netcdf file format must be a string'
             raise TypeError(err_msg)
         if not isinstance(compression, int):
-            err_msg = "Netcdf file compression must be an integer"
+            err_msg = 'Netcdf file compression must be an integer'
             raise TypeError(err_msg)
 
         if mode not in ['r', 'w', 'a']:
-            err_msg = "Netcdf write mode {0!r} is not one of 'r', 'w', or 'a'".format(
-                mode)
+            err_msg = "Netcdf write mode {0!r} is not one of 'r', 'w', or 'a'".format(mode)
             raise ValueError(err_msg)
         if ncfmt not in ['netcdf', 'netcdf4', 'netcdf4c']:
             err_msg = "Netcdf format {0!r} is not one of 'netcdf', 'netcdf4', or 'netcdf4c'".format(
-                mode)
+                mode
+            )
             raise ValueError(err_msg)
         if compression > 9 or compression < 0:
-            err_msg = "Netcdf compression level {0} is not in range 0 to 9".format(
-                compression)
+            err_msg = 'Netcdf compression level {0} is not in range 0 to 9'.format(compression)
             raise ValueError(err_msg)
 
         self._mode = mode
@@ -162,43 +162,42 @@ class NCFile(object):
             elif ncfmt == 'netcdf4c':
                 file_options.Format = 'NetCDF4Classic'
                 file_options.CompressionLevel = 1
-            self._file_opts = {"options": file_options}
+            self._file_opts = {'options': file_options}
 
             if mode == 'r':
                 self._obj = self._iolib.open_file(filename)
             else:
-                self._obj = self._iolib.open_file(
-                    filename, mode, **self._file_opts)
+                self._obj = self._iolib.open_file(filename, mode, **self._file_opts)
 
-            self._dimensions = _dict_(
-                (d, self._obj.dimensions[d]) for d in self._obj.dimensions)
+            self._dimensions = _dict_((d, self._obj.dimensions[d]) for d in self._obj.dimensions)
 
         elif self._backend == 'netCDF4':
             if ncfmt == 'netcdf':
-                self._file_opts["format"] = "NETCDF3_64BIT"
+                self._file_opts['format'] = 'NETCDF3_64BIT'
             elif ncfmt == 'netcdf4':
-                self._file_opts["format"] = "NETCDF4_CLASSIC"
+                self._file_opts['format'] = 'NETCDF4_CLASSIC'
                 if compression > 0:
-                    self._var_opts["zlib"] = True
-                    self._var_opts["complevel"] = int(compression)
+                    self._var_opts['zlib'] = True
+                    self._var_opts['complevel'] = int(compression)
                     if least_significant_digit:
-                        self._var_opts["least_significant_digit"] = least_significant_digit
+                        self._var_opts['least_significant_digit'] = least_significant_digit
             elif ncfmt == 'netcdf4c':
-                self._file_opts["format"] = "NETCDF4_CLASSIC"
-                self._var_opts["zlib"] = True
-                self._var_opts["complevel"] = 1
+                self._file_opts['format'] = 'NETCDF4_CLASSIC'
+                self._var_opts['zlib'] = True
+                self._var_opts['complevel'] = 1
 
             if mode == 'r':
                 self._obj = self._iolib.Dataset(filename)
             else:
-                self._obj = self._iolib.Dataset(
-                    filename, mode, **self._file_opts)
+                self._obj = self._iolib.Dataset(filename, mode, **self._file_opts)
 
             self._dimensions = _dict_(
-                (d, len(self._obj.dimensions[d])) for d in self._obj.dimensions)
+                (d, len(self._obj.dimensions[d])) for d in self._obj.dimensions
+            )
 
-        self._variables = _dict_((v, NCVariable(
-            v, self._obj.variables[v], mode=mode)) for v in self._obj.variables)
+        self._variables = _dict_(
+            (v, NCVariable(v, self._obj.variables[v], mode=mode)) for v in self._obj.variables
+        )
 
     @property
     def dimensions(self):
@@ -256,8 +255,7 @@ class NCFile(object):
     def create_variable(self, name, datatype, dimensions, fill_value=None, chunksizes=None):
         if self._mode == 'r':
             raise RuntimeError('Cannot create variable in read mode')
-        dt = datatype if isinstance(
-            datatype, numpy.dtype) else numpy.dtype(datatype)
+        dt = datatype if isinstance(datatype, numpy.dtype) else numpy.dtype(datatype)
         if dt.char in ('S', 'U', 'c'):
             fill_value = None
         if self._backend == 'Nio':
@@ -267,11 +265,9 @@ class NCFile(object):
                 setattr(var, '_FillValue', numpy.array(fill_value, dtype=dt))
         elif self._backend == 'netCDF4':
             if fill_value is not None:
-                self._var_opts['fill_value'] = numpy.array(
-                    fill_value, dtype=dt)
+                self._var_opts['fill_value'] = numpy.array(fill_value, dtype=dt)
             self._var_opts['chunksizes'] = chunksizes
-            var = self._obj.createVariable(
-                name, datatype, dimensions, **self._var_opts)
+            var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
         new_var = NCVariable(name, var, self._mode)
         self._variables[name] = new_var
         return new_var
@@ -320,7 +316,7 @@ class NCVariable(object):
         elif name == 'missing_value':
             value = numpy.array(value, dtype=self.datatype)[()]
         if self._backend == 'Nio':
-            if isinstance(value, unicode):
+            if isinstance(value, str):
                 value = str(value)
             setattr(self._obj, name, value)
         elif self._backend == 'netCDF4':
@@ -359,9 +355,13 @@ class NCVariable(object):
     @property
     def fill_value(self):
         if self._backend == 'Nio':
-            return self._obj.attributes['_FillValue'] if '_FillValue' in self._obj.attributes else None
+            return (
+                self._obj.attributes['_FillValue'] if '_FillValue' in self._obj.attributes else None
+            )
         elif self._backend == 'netCDF4':
-            return self._obj.getncattr('_FillValue') if '_FillValue' in self._obj.ncattrs() else None
+            return (
+                self._obj.getncattr('_FillValue') if '_FillValue' in self._obj.ncattrs() else None
+            )
 
     @property
     def chunk_sizes(self):
@@ -403,8 +403,12 @@ class NCVariable(object):
             raise RuntimeError('Cannot set variable in read mode')
         if self.shape == ():
             self.assign_value(value)
-        elif self.datatype == numpy.dtype('c') and self._backend == 'Nio' and get_backend_version(self._backend) < (1, 5, 0):
-            print get_backend_version()
+        elif (
+            self.datatype == numpy.dtype('c')
+            and self._backend == 'Nio'
+            and get_backend_version(self._backend) < (1, 5, 0)
+        ):
+            print(get_backend_version())
             key_t = numpy.index_exp[key]
             if self.ndim < len(key_t):
                 raise KeyError('Too many indices specified for variable')
@@ -414,14 +418,13 @@ class NCVariable(object):
             if varray.dtype.char not in ('c', 'S', 'U'):
                 raise TypeError('Incompatible type for string variable')
             if self.ndim != varray.ndim:
-                raise ValueError(
-                    'Incompatible array dimensions for string variable')
+                raise ValueError('Incompatible array dimensions for string variable')
 
-            def lenslice(l, s):
-                start, stop, step = s.indices(l)
+            def lenslice(i, s):
+                start, stop, step = s.indices(i)
                 return (stop - start) // step + int((stop - start) % step > 0)
-            strlen = lenslice(
-                self.shape[-1], key_t[-1]) if isinstance(key_t[-1], slice) else 1
+
+            strlen = lenslice(self.shape[-1], key_t[-1]) if isinstance(key_t[-1], slice) else 1
 
             rarray = numpy.squeeze(varray.view('S{}'.format(strlen)), axis=-1)
 
