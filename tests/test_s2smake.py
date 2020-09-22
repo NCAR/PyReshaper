@@ -1,6 +1,6 @@
 """
 Copyright 2020, University Corporation for Atmospheric Research
-See LICENSE.txt for details
+See the LICENSE.txt file for details
 """
 
 import cPickle as pickle

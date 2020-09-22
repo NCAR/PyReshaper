@@ -1,6 +1,4 @@
 """
-Unit tests for the Specifier class
-
 Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
