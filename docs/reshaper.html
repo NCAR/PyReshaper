@@ -1,70 +1,72 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyreshaper.reshaper module &mdash; PyReshaper 1.1.0 documentation</title>
+  
 
-  <title>pyreshaper.reshaper module &mdash; PyReshaper 1.0.5 documentation</title>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyreshaper.iobackend module" href="iobackend.html" />
-    <link rel="prev" title="pyreshaper.specification module" href="specification.html" />
-
-
-  <script src="_static/js/modernizr.min.js"></script>
-
+    <link rel="prev" title="pyreshaper.specification module" href="specification.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
-
+   
   <div class="wy-grid-for-nav">
-
-
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
+          
 
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyReshaper
+          
 
-
-            <a href="index.html" class="icon icon-home"> PyReshaper
-
-
-
+          
           </a>
 
-
-
-
+          
+            
+            
               <div class="version">
-                1.0
+                1.1
               </div>
+            
+          
 
-
-
-
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,16 +75,17 @@
   </form>
 </div>
 
-
+          
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-
-
-
-
-
-
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">The PyReshaper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="manual.html">The PyReshaper User’s Manual</a></li>
@@ -99,28 +102,29 @@
 <li class="toctree-l1"><a class="reference internal" href="license.html">Product License</a></li>
 </ul>
 
-
-
+            
+          
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
-
+      
       <nav class="wy-nav-top" aria-label="top navigation">
-
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">PyReshaper</a>
-
+        
       </nav>
 
 
       <div class="wy-nav-content">
-
+        
         <div class="rst-content">
-
-
+        
+          
 
 
 
@@ -139,105 +143,115 @@
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
-
-      <li><a href="index.html">Docs</a> &raquo;</li>
-
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="pyreshaper.html">The PyReshaper Package</a> &raquo;</li>
-
+        
       <li>pyreshaper.reshaper module</li>
-
-
+    
+    
       <li class="wy-breadcrumbs-aside">
-
-
+        
+            
             <a href="_sources/reshaper.rst.txt" rel="nofollow"> View page source</a>
-
-
+          
+        
       </li>
-
+    
   </ul>
 
-
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+            
   <div class="section" id="module-pyreshaper.reshaper">
 <span id="pyreshaper-reshaper-module"></span><h1>pyreshaper.reshaper module<a class="headerlink" href="#module-pyreshaper.reshaper" title="Permalink to this headline">¶</a></h1>
 <p>The module containing the Reshaper class</p>
 <p>This is the main reshaper module.  This is where the specific operations
 are defined.  Currently, only one operation has been implemented (i.e.,
 the time-slice to time-series operation).</p>
-<p>Copyright 2020, University Corporation for Atmospheric Research
-See the LICENSE.txt file for details</p>
-<dl class="class">
+<p>Copyright 2020 University Corporation for Atmospheric Research</p>
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<blockquote>
+<div><p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+</div></blockquote>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+<dl class="py class">
 <dt id="pyreshaper.reshaper.Reshaper">
-<em class="property">class </em><code class="descclassname">pyreshaper.reshaper.</code><code class="descname">Reshaper</code><span class="sig-paren">(</span><em>specifier</em>, <em>serial=False</em>, <em>verbosity=1</em>, <em>wmode='w'</em>, <em>once=False</em>, <em>simplecomm=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.reshaper.Reshaper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pyreshaper.reshaper.</code><code class="sig-name descname">Reshaper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">specifier</span></em>, <em class="sig-param"><span class="n">serial</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbosity</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">wmode</span><span class="o">=</span><span class="default_value">'w'</span></em>, <em class="sig-param"><span class="n">once</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">simplecomm</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.reshaper.Reshaper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The time-slice to time-series Reshaper class</p>
 <p>This is the class that defines how the time-slice to time-series
 reshaping operation is to be performed.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="pyreshaper.reshaper.Reshaper.convert">
-<code class="descname">convert</code><span class="sig-paren">(</span><em>output_limit=0</em>, <em>chunks=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.reshaper.Reshaper.convert" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">convert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output_limit</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">rchunks</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">wchunks</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.reshaper.Reshaper.convert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to perform the Reshaper’s designated operation.</p>
 <p>In this case, convert a list of time-slice files to time-series files.</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd><dl class="first last docutils">
-<dt>output_limit (int): Limit on the number of output (time-series) files to write during the</dt>
-<dd>convert() operation.  If set to 0, no limit is placed.  This limits the number of output files
-produced by each processor in a parallel run.</dd>
-<dt>chunks (dict): A dictionary of dimension names mapped to chunk sizes along that named</dt>
-<dd>dimension</dd>
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>output_limit (int): Limit on the number of output (time-series) files to write during the</dt><dd><p>convert() operation.  If set to 0, no limit is placed.  This limits the number of output files
+produced by each processor in a parallel run.</p>
+</dd>
+<dt>rchunks (dict): A dictionary of dimension names mapped to reading chunk sizes along that named</dt><dd><p>dimension</p>
+</dd>
+<dt>wchunks (dict): A dictionary of dimension names mapped to writing chunk sizes along that named</dt><dd><p>dimension</p>
+</dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="pyreshaper.reshaper.Reshaper.print_diagnostics">
-<code class="descname">print_diagnostics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.reshaper.Reshaper.print_diagnostics" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">print_diagnostics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.reshaper.Reshaper.print_diagnostics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print out timing and I/O information collected up to this point</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="pyreshaper.reshaper.create_reshaper">
-<code class="descclassname">pyreshaper.reshaper.</code><code class="descname">create_reshaper</code><span class="sig-paren">(</span><em>specifier</em>, <em>serial=False</em>, <em>verbosity=1</em>, <em>wmode='w'</em>, <em>once=False</em>, <em>simplecomm=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.reshaper.create_reshaper" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">pyreshaper.reshaper.</code><code class="sig-name descname">create_reshaper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">specifier</span></em>, <em class="sig-param"><span class="n">serial</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbosity</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">wmode</span><span class="o">=</span><span class="default_value">'w'</span></em>, <em class="sig-param"><span class="n">once</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">simplecomm</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyreshaper.reshaper.create_reshaper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Factory function for Reshaper class instantiations.</p>
-<dl class="docutils">
-<dt>Parameters:</dt>
-<dd><dl class="first last docutils">
-<dt>specifier (Specifier): An instantiation of a Specifier class that</dt>
-<dd>defines the type of operation to be performed.  (That is, a
+<dl class="simple">
+<dt>Parameters:</dt><dd><dl class="simple">
+<dt>specifier (Specifier): An instantiation of a Specifier class that</dt><dd><p>defines the type of operation to be performed.  (That is, a
 Slice2SeriesSpecifier will invoke the creation of a
 matching Slice2SeriesReshaper object.)
 Alternatively, this can be a list of Specifier objects,
 or dictionary of named Specifier objects.
 In this case, a reshaper will be created for each
 specifier in the list, and each reshaper will be
-created and run in sequence.</dd>
-<dt>serial (bool): True or False, indicating whether the Reshaper object</dt>
-<dd>should perform its operation in serial (True) or
-parallel (False).</dd>
-<dt>verbosity (int): Level of printed output (stdout).  A value of 0 means</dt>
-<dd>no output, and a higher value means more output.  The
-default value is 1.</dd>
-<dt>wmode (str): The mode to use for writing output.  Can be ‘w’ for</dt>
-<dd>normal write operation, ‘s’ to skip the output generation for
+created and run in sequence.</p>
+</dd>
+<dt>serial (bool): True or False, indicating whether the Reshaper object</dt><dd><p>should perform its operation in serial (True) or
+parallel (False).</p>
+</dd>
+<dt>verbosity (int): Level of printed output (stdout).  A value of 0 means</dt><dd><p>no output, and a higher value means more output.  The
+default value is 1.</p>
+</dd>
+<dt>wmode (str): The mode to use for writing output.  Can be ‘w’ for</dt><dd><p>normal write operation, ‘s’ to skip the output generation for
 existing time-series files, ‘o’ to overwrite existing time-series
-files, ‘a’ to append to existing time-series files.</dd>
-<dt>once (bool): True or False, indicating whether the Reshaper should</dt>
-<dd>write all metadata to a ‘once’ file (separately).</dd>
-<dt>simplecomm (SimpleComm): A SimpleComm object to handle the parallel</dt>
-<dd>communication, if necessary</dd>
+files, ‘a’ to append to existing time-series files.</p>
+</dd>
+<dt>once (bool): True or False, indicating whether the Reshaper should</dt><dd><p>write all metadata to a ‘once’ file (separately).</p>
+</dd>
+<dt>simplecomm (SimpleComm): A SimpleComm object to handle the parallel</dt><dd><p>communication, if necessary</p>
+</dd>
 </dl>
 </dd>
-<dt>Returns:</dt>
-<dd>Reshaper: An instance of the Reshaper object requested</dd>
+<dt>Returns:</dt><dd><p>Reshaper: An instance of the Reshaper object requested</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -245,29 +259,37 @@ files, ‘a’ to append to existing time-series files.</dd>
 
 
            </div>
-
+           
           </div>
           <footer>
-
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-
+      
         <a href="iobackend.html" class="btn btn-neutral float-right" title="pyreshaper.iobackend module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-
-
-        <a href="specification.html" class="btn btn-neutral" title="pyreshaper.specification module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-
+      
+      
+        <a href="specification.html" class="btn btn-neutral float-left" title="pyreshaper.specification module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2020, University Corporation for Atmospheric Research.
+        
+        &copy; Copyright 2020, University Corporation for Atmospheric Research
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -277,40 +299,18 @@ files, ‘a’ to append to existing time-series files.</dd>
     </section>
 
   </div>
-
-
-
-
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.0.5',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-
-
-
-
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
+  
 
   <script type="text/javascript">
       jQuery(function () {
-
-          SphinxRtdTheme.Navigation.enableSticky();
-
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

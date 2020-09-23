@@ -20,7 +20,11 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-exec(open('../../source/pyreshaper/version.py').read())
+import configparser
+
+cfg = configparser.ConfigParser()
+cfg.read('../../setup.cfg')
+__version__ = cfg['bumpversion']['current_version']
 
 # -- General configuration ------------------------------------------------
 
@@ -48,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyReshaper'
-copyright = u'2017, University Corporation for Atmospheric Research'
+copyright = u'2020, University Corporation for Atmospheric Research'
 author = u'John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu'
 
 # The version info for the project you're documenting, acts as replacement for
