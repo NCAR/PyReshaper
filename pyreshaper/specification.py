@@ -281,13 +281,8 @@ class Specifier(object):
         Parameters:
             fname (str): Name of file to write
         """
-        try:
-            fobj = open(fname, 'w')
+        with open(fname, 'wb') as fobj:
             pickle.dump(self, fobj)
-            fobj.close()
-        except:
-            err_msg = "Failed to write Specifier to file '{}'".format(fname)
-            raise OSError(err_msg)
 
 
 if __name__ == '__main__':

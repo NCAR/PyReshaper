@@ -316,7 +316,7 @@ def test_write():
     fname = 'test_write.s2s'
     spec.write(fname)
     assert os.path.exists(fname), 'Specfile failed to write'
-    spec2 = pickle.load(open(fname, 'r'))
+    spec2 = pickle.load(open(fname, 'rb'))
     for i1, i2 in zip(spec2.input_file_list, in_list):
         assert i1 == i2
     assert spec2.netcdf_format == fmt
