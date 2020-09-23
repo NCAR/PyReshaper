@@ -1,70 +1,72 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The PyReshaper User’s Manual &mdash; PyReshaper 1.1.0 documentation</title>
+  
 
-  <title>The PyReshaper User’s Manual &mdash; PyReshaper 1.0.5 documentation</title>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="The PyReshaper Package" href="pyreshaper.html" />
-    <link rel="prev" title="The PyReshaper" href="readme.html" />
-
-
-  <script src="_static/js/modernizr.min.js"></script>
-
+    <link rel="prev" title="The PyReshaper" href="readme.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
 
-
+   
   <div class="wy-grid-for-nav">
-
-
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
+          
 
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> PyReshaper
+          
 
-
-            <a href="index.html" class="icon icon-home"> PyReshaper
-
-
-
+          
           </a>
 
-
-
-
+          
+            
+            
               <div class="version">
-                1.0
+                1.1
               </div>
+            
+          
 
-
-
-
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,16 +75,17 @@
   </form>
 </div>
 
-
+          
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-
-
-
-
-
-
+          
+            
+            
+              
+            
+            
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="readme.html">The PyReshaper</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">The PyReshaper User’s Manual</a><ul>
@@ -123,28 +126,29 @@
 <li class="toctree-l1"><a class="reference internal" href="license.html">Product License</a></li>
 </ul>
 
-
-
+            
+          
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
-
+      
       <nav class="wy-nav-top" aria-label="top navigation">
-
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">PyReshaper</a>
-
+        
       </nav>
 
 
       <div class="wy-nav-content">
-
+        
         <div class="rst-content">
-
-
+        
+          
 
 
 
@@ -163,28 +167,28 @@
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
-
-      <li><a href="index.html">Docs</a> &raquo;</li>
-
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
       <li>The PyReshaper User’s Manual</li>
-
-
+    
+    
       <li class="wy-breadcrumbs-aside">
-
-
+        
+            
             <a href="_sources/manual.rst.txt" rel="nofollow"> View page source</a>
-
-
+          
+        
       </li>
-
+    
   </ul>
 
-
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+            
   <div class="section" id="the-pyreshaper-user-s-manual">
 <h1>The PyReshaper User’s Manual<a class="headerlink" href="#the-pyreshaper-user-s-manual" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="what-is-it">
@@ -196,8 +200,8 @@ format.</p>
 <h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h3>
 <p>The PyReshaper explicitly depends upon the following Python packages:</p>
 <ul class="simple">
-<li>PyNIO (v1.5+) or netCDF4-python (v1.2+)</li>
-<li>ASAPPyTools (v0.4+)</li>
+<li><p>PyNIO (v1.5+) or netCDF4-python (v1.2+)</p></li>
+<li><p>ASAPPyTools (v0.4+)</p></li>
 </ul>
 <p>These packages imply a dependency on the NumPy (v1.4+) and mpi4py (v1.3+)
 packages, and the libraries NetCDF and MPI/MPI-2.</p>
@@ -278,17 +282,17 @@ written simultaneously across the MPI processes allocated for the job.</p>
 <p>There are a number of assumptions that the PyReshaper makes regarding the
 time-slice (input) data, which we list below.</p>
 <ol class="arabic simple">
-<li>Each time-slice NetCDF file has multiple time-dependent variables
+<li><p>Each time-slice NetCDF file has multiple time-dependent variables
 inside it, but can have many time-independent variables inside it, as
-well.</li>
-<li>Each time-slice NetCDF file contains data for times that do not
+well.</p></li>
+<li><p>Each time-slice NetCDF file contains data for times that do not
 overlap with each other. (That is, each time-slice NetCDF file can
 contain data spanning a number of simulation time steps. However, the
 span of time contained in one time slice cannot overlap the span of
 time in another time-slice.)  If the time-slices overlap, an error
-will be given and execution will stop.</li>
-<li>Every time-slice NetCDF file contains the same time-dependent
-variables, just at differing times.</li>
+will be given and execution will stop.</p></li>
+<li><p>Every time-slice NetCDF file contains the same time-dependent
+variables, just at differing times.</p></li>
 </ol>
 <p>Similarly, there are a number of assumptions made about the time-series
 (output) data produced by the PyReshaper conversion process.  The variables
@@ -296,20 +300,16 @@ written to the output data can be time-series variables or metadata
 variables.  Time-series variables are written to one output file only.
 Metadata variables are written to all output files.</p>
 <ol class="arabic">
-<li><p class="first">By default, every time-dependent variable will be assumed to be a
-time-series variable (i.e., written to its own time-series NetCDF file).</p>
-</li>
-<li><p class="first">Every time-independent variable that appears in the time-slice files
+<li><p>By default, every time-dependent variable will be assumed to be a
+time-series variable (i.e., written to its own time-series NetCDF file).</p></li>
+<li><p>Every time-independent variable that appears in the time-slice files
 will be assumed to be a metadata variable (i.e., written to every
-time-series file).</p>
-</li>
-<li><p class="first">Users can explicitly specify any number of time-dependent variables
-as metadata variables (e.g., such as <code class="docutils literal notranslate"><span class="pre">time</span></code> itself).</p>
-</li>
-<li><p class="first">Every time-series file written by the PyReshaper will span the total
-range of time spanned by all time-slice files specified.</p>
-</li>
-<li><p class="first">Every time-series file will be named with the same prefix and suffix,
+time-series file).</p></li>
+<li><p>Users can explicitly specify any number of time-dependent variables
+as metadata variables (e.g., such as <code class="docutils literal notranslate"><span class="pre">time</span></code> itself).</p></li>
+<li><p>Every time-series file written by the PyReshaper will span the total
+range of time spanned by all time-slice files specified.</p></li>
+<li><p>Every time-series file will be named with the same prefix and suffix,
 according to the rule:</p>
 <p>time_series_filename = prefix + variable_name + suffix</p>
 </li>
@@ -398,48 +398,42 @@ interactive session or from an LSF submission script.</p>
 <h4>Arguments to the <code class="docutils literal notranslate"><span class="pre">s2smake</span></code> Script<a class="headerlink" href="#arguments-to-the-s2smake-script" title="Permalink to this headline">¶</a></h4>
 <p>The arguments to the <code class="docutils literal notranslate"><span class="pre">s2smake</span></code> utility are as follows.</p>
 <ul>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--backend</span> <span class="pre">BACKEND</span></code> (<code class="docutils literal notranslate"><span class="pre">-b</span> <span class="pre">BACKEND</span></code>):  I/O backend to be used when
+<li><p><code class="docutils literal notranslate"><span class="pre">--backend</span> <span class="pre">BACKEND</span></code> (<code class="docutils literal notranslate"><span class="pre">-b</span> <span class="pre">BACKEND</span></code>):  I/O backend to be used when
 reading or writing from NetCDF files.  The parameter <code class="docutils literal notranslate"><span class="pre">BACKEND</span></code> can be one
 of <code class="docutils literal notranslate"><span class="pre">'Nio'</span></code> or <code class="docutils literal notranslate"><span class="pre">'netCDF4'</span></code>, indicating PyNIO or netCDF4-python, respectively.
-The default value is <code class="docutils literal notranslate"><span class="pre">'netCDF4'</span></code>.</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--compression_level</span> <span class="pre">C</span></code> (<code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">C</span></code>):  NetCDF compression level, when using the
+The default value is <code class="docutils literal notranslate"><span class="pre">'netCDF4'</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--compression_level</span> <span class="pre">C</span></code> (<code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">C</span></code>):  NetCDF compression level, when using the
 netcdf4 file format, where <code class="docutils literal notranslate"><span class="pre">C</span></code> is an integer between 0 and 9, with 0 indicating
 no compression at all and 9 indicating the highest level of compression. The
-default compression level is 1.</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--netcdf_format</span> <span class="pre">NCFORMAT</span></code> (<code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">NCFORMAT</span></code>):  NetCDF file format to be used
+default compression level is 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--netcdf_format</span> <span class="pre">NCFORMAT</span></code> (<code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">NCFORMAT</span></code>):  NetCDF file format to be used
 for all output files, where <code class="docutils literal notranslate"><span class="pre">NCFORMAT</span></code> can be <code class="docutils literal notranslate"><span class="pre">'netcdf'</span></code>, <code class="docutils literal notranslate"><span class="pre">'netcdf4'</span></code>, or
 <code class="docutils literal notranslate"><span class="pre">'netcdf4c'</span></code>, indicating NetCDF3 Classic format, NetCDF4 Classic format, or
 NetCDF4 Classic format with forced compression level 1.  The default file format
-is <code class="docutils literal notranslate"><span class="pre">'netcdf4'</span></code>.</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--metadata</span> <span class="pre">VNAME</span></code> (<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">VNAME</span></code>):  Indicate that the variable <code class="docutils literal notranslate"><span class="pre">VNAME</span></code> should
+is <code class="docutils literal notranslate"><span class="pre">'netcdf4'</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--metadata</span> <span class="pre">VNAME</span></code> (<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">VNAME</span></code>):  Indicate that the variable <code class="docutils literal notranslate"><span class="pre">VNAME</span></code> should
 be treated as metadata, and written to all output files.  There may be more than
-one <code class="docutils literal notranslate"><span class="pre">--metadata</span></code> (or <code class="docutils literal notranslate"><span class="pre">-m</span></code>) options given, each one being added to a list.</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--meta1d</span></code> (<code class="docutils literal notranslate"><span class="pre">-1</span></code>):  This flag forces all 1D time-variant variables to be treated
+one <code class="docutils literal notranslate"><span class="pre">--metadata</span></code> (or <code class="docutils literal notranslate"><span class="pre">-m</span></code>) options given, each one being added to a list.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--meta1d</span></code> (<code class="docutils literal notranslate"><span class="pre">-1</span></code>):  This flag forces all 1D time-variant variables to be treated
 as metadata.  These variables need not be added explicitly to the list of metadata
 variables (i.e., with the <code class="docutils literal notranslate"><span class="pre">--metadata</span></code> or <code class="docutils literal notranslate"><span class="pre">-m</span></code> argument).  These variables will
-be added to the list when the PyReshaper runs.</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--specfile</span> <span class="pre">SPECFILE</span></code> (<code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">SPECFILE</span></code>):  The name of the <em>specfile</em> to write,
+be added to the list when the PyReshaper runs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--specfile</span> <span class="pre">SPECFILE</span></code> (<code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">SPECFILE</span></code>):  The name of the <em>specfile</em> to write,
 containing the specification of the PyReshaper job.  The default <em>specfile</em> name
-is <code class="docutils literal notranslate"><span class="pre">'input.s2s'</span></code>.</p>
-</li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--output_prefix</span> <span class="pre">PREFIX</span></code> (<code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">PREFIX</span></code>):  A string specifying the prefix to be
+is <code class="docutils literal notranslate"><span class="pre">'input.s2s'</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--output_prefix</span> <span class="pre">PREFIX</span></code> (<code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">PREFIX</span></code>):  A string specifying the prefix to be
 given to all output filenames.  The output file will be named according to the
 rule:</p>
 <p><code class="docutils literal notranslate"><span class="pre">output_prefix</span> <span class="pre">+</span> <span class="pre">variable_name</span> <span class="pre">+</span> <span class="pre">output_suffix</span></code></p>
 <p>The default output filename prefix is <code class="docutils literal notranslate"><span class="pre">'tseries.'</span></code>.</p>
 </li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--output_suffix</span> <span class="pre">SUFFIX</span></code> (<code class="docutils literal notranslate"><span class="pre">-s</span> <span class="pre">SUFFIX</span></code>):  A string specifying the suffix to be
+<li><p><code class="docutils literal notranslate"><span class="pre">--output_suffix</span> <span class="pre">SUFFIX</span></code> (<code class="docutils literal notranslate"><span class="pre">-s</span> <span class="pre">SUFFIX</span></code>):  A string specifying the suffix to be
 given to all output filenames.  The output file will be named according to the
 rule:</p>
 <p><code class="docutils literal notranslate"><span class="pre">output_prefix</span> <span class="pre">+</span> <span class="pre">variable_name</span> <span class="pre">+</span> <span class="pre">output_suffix</span></code></p>
 <p>The default output filename suffix is <code class="docutils literal notranslate"><span class="pre">'.nc'</span></code>.</p>
 </li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">--time_series</span> <span class="pre">VNAME</span></code>:  Indicate that only the named <code class="docutils literal notranslate"><span class="pre">VNAME</span></code> variables should
+<li><p><code class="docutils literal notranslate"><span class="pre">--time_series</span> <span class="pre">VNAME</span></code>:  Indicate that only the named <code class="docutils literal notranslate"><span class="pre">VNAME</span></code> variables should
 be treated as time-series variables and extracted into their own time-series files.
 This option works like the <code class="docutils literal notranslate"><span class="pre">--metadata</span></code> option, in that multiple occurrences of
 this option can be used to extract out only the time-series variables given.  If
@@ -449,8 +443,7 @@ option is <em>not</em> used, then all time-dependent variables that are not spec
 be metadata (i.e., with the <code class="docutils literal notranslate"><span class="pre">--metadata</span></code> option) will be treated as time-series
 variables and given their own output file.  <strong>NOTE: If you use this option, data
 can be left untransformed from time-slice to time-series output!  DO NOT DELETE
-YOUR OLD TIME-SLICE FILES!</strong></p>
-</li>
+YOUR OLD TIME-SLICE FILES!</strong></p></li>
 </ul>
 <p>Each input file should be listed in sequence, space separated, on the command line to
 the utility, nominally after all other options have been specified.</p>
@@ -460,7 +453,7 @@ the utility, nominally after all other options have been specified.</p>
 <p>While the basic options shown in the previous examples above are
 sufficient for most purposes, additional options are available.</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">--chunk</span> <span class="pre">NAME,SIZE</span></code> (<code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">NAME,SIZE</span></code>):  This command-line option can be used
+<li><p><code class="docutils literal notranslate"><span class="pre">--chunk</span> <span class="pre">NAME,SIZE</span></code> (<code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">NAME,SIZE</span></code>):  This command-line option can be used
 to specify a maximum read/write chunk-size <code class="docutils literal notranslate"><span class="pre">SIZE</span></code> along a given named dimension
 <code class="docutils literal notranslate"><span class="pre">NAME</span></code>.  Multiple <code class="docutils literal notranslate"><span class="pre">--chunk</span></code> options can be given to specify chunk-sizes along
 multiple dimensions.  This option determines the size of the data “chunk” read
@@ -469,23 +462,23 @@ is greater than the given dimension size, then the entire dimension will be read
 at once.  If the chunk-size is less than the given dimension size, then all variables
 that depend on that dimension will be read in multiple parts, each “chunk” being written
 before the next is read.  This can be important to control memory use.  By default,
-chunking is done over the unlimited dimension with a chunk-size of 1.</li>
-<li><code class="docutils literal notranslate"><span class="pre">--limit</span> <span class="pre">L</span></code> (<code class="docutils literal notranslate"><span class="pre">-l</span> <span class="pre">L</span></code>):  This command-line option can be used to set the
+chunking is done over the unlimited dimension with a chunk-size of 1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--limit</span> <span class="pre">L</span></code> (<code class="docutils literal notranslate"><span class="pre">-l</span> <span class="pre">L</span></code>):  This command-line option can be used to set the
 <code class="docutils literal notranslate"><span class="pre">output_limit</span></code> argument of the PyReshaper <code class="docutils literal notranslate"><span class="pre">convert()</span></code> function,
 described below.  This can be used when testing to only output the first <code class="docutils literal notranslate"><span class="pre">L</span></code>
-files.  The default value is 0, which indicates no limit (normal operation).</li>
-<li><code class="docutils literal notranslate"><span class="pre">--write_mode</span> <span class="pre">M</span></code> (<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">M</span></code>): This command-line option can be used to set
+files.  The default value is 0, which indicates no limit (normal operation).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--write_mode</span> <span class="pre">M</span></code> (<code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">M</span></code>): This command-line option can be used to set
 the <code class="docutils literal notranslate"><span class="pre">wmode</span></code> output file write-mode parameter of the <code class="docutils literal notranslate"><span class="pre">create_reshaper()</span></code>
 function, described below.  The default write mode is <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, which indicates
 normal writing, which will error if the output files already exists (i.e.,
 no overwriting).  Other options are <code class="docutils literal notranslate"><span class="pre">'o'</span></code> to overwrite existing output files,
 <code class="docutils literal notranslate"><span class="pre">'s'</span></code> to skip existing output files, <code class="docutils literal notranslate"><span class="pre">'a'</span></code> to append to existing output
-files.</li>
-<li><code class="docutils literal notranslate"><span class="pre">--serial</span></code> (<code class="docutils literal notranslate"><span class="pre">-s</span></code>):  If this flag is used, it will run the PyReshaper in
-serial mode.  By default, it will run PyReshaper in parallel mode.</li>
-<li><code class="docutils literal notranslate"><span class="pre">--verbosity</span> <span class="pre">V</span></code> (<code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">V</span></code>):  Sets the verbosity level for standard output
+files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--serial</span></code> (<code class="docutils literal notranslate"><span class="pre">-s</span></code>):  If this flag is used, it will run the PyReshaper in
+serial mode.  By default, it will run PyReshaper in parallel mode.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--verbosity</span> <span class="pre">V</span></code> (<code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">V</span></code>):  Sets the verbosity level for standard output
 from the PyReshaper.  A level of 0 means no output, and a value of 1 or more
-means increasingly more output.  The default verbosity level is 1.</li>
+means increasingly more output.  The default verbosity level is 1.</p></li>
 </ul>
 <p>Nominally, the last argument given to the <code class="docutils literal notranslate"><span class="pre">s2srun</span></code> utility should be the name
 of the <em>specfile</em> to run.</p>
@@ -502,7 +495,7 @@ own Python tools or scripts.</p>
 <p>Below, we show an example of how to use the PyReshaper from within
 Python to convert a stream from time-slice format to time-series
 format.</p>
-<div class="code py highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyreshaper</span> <span class="k">import</span> <span class="n">specification</span><span class="p">,</span> <span class="n">reshaper</span>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyreshaper</span> <span class="kn">import</span> <span class="n">specification</span><span class="p">,</span> <span class="n">reshaper</span>
 
 <span class="c1"># Create a Specifier object</span>
 <span class="n">specifier</span> <span class="o">=</span> <span class="n">specification</span><span class="o">.</span><span class="n">create_specifier</span><span class="p">()</span>
@@ -537,68 +530,67 @@ attribute of the Specifier object below.</p>
 <div class="section" id="specifier-object-attributes">
 <h4>Specifier Object Attributes<a class="headerlink" href="#specifier-object-attributes" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">input_file_list</span></code>: This specifies a list of input (time-slice) file
+<li><p><code class="docutils literal notranslate"><span class="pre">input_file_list</span></code>: This specifies a list of input (time-slice) file
 paths that all conform to the input file assumptions (described
 above). The list of input files need not be time-ordered, as the
 PyReshaper will order them appropriately. (This means that this list
-can easily be generated by using filename globs.)</li>
+can easily be generated by using filename globs.)</p></li>
 </ul>
 <p>In the example above, each file path is full and absolute, for safety’s
 sake.</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">netcdf_format</span></code>: This is a string specifying what NetCDF format
+<li><p><code class="docutils literal notranslate"><span class="pre">netcdf_format</span></code>: This is a string specifying what NetCDF format
 will be used to write the output (time-series) files.  Acceptable options
 for <code class="docutils literal notranslate"><span class="pre">netcdf_format</span></code> are: <code class="docutils literal notranslate"><span class="pre">&quot;netcdf&quot;</span></code> for NetCDF3 format, <code class="docutils literal notranslate"><span class="pre">&quot;netcdf4&quot;</span></code>
 for NetCDF4 Classic format, and <code class="docutils literal notranslate"><span class="pre">&quot;netcdf4c&quot;</span></code> for NetCDF4 Classic with
-level-1 compression.</li>
-<li><code class="docutils literal notranslate"><span class="pre">compression_level</span></code>: This is an integer specifying the level of
+level-1 compression.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">compression_level</span></code>: This is an integer specifying the level of
 compression to use when writing the output files.  This can be a number
 from 0 to 9, where 0 means no compression (default) and 9 mean the
 highest level of compression.  This is overridden when the <code class="docutils literal notranslate"><span class="pre">&quot;netcdf4c&quot;</span></code>
-format is used, where it is forced to be 1.</li>
+format is used, where it is forced to be 1.</p></li>
 </ul>
 <p>In the above example, NetCDF4 Classic format is used for the output files,
 with level-1 compression.  The <code class="docutils literal notranslate"><span class="pre">&quot;netcdf4c&quot;</span></code> option can be used as a
 short-hand notation for this combination of <code class="docutils literal notranslate"><span class="pre">netcdf_format</span></code> and
 <code class="docutils literal notranslate"><span class="pre">compression_level</span></code> options.</p>
 <ul>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">output_file_prefix</span></code>: This is a string specifying the common output
+<li><p><code class="docutils literal notranslate"><span class="pre">output_file_prefix</span></code>: This is a string specifying the common output
 (time-series) filename prefix. It is assumed that each time-series
 file will be named according to the rule:</p>
 <p>filename = output_file_prefix + variable_name + output_file_suffix</p>
 </li>
-<li><p class="first"><code class="docutils literal notranslate"><span class="pre">output_file_suffix</span></code>: This is a string specifying the common output
+<li><p><code class="docutils literal notranslate"><span class="pre">output_file_suffix</span></code>: This is a string specifying the common output
 (time-series) filename suffix. It is assumed that each time-series
-file will be named according to the above rule.</p>
-</li>
+file will be named according to the above rule.</p></li>
 </ul>
 <p>It is important to understand, as in the example above, that the prefix
 can include the full, absolute path information for the output
 (time-series) files.</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">time_variant_metadata</span></code>: This specifies a list of variable names
+<li><p><code class="docutils literal notranslate"><span class="pre">time_variant_metadata</span></code>: This specifies a list of variable names
 corresponding to variables that should be written to every output
 (time-series) NetCDF file.  Nominally, this should specify only the
 time-variant (time-dependent) variables that should <em>not</em> be treated
 as time-series variables (i.e., treated as metadata), since all
 time-invariant (time-independent) variables will be treat as metadata
-automatically.</li>
-<li><code class="docutils literal notranslate"><span class="pre">assume_1d_time_variant_metadata</span></code>: If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, this indicates
+automatically.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">assume_1d_time_variant_metadata</span></code>: If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, this indicates
 that all 1D time-variant variables (i.e., variables that <em>only</em> depend
 upon <code class="docutils literal notranslate"><span class="pre">time</span></code>) should be added to the list of <code class="docutils literal notranslate"><span class="pre">time_variant_metadata</span></code>
-when the Reshaper runs.  The default for this option is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</li>
-<li><code class="docutils literal notranslate"><span class="pre">time_series</span></code>: If set to a list of string variable names, only these
+when the Reshaper runs.  The default for this option is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_series</span></code>: If set to a list of string variable names, only these
 variable names will be transformed into time-series format.  This is
 equivalent to the <code class="docutils literal notranslate"><span class="pre">--time_series</span></code> option to the <code class="docutils literal notranslate"><span class="pre">s2smake</span></code> utility.
 <strong>NOTE: Setting this attribute can leave data untransformed from time-slice
-to time-series format!  DO NOT DELETE YOUR OLD TIME-SLICE FILES!</strong></li>
-<li><code class="docutils literal notranslate"><span class="pre">backend</span></code>: This specifies which I/O backend to use for reading
+to time-series format!  DO NOT DELETE YOUR OLD TIME-SLICE FILES!</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">backend</span></code>: This specifies which I/O backend to use for reading
 and writing NetCDF files.  The default backend is <code class="docutils literal notranslate"><span class="pre">'netCDF4'</span></code>, but
-the user can alternatively specify <code class="docutils literal notranslate"><span class="pre">'Nio'</span></code> to use PyNIO.</li>
-<li><code class="docutils literal notranslate"><span class="pre">exclude_list</span></code>: If set to a list of string time invariant variable names,
+the user can alternatively specify <code class="docutils literal notranslate"><span class="pre">'Nio'</span></code> to use PyNIO.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">exclude_list</span></code>: If set to a list of string time invariant variable names,
 these variables will not be included in each of the timeseries files.
 <strong>NOTE: Setting this attribute can leave data untransformed from time-slice
-to time-series format!  DO NOT DELETE YOUR OLD TIME-SLICE FILES!</strong></li>
+to time-series format!  DO NOT DELETE YOUR OLD TIME-SLICE FILES!</strong></p></li>
 </ul>
 </div>
 <div class="section" id="specifier-object-methods">
@@ -606,10 +598,10 @@ to time-series format!  DO NOT DELETE YOUR OLD TIME-SLICE FILES!</strong></li>
 <p>In addition to the attributes above, the Specifier objects have some useful
 methods that can be called.</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">validate()</span></code>:  Calling this function validates the attributes of the
-Specifier, making sure their types and values appear correct.</li>
-<li><code class="docutils literal notranslate"><span class="pre">write(filename)</span></code>:  Calling this function with the argument <code class="docutils literal notranslate"><span class="pre">filename</span></code>
-will write the <em>specfile</em> matching the Specifier.</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">validate()</span></code>:  Calling this function validates the attributes of the
+Specifier, making sure their types and values appear correct.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">write(filename)</span></code>:  Calling this function with the argument <code class="docutils literal notranslate"><span class="pre">filename</span></code>
+will write the <em>specfile</em> matching the Specifier.</p></li>
 </ul>
 </div>
 <div class="section" id="specfiles">
@@ -618,7 +610,7 @@ will write the <em>specfile</em> matching the Specifier.</li>
 create a <em>specfile</em>, one can simply call the Specifier’s <code class="docutils literal notranslate"><span class="pre">write()</span></code> method,
 described above, or one can explicitly <em>pickle</em> the Specifier directly, as
 shown below.</p>
-<div class="code py highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
 
 <span class="c1"># Assume &quot;spec&quot; is an existing Specifier instance</span>
 <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;specfile.s2s&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">))</span>
@@ -626,7 +618,7 @@ shown below.</p>
 </div>
 <p>This is equivalent to the call <code class="docutils literal notranslate"><span class="pre">spec.write('specfile.s2s')</span></code>.</p>
 <p>A <em>specfile</em> can be read with the following Python code.</p>
-<div class="code py highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
 
 <span class="n">spec</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;specfile.s2s&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="p">)</span>
 </pre></div>
@@ -643,54 +635,56 @@ diagnostics, respectively.</p>
 <p>In addition to the Specifier instance, the <code class="docutils literal notranslate"><span class="pre">create_reshaper()</span></code> function
 takes the following parameters.</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">serial</span></code>: This is a boolean flag, which can be <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code>,
+<li><p><code class="docutils literal notranslate"><span class="pre">serial</span></code>: This is a boolean flag, which can be <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code>,
 indicating whether the PyReshaper <code class="docutils literal notranslate"><span class="pre">convert()</span></code> step should be done in serial
 (<code class="docutils literal notranslate"><span class="pre">True</span></code>) or parallel (<code class="docutils literal notranslate"><span class="pre">False</span></code>). By default, parallel operation is
-assumed if this parameter is not specified.</li>
-<li><code class="docutils literal notranslate"><span class="pre">verbosity</span></code>: This is an integer parameter that specifies what level of
+assumed if this parameter is not specified.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">verbosity</span></code>: This is an integer parameter that specifies what level of
 output to produce (to <code class="docutils literal notranslate"><span class="pre">stdout</span></code>) during the <code class="docutils literal notranslate"><span class="pre">convert()</span></code> step.  A
 verbosity level of <code class="docutils literal notranslate"><span class="pre">0</span></code> means that no output will be produced, while an
 increasing vebosity level producing more and more output.  Currently, a
-level of <code class="docutils literal notranslate"><span class="pre">2</span></code> produces the most output possible.<ol class="arabic">
-<li><code class="docutils literal notranslate"><span class="pre">verbosity</span> <span class="pre">=</span> <span class="pre">0</span></code>: This means that no output will be produced unless
+level of <code class="docutils literal notranslate"><span class="pre">2</span></code> produces the most output possible.</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">verbosity</span> <span class="pre">=</span> <span class="pre">0</span></code>: This means that no output will be produced unless
 specifically requested (i.e., by calling the <code class="docutils literal notranslate"><span class="pre">print_diagnostics()</span></code>
-function).</li>
-<li><code class="docutils literal notranslate"><span class="pre">verbosity</span> <span class="pre">=</span> <span class="pre">1</span></code>: This means that only output that would be produced
-by the head rank of a parallel process will be generated.</li>
-<li><code class="docutils literal notranslate"><span class="pre">verbosity</span> <span class="pre">=</span> <span class="pre">2</span></code>: This means that all output from all processors
+function).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">verbosity</span> <span class="pre">=</span> <span class="pre">1</span></code>: This means that only output that would be produced
+by the head rank of a parallel process will be generated.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">verbosity</span> <span class="pre">=</span> <span class="pre">2</span></code>: This means that all output from all processors
 will be generated, but any output that is the same on all processors
-will only be generated once.</li>
+will only be generated once.</p></li>
 </ol>
 </li>
-<li><code class="docutils literal notranslate"><span class="pre">wmode</span></code>: This is a single-character string that can be used to set the
+<li><p><code class="docutils literal notranslate"><span class="pre">wmode</span></code>: This is a single-character string that can be used to set the
 <em>write mode</em> of the PyReshaper.  By default, the PyReshaper will not overwrite
 existing output files, if they exist.  In normal operation, this means the
 PyReshaper will error (and stop execution) if output files are already
 present.  This behavior can be  controlled with the <code class="docutils literal notranslate"><span class="pre">wmode</span></code> parameter.
-The <code class="docutils literal notranslate"><span class="pre">wmode</span></code> parameter can be set to any of the following.<ol class="arabic">
-<li><code class="docutils literal notranslate"><span class="pre">wmode</span> <span class="pre">=</span> <span class="pre">'w'</span></code>: This indicates that normal write operation is to be
+The <code class="docutils literal notranslate"><span class="pre">wmode</span></code> parameter can be set to any of the following.</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">wmode</span> <span class="pre">=</span> <span class="pre">'w'</span></code>: This indicates that normal write operation is to be
 performed.  That is, the PyReshaper will error and stop execution if it
-finds output files that already exist.  This is the default setting.</li>
-<li><code class="docutils literal notranslate"><span class="pre">wmode</span> <span class="pre">=</span> <span class="pre">'s'</span></code>: This indicates that the PyReshaper should skip generating
+finds output files that already exist.  This is the default setting.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wmode</span> <span class="pre">=</span> <span class="pre">'s'</span></code>: This indicates that the PyReshaper should skip generating
 time-series files for output files that already exist.  No check is
-done to see if the output files are correct.</li>
-<li><code class="docutils literal notranslate"><span class="pre">wmode</span> <span class="pre">=</span> <span class="pre">'o'</span></code>:  This indicates that the PyReshaper should overwrite
+done to see if the output files are correct.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wmode</span> <span class="pre">=</span> <span class="pre">'o'</span></code>:  This indicates that the PyReshaper should overwrite
 existing output files, if present.  In this mode, the existing output
-files will be deleted before running the PyReshaper operation.</li>
-<li><code class="docutils literal notranslate"><span class="pre">wmode</span> <span class="pre">=</span> <span class="pre">'a'</span></code>:  This indicates that the PyReshaper should append to
+files will be deleted before running the PyReshaper operation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wmode</span> <span class="pre">=</span> <span class="pre">'a'</span></code>:  This indicates that the PyReshaper should append to
 existing output files, if present.  In this mode, it is assumed that the
 existing output files have the correct format before appending new data
-to them.</li>
+to them.</p></li>
 </ol>
 </li>
-<li><code class="docutils literal notranslate"><span class="pre">simplecomm</span></code>: This option allows the user to pass an <code class="docutils literal notranslate"><span class="pre">ASAPPyTools</span></code>
+<li><p><code class="docutils literal notranslate"><span class="pre">simplecomm</span></code>: This option allows the user to pass an <code class="docutils literal notranslate"><span class="pre">ASAPPyTools</span></code>
 <code class="docutils literal notranslate"><span class="pre">SimpleComm</span></code> instance to the PyReshaper, instead of having the PyReshaper
 create its own internally.  The <code class="docutils literal notranslate"><span class="pre">SimpleComm</span></code> object is the simple MPI
 communication object used by the PyReshaper to handle its MPI communication.
 By default, the PyReshaper will create its own SimpleComm that uses the
 MPI <code class="docutils literal notranslate"><span class="pre">COMM_WORLD</span></code> communicator for communication.  However, the user
 may create their own <code class="docutils literal notranslate"><span class="pre">SimpleComm</span></code> object and force the PyReshaper to use
-it by setting this option equal to the user-created <code class="docutils literal notranslate"><span class="pre">SimpleComm</span></code> instance.</li>
+it by setting this option equal to the user-created <code class="docutils literal notranslate"><span class="pre">SimpleComm</span></code> instance.</p></li>
 </ul>
 </div>
 <div class="section" id="arguments-to-the-convert-function">
@@ -698,12 +692,12 @@ it by setting this option equal to the user-created <code class="docutils litera
 <p>While not shown in the above examples, there are named arguments that can
 be passed to the <code class="docutils literal notranslate"><span class="pre">convert()</span></code> function of the Reshaper object.</p>
 <ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">output_limit</span></code>:  This argument sets an integer limit on the number of
+<li><p><code class="docutils literal notranslate"><span class="pre">output_limit</span></code>:  This argument sets an integer limit on the number of
 time-series files generated during the <code class="docutils literal notranslate"><span class="pre">convert()</span></code> operation (per MPI process).
 This can be useful for debugging purposes, as it can greatly reduce the length
 of time consumed in the <code class="docutils literal notranslate"><span class="pre">convert()</span></code> function. A value of <code class="docutils literal notranslate"><span class="pre">0</span></code> indicates
-no limit, or all output files will be generated.</li>
-<li><code class="docutils literal notranslate"><span class="pre">chunks</span></code>:  This argument sets a dictionary of dimension names to chunk-sizes.
+no limit, or all output files will be generated.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chunks</span></code>:  This argument sets a dictionary of dimension names to chunk-sizes.
 This is equivalent to the <code class="docutils literal notranslate"><span class="pre">--chunk</span></code> command-line option to <code class="docutils literal notranslate"><span class="pre">s2srun</span></code>.  This option
 determines the size of the data “chunk” read from a single input file (and then written
 to an output file) along each given dimension.  If a chunk-size is greater than the given
@@ -711,7 +705,7 @@ dimension size, then the entire dimension will be read at once.  If a chunk-size
 than the given dimension size, then all variables  that depend on that dimension will be
 read in multiple parts, each “chunk” being written before the next is read.  This can be
 important to control memory use.  By default, the <code class="docutils literal notranslate"><span class="pre">chunks</span></code> parameter is equal to
-<code class="docutils literal notranslate"><span class="pre">None</span></code>, which means chunking is done over the unlimited dimension with a chunk-size of 1.</li>
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, which means chunking is done over the unlimited dimension with a chunk-size of 1.</p></li>
 </ul>
 </div>
 </div>
@@ -782,29 +776,37 @@ node, so using fewer processes per node may improve conversion speeds.</p>
 
 
            </div>
-
+           
           </div>
           <footer>
-
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-
+      
         <a href="pyreshaper.html" class="btn btn-neutral float-right" title="The PyReshaper Package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-
-
-        <a href="readme.html" class="btn btn-neutral" title="The PyReshaper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-
+      
+      
+        <a href="readme.html" class="btn btn-neutral float-left" title="The PyReshaper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2020, University Corporation for Atmospheric Research.
+        
+        &copy; Copyright 2020, University Corporation for Atmospheric Research
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -814,40 +816,18 @@ node, so using fewer processes per node may improve conversion speeds.</p>
     </section>
 
   </div>
-
-
-
-
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.0.5',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-
-
-
-
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
+  
 
   <script type="text/javascript">
       jQuery(function () {
-
-          SphinxRtdTheme.Navigation.enableSticky();
-
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
