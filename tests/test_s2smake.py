@@ -15,7 +15,6 @@ cwd = os.path.dirname(os.path.realpath(__file__))
 
 
 class CLITests:
-
     def test_empty(self):
         argv = []
         with pytest.raises(ValueError):
@@ -69,8 +68,7 @@ class CLITests:
         assert len(args) == len(infiles)
         for i1, i2 in zip(args, infiles):
             assert i1 == i2
-        assert len(opts.metadata) == len(
-            metadata)
+        assert len(opts.metadata) == len(metadata)
         for i1, i2 in zip(opts.metadata, metadata):
             assert i1 == i2
         assert opts.netcdf_format == ncfmt
@@ -94,15 +92,21 @@ class CLITests:
         infiles = ['test_s2smake.py', 'test_specification.py']
 
         argv = ['--meta1d']
-        argv.extend(['--compression_level', str(clevel),
-                     '--least_significant_digit', str(lsigfig),
-                     '--netcdf_format', ncfmt])
+        argv.extend(
+            [
+                '--compression_level',
+                str(clevel),
+                '--least_significant_digit',
+                str(lsigfig),
+                '--netcdf_format',
+                ncfmt,
+            ]
+        )
         for md in metadata:
             argv.extend(['--metadata', md])
         for x in xlist:
             argv.extend(['--exclude', x])
-        argv.extend(['--specfile', specfile, '--output_prefix', prefix,
-                     '--output_suffix', suffix])
+        argv.extend(['--specfile', specfile, '--output_prefix', prefix, '--output_suffix', suffix])
         for ts in tseries:
             argv.extend(['--time_series', ts])
         argv.extend(infiles)
@@ -110,8 +114,7 @@ class CLITests:
 
         assert opts.compression_level == clevel
         assert opts.least_significant_digit == lsigfig
-        assert len(args) == len(
-            infiles)
+        assert len(args) == len(infiles)
         for i1, i2 in zip(args, infiles):
             assert i1 == i2
         for i1, i2 in zip(opts.metadata, metadata):
@@ -127,7 +130,6 @@ class CLITests:
 
 
 class MainTests(object):
-
     def test_defaults(self):
         argv = [cwd + '/test_s2smake.py']
         specfile = 'input.s2s'
@@ -140,14 +142,12 @@ class MainTests(object):
         assert isinstance(spec, Specifier)
         assert spec.compression_level == 1
         assert spec.least_significant_digit is None
-        assert len(spec.input_file_list) == len(
-            argv)
+        assert len(spec.input_file_list) == len(argv)
         for i1, i2 in zip(spec.input_file_list, argv):
             assert i1 == i2
         assert len(spec.time_variant_metadata) == 0
         assert spec.netcdf_format == 'netcdf4'
-        assert spec.output_file_prefix == os.path.abspath(
-            'tseries.')
+        assert spec.output_file_prefix == os.path.abspath('tseries.')
         assert spec.output_file_suffix == '.nc'
         assert spec.time_series is None
         assert spec.assume_1d_time_variant_metadata is False
@@ -182,17 +182,14 @@ class MainTests(object):
         assert isinstance(spec, Specifier)
         assert spec.compression_level == clevel
         assert spec.least_significant_digit == lsigfig
-        assert len(spec.input_file_list) == len(
-            infiles)
+        assert len(spec.input_file_list) == len(infiles)
         for i1, i2 in zip(spec.input_file_list, infiles):
             assert i1 == i2
-        assert len(spec.time_variant_metadata) == len(
-            metadata)
+        assert len(spec.time_variant_metadata) == len(metadata)
         for i1, i2 in zip(spec.time_variant_metadata, metadata):
             assert i1 == i2
         assert spec.netcdf_format == ncfmt
-        assert spec.output_file_prefix == os.path.abspath(
-            prefix)
+        assert spec.output_file_prefix == os.path.abspath(prefix)
         assert spec.output_file_suffix == suffix + '.nc'
         assert spec.time_series is None
         assert spec.assume_1d_time_variant_metadata is True
@@ -209,14 +206,18 @@ class MainTests(object):
         tseries = ['tsvar1', 'tsvar2']
         infiles = [cwd + f for f in ['/test_s2smake.py', '/test_specification.py']]
 
-        argv = ['--meta1d',
-                '--compression_level', str(clevel),
-                '--least_significant_digit', str(lsigfig),
-                '--netcdf_format', ncfmt]
+        argv = [
+            '--meta1d',
+            '--compression_level',
+            str(clevel),
+            '--least_significant_digit',
+            str(lsigfig),
+            '--netcdf_format',
+            ncfmt,
+        ]
         for md in metadata:
             argv.extend(['--metadata', md])
-        argv.extend(['--specfile', specfile, '--output_prefix',
-                     prefix, '--output_suffix', suffix])
+        argv.extend(['--specfile', specfile, '--output_prefix', prefix, '--output_suffix', suffix])
         for ts in tseries:
             argv.extend(['--time_series', ts])
         argv.extend(infiles)
@@ -232,17 +233,14 @@ class MainTests(object):
         assert isinstance(spec, Specifier)
         assert spec.compression_level == clevel
         assert spec.least_significant_digit == lsigfig
-        assert len(spec.input_file_list) == len(
-            infiles)
+        assert len(spec.input_file_list) == len(infiles)
         for i1, i2 in zip(spec.input_file_list, infiles):
             assert i1 == i2
-        assert len(spec.time_variant_metadata) == len(
-            metadata)
+        assert len(spec.time_variant_metadata) == len(metadata)
         for i1, i2 in zip(spec.time_variant_metadata, metadata):
             assert i1 == i2
         assert spec.netcdf_format == ncfmt
-        assert spec.output_file_prefix == os.path.abspath(
-            prefix)
+        assert spec.output_file_prefix == os.path.abspath(prefix)
         assert spec.output_file_suffix == suffix + '.nc'
         for i1, i2 in zip(spec.time_series, tseries):
             assert i1 == i2

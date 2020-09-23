@@ -19,27 +19,28 @@ from .data import config, make
 
 
 class CommonTestsBase(object):
-
     def setUp(self):
 
         # Default arguments for testing
-        self.spec_args = {'infiles': config.slices,
-                          'ncfmt': 'netcdf4',
-                          'compression': 0,
-                          'prefix': 'out.',
-                          'suffix': '.nc',
-                          'timeseries': None,
-                          'metadata': [v for v in config.tvmvars] + ['time'] + [v for v in config.chvars],
-                          'meta1d': False,
-                          'metafile': None}
-        self.create_args = {'serial': False,
-                            'verbosity': 1,
-                            'wmode': 'w',
-                            'once': False,
-                            'simplecomm': None}
-        self.convert_args = {'output_limit': 0,
-                             'rchunks': None,
-                             'wchunks': None}
+        self.spec_args = {
+            'infiles': config.slices,
+            'ncfmt': 'netcdf4',
+            'compression': 0,
+            'prefix': 'out.',
+            'suffix': '.nc',
+            'timeseries': None,
+            'metadata': [v for v in config.tvmvars] + ['time'] + [v for v in config.chvars],
+            'meta1d': False,
+            'metafile': None,
+        }
+        self.create_args = {
+            'serial': False,
+            'verbosity': 1,
+            'wmode': 'w',
+            'once': False,
+            'simplecomm': None,
+        }
+        self.convert_args = {'output_limit': 0, 'rchunks': None, 'wchunks': None}
 
         # Test Data Generation
         self.clean()
@@ -53,16 +54,26 @@ class CommonTestsBase(object):
         mf = len(config.slices)
         mt = len(config.tsvars)
         nf = len(self.spec_args['infiles'])
-        nt = mt if self.spec_args['timeseries'] is None else len(
-            self.spec_args['timeseries'])
+        nt = mt if self.spec_args['timeseries'] is None else len(self.spec_args['timeseries'])
 
         hline = '-' * 100
-        hdrstr = ['', hline, '{}.{}:'.format(self.__class__.__name__, inspect.stack()[1][3]), '',
-                  '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt}, compression={compression}, meta1d={meta1d}, backend={backend}, metafile={metafile})'.format(
-                      nf, mf, nt, mt, **self.spec_args),
-                  '   create(serial={serial}, verbosity={verbosity}, wmode={wmode}, once={once}, simplecomm={simplecomm})'.format(
-                      **self.create_args),
-                  '   convert(output_limit={output_limit}, rchunks={rchunks}, wchunks={wchunks})'.format(**self.convert_args), hline, '']
+        hdrstr = [
+            '',
+            hline,
+            '{}.{}:'.format(self.__class__.__name__, inspect.stack()[1][3]),
+            '',
+            '   specifier({}/{} infile(s), {}/{} TSV(s), ncfmt={ncfmt}, compression={compression}, meta1d={meta1d}, backend={backend}, metafile={metafile})'.format(
+                nf, mf, nt, mt, **self.spec_args
+            ),
+            '   create(serial={serial}, verbosity={verbosity}, wmode={wmode}, once={once}, simplecomm={simplecomm})'.format(
+                **self.create_args
+            ),
+            '   convert(output_limit={output_limit}, rchunks={rchunks}, wchunks={wchunks})'.format(
+                **self.convert_args
+            ),
+            hline,
+            '',
+        ]
         print(eol.join(hdrstr))
 
     def check(self, tsvar):
@@ -71,11 +82,9 @@ class CommonTestsBase(object):
         args.update(self.create_args)
         args.update(self.convert_args)
         assertions_dict = check_outfile(tsvar=tsvar, **args)
-        failed_assertions = [
-            key for key, value in assertions_dict.items() if value is False]
+        failed_assertions = [key for key, value in assertions_dict.items() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
-        assert_msgs.extend(['   {0}'.format(assrt)
-                            for assrt in failed_assertions])
+        assert_msgs.extend(['   {0}'.format(assrt) for assrt in failed_assertions])
         assert len(failed_assertions) == 0, eol.join(assert_msgs)
 
     def convert(self, print_diags=False):
@@ -132,8 +141,7 @@ class CommonTestsBase(object):
             if tsvar in config.tsvars:
                 self.check(tsvar)
             else:
-                fname = self.spec_args['prefix'] + \
-                    tsvar + self.spec_args['suffix']
+                fname = self.spec_args['prefix'] + tsvar + self.spec_args['suffix']
                 assert not exists(fname), 'File {0!r} should not exist'.format(fname)
 
     def test_exclude(self):
@@ -141,7 +149,7 @@ class CommonTestsBase(object):
         self.header()
         self.convert()
         for tsvar in config.tsvars:
-            fname = (self.spec_args['prefix'] + tsvar + self.spec_args['suffix'])
+            fname = self.spec_args['prefix'] + tsvar + self.spec_args['suffix']
             for timvar in config.timvars:
                 if timvar in self.spec_args['exclude_list']:
                     xassert = self.assertFalse

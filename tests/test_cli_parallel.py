@@ -40,29 +40,35 @@ def check(**make_args):
         'prefix': make_args.pop('output_prefix', 'tseries.'),
         'suffix': make_args.pop('output_suffix', '.nc'),
         'metadata': make_args.pop('metadata', []),
-        'once': make_args.pop('once', False)
+        'once': make_args.pop('once', False),
     }
     kwargs.update(make_args)
     return check_outfile(**kwargs)
 
 
 @pytest.mark.parametrize('n', [0, 1, 2, 4])
-@pytest.mark.parametrize('make_args', [
-    {
-        'args': INFILES,
-    },
-    {
-        'args': INFILES,
-        'compression_level': 0,
-        'output_prefix': 'out.',
-        'metadata': [v for v in config.tvmvars] + ['time'] + [v for v in config.chvars],
-    },
-])
-@pytest.mark.parametrize('run_args', [
-    {
-        'args': ['input.s2s'],
-    },
-])
+@pytest.mark.parametrize(
+    'make_args',
+    [
+        {
+            'args': INFILES,
+        },
+        {
+            'args': INFILES,
+            'compression_level': 0,
+            'output_prefix': 'out.',
+            'metadata': [v for v in config.tvmvars] + ['time'] + [v for v in config.chvars],
+        },
+    ],
+)
+@pytest.mark.parametrize(
+    'run_args',
+    [
+        {
+            'args': ['input.s2s'],
+        },
+    ],
+)
 def test_cli_mpi(n, make_args, run_args):
     pre_cmds = ['coverage', 'run', '-p', '-m']
 

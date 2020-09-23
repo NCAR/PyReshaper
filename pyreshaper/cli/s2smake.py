@@ -33,55 +33,127 @@ def cli(argv=None):
               options and write the Specifier to a named file."""
 
     parser = optparse.OptionParser(prog='s2smake', description=desc)
-    parser.add_option('-1', '--meta1d', default=False, action='store_true',
-                      help=('Treat all 1D time-variant variables as metadata '
-                            'variables'))
-    parser.add_option('-b', '--backend', default='netCDF4', type='string',
-                      help=('I/O backend to be used when reading or writing '
-                            "from NetCDF files ('Nio' or 'netCDF4')"))
-    parser.add_option('-c', '--compression_level', type='int', default=1,
-                      help=('NetCDF compression level, when using the '
-                            'netcdf4 format. [Default: 1]'))
-    parser.add_option('-d', '--least_significant_digit', type='int', default=None,
-                      help=('If used, specifies which digit after the decimal to '
-                            'assure precision to and then truncates the data before '
-                            'compression is applied [Default: None]'))
-    parser.add_option('-f', '--netcdf_format', default='netcdf4', type='string',
-                      help=('NetCDF file format to be used for all output '
-                            'files. [Default: "netcdf4"]'))
-    parser.add_option('-m', '--metadata', action='append', default=[],
-                      help=('Names of a variable to be included in all '
-                            'output files.  There may be more than one '
-                            '--metadata (-m) option given, and each one is '
-                            'appended to a list.  [Default: []]'))
-    parser.add_option('--metafile', default=None, type='string',
-                      help=('The name of a time-slice input file from which '
-                            'metadata variable names will be read.  [Default: None]'))
-    parser.add_option('-o', '--specfile', default='input.s2s', type='string',
-                      help=('The name of the Pickled Specifier (specfile) '
-                            'to be output [Default: "input.s2s"]'))
-    parser.add_option('-p', '--output_prefix', default='tseries.', type='string',
-                      help=('String prefix for all output files.  The output '
-                            'file will be named according to the rule: '
-                            'output_prefix + variable_name + output_suffix '
-                            '[Default: "tseries."]'))
-    parser.add_option('-s', '--output_suffix', default='.nc', type='string',
-                      help=('String suffix for all output files.  The output '
-                            'file will be named according to the rule: '
-                            'output_prefix + variable_name + output_suffix '
-                            '[Default: ".nc"]'))
-    parser.add_option('-x', '--exclude', action='append', default=[],
-                      help=('Name of a time-invariant variable to be excluded '
-                            'from all output files.  There may be more than one '
-                            '--exclude (-x) option given, and each one is '
-                            'appended to a list.  [Default: []]'))
-    parser.add_option('--time_series', action='append', default=None,
-                      help=('Names of variables to be given their own output file. '
-                            'There may be more than one --time_series option given, and '
-                            'each name will be appended to a list.  If the --time_series '
-                            'option is not used, then all time-variant variables that '
-                            'are not labelled as metadata will be given their own '
-                            'output file. [Default: None]'))
+    parser.add_option(
+        '-1',
+        '--meta1d',
+        default=False,
+        action='store_true',
+        help=('Treat all 1D time-variant variables as metadata ' 'variables'),
+    )
+    parser.add_option(
+        '-b',
+        '--backend',
+        default='netCDF4',
+        type='string',
+        help=(
+            'I/O backend to be used when reading or writing '
+            "from NetCDF files ('Nio' or 'netCDF4')"
+        ),
+    )
+    parser.add_option(
+        '-c',
+        '--compression_level',
+        type='int',
+        default=1,
+        help=('NetCDF compression level, when using the ' 'netcdf4 format. [Default: 1]'),
+    )
+    parser.add_option(
+        '-d',
+        '--least_significant_digit',
+        type='int',
+        default=None,
+        help=(
+            'If used, specifies which digit after the decimal to '
+            'assure precision to and then truncates the data before '
+            'compression is applied [Default: None]'
+        ),
+    )
+    parser.add_option(
+        '-f',
+        '--netcdf_format',
+        default='netcdf4',
+        type='string',
+        help=('NetCDF file format to be used for all output ' 'files. [Default: "netcdf4"]'),
+    )
+    parser.add_option(
+        '-m',
+        '--metadata',
+        action='append',
+        default=[],
+        help=(
+            'Names of a variable to be included in all '
+            'output files.  There may be more than one '
+            '--metadata (-m) option given, and each one is '
+            'appended to a list.  [Default: []]'
+        ),
+    )
+    parser.add_option(
+        '--metafile',
+        default=None,
+        type='string',
+        help=(
+            'The name of a time-slice input file from which '
+            'metadata variable names will be read.  [Default: None]'
+        ),
+    )
+    parser.add_option(
+        '-o',
+        '--specfile',
+        default='input.s2s',
+        type='string',
+        help=(
+            'The name of the Pickled Specifier (specfile) ' 'to be output [Default: "input.s2s"]'
+        ),
+    )
+    parser.add_option(
+        '-p',
+        '--output_prefix',
+        default='tseries.',
+        type='string',
+        help=(
+            'String prefix for all output files.  The output '
+            'file will be named according to the rule: '
+            'output_prefix + variable_name + output_suffix '
+            '[Default: "tseries."]'
+        ),
+    )
+    parser.add_option(
+        '-s',
+        '--output_suffix',
+        default='.nc',
+        type='string',
+        help=(
+            'String suffix for all output files.  The output '
+            'file will be named according to the rule: '
+            'output_prefix + variable_name + output_suffix '
+            '[Default: ".nc"]'
+        ),
+    )
+    parser.add_option(
+        '-x',
+        '--exclude',
+        action='append',
+        default=[],
+        help=(
+            'Name of a time-invariant variable to be excluded '
+            'from all output files.  There may be more than one '
+            '--exclude (-x) option given, and each one is '
+            'appended to a list.  [Default: []]'
+        ),
+    )
+    parser.add_option(
+        '--time_series',
+        action='append',
+        default=None,
+        help=(
+            'Names of variables to be given their own output file. '
+            'There may be more than one --time_series option given, and '
+            'each name will be appended to a list.  If the --time_series '
+            'option is not used, then all time-variant variables that '
+            'are not labelled as metadata will be given their own '
+            'output file. [Default: None]'
+        ),
+    )
     opts, args = parser.parse_args(argv)
 
     # Check that input files are given
@@ -90,18 +162,17 @@ def cli(argv=None):
 
     # Check range of compression levels
     if opts.compression_level < 0 or opts.compression_level > 9:
-        raise ValueError(('Unacceptable compression level of '
-                          '{0}'.format(opts.compression_level)))
+        raise ValueError(
+            ('Unacceptable compression level of ' '{0}'.format(opts.compression_level))
+        )
 
     # Check for valid format types
     if opts.netcdf_format not in ['netcdf', 'netcdf4', 'netcdf4c']:
-        raise ValueError(('Unacceptable NetCDF format '
-                          '{0}'.format(opts.netcdf_format)))
+        raise ValueError(('Unacceptable NetCDF format ' '{0}'.format(opts.netcdf_format)))
 
     # Check the I/O backend name
     if opts.backend not in ['Nio', 'netCDF4']:
-        raise ValueError(('Unacceptable NetCDF backend name '
-                          '{0}'.format(opts.backend)))
+        raise ValueError(('Unacceptable NetCDF backend name ' '{0}'.format(opts.backend)))
 
     return opts, args
 

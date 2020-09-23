@@ -33,11 +33,15 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
 
     if 'metafile' in kwds and kwds['metafile']:
         metafile = iobackend.NCFile('metafile.nc')
-        _assert('{0}: Extra time-invariant metadata found'.format(outfile),
-                set(config.xtimvars).issubset(set(ncout.variables.keys())))
+        _assert(
+            '{0}: Extra time-invariant metadata found'.format(outfile),
+            set(config.xtimvars).issubset(set(ncout.variables.keys())),
+        )
         for v in config.xtimvars:
-            _assert('{0}: Extra time-invariant metadata dimensions'.format(outfile),
-                    ncout.variables[v].dimensions == ('lat', 'lon'))
+            _assert(
+                '{0}: Extra time-invariant metadata dimensions'.format(outfile),
+                ncout.variables[v].dimensions == ('lat', 'lon'),
+            )
     else:
         metafile = None
 
@@ -50,44 +54,48 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
         ncinp = iobackend.NCFile(infile)
         nsteps = ncinp.dimensions['time']
         if infile == infiles[0]:
-            scvars = [
-                v for v in ncinp.variables if ncinp.variables[v].dimensions == ()]
-            tivars = [
-                v for v in ncinp.variables if 'time' not in ncinp.variables[v].dimensions]
+            scvars = [v for v in ncinp.variables if ncinp.variables[v].dimensions == ()]
+            tivars = [v for v in ncinp.variables if 'time' not in ncinp.variables[v].dimensions]
             tsvars = [
-                v for v in ncinp.variables if 'time' in ncinp.variables[v].dimensions and v not in metadata]
+                v
+                for v in ncinp.variables
+                if 'time' in ncinp.variables[v].dimensions and v not in metadata
+            ]
             if once:
                 tsvars.append('once')
 
             outdims = {
-                'lat': ncinp.dimensions['lat'], 'lon': ncinp.dimensions['lon'], 'strlen': ncinp.dimensions['strlen']}
+                'lat': ncinp.dimensions['lat'],
+                'lon': ncinp.dimensions['lon'],
+                'strlen': ncinp.dimensions['strlen'],
+            }
 
             outmeta = [v for v in ncinp.variables if v not in tsvars]
 
-            _assert('{0}: variable {1!r} found in input'.format(
-                outfile, tsvar), tsvar in tsvars)
-            _assert('{0}: global attribute names equal'.format(
-                outfile), ncout.ncattrs == ncinp.ncattrs)
+            _assert('{0}: variable {1!r} found in input'.format(outfile, tsvar), tsvar in tsvars)
+            _assert(
+                '{0}: global attribute names equal'.format(outfile), ncout.ncattrs == ncinp.ncattrs
+            )
             for a in set(ncout.ncattrs).intersection(set(ncinp.ncattrs)):
-                _assert('{0}: global attribute {1} values equal'.format(
-                    outfile, a), ncout.getncattr(a) == ncinp.getncattr(a))
+                _assert(
+                    '{0}: global attribute {1} values equal'.format(outfile, a),
+                    ncout.getncattr(a) == ncinp.getncattr(a),
+                )
             for d, v in outdims.items():
-                _assert('{0}: {1!r} in dimensions'.format(
-                    outfile, d), d in ncout.dimensions)
-                _assert('{0}: dimensions[{1!r}]'.format(
-                    outfile, d), ncout.dimensions[d] == v)
-            _assert("{0}: 'time' in dimensions".format(
-                outfile), 'time' in ncout.dimensions)
-            _assert("{0}: 'time' unlimited".format(
-                outfile), ncout.unlimited('time'))
+                _assert('{0}: {1!r} in dimensions'.format(outfile, d), d in ncout.dimensions)
+                _assert('{0}: dimensions[{1!r}]'.format(outfile, d), ncout.dimensions[d] == v)
+            _assert("{0}: 'time' in dimensions".format(outfile), 'time' in ncout.dimensions)
+            _assert("{0}: 'time' unlimited".format(outfile), ncout.unlimited('time'))
             if once:
                 all_vars = outmeta if tsvar == 'once' else [tsvar]
             else:
                 all_vars = [tsvar] + outmeta
             if metafile:
                 all_vars += config.xtimvars
-            _assert('{0}: variable names same'.format(outfile),
-                    set(ncout.variables.keys()) == set(all_vars))
+            _assert(
+                '{0}: variable names same'.format(outfile),
+                set(ncout.variables.keys()) == set(all_vars),
+            )
             for v in all_vars:
                 if v in scvars:
                     expected = ()
@@ -99,8 +107,10 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                     expected = ('time', 'strlen')
                 else:
                     expected = ('time', 'lat', 'lon')
-                _assert('{0}: {1}.dimemsions equal'.format(outfile, v),
-                        ncout.variables[v].dimensions == expected)
+                _assert(
+                    '{0}: {1}.dimemsions equal'.format(outfile, v),
+                    ncout.variables[v].dimensions == expected,
+                )
 
         for v in all_vars:
             if v in config.xtimvars:
@@ -116,8 +126,7 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
                 actual = ncout.variables[v][tuple(oslice)]
             else:
                 actual = ncout.variables[v].get_value()
-            _assert(('{0}: {1!r} values equal').format(
-                outfile, v), np.all(actual == expected))
+            _assert(('{0}: {1!r} values equal').format(outfile, v), np.all(actual == expected))
 
         series_step += nsteps
         ncinp.close()

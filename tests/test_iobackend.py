@@ -190,7 +190,6 @@ class ReadTests:
 
 
 class WriteTests:
-
     @pytest.fixture(autouse=True)
     def data(self):
         self.ncfwname = 'writetest.nc'
@@ -205,7 +204,9 @@ class WriteTests:
             'v': np.random.ranf(self.ncdims['t'] * self.ncdims['x'])
             .reshape(10, 5)
             .astype(self.vdtype['v']),
-            's': np.array(['a string', 'another string'], dtype='S14').view('S1').reshape(self.vshape['s']),
+            's': np.array(['a string', 'another string'], dtype='S14')
+            .view('S1')
+            .reshape(self.vshape['s']),
             'c': np.array('scalar str', dtype='S14').reshape(1).view('S1'),
         }
         self.vattrs = {
