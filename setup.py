@@ -48,7 +48,7 @@ setup(
         'Topic :: Scientific/Engineering :: Atmospheric Science',
         'Topic :: Utilities',
     ],
-    python_requires='>=3.6',
+    python_requires='>=2.7',
     entry_points="""
         [console_scripts]
         s2smake=pyreshaper.cli.s2smake:main
