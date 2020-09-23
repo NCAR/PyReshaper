@@ -18,7 +18,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 __version__ = '1.0.7'
 
@@ -37,8 +37,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url='https://github.com/NCAR/PyReshaper',
-    packages=['pyreshaper', 'pyreshaper.cli'],
-    package_dir={'pyreshaper': 'pyreshaper', 'pyreshaper.cli': 'pyreshaper/cli'},
+    packages=find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
