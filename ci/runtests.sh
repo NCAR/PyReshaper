@@ -3,4 +3,6 @@
 set -e
 set -eo pipefail
 
-python -m pytest --cov=./ --cov-report=xml tests/
+coverage run -p -m pytest tests/
+coverage combine
+coverage xml

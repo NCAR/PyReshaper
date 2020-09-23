@@ -64,13 +64,15 @@ def check(**make_args):
     },
 ])
 def test_cli_mpi(n, make_args, run_args):
-    spec_cmds = ['s2smake', '-o', 'input.s2s'] + cmd_opts(**make_args)
+    pre_cmds = ['coverage', 'run', '-p', '-m']
+
+    spec_cmds = pre_cmds + ['pyreshaper.cli.s2smake', '-o', 'input.s2s'] + cmd_opts(**make_args)
     p_spec = Popen(spec_cmds)
     p_spec.communicate()
     assert p_spec.returncode == 0
 
     mpirun = ['mpirun', '-n', str(n)] if n > 0 else []
-    run_cmds = mpirun + ['s2srun'] + cmd_opts(**run_args)
+    run_cmds = mpirun + pre_cmds + ['pyreshaper.cli.s2srun'] + cmd_opts(**run_args)
     p_run = Popen(run_cmds)
     p_run.communicate()
     assert p_run.returncode == 0
