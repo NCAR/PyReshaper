@@ -372,7 +372,7 @@ class Reshaper(object):
             file_times[self._input_filenames[0]] = ifile.variables[udim][:]
 
             # Categorize each variable (only looking at first file)
-            for var_name, var in ifile.variables.iteritems():
+            for var_name, var in ifile.variables.items():
                 if udim not in var.dimensions:
                     if var_name not in self._exclude_list:
                         timeta.append(var_name)
@@ -389,7 +389,7 @@ class Reshaper(object):
             # Find variables only in the metadata file
             if self._metadata_filename is not None:
                 ifile = iobackend.NCFile(self._metadata_filename)
-                for var_name, var in ifile.variables.iteritems():
+                for var_name, var in ifile.variables.items():
                     if udim not in var.dimensions and var_name not in timeta:
                         xtra_timeta.append(var_name)
                 ifile.close()
@@ -583,7 +583,7 @@ class Reshaper(object):
         )
 
         # Find which files already exist
-        self._existing = [v for (v, f) in self._time_series_filenames.iteritems() if isfile(f)]
+        self._existing = [v for (v, f) in self._time_series_filenames.items() if isfile(f)]
 
         # Set the starting step index for each variable
         self._time_series_step_index = dict(
@@ -847,7 +847,7 @@ class Reshaper(object):
         if not isinstance(rchunks, dict):
             err_msg = 'Chunks must be specified with a dictionary'
             raise TypeError(err_msg)
-        for key, value in rchunks.iteritems():
+        for key, value in rchunks.items():
             if not isinstance(key, str):
                 err_msg = 'Chunks dictionary must have string-type keys'
                 raise TypeError(err_msg)
@@ -956,7 +956,7 @@ class Reshaper(object):
                     # Copy file attributes and dimensions to output file
                     for name in in_file.ncattrs:
                         out_file.setncattr(name, in_file.getncattr(name))
-                    for name, val in in_file.dimensions.iteritems():
+                    for name, val in in_file.dimensions.items():
                         if name == self._unlimited_dim:
                             out_file.create_dimension(name)
                         else:

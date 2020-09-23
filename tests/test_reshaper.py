@@ -72,7 +72,7 @@ class CommonTestsBase(object):
         args.update(self.convert_args)
         assertions_dict = check_outfile(tsvar=tsvar, **args)
         failed_assertions = [
-            key for key, value in assertions_dict.iteritems() if value is False]
+            key for key, value in assertions_dict.items() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
         assert_msgs.extend(['   {0}'.format(assrt)
                             for assrt in failed_assertions])

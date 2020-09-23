@@ -71,7 +71,7 @@ def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
             for a in set(ncout.ncattrs).intersection(set(ncinp.ncattrs)):
                 _assert('{0}: global attribute {1} values equal'.format(
                     outfile, a), ncout.getncattr(a) == ncinp.getncattr(a))
-            for d, v in outdims.iteritems():
+            for d, v in outdims.items():
                 _assert('{0}: {1!r} in dimensions'.format(
                     outfile, d), d in ncout.dimensions)
                 _assert('{0}: dimensions[{1!r}]'.format(

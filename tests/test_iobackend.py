@@ -380,7 +380,7 @@ class AppendTests:
         self.vattrs2 = {'standard_name': 'variable'}
 
         ncfile = netCDF4.Dataset(self.ncfaname, 'w')
-        for a, v in self.ncattrs.iteritems():
+        for a, v in self.ncattrs.items():
             setattr(ncfile, a, v)
         ncfile.createDimension('t')
         ncfile.createDimension('x', self.ncdims['x'])
@@ -389,7 +389,7 @@ class AppendTests:
         x = ncfile.createVariable('x', 'd', ('x',))
         x[:] = self.x
         v = ncfile.createVariable('v', 'f', ('t', 'x'))
-        for a, val in self.vattrs.iteritems():
+        for a, val in self.vattrs.items():
             v.setncattr(a, val)
         v[:, :] = self.v
 
@@ -411,7 +411,7 @@ class AppendTests:
     def test_NCFile_setncattr(self, backend):
         iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        for a, v in self.fattrs2.iteritems():
+        for a, v in self.fattrs2.items():
             ncf.setncattr(a, v)
         ncf.close()
         ncfr = netCDF4.Dataset(self.ncfaname)
@@ -457,7 +457,7 @@ class AppendTests:
         iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
         v = ncf.variables['v']
-        for attr, value in self.vattrs2.iteritems():
+        for attr, value in self.vattrs2.items():
             v.setncattr(attr, value)
         ncf.close()
         ncfr = Nio.open_file(self.ncfaname)

@@ -25,7 +25,7 @@ def generate_data(backend='netCDF4'):
         fobj = iobackend.NCFile(fname, mode='w')
 
         # Write attributes to file
-        for name, value in config.fattrs.iteritems():
+        for name, value in config.fattrs.items():
             fobj.setncattr(name, value)
 
         # Create the dimensions in the file
