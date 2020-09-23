@@ -3,6 +3,8 @@ Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
+from __future__ import absolute_import
+
 from glob import glob
 from os import remove
 from os.path import dirname, join, realpath
@@ -10,8 +12,8 @@ from subprocess import Popen
 
 import pytest
 
-from checks import check_outfile
-from data import config
+from .checks import check_outfile
+from .data import config
 
 THISDIR = dirname(realpath(__file__))
 INFILES = sorted(glob(join(THISDIR, 'data', 'input*.nc')))

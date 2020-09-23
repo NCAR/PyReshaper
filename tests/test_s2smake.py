@@ -4,8 +4,8 @@ See the LICENSE.txt file for details
 """
 
 import os
+import pickle
 
-import cPickle as pickle
 import pytest
 
 from pyreshaper.cli import s2smake

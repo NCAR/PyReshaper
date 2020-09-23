@@ -20,6 +20,6 @@ limitations under the License.
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
 """
 # flake8: noqa
+from __future__ import absolute_import
 
-import reshaper
-import specification
+from . import reshaper, specification

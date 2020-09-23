@@ -2,7 +2,8 @@
 Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
-from __future__ import print_function
+
+from __future__ import absolute_import, print_function
 
 import inspect
 import sys
@@ -11,12 +12,13 @@ from glob import glob
 from os import linesep as eol, remove
 from os.path import exists
 
-from cStringIO import StringIO
+import StringIO
 
-from checks import check_outfile, check_var_in
-from data import config, make
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier
+
+from .checks import check_outfile, check_var_in
+from .data import config, make
 
 
 class CommonTestsBase(object):

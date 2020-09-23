@@ -23,8 +23,7 @@ limitations under the License.
 """
 
 import optparse
-
-import cPickle as pickle
+import pickle
 
 from pyreshaper import reshaper
 

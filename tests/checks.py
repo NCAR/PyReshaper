@@ -3,12 +3,15 @@ Copyright 2020, University Corporation for Atmospheric Research
 See LICENSE.txt for details
 """
 
+from __future__ import absolute_import
+
 import os
 
 import numpy as np
 
-from data import config
 from pyreshaper import iobackend
+
+from .data import config
 
 
 def check_outfile(infiles, prefix, tsvar, suffix, metadata, once, **kwds):
