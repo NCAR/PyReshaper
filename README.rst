@@ -121,4 +121,4 @@ user installs, and therefore only needs to be added to the ``PYTHONPATH`` once.
 Instructions & Use
 ------------------
 
-Documentation for the PyReshaper can be found [here](https://ncar.github.io/PyReshaper).
+Documentation for the PyReshaper can be found at https://ncar.github.io/PyReshaper.
