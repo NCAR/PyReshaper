@@ -6,8 +6,9 @@ See LICENSE.txt for details
 
 import numpy as np
 
-import config
 from pyreshaper import iobackend
+
+from . import config
 
 
 def generate_data(backend='netCDF4'):

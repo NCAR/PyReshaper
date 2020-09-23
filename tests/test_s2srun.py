@@ -10,10 +10,11 @@ from os.path import exists
 
 import pytest
 
-from checks import check_outfile
-from data import config, make
 from pyreshaper.cli import s2srun
 from pyreshaper.specification import Specifier
+
+from .checks import check_outfile
+from .data import config, make
 
 
 class CLITests:

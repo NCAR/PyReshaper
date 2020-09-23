@@ -3,16 +3,13 @@ Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
-from __future__ import absolute_import, print_function
-
 import inspect
 import sys
 import unittest
 from glob import glob
+from io import StringIO
 from os import linesep as eol, remove
 from os.path import exists
-
-import StringIO
 
 from pyreshaper.reshaper import Reshaper, create_reshaper
 from pyreshaper.specification import Specifier

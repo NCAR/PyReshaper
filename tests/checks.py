@@ -3,8 +3,6 @@ Copyright 2020, University Corporation for Atmospheric Research
 See LICENSE.txt for details
 """
 
-from __future__ import absolute_import
-
 import os
 
 import numpy as np

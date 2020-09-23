@@ -41,8 +41,8 @@ from asaptools.simplecomm import SimpleComm, create_comm
 from asaptools.timekeeper import TimeKeeper
 from asaptools.vprinter import VPrinter
 
-from . import iobackend
-from .specification import Specifier
+from pyreshaper import iobackend
+from pyreshaper.specification import Specifier
 
 
 def _get_memory_usage_MB_():

@@ -3,8 +3,6 @@ Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
-from __future__ import absolute_import
-
 from glob import glob
 from os import remove
 from os.path import dirname, join, realpath
