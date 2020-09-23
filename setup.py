@@ -37,7 +37,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url='https://github.com/NCAR/PyReshaper',
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests']),
     classifiers=[
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
