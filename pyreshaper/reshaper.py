@@ -415,7 +415,7 @@ class Reshaper(object):
 
         # Get the list of variable names and missing variables
         var_names = set(
-            all_tsvars.keys()
+            list(all_tsvars.keys())
             + self._time_invariant_metadata
             + self._time_invariant_metafile_vars
             + self._time_variant_metadata
@@ -561,7 +561,7 @@ class Reshaper(object):
 
         # Partition the time-series variables across processors
         self._time_series_variables = self._simplecomm.partition(
-            all_tsvars.items(), func=WeightBalanced(), involved=True
+            list(all_tsvars.items()), func=WeightBalanced(), involved=True
         )
 
     def _inspect_output_files(self):
