@@ -3,6 +3,7 @@ Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
+from functools import reduce
 from os import remove
 from os.path import exists
 
@@ -27,7 +28,6 @@ def test_set_backend_failure():
 
 
 class ReadTests:
-
     @pytest.fixture(autouse=True)
     def data(self):
         self.ncfrname = 'readtest.nc'
@@ -35,16 +35,26 @@ class ReadTests:
         self.ncdims = {'t': 10, 'x': 5, 'c': 14}
         self.vdims = {'t': ('t',), 'x': ('x',), 'v': ('t', 'x'), 's': ('c',)}
         self.vdtype = {'t': 'd', 'x': 'd', 'v': 'f', 's': 'c'}
-        self.vshape = {'t': (self.ncdims['t'],), 'x': (self.ncdims['x'],),
-                       'v': (self.ncdims['t'], self.ncdims['x']), 's': (self.ncdims['c'],)}
-        self.ncvars = {'t': np.arange(0, self.ncdims['t'], dtype=self.vdtype['t']),
-                       'x': np.random.ranf(self.ncdims['x']).astype(self.vdtype['x']),
-                       'v': np.random.ranf(self.ncdims['t'] * self.ncdims['x']).reshape(10, 5).astype(self.vdtype['v']),
-                       's': np.array([c for c in 'this is a stri'])}
-        self.vattrs = {'t': {'long_name': u'time', 'units': u'days'},
-                       'x': {'long_name': u'space', 'units': u'meters'},
-                       'v': {'long_name': u'variable', 'units': u'kg', 'missing_value': np.float32(1e20)},
-                       's': {'long_name': u'string'}}
+        self.vshape = {
+            't': (self.ncdims['t'],),
+            'x': (self.ncdims['x'],),
+            'v': (self.ncdims['t'], self.ncdims['x']),
+            's': (self.ncdims['c'],),
+        }
+        self.ncvars = {
+            't': np.arange(0, self.ncdims['t'], dtype=self.vdtype['t']),
+            'x': np.random.ranf(self.ncdims['x']).astype(self.vdtype['x']),
+            'v': np.random.ranf(self.ncdims['t'] * self.ncdims['x'])
+            .reshape(10, 5)
+            .astype(self.vdtype['v']),
+            's': np.array([c for c in 'this is a stri']).astype(self.vdtype['s']),
+        }
+        self.vattrs = {
+            't': {'long_name': u'time', 'units': u'days'},
+            'x': {'long_name': u'space', 'units': u'meters'},
+            'v': {'long_name': u'variable', 'units': u'kg', 'missing_value': np.float32(1e20)},
+            's': {'long_name': u'string'},
+        }
         self.vfill = {'t': None, 'x': None, 'v': np.float32(1e20), 's': None}
 
         ncfile = netCDF4.Dataset(self.ncfrname, 'w')
@@ -56,8 +66,7 @@ class ReadTests:
             else:
                 ncfile.createDimension(d, self.ncdims[d])
         for v in self.ncvars:
-            vobj = ncfile.createVariable(
-                v, self.vdtype[v], self.vdims[v], fill_value=self.vfill[v])
+            vobj = ncfile.createVariable(v, self.vdtype[v], self.vdims[v], fill_value=self.vfill[v])
             for a in self.vattrs[v]:
                 vobj.setncattr(a, self.vattrs[v][a])
             vobj[:] = self.ncvars[v]
@@ -98,7 +107,7 @@ class ReadTests:
     def test_NCFile_ncattrs(self, backend):
         iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfrname)
-        assert ncf.ncattrs == self.ncattrs.keys()
+        assert ncf.ncattrs == list(self.ncattrs.keys())
         ncf.close()
 
     @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
@@ -181,31 +190,34 @@ class ReadTests:
 
 
 class WriteTests:
-
     @pytest.fixture(autouse=True)
     def data(self):
         self.ncfwname = 'writetest.nc'
         self.ncattrs = {'a1': 'attribute 1', 'a2': 'attribute 2'}
         self.ncdims = {'t': 10, 'x': 5, 'c': 14, 'n': 2}
-        self.vdims = {'t': ('t',), 'x': ('x',), 'v': ('t', 'x'),
-                      's': ('n', 'c'), 'c': ('c',)}
+        self.vdims = {'t': ('t',), 'x': ('x',), 'v': ('t', 'x'), 's': ('n', 'c'), 'c': ('c',)}
         self.vdtype = {'t': 'd', 'x': 'd', 'v': 'f', 's': 'c', 'c': 'c'}
-        self.vshape = {v: tuple(self.ncdims[d]
-                                for d in self.vdims[v]) for v in self.vdims}
-        self.ncvars = {'t': np.arange(0, self.ncdims['t'], dtype=self.vdtype['t']),
-                       'x': np.random.ranf(self.ncdims['x']).astype(self.vdtype['x']),
-                       'v': np.random.ranf(self.ncdims['t'] * self.ncdims['x']).reshape(10, 5).astype(self.vdtype['v']),
-                       's': np.array(['a string', 'another string'], dtype='S14').view('S1').reshape(self.vshape['s']),
-                       'c': np.array('scalar str', dtype='S14').reshape(1).view('S1')}
-        self.vattrs = {'t': {'long_name': u'time', 'units': u'days'},
-                       'x': {'long_name': u'space', 'units': u'meters'},
-                       'v': {'long_name': u'variable', 'units': u'kg', 'missing_value': np.float32(1e20)},
-                       's': {'long_name': u'vector of strings'},
-                       'c': {'long_name': u'scalar string'}}
-        self.vfill = {'t': None, 'x': None,
-                      'v': np.float32(1e20), 's': '', 'c': None}
-        self.chunks = {'t': [5], 'x': None,
-                       'v': [2, 3], 's': None, 'c': None}
+        self.vshape = {v: tuple(self.ncdims[d] for d in self.vdims[v]) for v in self.vdims}
+        self.ncvars = {
+            't': np.arange(0, self.ncdims['t'], dtype=self.vdtype['t']),
+            'x': np.random.ranf(self.ncdims['x']).astype(self.vdtype['x']),
+            'v': np.random.ranf(self.ncdims['t'] * self.ncdims['x'])
+            .reshape(10, 5)
+            .astype(self.vdtype['v']),
+            's': np.array(['a string', 'another string'], dtype='S14')
+            .view('S1')
+            .reshape(self.vshape['s']),
+            'c': np.array('scalar str', dtype='S14').reshape(1).view('S1'),
+        }
+        self.vattrs = {
+            't': {'long_name': u'time', 'units': u'days'},
+            'x': {'long_name': u'space', 'units': u'meters'},
+            'v': {'long_name': u'variable', 'units': u'kg', 'missing_value': np.float32(1e20)},
+            's': {'long_name': u'vector of strings'},
+            'c': {'long_name': u'scalar string'},
+        }
+        self.vfill = {'t': None, 'x': None, 'v': np.float32(1e20), 's': None, 'c': None}
+        self.chunks = {'t': [5], 'x': None, 'v': [2, 3], 's': None, 'c': None}
 
         yield
 
@@ -349,7 +361,6 @@ class WriteTests:
 
 
 class AppendTests:
-
     @pytest.fixture(autouse=True)
     def data(self):
         self.ncfaname = 'appendtest.nc'
@@ -357,17 +368,19 @@ class AppendTests:
         self.ncdims = {'t': 10, 'x': 5}
         self.t = np.arange(self.ncdims['t'], dtype='d')
         self.x = np.arange(self.ncdims['x'], dtype='d')
-        self.v = np.arange(self.ncdims['t'] * self.ncdims['x'],
-                           dtype='f').reshape(self.ncdims['t'], self.ncdims['x'])
+        self.v = np.arange(self.ncdims['t'] * self.ncdims['x'], dtype='f').reshape(
+            self.ncdims['t'], self.ncdims['x']
+        )
         self.vattrs = {'long_name': 'variable', 'units': 'meters'}
         self.fattrs2 = {'a3': 'attribute 3', 'a4': 'attribute 4'}
         self.t2 = np.arange(self.ncdims['t'], 2 * self.ncdims['t'], dtype='d')
-        self.v2 = np.arange(self.ncdims['t'] * self.ncdims['x'],
-                            dtype='f').reshape(self.ncdims['t'], self.ncdims['x'])
+        self.v2 = np.arange(self.ncdims['t'] * self.ncdims['x'], dtype='f').reshape(
+            self.ncdims['t'], self.ncdims['x']
+        )
         self.vattrs2 = {'standard_name': 'variable'}
 
         ncfile = netCDF4.Dataset(self.ncfaname, 'w')
-        for a, v in self.ncattrs.iteritems():
+        for a, v in self.ncattrs.items():
             setattr(ncfile, a, v)
         ncfile.createDimension('t')
         ncfile.createDimension('x', self.ncdims['x'])
@@ -376,7 +389,7 @@ class AppendTests:
         x = ncfile.createVariable('x', 'd', ('x',))
         x[:] = self.x
         v = ncfile.createVariable('v', 'f', ('t', 'x'))
-        for a, val in self.vattrs.iteritems():
+        for a, val in self.vattrs.items():
             v.setncattr(a, val)
         v[:, :] = self.v
 
@@ -398,7 +411,7 @@ class AppendTests:
     def test_NCFile_setncattr(self, backend):
         iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
-        for a, v in self.fattrs2.iteritems():
+        for a, v in self.fattrs2.items():
             ncf.setncattr(a, v)
         ncf.close()
         ncfr = netCDF4.Dataset(self.ncfaname)
@@ -444,7 +457,7 @@ class AppendTests:
         iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfaname, mode='a')
         v = ncf.variables['v']
-        for attr, value in self.vattrs2.iteritems():
+        for attr, value in self.vattrs2.items():
             v.setncattr(attr, value)
         ncf.close()
         ncfr = Nio.open_file(self.ncfaname)

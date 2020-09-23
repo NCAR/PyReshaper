@@ -15,5 +15,4 @@ timvars = ['tim{0}'.format(i) for i in range(2)]
 xtimvars = ['tim{0}'.format(i) for i in range(2, 5)]
 tvmvars = ['tvm{0}'.format(i) for i in range(2)]
 tsvars = ['tsvar{0}'.format(i) for i in range(4)]
-fattrs = {'attr1': 'attribute one',
-          'attr2': 'attribute two'}
+fattrs = {'attr1': 'attribute one', 'attr2': 'attribute two'}

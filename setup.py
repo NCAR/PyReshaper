@@ -18,36 +18,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
-__version__ = '1.0.7'
+__version__ = '1.1.0'
 
-with open("README.rst", "r") as fh:
+with open('README.rst', 'r') as fh:
     long_description = fh.read()
 
-setup(name='PyReshaper',
-      version=__version__,
-      author='Kevin Paul',
-      author_email='kpaul@ucar.edu',
-      description='Python Time-Slice to Time-Series NetCDF Converter',
-      long_description=long_description,
-      long_description_content_type="text/x-rst",
-      url='https://github.com/NCAR/PyReshaper',
-      packages=['pyreshaper', 'pyreshaper.cli'],
-      package_dir={'pyreshaper': 'pyreshaper', 'pyreshaper.cli': 'pyreshaper/cli'},
-      classifiers=[
-          "Programming Language :: Python :: 2.7",
-          "License :: OSI Approved :: Apache Software License"
-          "Operating System :: OS Independent",
-          "Topic :: Scientific/Engineering",
-          "Topic :: Scientific/Engineering :: Atmospheric Science",
-          "Topic :: Utilities"
-      ],
-      python_requires='>=2.7,<3.0',
-      entry_points="""
-          [console_scripts]
-          s2smake=pyreshaper.cli.s2smake:main
-          s2srun=pyreshaper.cli.s2srun:main
-          """,
-      install_requires=['mpi4py', 'asaptools']
-      )
+with open('requirements.txt') as f:
+    install_requires = f.read().strip().split('\n')
+
+setup(
+    name='PyReshaper',
+    version=__version__,
+    author='Kevin Paul',
+    author_email='kpaul@ucar.edu',
+    description='Python Time-Slice to Time-Series NetCDF Converter',
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
+    url='https://github.com/NCAR/PyReshaper',
+    packages=find_packages(),
+    classifiers=[
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'License :: OSI Approved :: Apache Software License' 'Operating System :: OS Independent',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Scientific/Engineering :: Atmospheric Science',
+        'Topic :: Utilities',
+    ],
+    python_requires='>=3.6',
+    entry_points="""
+        [console_scripts]
+        s2smake=pyreshaper.cli.s2smake:main
+        s2srun=pyreshaper.cli.s2srun:main
+        """,
+    install_requires=install_requires,
+)

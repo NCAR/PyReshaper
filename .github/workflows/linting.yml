@@ -14,8 +14,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-        with:
-          python-version: '2.7'
-      - run: pip install flake8==3.7.9 isort==4.3.21
-      - run: flake8
-      - run: isort --recursive -w 100 --check-only
+      - uses: pre-commit/action@v2.0.0

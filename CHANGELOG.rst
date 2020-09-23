@@ -15,6 +15,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+VERSION 1.1.0
+-------------
+
+ - Adding support for Python 3!!!  Dropping support for Python 2.
+ - Major refactor of testing suite.  Now uses pytests, adds code coverage,
+   implements pre-commit hooks, adds parallel testing.
 
 VERSION 1.0.6
 -------------

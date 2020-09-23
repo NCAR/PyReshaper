@@ -3,8 +3,8 @@ Copyright 2020, University Corporation for Atmospheric Research
 See the LICENSE.txt file for details
 """
 
-import cPickle as pickle
 import os
+import pickle
 
 import pytest
 
@@ -43,10 +43,19 @@ def test_init_full():
     backend = 'Nio'
     lsigfig = 3
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, timeseries=tseries, metadata=metadata,
-        meta1d=meta1d, metafile=metafile, backend=backend,
-        least_significant_digit=lsigfig, exclude_list=xlist)
+        infiles=in_list,
+        ncfmt=fmt,
+        compression=cl,
+        prefix=prefix,
+        suffix=suffix,
+        timeseries=tseries,
+        metadata=metadata,
+        meta1d=meta1d,
+        metafile=metafile,
+        backend=backend,
+        least_significant_digit=lsigfig,
+        exclude_list=xlist,
+    )
     for i1, i2 in zip(spec.input_file_list, in_list):
         assert i1 == i2
     assert spec.io_backend == backend
@@ -79,8 +88,15 @@ def test_validate_types():
     tseries = ['1', '2']
     metadata = ['x', 'y', 'z']
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, timeseries=tseries, metadata=metadata, meta1d=True)
+        infiles=in_list,
+        ncfmt=fmt,
+        compression=cl,
+        prefix=prefix,
+        suffix=suffix,
+        timeseries=tseries,
+        metadata=metadata,
+        meta1d=True,
+    )
     spec.validate_types()
 
 
@@ -92,8 +108,8 @@ def test_validate_types_fail_input():
     suffix = '.suf.nc'
     metadata = ['x', 'y', 'z']
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -107,8 +123,14 @@ def test_validate_types_fail_backend():
     metadata = ['x', 'y', 'z']
     backend = 1
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata, backend=backend)
+        infiles=in_list,
+        ncfmt=fmt,
+        compression=cl,
+        prefix=prefix,
+        suffix=suffix,
+        metadata=metadata,
+        backend=backend,
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -121,8 +143,8 @@ def test_validate_types_fail_format():
     suffix = '.suf.nc'
     metadata = ['x', 'y', 'z']
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -135,8 +157,8 @@ def test_validate_types_fail_cl():
     suffix = '.suf.nc'
     metadata = ['x', 'y', 'z']
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -149,8 +171,8 @@ def test_validate_types_fail_prefix():
     suffix = '.suf.nc'
     metadata = ['x', 'y', 'z']
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -163,8 +185,8 @@ def test_validate_types_fail_suffix():
     suffix = list()
     metadata = ['x', 'y', 'z']
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -178,8 +200,14 @@ def test_validate_types_fail_timeseries():
     tseries = ['1', 2.5]
     metadata = ['x', 'y', 'z']
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, timeseries=tseries, metadata=metadata)
+        infiles=in_list,
+        ncfmt=fmt,
+        compression=cl,
+        prefix=prefix,
+        suffix=suffix,
+        timeseries=tseries,
+        metadata=metadata,
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -192,8 +220,8 @@ def test_validate_types_fail_metadata():
     suffix = '.suf.nc'
     metadata = ['x', 'y', 2]
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -207,8 +235,14 @@ def test_validate_types_fail_meta1d():
     metadata = ['x', 'y', 'z']
     meta1d = 't'
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, meta1d=meta1d, metadata=metadata)
+        infiles=in_list,
+        ncfmt=fmt,
+        compression=cl,
+        prefix=prefix,
+        suffix=suffix,
+        meta1d=meta1d,
+        metadata=metadata,
+    )
     with pytest.raises(TypeError):
         spec.validate_types()
 
@@ -221,8 +255,8 @@ def test_validate_values_fail_input():
     suffix = '.suf.nc'
     metadata = []
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     spec.validate_types()
     with pytest.raises(ValueError):
         spec.validate_values()
@@ -237,8 +271,14 @@ def test_validate_values_fail_backend():
     metadata = []
     backend = 'x'
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata, backend=backend)
+        infiles=in_list,
+        ncfmt=fmt,
+        compression=cl,
+        prefix=prefix,
+        suffix=suffix,
+        metadata=metadata,
+        backend=backend,
+    )
     spec.validate_types()
     with pytest.raises(ValueError):
         spec.validate_values()
@@ -252,8 +292,8 @@ def test_validate_values_fail_format():
     suffix = '.suf.nc'
     metadata = []
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     spec.validate_types()
     with pytest.raises(ValueError):
         spec.validate_values()
@@ -267,8 +307,8 @@ def test_validate_values_fail_cl():
     suffix = '.suf.nc'
     metadata = []
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     spec.validate_types()
     with pytest.raises(ValueError):
         spec.validate_values()
@@ -281,8 +321,8 @@ def test_validate_values_fail_prefix():
     suffix = '.suf.nc'
     metadata = []
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     spec.validate_types()
     with pytest.raises(ValueError):
         spec.validate_values()
@@ -295,8 +335,8 @@ def test_validate_values_suffix():
     suffix = '.suf'
     metadata = []
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, prefix=prefix,
-        suffix=suffix, metadata=metadata)
+        infiles=in_list, ncfmt=fmt, prefix=prefix, suffix=suffix, metadata=metadata
+    )
     spec.validate_types()
     spec.validate_values()
     assert spec.output_file_suffix == suffix + '.nc'
@@ -311,12 +351,18 @@ def test_write():
     tseries = ['1', '2']
     metadata = ['time']
     spec = specification.Specifier(
-        infiles=in_list, ncfmt=fmt, compression=cl, prefix=prefix,
-        suffix=suffix, timeseries=tseries, metadata=metadata)
+        infiles=in_list,
+        ncfmt=fmt,
+        compression=cl,
+        prefix=prefix,
+        suffix=suffix,
+        timeseries=tseries,
+        metadata=metadata,
+    )
     fname = 'test_write.s2s'
     spec.write(fname)
     assert os.path.exists(fname), 'Specfile failed to write'
-    spec2 = pickle.load(open(fname, 'r'))
+    spec2 = pickle.load(open(fname, 'rb'))
     for i1, i2 in zip(spec2.input_file_list, in_list):
         assert i1 == i2
     assert spec2.netcdf_format == fmt

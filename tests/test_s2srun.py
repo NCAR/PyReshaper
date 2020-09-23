@@ -10,28 +10,34 @@ from os.path import exists
 
 import pytest
 
-from checks import check_outfile
-from data import config, make
 from pyreshaper.cli import s2srun
 from pyreshaper.specification import Specifier
 
+from .checks import check_outfile
+from .data import config, make
+
 
 class CLITests:
-
     @pytest.fixture(autouse=True)
     def init(self):
-        self.run_args = {'serial': False,
-                         'rchunks': {'y': 5},
-                         'wchunks': {'x': 4, 'y': 10},
-                         'limit': 0,
-                         'verbosity': 1,
-                         'write_mode': 'w',
-                         'once': False,
-                         'specfile': 'input.s2s'}
+        self.run_args = {
+            'serial': False,
+            'rchunks': {'y': 5},
+            'wchunks': {'x': 4, 'y': 10},
+            'limit': 0,
+            'verbosity': 1,
+            'write_mode': 'w',
+            'once': False,
+            'specfile': 'input.s2s',
+        }
 
     def longargs(self):
-        argv = ['--verbosity', str(self.run_args['verbosity']),
-                '--write_mode', self.run_args['write_mode']]
+        argv = [
+            '--verbosity',
+            str(self.run_args['verbosity']),
+            '--write_mode',
+            self.run_args['write_mode'],
+        ]
         if self.run_args['limit'] > 0:
             argv.extend(['--limit', str(self.run_args['limit'])])
         if self.run_args['once']:
@@ -54,8 +60,15 @@ class CLITests:
         return argv
 
     def shortargs(self):
-        long_to_short = {'--verbosity': '-v', '--write_mode': '-m', '--limit': '-l',
-                         '--once': '-l', '--serial': '-s', '--read_chunk': '-c', '--write_chunk': '-w'}
+        long_to_short = {
+            '--verbosity': '-v',
+            '--write_mode': '-m',
+            '--limit': '-l',
+            '--once': '-l',
+            '--serial': '-s',
+            '--read_chunk': '-c',
+            '--write_chunk': '-w',
+        }
         return [long_to_short[a] if a in long_to_short else a for a in self.longargs()]
 
     def cliassert(self, args):
@@ -85,26 +98,29 @@ class CLITests:
 
 
 class NetCDF4Tests(unittest.TestCase):
-
     @pytest.fixture(autouse=True)
     def init(self):
-        self.spec_args = {'infiles': config.slices,
-                          'ncfmt': 'netcdf4',
-                          'compression': 0,
-                          'prefix': 'out.',
-                          'suffix': '.nc',
-                          'timeseries': None,
-                          'metadata': [v for v in config.tvmvars] + ['time'],
-                          'meta1d': False,
-                          'backend': 'netCDF4'}
+        self.spec_args = {
+            'infiles': config.slices,
+            'ncfmt': 'netcdf4',
+            'compression': 0,
+            'prefix': 'out.',
+            'suffix': '.nc',
+            'timeseries': None,
+            'metadata': [v for v in config.tvmvars] + ['time'],
+            'meta1d': False,
+            'backend': 'netCDF4',
+        }
 
-        self.run_args = {'serial': False,
-                         'chunks': [],
-                         'limit': 0,
-                         'verbosity': 1,
-                         'write_mode': 'w',
-                         'once': False,
-                         'specfile': 'input.s2s'}
+        self.run_args = {
+            'serial': False,
+            'chunks': [],
+            'limit': 0,
+            'verbosity': 1,
+            'write_mode': 'w',
+            'once': False,
+            'specfile': 'input.s2s',
+        }
 
         self.clean()
         make.generate_data()
@@ -121,17 +137,20 @@ class NetCDF4Tests(unittest.TestCase):
         args.update(self.spec_args)
         args.update(self.run_args)
         assertions_dict = check_outfile(tsvar=tsvar, **args)
-        failed_assertions = [
-            key for key, value in assertions_dict.iteritems() if value is False]
+        failed_assertions = [key for key, value in assertions_dict.items() if value is False]
         assert_msgs = ['Output file check for variable {0!r}:'.format(tsvar)]
-        assert_msgs.extend(['   {0}'.format(assrt)
-                            for assrt in failed_assertions])
+        assert_msgs.extend(['   {0}'.format(assrt) for assrt in failed_assertions])
         assert len(failed_assertions) == 0, eol.join(assert_msgs)
 
     def runargs(self):
-        argv = ['-v', str(self.run_args['verbosity']),
-                '-m', self.run_args['write_mode'],
-                '-l', str(self.run_args['limit'])]
+        argv = [
+            '-v',
+            str(self.run_args['verbosity']),
+            '-m',
+            self.run_args['write_mode'],
+            '-l',
+            str(self.run_args['limit']),
+        ]
         if self.run_args['once']:
             argv.append('-1')
         if self.run_args['serial']:
@@ -179,8 +198,7 @@ class NetCDF4Tests(unittest.TestCase):
             if tsvar in config.tsvars:
                 self.check(tsvar)
             else:
-                fname = self.spec_args['prefix'] + \
-                    tsvar + self.spec_args['suffix']
+                fname = self.spec_args['prefix'] + tsvar + self.spec_args['suffix']
                 assert not exists(fname), 'File {0!r} should not exist'.format(fname)
 
     def test_NC3(self):
@@ -268,7 +286,6 @@ class NetCDF4Tests(unittest.TestCase):
 
 
 class NioTests(NetCDF4Tests):
-
     def setUp(self):
         NetCDF4Tests.setUp(self)
         self.spec_args['backend'] = 'Nio'

@@ -6,8 +6,9 @@ See LICENSE.txt for details
 
 import numpy as np
 
-import config
 from pyreshaper import iobackend
+
+from . import config
 
 
 def generate_data(backend='netCDF4'):
@@ -24,7 +25,7 @@ def generate_data(backend='netCDF4'):
         fobj = iobackend.NCFile(fname, mode='w')
 
         # Write attributes to file
-        for name, value in config.fattrs.iteritems():
+        for name, value in config.fattrs.items():
             fobj.setncattr(name, value)
 
         # Create the dimensions in the file
@@ -77,8 +78,11 @@ def generate_data(backend='netCDF4'):
             v = fobj.create_variable(vname, 'c', ('time', 'strlen'))
             v.setncattr('long_name', 'character array {0}'.format(n))
             vdata = [str((n + 1) * m) * (m + 1) for m in range(config.ntime)]
-            v[:] = np.array(vdata, dtype='S{}'.format(
-                config.nchar)).view('S1').reshape(config.ntime, config.nchar)
+            v[:] = (
+                np.array(vdata, dtype='S{}'.format(config.nchar))
+                .view('S1')
+                .reshape(config.ntime, config.nchar)
+            )
 
         # Create the time-variant metadata variables
         for n in range(len(config.tvmvars)):
@@ -91,14 +95,14 @@ def generate_data(backend='netCDF4'):
         # Create the time-series variables
         for n in range(len(config.tsvars)):
             vname = config.tsvars[n]
-            v = fobj.create_variable(
-                vname, 'd', ('time', 'lat', 'lon'), fill_value=1e36)
+            v = fobj.create_variable(vname, 'd', ('time', 'lat', 'lon'), fill_value=1e36)
             v.setncattr('long_name', 'time-series variable {0}'.format(n))
             v.setncattr('units', '[{0}]'.format(vname))
             v.setncattr('missing_value', 1e36)
             vdata = np.ones((config.ntime, config.nlat, config.nlon), dtype=np.float64) * n
             vmask = np.random.choice(
-                [True, False], config.ntime * config.nlat * config.nlon).reshape(config.ntime, config.nlat, config.nlon)
+                [True, False], config.ntime * config.nlat * config.nlon
+            ).reshape(config.ntime, config.nlat, config.nlon)
             v[:] = np.ma.MaskedArray(vdata, mask=vmask)
 
 
