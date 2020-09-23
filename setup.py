@@ -20,7 +20,7 @@ limitations under the License.
 
 from setuptools import find_packages, setup
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 with open('README.rst', 'r') as fh:
     long_description = fh.read()
