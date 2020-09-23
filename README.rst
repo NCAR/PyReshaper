@@ -17,7 +17,7 @@ A package for converting NetCDF files from time-slice (history) format
 to time-series (single-variable) format.
 
 :AUTHORS: John Dennis, Sheri Mickelson, Kevin Paul, Haiying Xu
-:COPYRIGHT: 2019 University Corporation for Atmospheric Research
+:COPYRIGHT: 2020 University Corporation for Atmospheric Research
 :LICENSE: Apache 2.0
 
 Send questions and comments to Kevin Paul (kpaul@ucar.edu).
@@ -47,7 +47,7 @@ dependencies exist as a result of these direct dependencies.
 The PyReshaper explicitly depends upon the following Python packages:
 
 -  PyNIO (v1.5+) or netCDF4-python (v1.2+)
--  ASAPPyTools (v0.4+)
+-  ASAPPyTools (v0.6+)
 
 These packages imply a dependency on the NumPy (v1.4+) and mpi4py (v1.3+)
 packages, and the  libraries NetCDF and MPI/MPI-2.
@@ -118,33 +118,7 @@ This can be handy since the site-packages directory will be common for all
 user installs, and therefore only needs to be added to the ``PYTHONPATH`` once.
 
 
-Before Using the PyReshaper Package
------------------------------------
-
-Before the PyReshaper package can be used, you must make sure that the
-site-packages directory containing the 'pyreshaper' source directory is in
-your PYTHONPATH.  Depending on the PREFIX used during installation, this
-path will be::
-
-    $PREFIX/lib/python2.X/site-packages
-
-where X will be 6 or 7 (or other) depending on the version of Python that you
-are using to install the package.
-
-To use the PyReshaper scripts (e.g., 's2smake' and 's2srun'), you must add the
-script binary directory to your PATH.  Depending on the PREFIX used during
-installation, this path will be::
-
-    $PREFIX/bin/
-
-Once the script binary directory has been added to your PATH and the
-site-packages directory has been added to your PYTHONPATH, you may use the
-PyReshaper package without issue.
-
-
 Instructions & Use
 ------------------
 
-Please see the more detailed instructions found in the docs/ directory for
-usage and examples.  See the 'Building & Installing from Source' section
-for how to build the documentation with Sphinx.
+Documentation for the PyReshaper can be found [here](https://ncar.github.io/PyReshaper).
