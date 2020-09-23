@@ -221,7 +221,7 @@ class NCFile(object):
     @property
     def ncattrs(self):
         if self._backend == 'Nio':
-            return self._obj.attributes.keys()
+            return list(self._obj.attributes.keys())
         elif self._backend == 'netCDF4':
             return self._obj.ncattrs()
 
@@ -258,14 +258,15 @@ class NCFile(object):
         dt = datatype if isinstance(datatype, numpy.dtype) else numpy.dtype(datatype)
         if dt.char in ('S', 'U', 'c'):
             fill_value = None
+        if fill_value is not None:
+            fill_value = numpy.array(fill_value, dtype=dt)
         if self._backend == 'Nio':
             dtc = 'c' if dt.char in ('S', 'U') else dt.char
             var = self._obj.create_variable(name, dtc, dimensions)
             if fill_value is not None:
-                setattr(var, '_FillValue', numpy.array(fill_value, dtype=dt))
+                setattr(var, '_FillValue', fill_value)
         elif self._backend == 'netCDF4':
-            if fill_value is not None:
-                self._var_opts['fill_value'] = numpy.array(fill_value, dtype=dt)
+            self._var_opts['fill_value'] = fill_value
             self._var_opts['chunksizes'] = chunksizes
             var = self._obj.createVariable(name, datatype, dimensions, **self._var_opts)
         new_var = NCVariable(name, var, self._mode)
@@ -430,7 +431,7 @@ class NCVariable(object):
 
             it = numpy.nditer(rarray, flags=['multi_index'])
             while not it.finished:
-                item = it[0].tostring().replace('\x00', '')
+                item = it[0].tobytes().replace('\x00', '')
                 minlen = strlen if strlen < len(item) else len(item)
                 # lidx = key_t[:-1] + (slice(minlen),)
                 lidx = it.multi_index + (slice(minlen),)

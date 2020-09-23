@@ -47,7 +47,7 @@ class ReadTests:
             'v': np.random.ranf(self.ncdims['t'] * self.ncdims['x'])
             .reshape(10, 5)
             .astype(self.vdtype['v']),
-            's': np.array([c for c in 'this is a stri']),
+            's': np.array([c for c in 'this is a stri']).astype(self.vdtype['s']),
         }
         self.vattrs = {
             't': {'long_name': u'time', 'units': u'days'},
@@ -107,7 +107,7 @@ class ReadTests:
     def test_NCFile_ncattrs(self, backend):
         iobackend.set_backend(backend)
         ncf = iobackend.NCFile(self.ncfrname)
-        assert ncf.ncattrs == self.ncattrs.keys()
+        assert ncf.ncattrs == list(self.ncattrs.keys())
         ncf.close()
 
     @pytest.mark.parametrize('backend', iobackend._AVAILABLE_)
@@ -190,6 +190,7 @@ class ReadTests:
 
 
 class WriteTests:
+
     @pytest.fixture(autouse=True)
     def data(self):
         self.ncfwname = 'writetest.nc'
@@ -204,9 +205,7 @@ class WriteTests:
             'v': np.random.ranf(self.ncdims['t'] * self.ncdims['x'])
             .reshape(10, 5)
             .astype(self.vdtype['v']),
-            's': np.array(['a string', 'another string'], dtype='S14')
-            .view('S1')
-            .reshape(self.vshape['s']),
+            's': np.array(['a string', 'another string'], dtype='S14').view('S1').reshape(self.vshape['s']),
             'c': np.array('scalar str', dtype='S14').reshape(1).view('S1'),
         }
         self.vattrs = {
@@ -216,7 +215,7 @@ class WriteTests:
             's': {'long_name': u'vector of strings'},
             'c': {'long_name': u'scalar string'},
         }
-        self.vfill = {'t': None, 'x': None, 'v': np.float32(1e20), 's': '', 'c': None}
+        self.vfill = {'t': None, 'x': None, 'v': np.float32(1e20), 's': None, 'c': None}
         self.chunks = {'t': [5], 'x': None, 'v': [2, 3], 's': None, 'c': None}
 
         yield
