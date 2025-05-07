@@ -36,7 +36,7 @@ jobs:
           path: ~/conda_pkgs_dir
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('ci/environment.yml') }}
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@11ae174708d1ae769b9457e7d6ed64d606c99af1 #v2
         with:
           activate-environment: pyreshaper # Defined in ci/environment.yml
           auto-update-conda: false
@@ -52,7 +52,7 @@ jobs:
       - name: Run Tests
         run: ci/runtests.sh
       - name: Upload code coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@e3f7b8baf8199f0945b1a1a79d355e4f22c53e4f#v1
         with:
           file: ./coverage.xml
           flags: unittests
